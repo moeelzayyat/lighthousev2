@@ -10,6 +10,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Items = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Items"))
 local EventLog = require(script.Parent.EventLog)
+local NetGuard = require(script.Parent.NetGuard) -- R1.4 remote guards
 
 local LoadoutService = {}
 
@@ -18,7 +19,6 @@ local STARTERS = { Primary = "DriftwoodHarpoon", Armor = "OilskinCoat", Beam = "
 local remotes
 local playerData
 local lastRequest = {}
-local handled = {} -- player -> { [requestId] = { ok, message } }
 
 local function process(player, action, itemId)
 	local item = type(itemId) == "string" and Items[itemId]
@@ -60,13 +60,18 @@ function LoadoutService.init(remoteFolder, playerDataService)
 	remotes = remoteFolder
 	playerData = playerDataService
 
+	-- R1.4: duplicate requestIds replay from a map capped at 40 per player (was unbounded)
+	local replay = NetGuard.replayMap()
 	remotes.LoadoutRequest.OnServerEvent:Connect(function(player, requestId, action, itemId)
-		if type(requestId) ~= "string" or #requestId == 0 or #requestId > 40 then
+		if not NetGuard.isRequestId(requestId) then
 			return
 		end
-		local memory = handled[player]
-		if memory and memory[requestId] then
-			remotes.LoadoutResult:FireClient(player, requestId, memory[requestId][1], memory[requestId][2])
+		local previous = replay.get(player, requestId)
+		if previous then
+			remotes.LoadoutResult:FireClient(player, requestId, previous[1], previous[2])
+			return
+		end
+		if not NetGuard.allow(player, "LoadoutRequest") then
 			return
 		end
 		local now = os.clock()
@@ -77,11 +82,7 @@ function LoadoutService.init(remoteFolder, playerDataService)
 		lastRequest[player] = now
 
 		local ok, message = process(player, action, itemId)
-		if not memory then
-			memory = {}
-			handled[player] = memory
-		end
-		memory[requestId] = { ok, message }
+		replay.put(player, requestId, { ok, message })
 		if not ok then
 			playerData.resync(player)
 		end
@@ -90,7 +91,6 @@ function LoadoutService.init(remoteFolder, playerDataService)
 
 	Players.PlayerRemoving:Connect(function(player)
 		lastRequest[player] = nil
-		handled[player] = nil
 	end)
 end
 

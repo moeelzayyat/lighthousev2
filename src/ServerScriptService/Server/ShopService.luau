@@ -14,6 +14,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Items = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Items"))
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local EventLog = require(script.Parent.EventLog)
+local NetGuard = require(script.Parent.NetGuard) -- R1.4 remote guards
 
 local ShopService = {}
 
@@ -30,7 +31,9 @@ local playerData
 local npcPart -- the Quartermaster's interaction part
 local openFor = {} -- player -> true while their shop is open
 local lastRequest = {} -- player -> os.clock() of their last request
-local handled = {} -- player -> { [requestId] = { ok, message }, order = {...} }
+-- R1.4: duplicate requestIds replay from NetGuard's capped map (the old table shared its "order" key with
+-- request ids, so a request id of "order" could corrupt it)
+local replay = NetGuard.replayMap(MAX_REMEMBERED_REQUESTS)
 
 local function distanceTo(player)
 	local character = player.Character
@@ -159,16 +162,7 @@ local function process(player, action, itemId, quantity)
 end
 
 local function remember(player, requestId, ok, message)
-	local memory = handled[player]
-	if not memory then
-		memory = { order = {} }
-		handled[player] = memory
-	end
-	memory[requestId] = { ok, message }
-	table.insert(memory.order, requestId)
-	if #memory.order > MAX_REMEMBERED_REQUESTS then
-		memory[table.remove(memory.order, 1)] = nil
-	end
+	replay.put(player, requestId, { ok, message })
 end
 
 function ShopService.init(remoteFolder, playerDataService, quartermasterPart, prompt)
@@ -180,16 +174,21 @@ function ShopService.init(remoteFolder, playerDataService, quartermasterPart, pr
 
 	remotes.ShopRequest.OnServerEvent:Connect(function(player, requestId, action, itemId, quantity)
 		if action == "close" then
-			close(player, nil)
+			if NetGuard.allow(player, "ShopRequest") then
+				close(player, nil)
+			end
 			return
 		end
 		if type(requestId) ~= "string" or #requestId == 0 or #requestId > 40 then
 			return
 		end
 		-- Duplicate request: answer with the original result, change nothing
-		local memory = handled[player]
-		if memory and memory[requestId] then
-			remotes.ShopResult:FireClient(player, requestId, memory[requestId][1], memory[requestId][2])
+		local previous = replay.get(player, requestId)
+		if previous then
+			remotes.ShopResult:FireClient(player, requestId, previous[1], previous[2])
+			return
+		end
+		if not NetGuard.allow(player, "ShopRequest") then
 			return
 		end
 		local now = os.clock()
@@ -222,7 +221,6 @@ function ShopService.init(remoteFolder, playerDataService, quartermasterPart, pr
 	Players.PlayerRemoving:Connect(function(player)
 		openFor[player] = nil
 		lastRequest[player] = nil
-		handled[player] = nil
 	end)
 end
 

@@ -30,6 +30,7 @@ local PlaceRole = require(script.Parent.PlaceRole)
 local HarborDepartures = require(script.Parent.HarborDepartures)
 local Voyages = require(script.Parent.Voyages)
 local IsleAdmission = require(script.Parent.IsleAdmission)
+local NetGuard = require(script.Parent.NetGuard) -- R1.4: rate limits, replay maps, type guards (API_CONTRACTS.md)
 
 -- Multi-ship phase 2: "single" (MULTI_SHIP_ENABLED off, the published game, unchanged), "harbor" or "isle"
 local ROLE = PlaceRole.get()
@@ -96,41 +97,68 @@ end
 
 local lastBuy = {}
 
--- Title screen: Play / back to menu. Only Ready players take part in runs.
-remotes.SetReady.OnServerEvent:Connect(function(player, ready)
-	if typeof(ready) ~= "boolean" then
-		return
-	end
-	if ready then
-		return -- joining the crew now happens at the ship's wheel (see the lobby section below)
-	end
-	player:SetAttribute("Ready", false)
-	EventLog.log("PlayerToMenu", { player = player.Name })
-	if LampService.getKeeper() == player then
-		LampService.setKeeper(nil, "leave")
-	end
-end)
+-- (R1.4: the SetReady handler that was here is merged into the one in the lobby section, so one
+-- message is rate-limited and handled once.)
 
 -- Results screen: Play Again
 remotes.VoteRematch.OnServerEvent:Connect(function(player)
+	if not NetGuard.allow(player, "VoteRematch") then
+		return
+	end
 	if player:GetAttribute("Ready") then
 		player:SetAttribute("WantsRematch", true)
 	end
 end)
 
--- Each client reports its input type once (for the event log)
+-- Each client reports its input type once per session (for the event log)
 local VALID_DEVICES = { Touch = true, Keyboard = true, Gamepad = true }
+local deviceReported = {}
 remotes.ReportDevice.OnServerEvent:Connect(function(player, device)
+	if deviceReported[player] or not NetGuard.allow(player, "ReportDevice") then
+		return
+	end
 	if VALID_DEVICES[device] then
+		deviceReported[player] = true
 		EventLog.setDevice(player, device)
 	end
 end)
+
+-- Upgrade bench (crew Shells). R1.4: only a Ready crew member, during a voyage, standing at the bench may
+-- spend; duplicate requestIds replay the first answer from a capped map (checked before the rate limit).
+local BENCH_RANGE = 18
+local BENCH_PHASES = { Prologue = true, Day = true, Night = true }
+local upgradeReplay = NetGuard.replayMap()
+local function benchRefusal(player)
+	if player:GetAttribute("Ready") ~= true then
+		return "Only the voyage crew can spend the crew's Shells."
+	end
+	if not BENCH_PHASES[stateFolder:GetAttribute("Phase")] then
+		return "The bench only works during a voyage."
+	end
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local benchPart = refs.upgradePrompt.Parent
+	if not root or not benchPart or (root.Position - benchPart.Position).Magnitude > BENCH_RANGE then
+		return "Get closer to the UPGRADE bench."
+	end
+	return nil
+end
 -- requestId (optional, sent by the upgrade bench UI) gets a direct UpgradeResult reply
 remotes.BuyUpgrade.OnServerEvent:Connect(function(player, id, requestId)
-	if typeof(id) ~= "string" then
+	if typeof(id) ~= "string" or #id > 40 then
 		return
 	end
-	if requestId ~= nil and (typeof(requestId) ~= "string" or #requestId > 40) then
+	if requestId ~= nil and not NetGuard.isRequestId(requestId) then
+		return
+	end
+	if requestId then
+		local previous = upgradeReplay.get(player, requestId)
+		if previous then
+			remotes.UpgradeResult:FireClient(player, requestId, previous[1], previous[2], id)
+			return
+		end
+	end
+	if not NetGuard.allow(player, "BuyUpgrade") then
 		return
 	end
 	local now = os.clock()
@@ -141,8 +169,16 @@ remotes.BuyUpgrade.OnServerEvent:Connect(function(player, id, requestId)
 		return -- ignore double-clicks
 	end
 	lastBuy[player] = now
-	local ok, message = UpgradeService.buy(id)
+	local ok, message
+	local refusal = benchRefusal(player)
+	if refusal then
+		ok, message = false, refusal
+		EventLog.log("UpgradeRefused", { player = player.Name, id = id, reason = refusal })
+	else
+		ok, message = UpgradeService.buy(id)
+	end
 	if requestId then
+		upgradeReplay.put(player, requestId, { ok, message })
 		remotes.UpgradeResult:FireClient(player, requestId, ok, message, id)
 	end
 	if ok then
@@ -509,8 +545,8 @@ end
 local lastAttack = {}
 
 remotes.Attack.OnServerEvent:Connect(function(player, target)
-	-- Validate everything the client sends
-	if typeof(target) ~= "Vector3" or target.X ~= target.X or target.Y ~= target.Y or target.Z ~= target.Z then
+	-- Validate everything the client sends (R1.4: NaN and +/-inf rejected, contract rate)
+	if not NetGuard.isFiniteVector3(target) or not NetGuard.allow(player, "Attack") then
 		return
 	end
 	if LampService.getKeeper() == player then
@@ -558,6 +594,7 @@ end)
 Players.PlayerRemoving:Connect(function(player)
 	lastAttack[player] = nil
 	lastBuy[player] = nil
+	deviceReported[player] = nil
 	-- Playtest analytics: someone leaving in the middle of a run
 	local phase = stateFolder:GetAttribute("Phase")
 	EventLog.playerLeft(player, if not player:GetAttribute("InLobby") then "title" elseif not player:GetAttribute("Ready") then "harbor" else phase)
@@ -617,6 +654,9 @@ end
 local COACH_IDS = { oil = true, tank = true, lamp = true, aim = true, focus = true, repair = true, bench = true }
 local coachBudget = {} -- player -> events left this session
 remotes.CoachEvent.OnServerEvent:Connect(function(player, kind, id)
+	if not NetGuard.allow(player, "CoachEvent") then
+		return
+	end
 	if (kind ~= "shown" and kind ~= "done") or not COACH_IDS[id] then
 		return
 	end
@@ -633,6 +673,9 @@ end)
 
 -- Storm forecast vote (launch R9): crew members pick one of the two offered forecasts before sailing
 remotes.ForecastVote.OnServerEvent:Connect(function(player, choice)
+	if not NetGuard.allow(player, "ForecastVote") then
+		return
+	end
 	local phase = stateFolder:GetAttribute("Phase")
 	if not player:GetAttribute("Ready") or (phase ~= "Waiting" and phase ~= "Intermission") then
 		return
@@ -645,17 +688,35 @@ end)
 
 -- Title screen "Play": you're now on the ship
 remotes.EnterLobby.OnServerEvent:Connect(function(player)
+	if not NetGuard.allow(player, "EnterLobby") then
+		return
+	end
 	if not player:GetAttribute("InLobby") then
 		player:SetAttribute("InLobby", true)
 		EventLog.log("EnteredLobby", { player = player.Name })
 	end
 end)
 
--- Results screen "Main Menu" (or leaving the crew): back to the ship
+-- Results screen "Main Menu" (or leaving the crew): back to the ship. SetReady(true) is ignored: joining
+-- the crew happens at the ship's wheel. R1.4: one handler (was two), contract rate, PlayerToMenu logged once
+-- per session.
+local menuLogged = {}
 remotes.SetReady.OnServerEvent:Connect(function(player, ready)
-	if ready == false then
-		sendToShip(player)
+	if ready ~= false or not NetGuard.allow(player, "SetReady") then
+		return
 	end
+	player:SetAttribute("Ready", false)
+	if not menuLogged[player] then
+		menuLogged[player] = true
+		EventLog.log("PlayerToMenu", { player = player.Name })
+	end
+	if LampService.getKeeper() == player then
+		LampService.setKeeper(nil, "leave")
+	end
+	sendToShip(player)
+end)
+Players.PlayerRemoving:Connect(function(player)
+	menuLogged[player] = nil
 end)
 
 -- Ship parties (batch 1 revision): the lobby holds the whole server; each departure ship takes a party of at
@@ -857,6 +918,9 @@ remotes.TraderRequest.OnServerEvent:Connect(function(player, requestId, action)
 	local memory = traderHandled[player]
 	if memory and memory.id == requestId then
 		remotes.TraderResult:FireClient(player, requestId, memory.ok, memory.message, memory.total)
+		return
+	end
+	if not NetGuard.allow(player, "TraderRequest") then
 		return
 	end
 	local now = os.clock()

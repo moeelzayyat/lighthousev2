@@ -7,29 +7,35 @@
 - Economic remotes carry `requestId` (≤ 40 chars) with a **capped** replay map (40 entries), checked before the rate limit (as `ShopService` does today).
 - The server never trusts: damage, creature positions, amounts, item IDs it did not offer, rewards, or non-finite vectors.
 
-## Client → Server (current 29 remotes, with the v2.0 guard column)
-| Remote | Payload | Guard today | Guard required (R1.4) | Rate |
-|---|---|---|---|---|
-| `Attack` | `target: Vector3` | type, NaN, not Keeper, alive, equipped Tool attr, cooldown, range | + finite (±inf) check; + `Seq` for CombatResult | 6 / 10 |
-| `BeamControl` | `angle: number` | keeper, finite | + 20 Hz cap | 20 / 30 |
-| `LampAction` | `"leave" \| "toggleMode"` | keeper | OK | 4 / 6 |
-| `LampShift` | `id, accepted: boolean` | pending id, phase Day, role | OK | 4 / 6 |
-| `BuyUpgrade` | `id, requestId` | id string, 0.3 s | **+ Ready, run phase, bench distance ≤ 18, capped replay map** | 3 / 5 |
-| `ShopRequest` | `requestId, action, itemId, qty` | full (replay, 0.2 s, open, distance ≤ 18, catalog, qty) | OK (reference implementation) | 5 / 8 |
-| `TraderRequest` | `requestId, "sellAll"` | replay, 0.3 s, Ready, range | OK | 3 / 5 |
-| `LoadoutRequest` | `requestId, action, itemId` | replay (unbounded), 0.2 s, ownership, slot | **cap replay map at 40** | 5 / 8 |
-| `GearAction` | `"sync"` | action string | **0.25 s throttle** | 2 / 4 |
-| `SetReady` | `ready: boolean` | boolean; true ignored | **0.5 s throttle; log once per session** | 2 / 3 |
-| `VoteRematch` | – | Ready | OK | 2 / 3 |
-| `EnterLobby` | – | – | OK | 1 / 2 |
-| `ReportDevice` | `device` | whitelist | **once per session** | 1 / 1 |
-| `CoachEvent` | `kind, id` | enums, 60/session | OK | 4 / 8 |
-| `ForecastVote` | `choice: "A"\|"B"` | Ready, phase, enum | OK | 3 / 5 |
-| `Travel` | (server→client fade) | – | – | – |
-| `MerchantRequest` (new, S6.2) | `requestId, action, itemId, qty` | — | replay, Day phase, Ready, distance ≤ 18, stock, Shells | 5 / 8 |
-| `ObjectiveClaim` (new, S7.2) | `objectiveId, claimId` | — | complete, unclaimed, GrantService | 2 / 3 |
-| `CodeRedeem` (new, L1.4) | `code ≤ 32` | — | once per profile, expiry | 1 per 10 s |
-| `Settings` (new, S5) | `key, value` | — | whitelist of keys | 5 / 10 |
+## Client → Server (the 15 client→server remotes of the current 29; guards implemented in R1.4 via `NetGuard`)
+Every handler calls `NetGuard.allow(player, remote)` (per-player token bucket at the Rate below; counters `Allowed_<Remote>` / `Limited_<Remote>` on the `NetGuard` ModuleScript). Economic remotes check the replay map first, then the rate.
+| Remote | Payload | Guard (R1.4, implemented) | Rate |
+|---|---|---|---|
+| `Attack` | `target: Vector3` | finite vector (NaN, ±inf rejected), not Keeper, alive, equipped Tool attr, cooldown, range clamp | 6 / 10 |
+| `BeamControl` | `angle: number` | keeper only, finite number | 20 / 30 |
+| `LampAction` | `"leave" \| "toggleMode"` | keeper only | 4 / 6 |
+| `LampShift` | `id, accepted: boolean` | pending id, phase Day, role | 4 / 6 |
+| `BuyUpgrade` | `id ≤ 40, requestId?` | requestId ≤ 40; capped replay map (40) before the rate; 0.3 s; **Ready crew only; phase Prologue/Day/Night; ≤ 18 studs from the bench**; refusals logged `UpgradeRefused` | 3 / 5 |
+| `ShopRequest` | `requestId, action, itemId, qty` | replay map (40, now `NetGuard.replayMap`), 0.2 s, open, distance ≤ 18, catalog, qty; `close` also rate-limited | 5 / 8 |
+| `TraderRequest` | `requestId, "sellAll"` | last-request replay, 0.3 s, Ready, range | 3 / 5 |
+| `LoadoutRequest` | `requestId, action, itemId` | replay map **capped at 40** (was unbounded), 0.2 s, ownership, slot | 5 / 8 |
+| `GearAction` | `"sync"` | action string | 2 / 4 |
+| `SetReady` | `ready: boolean` | only `false` acts (true ignored: the crew is joined at the wheel); **one handler (was two)**; `PlayerToMenu` logged once per session | 2 / 3 |
+| `VoteRematch` | – | Ready | 2 / 3 |
+| `EnterLobby` | – | – | 1 / 2 |
+| `ReportDevice` | `device` | whitelist; **once per session** | 1 / 1 |
+| `CoachEvent` | `kind, id` | enums, 60/session | 4 / 8 |
+| `ForecastVote` | `choice` | Ready, phase Waiting/Intermission, one of the two offered | 3 / 5 |
+| `MerchantRequest` (new, S6.2) | `requestId, action, itemId, qty` | replay, Day phase, Ready, distance ≤ 18, stock, Shells | 5 / 8 |
+| `ObjectiveClaim` (new, S7.2) | `objectiveId, claimId` | complete, unclaimed, GrantService | 2 / 3 |
+| `CodeRedeem` (new, L1.4) | `code ≤ 32` | once per profile, expiry | 1 per 10 s |
+| `Settings` (new, S5) | `key, value` | whitelist of keys | 5 / 10 |
+
+Deferred from this table: `Attack.Seq` + `CombatResult` (architecture §7.1 feel work) — not in the R1.4 roadmap row; lands with client prediction in S4.
+
+## All 29 current remotes
+Client → server (15): `Attack`, `BeamControl`, `LampAction`, `LampShift` (both directions), `BuyUpgrade`, `ShopRequest`, `TraderRequest`, `LoadoutRequest`, `GearAction`, `SetReady`, `VoteRematch`, `EnterLobby`, `ReportDevice`, `CoachEvent` (both directions), `ForecastVote`.
+Server → client only (14): `Notify`, `LootCollected`, `OpenUpgrades`, `PlaySound`, `RunResults`, `GearData`, `ShopOpen`, `ShopResult`, `LoadoutResult`, `Travel`, `UpgradeResult`, `TraderOpen`, `TraderResult`, `CrewFeed`. They have no server handler, so client input on them is ignored.
 
 ## Server → Client
 | Remote | Payload | Notes |
@@ -39,7 +45,7 @@
 | `RunResults` | results payload | |
 | `GearData` | profile view | **never** includes `Grants`, `RedeemedCodes` |
 | `CreatureSnapshot` (new, S4.2) | `buffer`: `[n][id u16, x f32, y f32, z f32, yaw u8, state u8, hpPct u8]` | 12 Hz, `U` |
-| `CombatResult` (new, R1.4) | `{Seq, Hits}` | `U`, batched |
+| `CombatResult` (new, S4) | `{Seq, Hits}` | `U`, batched |
 | `DawnPearl` (new, S2.2) | `{night, total}` | |
 | `LeaderboardUpdate` (new, S7.3) | `{board, rows}` | 60 s |
 | `GameState` attributes | Phase, Night, TimeLeft, Reason, Cause, Fuel, MaxFuel, DarkSeconds, BeamMode, KeeperUserId, Integrity, MaxIntegrity, Shells, BigWarning, Forecast*, Upgrade_*, Evo_* | unchanged |

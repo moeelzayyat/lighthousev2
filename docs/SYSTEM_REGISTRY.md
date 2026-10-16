@@ -61,7 +61,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | ProfileStore persistence, schema v2, migration | Planned | R1.3 | D-002 |
 | GrantService (idempotent) | Planned | R1.3 | |
 | AdminDataService (inspect/grant/rollback) | Planned | R1.8 | |
-| Remote contract registry + guards + buckets | Planned | R1.4 | |
+| Remote contract registry + guards + buckets | Tested (not yet published) | R1.4 | `NetGuard` on all 15 client→server remotes; 11 tests + Play spam test |
 | Event bus (EventLog) | Partial | R1.6 | |
 | Analytics funnel | Planned | R1.6 | |
 | Feature flags / remote config | Planned | S5.1 | |

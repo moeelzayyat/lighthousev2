@@ -14,6 +14,7 @@ local StarterPlayer = game:GetService("StarterPlayer")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local EventLog = require(script.Parent.EventLog)
+local NetGuard = require(script.Parent.NetGuard) -- R1.4 remote guards
 local Ground = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Ground"))
 
 local LampService = {}
@@ -326,8 +327,8 @@ function LampService.init(islandRefs, stateFolder, remoteFolder)
 		if player ~= keeper then
 			return
 		end
-		-- Reject anything that isn't a normal number (exploit protection)
-		if typeof(requested) ~= "number" or requested ~= requested or math.abs(requested) == math.huge then
+		-- Reject anything that isn't a normal number (exploit protection); R1.4: contract rate (20 Hz)
+		if not NetGuard.isFiniteNumber(requested) or not NetGuard.allow(player, "BeamControl") then
 			return
 		end
 		targetAngle = requested % 360
@@ -336,7 +337,7 @@ function LampService.init(islandRefs, stateFolder, remoteFolder)
 
 	-- Keeper actions: leave the lamp, or switch beam mode
 	remotes.LampAction.OnServerEvent:Connect(function(player, action)
-		if player ~= keeper then
+		if player ~= keeper or not NetGuard.allow(player, "LampAction") then
 			return
 		end
 		if action == "leave" then
@@ -415,6 +416,9 @@ function LampService.init(islandRefs, stateFolder, remoteFolder)
 	end
 
 	remotes.LampShift.OnServerEvent:Connect(function(player, id, accepted)
+		if not NetGuard.allow(player, "LampShift") then
+			return
+		end
 		if not pending or id ~= pending.id or typeof(accepted) ~= "boolean" then
 			return
 		end

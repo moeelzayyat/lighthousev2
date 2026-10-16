@@ -81,3 +81,21 @@ DATE: 2026-10-16
 Finding: architecture §19 ("same store, existing values load unchanged") would wipe every existing player's save: ProfileStore overwrites any non-ProfileStore record with an empty profile (source-verified at commit 45c9847, `docs/legacy/audits/TASK-004/SOURCE_VERIFICATION_ADDENDUM.md`). Changing §19 is a stop-and-ask item, so R1.3 waits for the owner.
 Recommendation (D-012): a new store `LighthouseKeepers_PlayerData_v2` with a one-time, read-only import from v1 on each player's first load; v1 frozen as the safety copy.
 No Studio changes for R1.3. Meanwhile the run continues with R1.4 (remote contracts), which does not depend on persistence.
+
+CHECKPOINT: R1.4 Remote contracts (🟦 step 2 pending: Script Analysis tool)
+DATE: 2026-10-16
+STUDIO INSTANCE: placeId 132065051336560 verified · API access: OFF before Play (probe: "Studio access to APIs is not allowed")
+BACKUP: ServerStorage.Backups.R1.4_before_2026-10-16 (Main [disabled copy], LampService, LoadoutService, PlayerData, ShopService)
+DELIVERED: `ServerScriptService.Server.NetGuard` (`--!strict`): per-player token buckets with the contract rates, capped replay maps, finite/requestId guards, counters as attributes. All 15 client→server handlers call it. BuyUpgrade now requires a Ready crew member, a voyage phase (Prologue/Day/Night) and ≤ 18 studs from the bench, with a capped replay map. LoadoutRequest replay map capped at 40 (was unbounded). ShopService replay moved to NetGuard (the old table shared its `order` key with request ids). SetReady: the two handlers merged into one; PlayerToMenu logged once per session. ReportDevice once per session. Attack rejects ±inf. `API_CONTRACTS.md` lists all 29 remotes.
+TESTRUNNER (Edit): `30 passed, 0 failed` (0.13 s) — adds NetGuardSpec (11): rates equal the contract for all 15 remotes; 50 calls in one instant accept exactly the burst; 50 calls over 1 s accept ≤ burst + rate; refill and cap; per-player buckets; replay map returns the first result, caps at 40, cannot be corrupted by key names; NaN/±inf/non-Vector3 rejected.
+PLAY TEST (API off; ProfileState=memory, so the owner's real save was not touched):
+ 1. Harbor, not crew: client fired every client→server remote 50× (Attack 150× with +inf/−inf/NaN targets). Server counters: Attack 0 allowed (rejected by the finite guard); BeamControl/LampAction 0 (not Keeper); SetReady(true) 0 (ignored); ReportDevice 0 extra (already reported once); BuyUpgrade 5/50, ShopRequest 8/50, TraderRequest 5/50, LoadoutRequest 8/50, LampShift 6/50, CoachEvent 8/50, ForecastVote 5/50, VoteRematch 3/50, EnterLobby 2/50 = exactly each burst; GearAction 7 allowed incl. the client's own startup syncs. Shells 0 → 0.
+ 2. Voyage (Prologue), crew, 44 studs from the bench: BuyUpgrade refused "Get closer to the UPGRADE bench."; Shells 120 → 120.
+ 3. Voyage, at the bench, Ready forced false (test only, restored): 50× BuyUpgrade → 5 processed, all refused "Only the voyage crew can spend the crew's Shells."; Shells 120 → 120. (Clearing Ready mid-voyage abandoned that voyage, as designed; a new one was started.)
+ 4. Voyage, crew at the bench: one BuyUpgrade(Walls) → Shells 120 → 95, Upgrade_Walls 1; the same requestId replayed 5× → same answer, Shells stay 95.
+ Console: 0 errors from game scripts.
+NUMBERS: 30 tests; per-remote accepted counts above; Main 36114 → 38430 chars.
+DEBT: `Attack.Seq`/`CombatResult` (architecture §7.1) not in the R1.4 roadmap row → moved to S4 in `API_CONTRACTS.md`. Touched legacy modules (Main, LampService, LoadoutService, PlayerData, ShopService) are not `--!strict` yet (same reason as GameState in R1.2).
+MIRROR: 7 files FNV-1a identical to Studio.
+OWNER APPROVAL: pending step 2 (would be auto-approved under D-010)
+NEXT: R1.5

@@ -14,6 +14,7 @@ local HttpService = game:GetService("HttpService")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local Items = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Items"))
 local EventLog = require(script.Parent.EventLog)
+local NetGuard = require(script.Parent.NetGuard) -- R1.4 remote guards
 
 local PlayerData = {}
 
@@ -310,7 +311,8 @@ function PlayerData.init(remoteFolder, notify)
 	remotes.GearAction.OnServerEvent:Connect(function(player, action)
 		-- The only client request handled here: "send me my data".
 		-- Buying/selling go through ShopService (Quartermaster); equipping through LoadoutService.
-		if action == "sync" then
+		-- R1.4: contract rate (2/s, burst 4) so a client cannot spam full profile pushes.
+		if action == "sync" and NetGuard.allow(player, "GearAction") then
 			push(player)
 		end
 	end)
