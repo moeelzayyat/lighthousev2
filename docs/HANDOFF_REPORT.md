@@ -61,3 +61,17 @@ NUMBERS: 3 tests; run time 0.13 s.
 MIRROR: `src/ServerStorage/Tests/` (2 files, FNV-1a identical to Studio: TestRunner 12745 chars c26f4619, TestRunnerSpec 1501 chars 1fb28743).
 OWNER APPROVAL: pending step 2 (would be auto-approved under D-010)
 NEXT: R1.2
+
+CHECKPOINT: R1.2 Pure logic extraction (🟦 step 2 pending: Script Analysis tool)
+DATE: 2026-10-16
+STUDIO INSTANCE: placeId 132065051336560 verified · API access: OFF before Play (probe: "Studio access to APIs is not allowed")
+BACKUP: ServerStorage.Backups.R1.2_before_2026-10-16 (GameState, 22857 chars)
+DELIVERED: `ServerScriptService.Server.WaveDirector` (`--!strict`, pure: `growth`, `bigNights`, `nightPlan(night, crewSize, forecast, config) -> {crabs, skitters, boss?}`), `ServerScriptService.Server.Voyage` (`--!strict`, pure: `pearlsFor(night, won, config)`). `GameState` now calls them for the big-night schedule, the night spawn counts and the end-of-voyage Pearls; random boss kinds, per-award Pearls and all timing stay in `GameState`. No gameplay number changed.
+REFERENCE: before editing, a verbatim copy of the old GameState formula was run against the live Config for nights 1/4/7/10/13 × crew 1–4 × forecasts none/FogBank/SpringTide/LeakyStores; that table is frozen in `WaveDirectorSpec` (crew 4, no forecast: 14/42, 34/82, 46/106, 58/130, 105/154; matches `STATS.md`). Big nights: 13, 10, 7, 4.
+TESTRUNNER (Edit): `19 passed, 0 failed` (0.13 s) — TestRunner 3, WaveDirector 12, Voyage 4.
+SCRIPT ANALYSIS: NOT MEASURED (no analyzer available; see R1.1). Debt: `GameState` itself is not `--!strict` (legacy module, dissolved at S5.2); adding the pragma before an analyzer can list the warnings would break the zero-warning rule blindly.
+PLAY TEST: Play (API off; ProfileState=memory, SaveUnavailable=true, so the owner's real save was not read or written). Studio player boarded the ship, SAIL NOW at the wheel → Intermission → Prologue → Day 1 → Night 1 → Defeat by blackout at 2:13 (no oil carried, by design). Console: `NightSpawns crabs=14 night=1 skitters=17` (= reference, crew 1); results path ran (`RunsCompleted` 0 → 1, which follows the Pearl grant in the same loop); 0 errors from game scripts (only the expected DataStore 403 notice and engine UIBlox warnings). Play stopped.
+NUMBERS: 19 tests; night-1 solo spawn 14 crabs / 17 skitters; first voyage Defeat at 2:13; GameState 22857 → 21661 chars.
+MIRROR: GameState, WaveDirector, Voyage, VoyageSpec, WaveDirectorSpec; all 56 Studio scripts FNV-1a identical to `src/` after the export.
+OWNER APPROVAL: pending step 2 (would be auto-approved under D-010)
+NEXT: R1.3

@@ -14,6 +14,8 @@ local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("S
 local EventLog = require(script.Parent.EventLog)
 local VoyageCast = require(script.Parent.VoyageCast)
 local Forecasts = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Forecasts"))
+local WaveDirector = require(script.Parent.WaveDirector) -- pure night plan (R1.2)
+local Voyage = require(script.Parent.Voyage) -- pure Pearl rules (R1.2)
 
 local GameState = {}
 
@@ -378,26 +380,11 @@ function GameState.run(deps)
 			if not runPrologue() then
 				result = "Abandoned"
 			else
-				-- Big monsters this run. Short runs: the middle night and the final night.
-				-- Long runs (more than 5 nights): every BIG_EVERY_NIGHTS counting back from the final night
-				-- (13 nights -> 13, 10, 7, 4). At most MAX_BIG_PER_RUN.
+				-- Big monsters this run: schedule from WaveDirector.bigNights (13 nights -> 13, 10, 7, 4),
+				-- one random kind per scheduled night, picked in schedule order.
 				local bigNights = {}
-				local picked = 0
-				local candidates = {}
-				if Config.NIGHTS_TO_WIN > 5 and (Config.BIG_EVERY_NIGHTS or 0) > 0 then
-					local n = Config.NIGHTS_TO_WIN
-					while n >= 2 do
-						table.insert(candidates, n)
-						n -= Config.BIG_EVERY_NIGHTS
-					end
-				else
-					candidates = { math.max(1, math.ceil(Config.NIGHTS_TO_WIN / 2)), Config.NIGHTS_TO_WIN }
-				end
-				for _, n in candidates do
-					if Config.BIG_MONSTERS_ENABLED and picked < Config.MAX_BIG_PER_RUN and not bigNights[n] then
-						bigNights[n] = Creatures.BIG_POOL[math.random(1, #Creatures.BIG_POOL)]
-						picked += 1
-					end
+				for _, n in WaveDirector.bigNights(Config) do
+					bigNights[n] = Creatures.BIG_POOL[math.random(1, #Creatures.BIG_POOL)]
 				end
 				for night = 1, Config.NIGHTS_TO_WIN do
 					-- DAY: prepare
@@ -420,21 +407,11 @@ function GameState.run(deps)
 					setLighting(true, 4)
 					notifyAll(string.format("Night %d: the storm is here. Keep the light alive!", night))
 					lamp.setDraining(true)
-					-- Growth steps: full growth for the first nights, then gentler (owner, Oct 13)
-					local fullUntil = Config.GROWTH_FULL_UNTIL or math.huge
-					local growth = if night <= fullUntil
-						then night - 1
-						else (fullUntil - 1) + (night - fullUntil) * (Config.GROWTH_LATE_RATE or 1)
-					local crabCount = math.floor((Config.CRABS_BASE + Config.CRABS_PER_NIGHT * growth) * (state:GetAttribute("ForecastCrabMult") or 1) + 0.5)
-					if night == Config.NIGHTS_TO_WIN then
-						crabCount = math.floor(crabCount * Config.FINAL_NIGHT_CRAB_MULTIPLIER)
-					end
-					local stopWave = startWave(crabCount, Config.NIGHT_SECONDS * Config.SPAWN_WINDOW)
-					local crewSize = math.clamp(#readyPlayers(), 1, 4)
-					local crewShare = (Config.SWARM_BY_CREW and Config.SWARM_BY_CREW[crewSize]) or 1
-					local swarmCount = math.floor(((Config.SWARM_BASE or 0) + (Config.SWARM_PER_NIGHT or 0) * growth) * crewShare * (state:GetAttribute("ForecastCrabMult") or 1) + 0.5)
-					local stopSwarm = startSwarm(swarmCount, Config.NIGHT_SECONDS * (Config.SWARM_WINDOW or 0.85))
-					EventLog.log("NightSpawns", { night = night, crabs = crabCount, skitters = if Config.SWARM_ENABLED then swarmCount else 0 })
+					-- Spawn counts from the pure night plan (growth, final-night crisis, swarm share by crew size)
+					local plan = WaveDirector.nightPlan(night, #readyPlayers(), { crabMult = state:GetAttribute("ForecastCrabMult") }, Config)
+					local stopWave = startWave(plan.crabs, Config.NIGHT_SECONDS * Config.SPAWN_WINDOW)
+					local stopSwarm = startSwarm(plan.skitters, Config.NIGHT_SECONDS * (Config.SWARM_WINDOW or 0.85))
+					EventLog.log("NightSpawns", { night = night, crabs = plan.crabs, skitters = plan.skitters })
 
 					-- A big sea monster arrives partway through this night
 					local bigKind = bigNights[night]
@@ -525,16 +502,14 @@ function GameState.run(deps)
 			-- screen, which tells us whether people choose to replay (a key playtest question).
 			local voters = readyPlayers()
 
-			-- Pearl rewards (saved, personal): PEARLS_PER_NIGHT per night survived (+ the old triangular
-			-- step if PEARLS_NIGHT_STEP > 0), plus PEARLS_VICTORY_BONUS for a win. 13-night win = 18.
+			-- Pearl rewards (saved, personal) from the pure rule Voyage.pearlsFor: PEARLS_PER_NIGHT per night
+			-- survived, plus PEARLS_VICTORY_BONUS for a win (13-night win = 18), plus per-award Pearls here.
 			results.pearls = {}
 			if result ~= "Abandoned" then
-				local survived = if result == "Victory" then Config.NIGHTS_TO_WIN else math.max(0, results.nightReached - 1)
+				local won = result == "Victory"
+				local nightReached = if won then Config.NIGHTS_TO_WIN else results.nightReached
 				for _, player in voters do
-					local earned = (Config.PEARLS_PER_NIGHT or 0) * survived + (Config.PEARLS_NIGHT_STEP or 0) * survived * (survived + 1) / 2
-					if result == "Victory" then
-						earned += Config.PEARLS_VICTORY_BONUS
-					end
+					local earned = Voyage.pearlsFor(nightReached, won, Config)
 					for _, award in results.awards do
 						if award.player == player.DisplayName then
 							earned += Config.PEARLS_PER_AWARD

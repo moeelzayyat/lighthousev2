@@ -18,7 +18,8 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Rock Crab, Sand Skitter swarm | Released | S4 | render budget |
 | Big monsters (Barnacle Brute, Shipwreck Hermit) | Released | S6.1 | by crew size |
 | New monsters ×5 | Planned | S6.5–S6.6 | |
-| Wave director (`nightPlan` pure) | Released (inline) | R1.2 | extraction |
+| Wave director (`nightPlan` pure) | Tested (not yet published) | R1.2 | `WaveDirector.nightPlan/bigNights/growth`; 12 tests vs pre-R1.2 reference |
+| Pearl rule (`pearlsFor` pure) | Tested (not yet published) | R1.2 | `Voyage.pearlsFor`; 4 tests (win 7 = 12, win 13 = 18, loss n = n−1) |
 | Loot drops, magnet, dawn window, tide | Released | S4.5 | |
 | Bench upgrades (4) + evolutions (2) | Released | S5.7 | StatPipeline |
 | Forecasts (3) + vote | Released | — | |
@@ -67,7 +68,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Definitions registry | Planned | S5.4 | |
 | StatPipeline | Planned | S5.7 | |
 | Domain lifecycle | Planned | S5.1 | |
-| TestRunner | Planned | R1.1 | |
+| TestRunner | Implemented | R1.1 | `ServerStorage.Tests.TestRunner`; specs named `<Name>Spec` |
 | Creature 20 Hz step + snapshots + interpolation | Planned | S4.2–S4.3 | |
 | Ground height grid | Planned | S4.1 | |
 
