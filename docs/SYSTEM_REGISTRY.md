@@ -62,8 +62,8 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | GrantService (idempotent) | Planned | R1.3 | |
 | AdminDataService (inspect/grant/rollback) | Planned | R1.8 | |
 | Remote contract registry + guards + buckets | Tested (not yet published) | R1.4 | `NetGuard` on all 15 client→server remotes; 11 tests + Play spam test |
-| Event bus (EventLog) | Partial | R1.6 | |
-| Analytics funnel | Planned | R1.6 | |
+| Event bus (EventLog) | Tested (not yet published) | R1.6 | `EventBus` + catalog `Shared/Events`; 7 bus tests; publishers for funnel, voyage and Pearl events |
+| Analytics funnel | Implemented (live dashboard check pending, R1.9) | R1.6 | `Analytics` bus consumer → AnalyticsService; 4 tests; every step except DawnPearl (S2.2) fired in Studio |
 | Feature flags / remote config | Planned | S5.1 | |
 | Definitions registry | Planned | S5.4 | |
 | StatPipeline | Planned | S5.7 | |

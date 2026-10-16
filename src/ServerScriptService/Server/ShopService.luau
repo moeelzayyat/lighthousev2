@@ -101,7 +101,7 @@ local function buy(player, itemId, quantity)
 	end
 
 	local cost = item.price * quantity
-	if not playerData.spendPearls(player, cost) then
+	if not playerData.spendPearls(player, cost, itemId) then
 		return false, string.format("Need %d Pearls (you have %d).", cost, profile.pearls)
 	end
 	playerData.addItem(player, itemId, quantity)

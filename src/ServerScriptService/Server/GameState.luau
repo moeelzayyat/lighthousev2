@@ -48,6 +48,15 @@ local NIGHT_ATMOSPHERE = {
 	Color = Color3.fromRGB(52, 72, 122),
 }
 
+-- UserIds of a player list (bus payloads carry ids, never Instances)
+local function userIds(players)
+	local ids = {}
+	for _, player in players do
+		table.insert(ids, player.UserId)
+	end
+	return ids
+end
+
 local function tweenProps(instance, goal, seconds)
 	local info = TweenInfo.new(seconds, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
 	TweenService:Create(instance, info, goal):Play()
@@ -360,7 +369,14 @@ function GameState.run(deps)
 				state:SetAttribute("Cause", "error")
 			end,
 			function()
-				EventLog.endRun("Error", "The voyage stopped because of a script error.")
+				local results = EventLog.endRun("Error", "The voyage stopped because of a script error.")
+				EventLog.Publish("VoyageEnded", {
+					VoyageId = EventLog.voyageId(),
+					Outcome = "Error",
+					Cause = "error",
+					NightReached = results and results.nightReached or 0,
+					Crew = userIds(departing),
+				})
 			end,
 			function()
 				setLighting(false, 2)
@@ -512,6 +528,7 @@ function GameState.run(deps)
 						local bonus = if Config.ECONOMY_ENABLED then Config.WAVE_BONUS_PER_NIGHT * night else 0
 						upgrades.addShells(bonus)
 						EventLog.log("NightSurvived", { night = night, bonus = bonus, fuel = math.floor(lamp.getFuel()), tower = state:GetAttribute("Integrity") })
+						EventLog.Publish("NightSurvived", { VoyageId = EventLog.voyageId(), Night = night, Crew = userIds(readyPlayers()) })
 						-- Dawn loot window (Oct 12 2026): leftover loot stays on the beach most of the day at full
 						-- value, then the tide brings what's left in at DAWN_LOOT_FRACTION. The last night ends the run,
 						-- so there the tide comes quickly as before.
@@ -538,6 +555,13 @@ function GameState.run(deps)
 				setPhase(result, state:GetAttribute("Night"))
 				local results = EventLog.endRun(result, state:GetAttribute("Reason"))
 				results.cause = state:GetAttribute("Cause") or ""
+				EventLog.Publish("VoyageEnded", {
+					VoyageId = EventLog.voyageId(),
+					Outcome = result,
+					Cause = results.cause,
+					NightReached = results.nightReached,
+					Crew = userIds(departing),
+				})
 				results.shellsLeft = upgrades.getShells()
 				results.economy = Config.ECONOMY_ENABLED
 				setLighting(false, 4)
@@ -599,6 +623,7 @@ function GameState.run(deps)
 							EventLog.log("RematchChoice", { player = player.Name, choice = if wants then "play again" else "menu" })
 							if wants then
 								again += 1
+								EventLog.Publish("SailAgain", { VoyageId = EventLog.voyageId(), UserId = player.UserId })
 							else
 								player:SetAttribute("Ready", false)
 								deps.sendToShip(player) -- back to the lobby ship

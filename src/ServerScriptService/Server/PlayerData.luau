@@ -175,6 +175,7 @@ function PlayerData.addPearls(player, amount, reason)
 	end
 	profile.pearls += amount
 	EventLog.log("Pearls", { player = player.Name, amount = amount, reason = reason or "?", total = profile.pearls })
+	EventLog.Publish("PearlsGranted", { UserId = player.UserId, Amount = amount, Balance = profile.pearls, Source = reason or "?" })
 	markChanged(player)
 end
 
@@ -227,13 +228,14 @@ end
 -- Mutations used by ShopService and LoadoutService (they do the validation)
 ---------------------------------------------------------------------
 
--- Spends Pearls if the player has enough. Returns true if spent.
-function PlayerData.spendPearls(player, amount)
+-- Spends Pearls if the player has enough. Returns true if spent. itemId (optional) names what was bought.
+function PlayerData.spendPearls(player, amount, itemId)
 	local profile = profiles[player]
 	if not profile or amount < 0 or profile.pearls < amount then
 		return false
 	end
 	profile.pearls -= amount
+	EventLog.Publish("PearlsSpent", { UserId = player.UserId, Amount = amount, Balance = profile.pearls, ItemId = itemId })
 	markChanged(player)
 	return true
 end

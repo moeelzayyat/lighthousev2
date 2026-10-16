@@ -31,6 +31,10 @@ local HarborDepartures = require(script.Parent.HarborDepartures)
 local Voyages = require(script.Parent.Voyages)
 local IsleAdmission = require(script.Parent.IsleAdmission)
 local NetGuard = require(script.Parent.NetGuard) -- R1.4: rate limits, replay maps, type guards (API_CONTRACTS.md)
+local Analytics = require(script.Parent.Analytics) -- R1.6: bus consumer -> Roblox AnalyticsService
+
+-- Telemetry consumes the bus before any player can join (funnel step 1 is PlayerJoined)
+Analytics.start(EventLog, Analytics.robloxSink(Config.EVENT_LOG_ENABLED))
 
 -- Multi-ship phase 2: "single" (MULTI_SHIP_ENABLED off, the published game, unchanged), "harbor" or "isle"
 local ROLE = PlaceRole.get()

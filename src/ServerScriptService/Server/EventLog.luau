@@ -10,8 +10,19 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local Events = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Events"))
+local EventBus = require(script.Parent.EventBus)
 
 local EventLog = {}
+
+-- The server's event bus (R1.6, architecture §5.3). Publish(name, payload) / Subscribe(name, handler);
+-- the catalog is Shared/Events and docs/EVENTS.md. Domains publish; Analytics, Results, Objectives consume.
+local bus = EventBus.new(Events)
+EventLog.Publish = bus.Publish
+EventLog.Subscribe = bus.Subscribe
+function EventLog.busStats()
+	return bus.stats
+end
 
 local runStartedAt = os.clock()
 local stats = {}
@@ -147,6 +158,12 @@ end
 -- Called once when a player joins the server
 function EventLog.playerJoined(player)
 	joinedAt[player.UserId] = os.clock()
+	bus.Publish("PlayerJoined", { UserId = player.UserId })
+end
+
+-- The id of the current (or last) voyage, used as VoyageId on bus events
+function EventLog.voyageId()
+	return stats.runId or "none"
 end
 
 function EventLog.setRoute(player, route)
@@ -157,7 +174,7 @@ end
 -- Records the first time `player` reaches `step` this run (seconds since they joined the server).
 -- Steps: crew, landed, firstAction, firstBeamHit, fuel, repair, strike, reload, lamp,
 --        promptShown:<id>, promptDone:<id>. Cheap to call often: repeat calls return at once.
-function EventLog.mark(player, step)
+function EventLog.mark(player, step, kind)
 	if not player then
 		return
 	end
@@ -172,8 +189,18 @@ function EventLog.mark(player, step)
 	local sinceJoin = os.clock() - (joinedAt[player.UserId] or runStartedAt)
 	entry.steps[step] = sinceJoin
 	EventLog.log("Onboard", { player = player.Name, step = step, sinceJoin = sinceJoin, sinceRun = stamp() })
+	-- funnel steps go on the bus once per run (R1.6); the caller of mark is the authoritative domain
+	if step == "crew" then
+		bus.Publish("PlayerJoinedCrew", { UserId = player.UserId, Route = routes[player.UserId] })
+	elseif step == "landed" then
+		bus.Publish("PlayerLanded", { VoyageId = EventLog.voyageId(), UserId = player.UserId })
+	elseif step == "firstAction" then
+		bus.Publish("FirstAction", { VoyageId = stats.runId, UserId = player.UserId, Kind = kind or "action" })
+	elseif step == "firstBeamHit" then
+		bus.Publish("BeamHit", { VoyageId = stats.runId, KeeperId = player.UserId, First = true })
+	end
 	if ROLE_STEPS[step] or step == "firstBeamHit" then
-		EventLog.mark(player, "firstAction")
+		EventLog.mark(player, "firstAction", step)
 	end
 end
 
@@ -193,6 +220,7 @@ function EventLog.playerLeft(player, phase)
 		where = phase,
 		sessionSeconds = os.clock() - (joinedAt[player.UserId] or os.clock()),
 	})
+	bus.Publish("PlayerLeft", { UserId = player.UserId, Phase = tostring(phase), Night = stats.nightReached })
 	joinedAt[player.UserId] = nil
 end
 
@@ -211,6 +239,11 @@ function EventLog.startRun(players)
 	for _, player in players do
 		table.insert(stats.players, player.Name .. "(" .. (devices[player.UserId] or "?") .. ")")
 	end
+	local crewIds = {}
+	for _, player in players do
+		table.insert(crewIds, player.UserId)
+	end
+	bus.Publish("VoyageStarted", { VoyageId = stats.runId, Crew = crewIds })
 	EventLog.log("RunStarted", {
 		players = #players,
 		runId = stats.runId,
