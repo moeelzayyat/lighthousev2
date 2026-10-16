@@ -75,3 +75,9 @@ NUMBERS: 19 tests; night-1 solo spawn 14 crabs / 17 skitters; first voyage Defea
 MIRROR: GameState, WaveDirector, Voyage, VoyageSpec, WaveDirectorSpec; all 56 Studio scripts FNV-1a identical to `src/` after the export.
 OWNER APPROVAL: pending step 2 (would be auto-approved under D-010)
 NEXT: R1.3
+
+CHECKPOINT: R1.3 ProfileStore — 🟥 BLOCKED on owner decision D-012
+DATE: 2026-10-16
+Finding: architecture §19 ("same store, existing values load unchanged") would wipe every existing player's save: ProfileStore overwrites any non-ProfileStore record with an empty profile (source-verified at commit 45c9847, `docs/legacy/audits/TASK-004/SOURCE_VERIFICATION_ADDENDUM.md`). Changing §19 is a stop-and-ask item, so R1.3 waits for the owner.
+Recommendation (D-012): a new store `LighthouseKeepers_PlayerData_v2` with a one-time, read-only import from v1 on each player's first load; v1 frozen as the safety copy.
+No Studio changes for R1.3. Meanwhile the run continues with R1.4 (remote contracts), which does not depend on persistence.
