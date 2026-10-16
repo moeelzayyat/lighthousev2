@@ -1,2 +1,2 @@
 # Vendored files are kept byte-identical to their pinned upstream (no line-ending conversion)
-src/ServerScriptService/Server/ProfileStore.luau -text
+ServerScriptService/Server/ProfileStore.luau -text
