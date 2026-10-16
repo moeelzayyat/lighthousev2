@@ -49,10 +49,17 @@ You are the implementation engineer for Lighthouse Keepers, a live Roblox co-op 
 - If a checkpoint item cannot be met, say so and mark `🟦`/`🟥`; do not move on.
 
 ## Checkpoint protocol (every substage, all 8)
-1 TestRunner green (summary) · 2 Script Analysis 0 warnings · 3 play test, 0 console errors, API off confirmed · 4 numbers recorded · 5 backup folder + restore point `<ID> passed` · 6 mirror export committed · 7 record appended to `docs/HANDOFF_REPORT.md` (template in `ROADMAP.md` §14) · 8 owner approval line in `docs/DECISION_LOG.md`. Then advance `docs/CURRENT_PHASE.md` and the roadmap status columns. **Publishing is the owner's separate step.**
+1 TestRunner green (summary) · 2 Script Analysis 0 warnings · 3 play test, 0 console errors, API off confirmed · 4 numbers recorded · 5 backup folder + restore point `<ID> passed` · 6 mirror export committed · 7 record appended to `docs/HANDOFF_REPORT.md` (template in `ROADMAP.md` §14) · 8 approval line in `docs/DECISION_LOG.md` — **unattended mode (D-010):** write `CP — <ID> passed · <date> · auto-approved (unattended)` and continue; only publish substages and GO/NO-GO gates wait for the owner. Then advance `docs/CURRENT_PHASE.md` and the roadmap status columns. **Publishing is the owner's separate step.**
 
-## When to stop and ask
-Any publish; any production DataStore write outside ProfileStore's normal operation; any schema change; any gameplay number; any monetization; a budget missed after two attempts; a Studio instance that cannot be verified; anything touching another game; any deviation from `architecture.md` §0, §4.4, §5, §19, §20.
+## Unattended mode (D-010)
+- Run substages back to back. Never wait for a reply that the roadmap does not require.
+- At a **publish substage** (R1.9, S2.8, S4.7, S5.8, S6.7, S7.6, L1.7): write the publish package to `docs/HANDOFF_REPORT.md` ("READY FOR OWNER TO PUBLISH" with the checklist and the before/after checks the owner should do), set that substage to 🟦, and continue with the next substage that does not depend on the live build. Re-check at the start of every later substage whether the owner has recorded the publish; if so, finish the 🟦 substage's live checks and mark it ✅.
+- At a **GO/NO-GO gate** (S3.6, B1.6): stop. These need live player data and the owner's decision.
+- Decisions D-001, D-003, D-004, D-005, D-006, D-009 are pre-approved. A new decision that would block: take the recommendation in `architecture.md`, log it as `Accepted (unattended, recommendation)`, flag it in the handoff record, continue.
+- Things only the owner can do (rename the experience, set max players in Game Settings, buy ads, create Robux products, save a local `.rbxl`): write the exact instruction in the handoff record and continue.
+
+## When to stop and ask (even unattended)
+Any publish; any production DataStore write outside ProfileStore's normal operation; any monetization being *enabled*; a budget missed after two attempts **and** no fallback in the risk register; a Studio instance that cannot be verified; anything touching another game; any deviation from `architecture.md` §0, §4.4, §5, §19, §20; a GO/NO-GO gate.
 
 ## Working style
 Small reviewable changes grouped by behaviour. Short plain-English replies to the owner; one question at a time only when a real decision is needed; offer options with a recommendation. Update `API_CONTRACTS.md`, `EVENTS.md`, `STATS.md` in the same change that alters them. Keep `assets/ART_SOURCES.md` current.

@@ -20,7 +20,7 @@
 5. **Restore point:** Studio version-history save `<ID> passed` plus `ServerStorage.Backups.<ID>_before_<date>` made *before* the edits.
 6. **Mirror:** Rojo export to `src/`, committed with the substage ID (never force-push; never push `.rbxl`, backups, `work/`, `vendor-review/`, credentials).
 7. **Handoff record** appended to `docs/HANDOFF_REPORT.md`.
-8. **Owner approval** line in `docs/DECISION_LOG.md`. **Publishing is a separate owner action** and is never part of a checkpoint Claude performs.
+8. **Approval** line in `docs/DECISION_LOG.md` — in unattended mode (D-010) this is `auto-approved (unattended)` for every substage except publish substages and GO/NO-GO gates, which wait for the owner. **Publishing is a separate owner action** and is never part of a checkpoint Claude performs.
 
 ### Studio safety (every substage, before the first action)
 `list_roblox_studios` → identify the instance by PlaceId **132065051336560** → never act on another instance (DEADZONE, Outlaw City) → production window: API access OFF before any Play.
@@ -54,12 +54,12 @@ Purpose: freeze the old direction, record the decisions, set up the new working 
 
 | ID | Substage | Deliverables | Passes when | Verify |
 |---|---|---|---|---|
-| R0.1 | Decision D-001 | Owner decides: one crew per server (recommended) or continue the split | Line in `DECISION_LOG.md` | Owner |
+| R0.1 | Decision D-001 | **Accepted 2026-10-16 (Option A).** Record only. | Line in `DECISION_LOG.md` | — |
 | R0.2 | Freeze old repo | In `moeelzayyat/lighthousekeepers`: `multiship-test` tagged `frozen-2026-10-16`; repository archived; test experience 10771229467 left private and untouched | Tag pushed; archive flag set | Owner (GitHub) |
 | R0.3 | New repository | `moeelzayyat/lighthousev2` cloned to `C:\RobloxProjects\Lighthousev2`; `src/` and `tests/` copied from the old repo's `main`; old `docs/` copied to `docs/legacy/`; this docs set at the root | Tree matches `architecture.md` §4.3; first commit pushed | Repo |
 | R0.4 | Studio baseline | In the production window (API off): `list_roblox_studios` verified; full script export to `src/` at the current live build; restore point `R0 baseline`; local `.rbxl` saved by the owner | Export committed; restore point exists | Studio, repo |
-| R0.5 | Live build identity | Owner confirms which build is live (departure build f00ea66 or later); recorded | Line in `DECISION_LOG.md` | Owner |
-| R0.6 | Title and icon brief | Title A/B chosen; icon brief re-read; thumbnail list; owner decides who produces the icon | `ART_BIBLE.md` store section filled | Owner |
+| R0.5 | Live build identity | Compare the Studio production scripts with `src/` (old `main` 854f4e9) via `script_read` hashes; record which build is live and any drift | Line in `DECISION_LOG.md`; drift listed | Studio (read-only, API off) |
+| R0.6 | Title and icon brief | D-009 accepted: write the owner instruction to rename the experience and set max players 4 in the handoff record; store section of `ART_BIBLE.md` finalised; icon production via Studio AI image generation attempted first, contractor as fallback | Instruction written; `ART_BIBLE.md` final | — |
 
 **R0 exit:** all ✅; `CURRENT_PHASE.md` = R1.1.
 
@@ -261,5 +261,6 @@ NEXT: <next ID>
 
 ---
 
+**Mode:** unattended (D-010)
 **Current substage:** R0.1
 **Last checkpoint passed:** none

@@ -1,25 +1,22 @@
 # CURRENT PHASE
 
+**Mode:** UNATTENDED (D-010) — run substages back to back; stop only at publish substages (write the package, continue elsewhere) and GO/NO-GO gates.
 **Stage:** R0 — Re-baseline
-**Substage:** R0.1 — Decision D-001 (place model)
+**Substage:** R0.1 — Decision D-001
 **Status:** ⬜ Not started
 **Last checkpoint passed:** none
 
-## What this substage is
-The owner decides the place model before any code moves:
-- **Option A (recommended):** one place, one crew per server (server size 4). Freeze the Harbor/Isle split. Protect production with ProfileStore in R1.
-- **Option B:** continue the two-place split in the test experience, applying the five corrections in `docs/AUDIT_2026-10-16.md §6` first.
+## R0.1
+D-001 is already **Accepted (Option A: one crew per server)**. This substage only records it: append `CP — R0.1 passed · <date> · auto-approved (unattended)` to `docs/DECISION_LOG.md`, set R0.1 ✅ in `docs/ROADMAP.md`, then move to R0.2.
 
-The recommendation and its reasons are in `architecture.md` §4.4 and `DECISION_LOG.md` D-001 (status: Proposed).
+## R0.2 (next)
+The owner must tag and archive the old repo; Claude cannot push there. Write the instruction in `docs/HANDOFF_REPORT.md`, mark R0.2 🟦, continue to R0.3.
 
-## Passes when
-D-001 has a status of Accepted (A or B) with the owner's line in `docs/DECISION_LOG.md`.
+## R0.3
+Already done (repo assembled and pushed 2026-10-16). Verify the tree matches `architecture.md` §4.3 and mark ✅.
 
-## Then
-R0.2 freezes the `multiship-test` branch (Option A) or re-scopes R1 around the corrections (Option B — Claude rewrites R1.3/R1.7 in `ROADMAP.md` before proceeding).
+## R0.4 — first Studio contact
+Production window only: `list_roblox_studios` → PlaceId 132065051336560 → API access OFF → export all scripts, compare with `src/`, restore point `R0 baseline`. No edits.
 
 ## Repository
-`https://github.com/moeelzayyat/lighthousev2` at `C:\RobloxProjects\Lighthousev2`. The old repo and folder are history only.
-
-## Studio
-No Studio changes in R0.1. When Studio work starts at R0.4: production window only, PlaceId 132065051336560 verified, API access OFF.
+`https://github.com/moeelzayyat/lighthousev2` at `C:\RobloxProjects\Lighthousev2`.
