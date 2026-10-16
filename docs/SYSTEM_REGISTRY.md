@@ -94,4 +94,4 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 ## Frozen (not in scope; history only)
 | System | Status | Notes |
 |---|---|---|
-| Harbor/Isle place split, reserved servers, teleports, manifests, custom SessionLock, hand-off/reclaim | Frozen | branch `multiship-test` tag `frozen-2026-10-16`; audit §6 corrections recorded; revive only per architecture §4.4 |
+| Harbor/Isle place split, reserved servers, teleports, manifests, custom SessionLock, hand-off/reclaim | Frozen | branch `multiship-test` tag `frozen-2026-10-16`; audit §6 corrections recorded; revive only per architecture §4.4. R1.7: PlaceRole, Voyages, IsleAdmission, HarborDepartures moved out of the live tree into `ServerStorage.Backups.R1.7_before_2026-10-16`; flags deleted from Config; SessionLock (unused) leaves at R1.3 |

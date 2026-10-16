@@ -126,3 +126,15 @@ LIVE CHECK FOR THE OWNER (after the R1.9 publish): Creator Hub → Lighthouse Ke
 MIRROR: 61 scripts FNV-1a identical to Studio.
 OWNER APPROVAL: pending (live dashboard + step 2)
 NEXT: R1.7
+
+CHECKPOINT: R1.7 Multi-ship removal from Main (🟦 waits on: owner's 4-client Studio test + Max players 4; Script Analysis tool)
+DATE: 2026-10-16
+STUDIO INSTANCE: placeId 132065051336560 verified · API access: OFF before Play (probe: "Studio access to APIs is not allowed")
+BACKUP: ServerStorage.Backups.R1.7_before_2026-10-16 (Main [disabled copy], Config). The four multi-ship modules (PlaceRole, Voyages, IsleAdmission, HarborDepartures) were MOVED into the same folder, out of the live tree.
+DELIVERED: `Main` no longer requires PlaceRole/Voyages/IsleAdmission/HarborDepartures; the ROLE switch, extra-ship build, isle branches, Voyages/Harbor/Isle wiring, `MultiShip` attribute and `InTransit` check are gone; GameState gets the single-ship departure directly. Config: MULTI_SHIP_ENABLED, TELEPORT_ENABLED, PLACE_ROLE_OVERRIDE, HARBOR_PLACE_ID, ISLE_PLACE_ID, ISLE_ARRIVAL_WAIT, ISLE_STUDIO_TEST deleted (no `MULTISHIP_TEST` block existed on this branch). The client `Departure` reads `MultiShip == true`, which is now nil → single-ship UI (unchanged behaviour). Main 38694 → 36078 chars.
+TESTRUNNER (Edit): `46 passed, 0 failed` — adds ShipDepartureSpec (5) on a fake roster: 4/4 sails automatically; SAIL NOW for a crew of 2, only by a crew member, "already" for a second call; SAIL NOW refused at 4/4 ("full"); an automatic departure cancels when 4 drops to 3; SAIL NOW cancels when its caller leaves.
+PLAY TEST (solo, API off): boot clean (only the engine DataStore 403 notice and Analytics info lines); none of the four modules in ServerScriptService; one ship in the Lobby; attributes Ship_Ship1_* and ShipCapacity = 4 only; boarded, SAIL NOW, Prologue started.
+NOT DONE BY CLAUDE (owner): the roadmap's 4-client check needs Studio's multi-client test, which the MCP cannot start, and the 5th-client refusal needs Game Settings → Max players = 4. Owner steps: (1) Game Settings → Places → Max players 4, save; (2) Test tab → Clients and Servers → 4 players → Start; walk all 4 onto the ship → it sails automatically; (3) restart with 2 players, one uses SAIL NOW → it sails with 2; (4) a 5th client cannot join the server once Max players is 4. Record pass/fail in this file.
+MIRROR: Main, Config, ShipDepartureSpec FNV-1a identical; the four module files removed from `src/` (58 scripts, matches Studio).
+OWNER APPROVAL: pending (4-client check + step 2)
+NEXT: R1.8 (blocked behind R1.3: AdminDataService needs ProfileStore) → then R1.9 publish package
