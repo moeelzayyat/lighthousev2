@@ -106,3 +106,8 @@ Consequences:
 ## CP — R1.9 passed (DEV) · 2026-10-16 · live save check by the owner ("pearl stayed") · published by owner to DEV: yes · production: untouched (D-013)
 ## CP — S2.1 passed (🟦 Script Analysis) · 2026-10-16 · auto-approved (unattended) · DEV only
 ## CP — S2.2 passed (🟦 Script Analysis) · 2026-10-16 · auto-approved (unattended) · DEV only
+## D-014 — The Night-1 reserve refills the lamp to full
+2026-10-16 · S2.3 · **Status: Accepted (unattended, recommendation)** — flagged for the owner in the S2.3 record
+Architecture §3 says the emergency reserve "refills the lamp once" on the first Night-1 blackout but gives no amount. Measured in DEV: a first-time solo player who never carries oil reaches nightfall with an **empty lamp** (the prologue's 40-fuel reserve burns out before the prologue ends). One barrel (`FUEL_PER_REFILL` = 40) would last 48 s at the solo wide-beam rate (0.84/s) plus the 10 s dark grace, short of the 90 s night, so the roadmap check ("survives Night 1 once and loses Night 2") cannot pass with it.
+Decision: the reserve fills the lamp to `MAX_FUEL` (100). No new number is added; it uses the existing maximum. Measured result: Night 1 survived with 24 fuel left at dawn, Night 2 lost to a blackout 39 s in. To change it, the owner names a different amount.
+## CP — S2.3 passed (🟦 Script Analysis) · 2026-10-16 · auto-approved (unattended) · DEV only

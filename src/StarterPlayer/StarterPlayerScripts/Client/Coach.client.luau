@@ -145,6 +145,10 @@ local function inRun()
 	local phase = state:GetAttribute("Phase")
 	return player:GetAttribute("Ready") == true and (phase == "Prologue" or phase == "Day" or phase == "Night")
 end
+-- S2.3: the Night-1 reserve just refilled the lamp; the oil prompt is forced for the rest of the night
+local function reserveForced()
+	return state:GetAttribute("ReserveUsed") == true and state:GetAttribute("Phase") == "Night"
+end
 local function creaturesOut()
 	local folder = island:FindFirstChild("Creatures")
 	return folder ~= nil and #folder:GetChildren() > 0
@@ -182,7 +186,7 @@ local PROMPTS = {
 		keys = { keyboard = "E", touch = "Tap", gamepad = X },
 		target = "OilPile",
 		when = function()
-			return not isKeeper() and player:GetAttribute("CarryingOil") ~= true and fuelRatio() < 0.35
+			return player:GetAttribute("CarryingOil") ~= true and (reserveForced() or (not isKeeper() and fuelRatio() < 0.35))
 		end,
 	},
 	{
@@ -323,6 +327,12 @@ end)
 state:GetAttributeChangedSignal("KeeperUserId"):Connect(function()
 	if isKeeper() then
 		retire("lamp")
+	end
+end)
+state:GetAttributeChangedSignal("ReserveUsed"):Connect(function()
+	if state:GetAttribute("ReserveUsed") == true then
+		retired.oil = nil -- S2.3: the reserve saved the light; point at the oil barrels again
+		shownCount.oil = 0
 	end
 end)
 state:GetAttributeChangedSignal("BeamMode"):Connect(function()
@@ -505,6 +515,10 @@ feedRemote.OnClientEvent:Connect(function(event)
 	elseif event.kind == "refuel" then
 		enqueue("refuel" .. who, string.format("%s refueled the light (+%d%%)", who, tonumber(event.amount) or 0), C.AccentLighthouseSoft)
 		flare(false)
+	elseif event.kind == "reserve" then -- S2.3: the Night-1 reserve refilled the lamp
+		enqueue("reserve", "The reserve saved the light \u{2014} carry oil!", C.AccentLighthouse)
+		flare(true)
+		SoundFx.play2D("refuel", 1.15)
 	end
 end)
 

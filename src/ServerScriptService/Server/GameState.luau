@@ -18,6 +18,7 @@ local Voyages = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("D
 local WaveDirector = require(script.Parent.WaveDirector) -- pure night plan (R1.2)
 local Voyage = require(script.Parent.Voyage) -- pure Pearl rules (R1.2)
 local DawnBanking = require(script.Parent.DawnBanking) -- S2.2: Pearls banked at each dawn
+local NightSafety = require(script.Parent.NightSafety) -- S2.3: Night-1 safety reserve (pure)
 local GrantService = require(script.Parent.GrantService) -- R1.3: the only writer of Pearl income
 
 local GameState = {}
@@ -448,6 +449,8 @@ function GameState.run(deps)
 				local voyageConfig = WaveDirector.configFor(def, Config)
 				state:SetAttribute("VoyageDef", def.id)
 				state:SetAttribute("TotalNights", def.nights)
+				state:SetAttribute("ReserveUsed", false) -- S2.3
+				local reserveUsed = false -- S2.3: the Night-1 reserve is used at most once per voyage
 				EventLog.startRun(departing)
 				EventLog.setVoyage(def.id, def.nights)
 				if forecast then
@@ -524,7 +527,24 @@ function GameState.run(deps)
 							end)
 						end
 
+						-- Night-1 safety (S2.3): a first-voyage crew's first blackout tonight is caught once by the reserve
+						local function nightOneSafety()
+							local runs = {}
+							for _, p in readyPlayers() do
+								table.insert(runs, p:GetAttribute("RunsCompleted") or 0)
+							end
+							if NightSafety.shouldRefill(night, lamp.getFuel(), reserveUsed, runs) then
+								reserveUsed = true
+								lamp.setFuel(lamp.getMaxFuel())
+								state:SetAttribute("ReserveUsed", true)
+								EventLog.log("NightOneReserve", { night = night, crew = #runs })
+								for _, p in readyPlayers() do
+									deps.remotes.CrewFeed:FireClient(p, { kind = "reserve" })
+								end
+							end
+						end
 						local survived = countdown(Config.NIGHT_SECONDS, function()
+							nightOneSafety()
 							return noPlayers()
 								or lamp.darkSeconds >= Config.DARK_GRACE_SECONDS
 								or tower.isBroken()

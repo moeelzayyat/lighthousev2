@@ -249,3 +249,23 @@ MIRROR: 72 scripts in DEV, every FNV-1a hash identical to `src/`.
 OWNER APPROVAL: auto-approved (unattended, D-010)   PUBLISHED BY OWNER: n.a. (S2 publishes at S2.8, to DEV)
 NOTES / DEBT: the leave-at-night-5 case is proven on the mock store (roadmap asks for mock); a live check fits the S2.8 DEV publish. Toast title and wording are new UI text, not gameplay numbers.
 NEXT: S2.3 Night-1 safety.
+
+CHECKPOINT: S2.3 Night-1 safety — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-16
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before each Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S2.3_before_2026-10-16 (GameState, Coach)
+BUILT:
+- `NightSafety.shouldRefill(night, fuel, used, crewRuns)` (new, pure, Encounter): true only on Night 1, at a blackout (fuel 0), once per voyage, when a sailing crew member has 0 completed voyages.
+- `GameState`: checked every 0.2 s during the night; on true the lamp is refilled to its maximum (D-014), `ReserveUsed` is set on the state folder, `NightOneReserve` is logged and every crew member's feed gets `CrewFeed{kind="reserve"}`.
+- Coach client: feed line "The reserve saved the light — carry oil!" with the lamp flare and refuel sound; after the reserve the "Grab oil for the lamp" prompt is forced for the rest of the night (also for the keeper) and is un-retired so it shows again.
+DECISION FLAGGED FOR THE OWNER: D-014, the reserve fills the lamp to full (100). One barrel (40) cannot carry a solo first voyager through the 90 s night because the lamp is empty at nightfall. Accepted as the recommendation under D-010; say a different amount to change it.
+TESTRUNNER (DEV): 96 passed, 0 failed. New `NightSafetySpec` (4): the refill rule's cases (Night 1 only, blackout only, once, first voyager only, empty crew), and a lamp model with the live numbers: 0-run solo with an empty lamp survives Night 1 and loses Night 2; 1-run solo loses Night 1; a late Night-1 blackout is caught; a 4-player first-voyage crew reaches dawn 1.
+SCRIPT ANALYSIS: not measured (owner item).
+PLAY TEST 1 (DEV, owner's account, mock store, 0 completed voyages; TEMPTEST script kept the tower standing and never touched the fuel): SAIL NOW, nobody carried oil. Lamp at 0 when Night 1 began (123.8 s); `NightOneReserve crew=1 night=1` at once, lamp relit at 100. Client: one reserve feed event, feed line shown, "Grab oil for the lamp" prompt shown after the reserve. Night 1 survived (dawn at 213.8 s, 24 fuel left, 1 Pearl banked). Night 2: lamp dark at 273.0 s, Defeat (blackout) at 283.2 s. Reserve used once.
+PLAY TEST 2 (DEV, same account, mock profile given 1 completed voyage by a TEMPTEST script before sailing; memory mode, nothing saved): lamp at 0 at nightfall, no reserve (`ReserveUsed=false`), Defeat (blackout) 10 s into Night 1.
+"Two accounts" here means the same Studio account with a 0-run and a 1-run mock profile; a second real account was not used.
+Console in both runs: ProfileStore's refused Studio write (API off) and Roblox CorePackages UIBlox warnings only; 0 game-script errors. Play stopped; 0 TEMPTEST scripts remain.
+NUMBERS: fuel at Night-1 start for a never-oil first voyager = 0 (both runs); with the reserve, Night 1 ends with 24 fuel; Night 2 blackout loss 39 s into the night; without it, Night 1 lost at 10 s.
+MIRROR: 74 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (e7014ef0).
+OWNER APPROVAL: auto-approved (unattended, D-010)   PUBLISHED BY OWNER: n.a. (S2 publishes at S2.8, to DEV)
+NEXT: S2.4 First beam hit ≤ 45 s.

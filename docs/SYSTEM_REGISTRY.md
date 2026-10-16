@@ -9,7 +9,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Standard Voyage (7 nights) | Tested (not yet published) | S2.1 | D-003; `Definitions/Voyages`; bosses 4, 7; win = 12 Pearls, unlocks Long (play-tested in DEV) |
 | Long Voyage (13 nights, unlock) | Tested (not yet published) | S2.1 | now the unlock (`Unlocks.LongVoyage`, `ChooseVoyage`); bosses 4, 7, 10, 13 and every night from 8; win = 18 Pearls |
 | Lamp beam (wide/focused, fuel, auto-sweep, idle release) | Released | S4 | server pin of the Keeper |
-| Fuel / oil carry / emergency reserve | Released | S2.3 | Night-1 safety |
+| Fuel / oil carry / emergency reserve | Released; Night-1 safety Tested (not yet published) | S2.3 | `NightSafety`: first Night-1 blackout of a crew with a 0-run member refills the lamp to full once (D-014); coach oil prompt forced; feed line |
 | Tower integrity / repair | Released | — | |
 | Harpoons (4) | Released | R1.4 | finite checks |
 | Armor (3) | Released | — | |
