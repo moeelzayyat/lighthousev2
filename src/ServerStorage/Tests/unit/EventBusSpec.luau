@@ -174,6 +174,19 @@ return function(T: any)
 			})
 		end)
 
+		T.it("S2.2: a player's first dawn-banked Pearl is the DawnPearl step, once", function()
+			local bus = quietBus()
+			local sink, calls = recordingSink()
+			Analytics.start(bus, sink)
+			bus.Publish("PearlsGranted", { UserId = 4, Amount = 1, Balance = 1, Source = "dawn", ClaimId = "v:night1:4" })
+			bus.Publish("PearlsGranted", { UserId = 4, Amount = 1, Balance = 2, Source = "dawn", ClaimId = "v:night2:4" })
+			T.expect(calls).toEqual({
+				"funnel 4 7 DawnPearl",
+				"economy 4 Source 1 1 Gameplay dawn",
+				"economy 4 Source 1 2 Gameplay dawn",
+			})
+		end)
+
 		T.it("funnel step names are the fixed dashboard names", function()
 			T.expect(Analytics.STEPS).toEqual({
 				Joined = 1,

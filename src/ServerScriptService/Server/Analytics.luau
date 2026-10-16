@@ -1,7 +1,7 @@
 --!strict
 -- Analytics (R1.6, Telemetry domain): a bus consumer only. Turns bus events into Roblox AnalyticsService calls:
 --   * the onboarding funnel with fixed step names (docs/EVENTS.md): Joined, OnCrew, Landed, FirstAction,
---     FirstBeamHit, Night1Survived, DawnPearl (from S2.2), VoyageEnded, SailAgain
+--     FirstBeamHit, Night1Survived, DawnPearl (a player's first dawn-banked Pearl, S2.2), VoyageEnded, SailAgain
 --   * "Left" and "VoyageEnded" as custom events with their phase / outcome
 --   * Pearl sources and sinks as economy events with the ending balance
 -- The sink is swappable so tests can record calls without touching AnalyticsService.
@@ -140,7 +140,12 @@ function Analytics.start(bus: Bus, sink: Sink): { () -> () }
 	on("PlayerLeft", function(e)
 		sink.custom(e.UserId, "Left", e.Night, e.Phase)
 	end)
+	local dawnSeen: { [number]: boolean } = {}
 	on("PearlsGranted", function(e)
+		if e.Source == "dawn" and not dawnSeen[e.UserId] then
+			dawnSeen[e.UserId] = true
+			step(e.UserId, "DawnPearl")
+		end
 		sink.economy(e.UserId, "Source", e.Amount, e.Balance, transactionFor(e.Source), e.Source)
 	end)
 	on("PearlsSpent", function(e)

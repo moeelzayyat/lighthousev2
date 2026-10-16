@@ -42,14 +42,14 @@ Server → client only (15): `AdminResult`, `Notify`, `LootCollected`, `OpenUpgr
 ## Server → Client
 | Remote | Payload | Notes |
 |---|---|---|
-| `Notify`, `PlaySound`, `LootCollected`, `CrewFeed`, `CoachEvent` | as today | `PlaySound` client handler validates types (keep) |
+| `Notify`, `PlaySound`, `LootCollected`, `CrewFeed`, `CoachEvent` | as today; `LootCollected` kinds: loot item ids, `Shells`, `Pearls`, and `PearlBanked` (S2.2, amount banked at dawn) | `PlaySound` client handler validates types (keep) |
 | `UpgradeResult`, `ShopResult`, `LoadoutResult`, `TraderResult`, `MerchantResult` | `{requestId, ok, reason?, state?}` | replayed for duplicate requestIds |
 | `AdminResult` (R1.8) | `requestId, ok, result` (table for inspect, message otherwise) | owner only in practice |
 | `RunResults` | results payload | |
 | `GearData` | profile view | **never** includes `Grants`, `RedeemedCodes` |
 | `CreatureSnapshot` (new, S4.2) | `buffer`: `[n][id u16, x f32, y f32, z f32, yaw u8, state u8, hpPct u8]` | 12 Hz, `U` |
 | `CombatResult` (new, S4) | `{Seq, Hits}` | `U`, batched |
-| `DawnPearl` (new, S2.2) | `{night, total}` | |
+| ~~`DawnPearl` (new, S2.2)~~ | — | S2.2 used the existing `LootCollected` instead: `LootCollected("PearlBanked", amount)`; `RunResults` carries `banked[playerName]` |
 | `LeaderboardUpdate` (new, S7.3) | `{board, rows}` | 60 s |
 | `GameState` attributes | Phase, Night, TimeLeft, Reason, Cause, Fuel, MaxFuel, DarkSeconds, BeamMode, KeeperUserId, Integrity, MaxIntegrity, Shells, BigWarning, Forecast*, Upgrade_*, Evo_* | unchanged |
 

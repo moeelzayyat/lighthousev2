@@ -17,6 +17,7 @@ local Forecasts = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild(
 local Voyages = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Voyages")) -- S2.1
 local WaveDirector = require(script.Parent.WaveDirector) -- pure night plan (R1.2)
 local Voyage = require(script.Parent.Voyage) -- pure Pearl rules (R1.2)
+local DawnBanking = require(script.Parent.DawnBanking) -- S2.2: Pearls banked at each dawn
 local GrantService = require(script.Parent.GrantService) -- R1.3: the only writer of Pearl income
 
 local GameState = {}
@@ -597,14 +598,17 @@ function GameState.run(deps)
 				-- screen, which tells us whether people choose to replay (a key playtest question).
 				local voters = readyPlayers()
 
-				-- Pearl rewards (saved, personal) from the pure rule Voyage.pearlsFor: PEARLS_PER_NIGHT per night
-				-- survived, plus PEARLS_VICTORY_BONUS for a win (13-night win = 18), plus per-award Pearls here.
+				-- Pearl rewards (saved, personal). Night Pearls were banked at each dawn (S2.2, DawnBanking); Results
+				-- pays what Voyage.resultPearls says is left (the victory bonus on a win), plus per-award Pearls here.
+				-- results.pearls is the voyage total (banked + paid now); results.banked the dawn part.
 				results.pearls = {}
+				results.banked = {}
 				if result ~= "Abandoned" then
 					local won = result == "Victory"
 					local nightReached = if won then def.nights else results.nightReached
 					for _, player in voters do
-						local earned = Voyage.pearlsFor(nightReached, won, Config)
+						local banked = DawnBanking.bankedFor(EventLog.voyageId(), player.UserId)
+						local earned = Voyage.resultPearls(nightReached, won, banked, Config)
 						for _, award in results.awards do
 							if award.player == player.DisplayName then
 								earned += Config.PEARLS_PER_AWARD
@@ -617,9 +621,11 @@ function GameState.run(deps)
 						if won and def.unlocks then
 							deps.playerData.unlock(player, def.unlocks) -- S2.1: a Standard win unlocks the Long Voyage
 						end
-						results.pearls[player.Name] = earned
+						results.pearls[player.Name] = banked + earned
+						results.banked[player.Name] = banked
 					end
 				end
+				DawnBanking.forget(EventLog.voyageId())
 				-- Loot is run-scoped like shells: unsold loot is lost when the voyage ends
 				for _, player in Players:GetPlayers() do
 					deps.playerData.clearRunLoot(player)

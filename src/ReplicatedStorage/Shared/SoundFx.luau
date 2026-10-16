@@ -42,6 +42,7 @@ SoundFx.SOUNDS = {
 	refuel = { id = "rbxasset://sounds/impact_water.mp3", volume = 0.6, speed = 1.3 },
 	repair = { id = "rbxasset://sounds/snap.wav", volume = 0.7, speed = 1.2 },
 	loot = { id = "rbxasset://sounds/electronicpingshort.wav", volume = 0.4, speed = 1.0 },
+	lantern = { id = "rbxasset://sounds/electronicpingshort.wav", volume = 0.55, speed = 0.7 }, -- S2.2: soft chime, Pearls banked at dawn
 	click = { id = "rbxasset://sounds/clickfast.wav", volume = 0.5, speed = 1.0 },
 	denied = { id = "rbxasset://sounds/button.wav", volume = 0.5, speed = 0.7 },
 	monster = { id = "rbxasset://sounds/HalloweenGhost.wav", volume = 0.9, speed = 0.45 }, -- deep roar when a big monster arrives

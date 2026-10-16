@@ -25,11 +25,11 @@ Module: `EventLog` (Telemetry domain) exposes `Publish(name, payload)` / `Subscr
 | `LootCollected` | `{VoyageId, UserId, ItemId, Qty}` | Encounter (Loot) | Objectives, Analytics | S5.3 |
 | `ShellsChanged` | `{VoyageId, Delta, Reason}` | Economy (ShellPool) | Analytics | S5.3 |
 | `UpgradeBought` / `EvolutionUnlocked` | `{VoyageId, UserId, Id, Rank?}` | Encounter (Upgrades) | Results, Logbook, Objectives | S5.3 |
-| `NightSurvived` | `{VoyageId, Night, Crew}` | Encounter | **Grant (dawn Pearl)**, Analytics (`Night1Survived`), Leaderboard | R1.6 ✅ |
+| `NightSurvived` | `{VoyageId, Night, Crew}` | Encounter | **Grant (dawn Pearl, `DawnBanking`, S2.2 ✅)**, Analytics (`Night1Survived`), Leaderboard | R1.6 ✅ |
 | `DawnLootWindow` | `{VoyageId, Seconds}` | Encounter | HUD | S5.3 |
 | `VoyageEnded` | `{VoyageId, Outcome: "Victory"\|"Defeat", Cause, NightReached, Crew, PerPlayer}` | Encounter | Results, Grant (victory bonus), Leaderboard, Objectives, Analytics | R1.6 ✅ |
 | `RematchVoted` / `SailAgain` | `{VoyageId, UserId}` | Crew | Analytics | R1.6 ✅ |
-| `PearlsGranted` | `{UserId, ClaimId, Amount, Balance, Source}` | Economy (GrantService) | HUD (`DawnPearl`), Analytics | R1.6 ✅ |
+| `PearlsGranted` | `{UserId, ClaimId, Amount, Balance, Source}` | Economy (GrantService) | Analytics (economy source; Source `"dawn"` → funnel `DawnPearl` once per player, S2.2) | R1.6 ✅ |
 | `PearlsSpent` | `{UserId, Amount, Balance, ItemId?}` | Data (PlayerData.spendPearls) | Analytics (economy sink) | R1.6 ✅ |
 | `ItemGranted` | `{UserId, ItemId, Source}` | Economy (Grant) | Logbook, Analytics | R1.3 |
 | `ShopPurchase` / `MerchantPurchase` | `{UserId, ItemId, Price, Currency}` | Economy | Analytics | S5.3 |

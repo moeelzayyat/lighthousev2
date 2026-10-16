@@ -230,3 +230,22 @@ MIRROR: 70 scripts in DEV, every FNV-1a hash identical to `src/`.
 OWNER APPROVAL: auto-approved (unattended, D-010)   PUBLISHED BY OWNER: n.a. (S2 publishes at S2.8, to DEV)
 NOTES / DEBT: Long Voyage gameplay past night 1 was not played through (13 nights ≈ 30 min); its plan is covered by tests. `VoyageService` from the roadmap row is `GameState` taking a definition until the S5 domain split.
 NEXT: S2.2 Dawn Pearl banking.
+
+CHECKPOINT: S2.2 Dawn Pearl banking — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-16
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S2.2_before_2026-10-16 (GameState, Voyage, Analytics, Hud, Results, SoundFx, VoyageSpec, PlayerDataSpec, EventBusSpec)
+BUILT:
+- `DawnBanking` (new, Economy domain): a bus consumer of `NightSurvived`. Each crew member gets that night's Pearls through `GrantService.Grant` (source "dawn", saved at once) with claimId `voyageId:night<n>:userId`; it keeps a per-voyage tally (a replayed dawn is counted once) and tells the client.
+- `Voyage.dawnPearls(night)`, `Voyage.resultPearls(night, won, banked)`, `Voyage.dawnClaimId(...)`: the dawns add up to the same night Pearls as before; Results pays only what is left (the +5 victory bonus on a win, nothing on a loss). Totals unchanged: Standard win 12, Long win 18, loss at night n = n − 1.
+- `GameState` Results: `results.pearls` = voyage total (banked + paid now), new `results.banked`; the tally is dropped after Results.
+- Client: `LootCollected("PearlBanked", amount)` → lantern chime (new `SoundFx.lantern`), Pearl pickup and a "+1 Pearl banked" toast titled "Dawn". Results' Pearl tile reads "7 banked at dawn · yours to keep". The planned `DawnPearl` server→client remote was not needed (API_CONTRACTS updated).
+- Analytics: a player's first dawn-banked Pearl is the `DawnPearl` funnel step (step 7), once per player.
+TESTRUNNER (DEV): 92 passed, 0 failed. New: `DawnBankingSpec` (7: dawn sum = night Pearls, Results remainder 5 / 0 / 5, triangular step, claim id format, each dawn grants every crew member and notifies, a replayed dawn grants and counts once, a refused grant banks nothing, driven by NightSurvived on the bus), EventBusSpec "first dawn Pearl is the DawnPearl step, once", PlayerDataSpec "leaving at night 5 keeps the 4 Pearls banked at dawn; a replayed dawn grants once" (mock store).
+SCRIPT ANALYSIS: not measured (owner item).
+PLAY TEST (DEV, Studio play on the owner's account, mock store, TEMPTEST keep-alive script runtime-only): Standard voyage, SAIL NOW → Victory 7 of 7, 15:35. Server Pearls at each Day start: 0, 1, 2, 3, 4, 5, 6; console shows 7 dawn grants `664fbfa9:night1..7:11752219158` (1 each), then the Results grant `664fbfa9:result:11752219158` = 5 → 12 total. Client received 7 "PearlBanked"; RunResults pearls = 12, banked = 7; tile text "7 banked at dawn · yours to keep". Funnel: `funnel 7 DawnPearl` logged once at dawn 1. Console: ProfileStore's refused Studio write (API off) and Roblox CorePackages UIBlox warnings only; 0 game-script errors. Play stopped; 0 TEMPTEST scripts remain.
+NUMBERS: dawn grant = 1 Pearl per night survived; Standard win = 7 banked + 5 at Results = 12 (measured); first dawn Pearl at 214 s into the voyage (night 1 dawn, with the 94 s prologue).
+MIRROR: 72 scripts in DEV, every FNV-1a hash identical to `src/`.
+OWNER APPROVAL: auto-approved (unattended, D-010)   PUBLISHED BY OWNER: n.a. (S2 publishes at S2.8, to DEV)
+NOTES / DEBT: the leave-at-night-5 case is proven on the mock store (roadmap asks for mock); a live check fits the S2.8 DEV publish. Toast title and wording are new UI text, not gameplay numbers.
+NEXT: S2.3 Night-1 safety.

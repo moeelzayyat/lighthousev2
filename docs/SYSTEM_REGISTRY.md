@@ -26,7 +26,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Island merchant (voyage-only Shell items) | Planned | S6.2 | |
 | Orbiting Blades | Planned | S6.3 | |
 | Results (cause, Moment, your part, rewards, next goal) | Released | S2.5 | Sail again |
-| Dawn Pearl banking | Planned | S2.2 | D-004 |
+| Dawn Pearl banking | Tested (not yet published) | S2.2 | D-004; `DawnBanking` bus consumer of NightSurvived → GrantService claim `voyageId:night<n>:userId`; Results pays the remainder (`Voyage.resultPearls`); play-tested in DEV (7 banked + 5 = 12) |
 
 ## Crew and social
 | System | Status | Target | Notes |
@@ -63,7 +63,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | AdminDataService (inspect/grant/rollback) | Tested (not yet published) | R1.8 | owner-only; 7 daily snapshots in `LighthouseKeepers_Snapshots_v2` |
 | Remote contract registry + guards + buckets | Tested (not yet published) | R1.4 | `NetGuard` on all 15 client→server remotes; 11 tests + Play spam test |
 | Event bus (EventLog) | Tested (not yet published) | R1.6 | `EventBus` + catalog `Shared/Events`; 7 bus tests; publishers for funnel, voyage and Pearl events |
-| Analytics funnel | Implemented (live dashboard check pending, R1.9) | R1.6 | `Analytics` bus consumer → AnalyticsService; 4 tests; every step except DawnPearl (S2.2) fired in Studio |
+| Analytics funnel | Implemented (live dashboard check pending, R1.9) | R1.6 | `Analytics` bus consumer → AnalyticsService; 4 tests; every step fired in Studio (DawnPearl from S2.2) |
 | Feature flags / remote config | Planned | S5.1 | |
 | Definitions registry | Planned | S5.4 | |
 | StatPipeline | Planned | S5.7 | |

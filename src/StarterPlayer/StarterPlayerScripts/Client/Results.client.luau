@@ -322,7 +322,11 @@ local function render()
 	local pearls = r.pearls and r.pearls[player.Name] or 0
 	pearlTile.value.Text = if pearls > 0 then "+" .. fmt(pearls) else "0"
 	pearlTile.word.Text = "PEARLS"
-	pearlTile.note.Text = if pearls > 0 then "Yours to keep \u{00B7} Quartermaster" else "Survive a night to earn Pearls"
+	local banked = r.banked and r.banked[player.Name] or 0 -- S2.2: the part already banked at each dawn
+	pearlTile.note.Text = if banked > 0
+		then string.format("%s banked at dawn \u{00B7} yours to keep", fmt(banked))
+		elseif pearls > 0 then "Yours to keep \u{00B7} Quartermaster"
+		else "Survive a night to earn Pearls"
 	local economy = r.economy ~= false
 	shellTile.frame.Visible = economy
 	lootTile.frame.Visible = economy

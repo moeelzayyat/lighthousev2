@@ -1158,6 +1158,13 @@ remotes:WaitForChild("Notify").OnClientEvent:Connect(function(text)
 end)
 
 remotes:WaitForChild("LootCollected").OnClientEvent:Connect(function(kind, value)
+	if kind == "PearlBanked" then -- S2.2: this night's Pearls were banked (saved) at dawn
+		local banked = tonumber(value) or 1
+		SoundFx.play2D("lantern")
+		UiKit.Pickup(hudRoot, { kind = "Pearls", amount = banked })
+		UiKit.Toast(promptRoot, string.format("+%d Pearl%s banked", banked, if banked == 1 then "" else "s"), "success", { title = "Dawn" })
+		return
+	end
 	SoundFx.play2D("loot", if kind == "Pearls" then 1.9 elseif kind == "BlackPearl" then 1.6 elseif kind == "SeaGlass" then 1.3 else 1)
 	local amount = tonumber(value) or 1
 	if kind == "Shells" then

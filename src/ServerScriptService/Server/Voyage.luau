@@ -22,4 +22,21 @@ function Voyage.pearlsFor(night: number, won: boolean, config: PearlConfig): num
 	return earned
 end
 
+-- Pearls banked at the dawn after night n (S2.2): the per-night part of pearlsFor, granted as each night is
+-- survived, so the dawns of a voyage add up to the night Pearls pearlsFor counts.
+function Voyage.dawnPearls(night: number, config: PearlConfig): number
+	return (config.PEARLS_PER_NIGHT or 0) + (config.PEARLS_NIGHT_STEP or 0) * night
+end
+
+-- What Results still pays after dawn banking: the voyage's pearlsFor less what was banked (never negative).
+-- A win leaves the victory bonus; a loss leaves nothing unless the player missed a dawn.
+function Voyage.resultPearls(night: number, won: boolean, banked: number, config: PearlConfig): number
+	return math.max(0, Voyage.pearlsFor(night, won, config) - banked)
+end
+
+-- Claim id of one dawn grant (architecture §2.4): voyageId:night<n>:userId
+function Voyage.dawnClaimId(voyageId: string, night: number, userId: number): string
+	return voyageId .. ":night" .. night .. ":" .. userId
+end
+
 return Voyage

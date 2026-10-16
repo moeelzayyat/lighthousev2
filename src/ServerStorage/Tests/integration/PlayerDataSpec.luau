@@ -119,6 +119,34 @@ return function(T: any)
 			T.expect(PlayerData.data(again).Unlocks.LongVoyage).toBe(true)
 		end)
 
+		T.it("S2.2: leaving at night 5 keeps the 4 Pearls banked at dawn; a replayed dawn grants once", function()
+			local PlayerData, GrantService, store = setup()
+			local DawnBanking = T.require(game.ServerScriptService.Server.DawnBanking)
+			local Config = T.require(game.ReplicatedStorage.Shared.Config)
+			local p = fakePlayer(109)
+			PlayerData._load(store, p)
+			local deps = {
+				config = Config,
+				grant = function(_, claimId: string, rewards: any): string
+					return (GrantService.Grant(p, claimId, rewards, "dawn"))
+				end,
+				notify = function() end,
+			}
+			for night = 1, 4 do
+				DawnBanking.bank("vLeave", night, { 109 }, deps)
+			end
+			DawnBanking.bank("vLeave", 4, { 109 }, deps) -- replayed dawn
+			T.expect(PlayerData.data(p).Pearls).toBe(4)
+			PlayerData._unload(p) -- leaves during night 5
+			local again = fakePlayer(109)
+			PlayerData._load(store, again)
+			T.expect(PlayerData.data(again).Pearls).toBe(4)
+			T.expect(PlayerData.data(again).Grants["vLeave:night4:109"] ~= nil).toBe(true)
+			T.expect(GrantService.Grant(again, "vLeave:night4:109", { Pearls = 1 }, "dawn")).toBe("duplicate")
+			T.expect(PlayerData.data(again).Pearls).toBe(4)
+			DawnBanking.forget("vLeave")
+		end)
+
 		T.it("a stored profile with bad types is repaired on load", function()
 			local PlayerData, _, store = setup()
 			local ProfileSchema = T.require(game.ServerScriptService.Server.ProfileSchema)

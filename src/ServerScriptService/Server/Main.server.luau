@@ -31,6 +31,7 @@ local Analytics = require(script.Parent.Analytics) -- R1.6: bus consumer -> Robl
 local GrantService = require(script.Parent.GrantService) -- R1.3: the only writer of Pearl income
 local AdminDataService = require(script.Parent.AdminDataService) -- R1.8: inspect / grant / rollback
 local Voyages = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Voyages")) -- S2.1
+local DawnBanking = require(script.Parent.DawnBanking) -- S2.2: Pearls banked at each dawn (bus consumer)
 
 -- Telemetry consumes the bus before any player can join (funnel step 1 is PlayerJoined)
 Analytics.start(EventLog, Analytics.robloxSink(Config.EVENT_LOG_ENABLED))
@@ -66,6 +67,25 @@ for _, name in { "BeamControl", "LampAction", "Notify", "Attack", "LootCollected
 	remote.Parent = remotes
 end
 remotes.Parent = ReplicatedStorage
+
+-- Dawn Pearl banking (S2.2): NightSurvived -> GrantService for each crew member, saved at once; the client
+-- hears "+1 Pearl banked" through LootCollected("PearlBanked", amount).
+DawnBanking.start(EventLog, {
+	config = Config,
+	grant = function(userId, claimId, rewards)
+		local player = Players:GetPlayerByUserId(userId)
+		if not player then
+			return "invalid"
+		end
+		return (GrantService.Grant(player, claimId, rewards, "dawn"))
+	end,
+	notify = function(userId, amount)
+		local player = Players:GetPlayerByUserId(userId)
+		if player then
+			remotes.LootCollected:FireClient(player, "PearlBanked", amount)
+		end
+	end,
+})
 
 local refs = IslandBuilder.build()
 local lobbyRefs = LobbyBuilder.build(refs) -- the pirate-ship lobby (also moves the Quartermaster aboard)

@@ -105,3 +105,4 @@ Consequences:
 - CLAUDE.md hard rule 4 now verifies the DEV PlaceId; rules 11 and 12 added.
 ## CP — R1.9 passed (DEV) · 2026-10-16 · live save check by the owner ("pearl stayed") · published by owner to DEV: yes · production: untouched (D-013)
 ## CP — S2.1 passed (🟦 Script Analysis) · 2026-10-16 · auto-approved (unattended) · DEV only
+## CP — S2.2 passed (🟦 Script Analysis) · 2026-10-16 · auto-approved (unattended) · DEV only

@@ -39,7 +39,7 @@ boss(n)   = per VoyageDefinition schedule; count = crew size (S6.1)
 Reference table (crew 4, no forecast): night 1 → 14 / 42 · 4 → 34 / 82 · 7 → 46 / 106 · 10 → 58 / 130 · 13 → 70×1.5=105 / 154.
 
 ## Pearl rules (pure, R1.2 / S2.2)
-`pearlsFor(nightsSurvived, won, def) = nightsSurvived × PEARLS_PER_NIGHT + (won and PEARLS_VICTORY_BONUS or 0)` → Standard win 12, Long win 18. Dawn banking grants `PEARLS_PER_NIGHT` per `NightSurvived`; the victory bonus at `VoyageEnded`. Boss drops: 50% chance of 2–4, unchanged.
+`pearlsFor(nightsSurvived, won, def) = nightsSurvived × PEARLS_PER_NIGHT + (won and PEARLS_VICTORY_BONUS or 0)` → Standard win 12, Long win 18. Dawn banking (S2.2, implemented): `Voyage.dawnPearls(n)` = `PEARLS_PER_NIGHT` (+ the legacy step × n) per `NightSurvived`; Results pays `Voyage.resultPearls` = `pearlsFor − banked` (the victory bonus on a win). Boss drops: 50% chance of 2–4, unchanged.
 
 ## Caps (owner policy)
 Permanent Quartermaster boosts total ≤ +15% across Shells/speed/damage (D-pending S6.4). Specialties ≤ +10% each, one active. Voyage-only merchant boosts ≤ +25%, wiped at Results.
