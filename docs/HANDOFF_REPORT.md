@@ -182,3 +182,20 @@ Live check (about 10 minutes):
  9. Tell Claude: Pearls after step 7, Pearls after step 8, anything odd. Claude then marks R1.3 and R1.9 ✅ and checks the Analytics funnel (R1.6) the next day.
 If something is wrong: Creator Hub → place → Version History → restore the previous version, then Shut down all servers. Players then see their old (frozen v1) progress again; nothing earned on the new store is lost, it is only hidden until a republish.
 Claude's state: stopped here, as the owner asked ("stop only at publish substages"). Studio is not being edited, so what you publish is exactly what was tested.
+
+=====================================================================
+R1.9 RE-PLANNED (D-013) — set up the DEV experience, then publish R1 to DEV
+The "READY FOR OWNER TO PUBLISH" package above is WITHDRAWN: do not publish the production window.
+=====================================================================
+Owner steps to create the DEV experience (about 5 minutes):
+ 1. In the open production Studio window ("Lighthouse Keepers - Staging", PlaceId 132065051336560): File → Save to File As → `Documents\LighthouseKeepers_DEV_seed_2026-10-16.rbxl`. This copy has all of today's work (R0–R1.8, tests, backups). Nothing here is live.
+ 2. Close the production Studio window. Do not publish it.
+ 3. File → Open from File → `Documents\LighthouseKeepers_DEV_seed_2026-10-16.rbxl`.
+ 4. File → Publish to Roblox As… → "Create new experience" → Name: `Lighthouse Keepers DEV` → Create.
+ 5. In that window: Home → Game Settings → Permissions → Private (only you). Places → Max players = 4. Security → leave "Enable Studio Access to API Services" OFF. Save.
+ 6. Keep the "Lighthouse Keepers DEV" window open and in front (Studio stops drawing frames when it is minimised, which blocks play tests), and tell Claude it is ready. Claude reads the new PlaceId from `list_roblox_studios` and records it in `CURRENT_PHASE.md`.
+R1.9 live check in DEV (after Claude has re-run the tests in the DEV window):
+ 7. In the DEV window: File → Publish to Roblox (this publishes DEV only).
+ 8. Creator Hub → Lighthouse Keepers DEV → Play. Expect 0 Pearls (DEV's own new store).
+ 9. Play one voyage to Results (losing on night 2 or later pays at least 1 Pearl); leave; rejoin within 30 seconds; the Pearl count must be the same. Tell Claude both numbers.
+Production: untouched until relaunch (L1.7), when the finished build is published there and D-012's fresh start applies to players.

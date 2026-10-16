@@ -1,21 +1,19 @@
 # CURRENT PHASE
 
 **Mode:** UNATTENDED (D-010); the owner asked to stop at publish substages and GO/NO-GO gates.
+**Studio:** work in the **DEV experience "Lighthouse Keepers DEV"** only (D-013). DEV PlaceId: _not created yet_. Production (PlaceId 132065051336560) is off limits until the rebuild is finished.
 **Stage:** R1 — Safety & structure
-**Substage:** R1.9 — Production cutover (owner publishes)
-**Status:** 🟦 Waiting for the owner's publish and live check
-**Last work:** R1.1–R1.8 built and tested (TestRunner 74/74). Each is 🟦 only on Script Analysis (no analyzer available to Claude) and, for R1.3/R1.6/R1.7, a live or owner-run check.
+**Substage:** R1.9 — DEV cutover (re-planned by D-013)
+**Status:** 🟦 Waiting for the owner to create the DEV experience
+**Last work:** R1.1–R1.8 built and tested in the production place's Studio copy (unpublished; TestRunner 74/74). Each is 🟦 only on Script Analysis and, for R1.3/R1.6/R1.7, a live or owner-run check.
 
 ## What the owner does now
-Follow "R1.9 — READY FOR OWNER TO PUBLISH" at the bottom of `docs/HANDOFF_REPORT.md`: save a local `.rbxl`, publish, Shut down all servers, join, one voyage, leave, rejoin, report the Pearl counts.
+Follow "R1.9 RE-PLANNED (D-013)" at the bottom of `docs/HANDOFF_REPORT.md`: save `Documents\LighthouseKeepers_DEV_seed_2026-10-16.rbxl` from the production window, close it without publishing, open the file, Publish to Roblox As a new experience named `Lighthouse Keepers DEV`, set it Private with Max players 4, keep that window open.
 
 ## Then
-Claude marks R1.3 and R1.9 ✅ from the owner's numbers, checks the Analytics funnel for R1.6 the next day, and starts S2.1 (voyage definitions).
+Claude confirms the DEV PlaceId with `list_roblox_studios`, records it here, re-runs TestRunner and a play test in DEV, and asks the owner to publish DEV for the R1.9 live save check. After that: S2.1.
 
 ## Open owner items
 - Script Analysis warning count for the touched modules (or permission to install `luau-analyze`).
-- R1.7: Max players 4; optional 4-client Studio test.
-- R0.2 tag/archive old repo; R0.4 version-history save; R0.6 title change.
-
-## Studio
-Production window only: `list_roblox_studios` → PlaceId 132065051336560 → API access OFF before any Play. Studio always uses ProfileStore's mock store, so Studio play never touches real saves.
+- R1.7: optional 4-client Studio test (in DEV).
+- R0.2 tag/archive old repo. (R0.4 version-history save withdrawn; R0.6 title change deferred to L1.5, D-013.)

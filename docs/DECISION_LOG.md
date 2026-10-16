@@ -92,3 +92,14 @@ Approved by: ______ (owner)
 Owner (thread, 2026-10-16 16:58 UTC): "I don't care about saves, you can wipe them I don't care".
 Decision taken (simplest path that keeps the hard rules): ProfileStore on a **new store `LighthouseKeepers_PlayerData_v2`**, key `player_<UserId>`, **no import from v1**. Every player, the owner included, starts from the schema-v2 defaults after the R1.9 publish. v1 (`LighthouseKeepers_PlayerData_v1`) is **not deleted and never written again**; it stays as a frozen copy, so an import can still be added later if the owner changes his mind (`MigrationService.fromV1` is kept and tested for that case). No `RemoveAsync`, no production write by Claude.
 Consequence for R1.3's pass list: "v1 fixture loads as v2" is kept as a unit test of `MigrationService` but no live path calls it; "quick rejoin keeps Pearls" and `BindToClose` are tested on the mock store.
+
+## D-013 — Development moves to a separate DEV experience; production is left alone until the rebuild is finished
+2026-10-16 · R1.9 · **Status: Accepted (owner)**
+Owner (project chat, 2026-10-16 18:53 UTC): "Work on a separate experience and leave the production experience alone until we finish it" and "If you want me to save .rbxl file always give me the file name so you remember what is what".
+Decision: all Studio work, play tests and publish substages move to a new private experience, **"Lighthouse Keepers DEV"**, seeded from a local copy of the production place as it is now (it already holds the unpublished R0–R1.8 work). The production experience (PlaceId 132065051336560) gets no more edits, Play, scripts, saves or publishes from Claude, and Claude stops asking the owner to publish there; production receives the finished build only at relaunch (L1.7). Every `.rbxl` request names the exact file and folder (CLAUDE.md hard rule 12).
+Consequences:
+- R1.9 is re-planned as "publish R1 to DEV and check saves live in DEV" (DEV has its own DataStores, so the real ProfileStore session lock, rejoin and shutdown save can be tested without any risk to players). The production cutover (fresh start of D-012) happens at relaunch.
+- The production place's Team Create copy still contains the unpublished R1 work and the ServerStorage backups made today; players are unaffected because nothing was published. It must not be published from that window before relaunch.
+- Earlier owner asks that touched production are withdrawn or deferred: R0.4 "Save to Roblox" restore point (withdrawn; the DEV seed `.rbxl` replaces it), R0.6 title change (deferred to L1.5), R1.7 Max players = 4 (do it in DEV now; production at L1.7).
+- The frozen LK test experience 10771229467 and SaveTest 10770892134 are not reused.
+- CLAUDE.md hard rule 4 now verifies the DEV PlaceId; rules 11 and 12 added.
