@@ -206,3 +206,8 @@ R1.9 (DEV) — DEV experience verified · 2026-10-16
 - TestRunner in DEV: `74 passed, 0 failed` (0.57 s).
 - Play test in DEV: Studio rendering (61 frames/s), ProfileState=memory (mock store), fast route, boarded, SAIL NOW, Prologue started; console: only ProfileStore's refused Studio probe (API off), 0 game-script errors.
 - "Publish to Roblox As" already put this exact build live in DEV, so no further publish is needed for the live check. Waiting on the owner's numbers (steps 8–9 of the R1.9 DEV plan).
+
+CHECKPOINT: R1.9 DEV cutover — live check ✅ · 2026-10-16
+Owner (thread, 19:30 UTC): played Lighthouse Keepers DEV in the normal Roblox player, finished a voyage, closed the game, reopened: "pearl stayed". The exact count was not given. This confirms on a real DEV server: ProfileStore session start, Pearl grant through GrantService, save on leave, reload on rejoin. Production untouched (D-013).
+R1 exit numbers: TestRunner 74 (≥ 60) ✓ · cutover check ✓ (DEV) · funnel: check the DEV Analytics dashboard after 24 h · Script Analysis: still unmeasured (owner item).
+NEXT: S2.1 in the DEV window.

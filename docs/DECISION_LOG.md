@@ -103,3 +103,4 @@ Consequences:
 - Earlier owner asks that touched production are withdrawn or deferred: R0.4 "Save to Roblox" restore point (withdrawn; the DEV seed `.rbxl` replaces it), R0.6 title change (deferred to L1.5), R1.7 Max players = 4 (do it in DEV now; production at L1.7).
 - The frozen LK test experience 10771229467 and SaveTest 10770892134 are not reused.
 - CLAUDE.md hard rule 4 now verifies the DEV PlaceId; rules 11 and 12 added.
+## CP — R1.9 passed (DEV) · 2026-10-16 · live save check by the owner ("pearl stayed") · published by owner to DEV: yes · production: untouched (D-013)
