@@ -99,3 +99,17 @@ DEBT: `Attack.Seq`/`CombatResult` (architecture §7.1) not in the R1.4 roadmap r
 MIRROR: 7 files FNV-1a identical to Studio.
 OWNER APPROVAL: pending step 2 (would be auto-approved under D-010)
 NEXT: R1.5
+
+CHECKPOINT: R1.5 Voyage isolation (🟦 step 2 pending: Script Analysis tool)
+DATE: 2026-10-16
+STUDIO INSTANCE: placeId 132065051336560 verified · API access: OFF before Play (probe: "Studio access to APIs is not allowed")
+BACKUP: ServerStorage.Backups.R1.5_before_2026-10-16 (GameState)
+DELIVERED: `GameState.run` runs each voyage (reset → forecast → prologue → nights → results → rematch) inside `xpcall(…, debug.traceback)`. On an error `recoverFromError` warns once with the traceback, logs one `ErrorReport {where, phase, night, error}`, then (each step in its own pcall) stops the lamp drain, unprotects the tower, clears creatures, sets Cause "error", closes the run summary as `Result: Error`, returns the lighting to day, and for every crew member still in the server sets Ready false (frees the ship seat), sends them to the deck and tells them "Something went wrong on the voyage. You're back on the deck: sail again when you're ready." The loop then returns to Waiting. Body otherwise unchanged (re-indented one level).
+TESTRUNNER (Edit): `30 passed, 0 failed`.
+PLAY TEST (API off; memory profile): voyage 1 sailed; during Day 1 the state attribute `ForecastCrabMult` was set to a string (TEST ONLY injection; the next Waiting phase resets it to 1) so the night plan throws as Night 1 begins (phase = Night). Console: exactly one `[GameState] voyage error … WaveDirector:70: attempt to perform arithmetic (mul) on number and string` warning with traceback, one `ErrorReport … night=1 phase=Night where=voyage`, run summary `Result: Error`. 36 s later: Phase Waiting, Ready false, ShipId nil, player on the deck, ship unlocked, 0 creatures. Voyage 2: boarded, SAIL NOW, Prologue → Day 1 → Night 1 with `NightSpawns crabs=14 night=1 skitters=17` (normal). 0 errors from game scripts.
+NUMBERS: error → crew back on the deck in < 36 s (observed at the first poll); next voyage reached Night 1 normally.
+NOTE: Pearls for nights survived before an error are not paid (Pearls are paid at Results until dawn banking lands at S2.2).
+DEBT: injection was at the start of Night 1, not halfway through it; the recovery path is the same.
+MIRROR: GameState FNV-1a identical to Studio (23553 chars, a9e44ee7).
+OWNER APPROVAL: pending step 2 (would be auto-approved under D-010)
+NEXT: R1.6

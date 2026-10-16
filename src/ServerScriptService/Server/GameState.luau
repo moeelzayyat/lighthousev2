@@ -334,6 +334,53 @@ function GameState.run(deps)
 		return pick, votesA, votesB
 	end
 
+	-- Voyage isolation (R1.5): a script error inside one voyage ends that voyage only. It is logged once as
+	-- ErrorReport, the island is made safe, and the crew goes back to the deck; the loop carries on.
+	local function recoverFromError(departing, err)
+		local message = tostring(err)
+		warn("[GameState] voyage error: " .. message)
+		EventLog.log("ErrorReport", {
+			where = "voyage",
+			phase = state:GetAttribute("Phase"),
+			night = state:GetAttribute("Night"),
+			error = string.sub(string.split(message, "\n")[1], 1, 200),
+		})
+		local steps = {
+			function()
+				lamp.setDraining(false)
+			end,
+			function()
+				tower.setProtected(false)
+			end,
+			function()
+				creatures.clearAll()
+			end,
+			function()
+				state:SetAttribute("BigWarning", "")
+				state:SetAttribute("Cause", "error")
+			end,
+			function()
+				EventLog.endRun("Error", "The voyage stopped because of a script error.")
+			end,
+			function()
+				setLighting(false, 2)
+			end,
+		}
+		for _, step in steps do
+			local stepOk, stepErr = pcall(step)
+			if not stepOk then
+				warn("[GameState] recovery step failed: " .. tostring(stepErr))
+			end
+		end
+		for _, player in departing do
+			if player.Parent == Players then
+				player:SetAttribute("Ready", false) -- frees the ship seat; the ship unlocks at Waiting
+				pcall(deps.sendToShip, player)
+				deps.remotes.Notify:FireClient(player, "Something went wrong on the voyage. You're back on the deck: sail again when you're ready.")
+			end
+		end
+	end
+
 	while true do
 		setPhase("Waiting", 0)
 		state:SetAttribute("Reason", "")
@@ -359,209 +406,215 @@ function GameState.run(deps)
 			departing = if deps.departShip then deps.departShip() else readyPlayers()
 		end
 		if #departing > 0 then
-			deps.resetRound()
-			local forecast, votesA, votesB = chooseForecast(departing)
-			EventLog.startRun(departing)
-			if forecast then
-				EventLog.setForecast(forecast)
-				EventLog.log("Forecast", { id = forecast, votesA = votesA, votesB = votesB, a = state:GetAttribute("ForecastA"), b = state:GetAttribute("ForecastB") })
-				if deps.lampVisuals then
-					deps.lampVisuals()
+			-- Voyage isolation (R1.5): the whole voyage runs protected; an error ends this voyage only.
+			local ok, err = xpcall(function()
+				deps.resetRound()
+				local forecast, votesA, votesB = chooseForecast(departing)
+				EventLog.startRun(departing)
+				if forecast then
+					EventLog.setForecast(forecast)
+					EventLog.log("Forecast", { id = forecast, votesA = votesA, votesB = votesB, a = state:GetAttribute("ForecastA"), b = state:GetAttribute("ForecastB") })
+					if deps.lampVisuals then
+						deps.lampVisuals()
+					end
+					task.delay(1.2, notifyAll, "Forecast: " .. Forecasts[forecast].displayName .. ". " .. Forecasts[forecast].summary)
 				end
-				task.delay(1.2, notifyAll, "Forecast: " .. Forecasts[forecast].displayName .. ". " .. Forecasts[forecast].summary)
-			end
-			-- The crew sails from the ship to the lighthouse island
-			for _, player in departing do
-				deps.sendToIsland(player)
-			end
-			task.wait(0.6)
-			local result = "Victory"
-
-			if not runPrologue() then
-				result = "Abandoned"
-			else
-				-- Big monsters this run: schedule from WaveDirector.bigNights (13 nights -> 13, 10, 7, 4),
-				-- one random kind per scheduled night, picked in schedule order.
-				local bigNights = {}
-				for _, n in WaveDirector.bigNights(Config) do
-					bigNights[n] = Creatures.BIG_POOL[math.random(1, #Creatures.BIG_POOL)]
+				-- The crew sails from the ship to the lighthouse island
+				for _, player in departing do
+					deps.sendToIsland(player)
 				end
-				for night = 1, Config.NIGHTS_TO_WIN do
-					-- DAY: prepare
-					setPhase("Day", night)
-					setLighting(false, 4)
-					notifyAll(if Config.ECONOMY_ENABLED
-						then string.format("Day %d: stock up on oil, repair the tower, and spend Shells at the UPGRADE bench.", night)
-						else string.format("Day %d: stock up on oil and repair the tower before dark.", night))
-					-- Warn early if the lamp won't last the night
-					if lamp.getFuel() < lamp.getMaxFuel() * 0.5 then
-						task.delay(4, notifyAll, string.format("FUEL IS LOW (%d)! Carry oil to the FUEL TANK before night falls, or the light will go out.", math.floor(lamp.getFuel())))
+				task.wait(0.6)
+				local result = "Victory"
+
+				if not runPrologue() then
+					result = "Abandoned"
+				else
+					-- Big monsters this run: schedule from WaveDirector.bigNights (13 nights -> 13, 10, 7, 4),
+					-- one random kind per scheduled night, picked in schedule order.
+					local bigNights = {}
+					for _, n in WaveDirector.bigNights(Config) do
+						bigNights[n] = Creatures.BIG_POOL[math.random(1, #Creatures.BIG_POOL)]
 					end
-					if not countdown(Config.DAY_SECONDS, noPlayers) then
-						result = "Abandoned"
-						break
-					end
-
-					-- NIGHT: survive
-					setPhase("Night", night)
-					setLighting(true, 4)
-					notifyAll(string.format("Night %d: the storm is here. Keep the light alive!", night))
-					lamp.setDraining(true)
-					-- Spawn counts from the pure night plan (growth, final-night crisis, swarm share by crew size)
-					local plan = WaveDirector.nightPlan(night, #readyPlayers(), { crabMult = state:GetAttribute("ForecastCrabMult") }, Config)
-					local stopWave = startWave(plan.crabs, Config.NIGHT_SECONDS * Config.SPAWN_WINDOW)
-					local stopSwarm = startSwarm(plan.skitters, Config.NIGHT_SECONDS * (Config.SWARM_WINDOW or 0.85))
-					EventLog.log("NightSpawns", { night = night, crabs = plan.crabs, skitters = plan.skitters })
-
-					-- A big sea monster arrives partway through this night
-					local bigKind = bigNights[night]
-					if bigKind then
-						task.delay(3, function()
-							notifyAll("The sea is restless... something BIG is coming tonight. Stay close to your crew.")
-							if state:GetAttribute("Phase") == "Night" and state:GetAttribute("Night") == night then
-								state:SetAttribute("BigWarning", "approaching") -- HUD warning until it arrives
-							end
-						end)
-						task.delay(Config.NIGHT_SECONDS * Config.BIG_SPAWN_DELAY, function()
-							state:SetAttribute("BigWarning", "")
-							if state:GetAttribute("Phase") ~= "Night" or state:GetAttribute("Night") ~= night then
-								return -- the night already ended
-							end
-							local bearing = math.random() * 360
-							creatures.spawn(bigKind, bearing)
-							local rad = math.rad(bearing)
-							SoundFx.playAt("monster", Vector3.new(-math.sin(rad) * 80, 5, -math.cos(rad) * 80))
-							notifyAll(string.format("A %s climbs out of the sea! Big monsters hit hard: bring your best gear.", string.upper(Creatures[bigKind].displayName)))
-							EventLog.log("BigMonsterSpawned", { kind = bigKind, night = night })
-						end)
-					end
-
-					local survived = countdown(Config.NIGHT_SECONDS, function()
-						return noPlayers()
-							or lamp.darkSeconds >= Config.DARK_GRACE_SECONDS
-							or tower.isBroken()
-					end)
-
-					stopWave()
-					stopSwarm()
-					local wentDark = lamp.darkSeconds >= Config.DARK_GRACE_SECONDS
-					lamp.setDraining(false)
-					creatures.clearAll() -- at dawn, the survivors retreat into the sea
-
-					if not survived then
-						if noPlayers() then
+					for night = 1, Config.NIGHTS_TO_WIN do
+						-- DAY: prepare
+						setPhase("Day", night)
+						setLighting(false, 4)
+						notifyAll(if Config.ECONOMY_ENABLED
+							then string.format("Day %d: stock up on oil, repair the tower, and spend Shells at the UPGRADE bench.", night)
+							else string.format("Day %d: stock up on oil and repair the tower before dark.", night))
+						-- Warn early if the lamp won't last the night
+						if lamp.getFuel() < lamp.getMaxFuel() * 0.5 then
+							task.delay(4, notifyAll, string.format("FUEL IS LOW (%d)! Carry oil to the FUEL TANK before night falls, or the light will go out.", math.floor(lamp.getFuel())))
+						end
+						if not countdown(Config.DAY_SECONDS, noPlayers) then
 							result = "Abandoned"
-						else
-							result = "Defeat"
-							state:SetAttribute("Cause", if wentDark then "blackout" else "breach") -- for the results screen
-							state:SetAttribute("Reason", if wentDark
-								then string.format("The light went out: the lamp ran out of fuel and stayed dark for %d seconds.", Config.DARK_GRACE_SECONDS)
-								else "The creatures broke into the lighthouse.")
+							break
 						end
-						break
-					end
-					local bonus = if Config.ECONOMY_ENABLED then Config.WAVE_BONUS_PER_NIGHT * night else 0
-					upgrades.addShells(bonus)
-					EventLog.log("NightSurvived", { night = night, bonus = bonus, fuel = math.floor(lamp.getFuel()), tower = state:GetAttribute("Integrity") })
-					-- Dawn loot window (Oct 12 2026): leftover loot stays on the beach most of the day at full
-					-- value, then the tide brings what's left in at DAWN_LOOT_FRACTION. The last night ends the run,
-					-- so there the tide comes quickly as before.
-					local lootSeconds = if night < Config.NIGHTS_TO_WIN
-						then math.min(Config.DAWN_LOOT_SECONDS or 25, Config.DAY_SECONDS - 3)
-						else 10
-					loot.keepFor(lootSeconds + 1)
-					if night < Config.NIGHTS_TO_WIN and Config.ECONOMY_ENABLED then
-						if loot.count() > 0 then
-							notifyAll(string.format("Night %d survived! +%d shells wave bonus. Loot is still on the beach: grab it in the next %d seconds for full value. The tide brings the rest in at half.", night, bonus, lootSeconds))
-						else
-							notifyAll(string.format("Night %d survived! +%d shells wave bonus.", night, bonus))
+
+						-- NIGHT: survive
+						setPhase("Night", night)
+						setLighting(true, 4)
+						notifyAll(string.format("Night %d: the storm is here. Keep the light alive!", night))
+						lamp.setDraining(true)
+						-- Spawn counts from the pure night plan (growth, final-night crisis, swarm share by crew size)
+						local plan = WaveDirector.nightPlan(night, #readyPlayers(), { crabMult = state:GetAttribute("ForecastCrabMult") }, Config)
+						local stopWave = startWave(plan.crabs, Config.NIGHT_SECONDS * Config.SPAWN_WINDOW)
+						local stopSwarm = startSwarm(plan.skitters, Config.NIGHT_SECONDS * (Config.SWARM_WINDOW or 0.85))
+						EventLog.log("NightSpawns", { night = night, crabs = plan.crabs, skitters = plan.skitters })
+
+						-- A big sea monster arrives partway through this night
+						local bigKind = bigNights[night]
+						if bigKind then
+							task.delay(3, function()
+								notifyAll("The sea is restless... something BIG is coming tonight. Stay close to your crew.")
+								if state:GetAttribute("Phase") == "Night" and state:GetAttribute("Night") == night then
+									state:SetAttribute("BigWarning", "approaching") -- HUD warning until it arrives
+								end
+							end)
+							task.delay(Config.NIGHT_SECONDS * Config.BIG_SPAWN_DELAY, function()
+								state:SetAttribute("BigWarning", "")
+								if state:GetAttribute("Phase") ~= "Night" or state:GetAttribute("Night") ~= night then
+									return -- the night already ended
+								end
+								local bearing = math.random() * 360
+								creatures.spawn(bigKind, bearing)
+								local rad = math.rad(bearing)
+								SoundFx.playAt("monster", Vector3.new(-math.sin(rad) * 80, 5, -math.cos(rad) * 80))
+								notifyAll(string.format("A %s climbs out of the sea! Big monsters hit hard: bring your best gear.", string.upper(Creatures[bigKind].displayName)))
+								EventLog.log("BigMonsterSpawned", { kind = bigKind, night = night })
+							end)
 						end
-					elseif night < Config.NIGHTS_TO_WIN then
-						notifyAll(string.format("Night %d survived! Dawn is coming.", night))
-					end
-					task.delay(lootSeconds, loot.tideCollect, Config.DAWN_LOOT_FRACTION) -- the tide brings leftover loot in at reduced value
-					if deps.autoSell then
-						task.delay(lootSeconds + 2, deps.autoSell) -- launch R10 switch (Config.AUTO_SELL_LOOT, off by default)
-					end
-				end
-			end
 
-			setPhase(result, state:GetAttribute("Night"))
-			local results = EventLog.endRun(result, state:GetAttribute("Reason"))
-			results.cause = state:GetAttribute("Cause") or ""
-			results.shellsLeft = upgrades.getShells()
-			results.economy = Config.ECONOMY_ENABLED
-			setLighting(false, 4)
-			if result == "Victory" then
-				notifyAll(string.format("You kept the light alive for all %d nights!", Config.NIGHTS_TO_WIN))
-			elseif result == "Defeat" then
-				notifyAll(state:GetAttribute("Reason") .. " The sea claims the island.")
-			end
+						local survived = countdown(Config.NIGHT_SECONDS, function()
+							return noPlayers()
+								or lamp.darkSeconds >= Config.DARK_GRACE_SECONDS
+								or tower.isBroken()
+						end)
 
-			-- Results screen and rematch vote. Players who don't choose Play Again go back to the title
-			-- screen, which tells us whether people choose to replay (a key playtest question).
-			local voters = readyPlayers()
+						stopWave()
+						stopSwarm()
+						local wentDark = lamp.darkSeconds >= Config.DARK_GRACE_SECONDS
+						lamp.setDraining(false)
+						creatures.clearAll() -- at dawn, the survivors retreat into the sea
 
-			-- Pearl rewards (saved, personal) from the pure rule Voyage.pearlsFor: PEARLS_PER_NIGHT per night
-			-- survived, plus PEARLS_VICTORY_BONUS for a win (13-night win = 18), plus per-award Pearls here.
-			results.pearls = {}
-			if result ~= "Abandoned" then
-				local won = result == "Victory"
-				local nightReached = if won then Config.NIGHTS_TO_WIN else results.nightReached
-				for _, player in voters do
-					local earned = Voyage.pearlsFor(nightReached, won, Config)
-					for _, award in results.awards do
-						if award.player == player.DisplayName then
-							earned += Config.PEARLS_PER_AWARD
+						if not survived then
+							if noPlayers() then
+								result = "Abandoned"
+							else
+								result = "Defeat"
+								state:SetAttribute("Cause", if wentDark then "blackout" else "breach") -- for the results screen
+								state:SetAttribute("Reason", if wentDark
+									then string.format("The light went out: the lamp ran out of fuel and stayed dark for %d seconds.", Config.DARK_GRACE_SECONDS)
+									else "The creatures broke into the lighthouse.")
+							end
+							break
+						end
+						local bonus = if Config.ECONOMY_ENABLED then Config.WAVE_BONUS_PER_NIGHT * night else 0
+						upgrades.addShells(bonus)
+						EventLog.log("NightSurvived", { night = night, bonus = bonus, fuel = math.floor(lamp.getFuel()), tower = state:GetAttribute("Integrity") })
+						-- Dawn loot window (Oct 12 2026): leftover loot stays on the beach most of the day at full
+						-- value, then the tide brings what's left in at DAWN_LOOT_FRACTION. The last night ends the run,
+						-- so there the tide comes quickly as before.
+						local lootSeconds = if night < Config.NIGHTS_TO_WIN
+							then math.min(Config.DAWN_LOOT_SECONDS or 25, Config.DAY_SECONDS - 3)
+							else 10
+						loot.keepFor(lootSeconds + 1)
+						if night < Config.NIGHTS_TO_WIN and Config.ECONOMY_ENABLED then
+							if loot.count() > 0 then
+								notifyAll(string.format("Night %d survived! +%d shells wave bonus. Loot is still on the beach: grab it in the next %d seconds for full value. The tide brings the rest in at half.", night, bonus, lootSeconds))
+							else
+								notifyAll(string.format("Night %d survived! +%d shells wave bonus.", night, bonus))
+							end
+						elseif night < Config.NIGHTS_TO_WIN then
+							notifyAll(string.format("Night %d survived! Dawn is coming.", night))
+						end
+						task.delay(lootSeconds, loot.tideCollect, Config.DAWN_LOOT_FRACTION) -- the tide brings leftover loot in at reduced value
+						if deps.autoSell then
+							task.delay(lootSeconds + 2, deps.autoSell) -- launch R10 switch (Config.AUTO_SELL_LOOT, off by default)
 						end
 					end
-					deps.playerData.addPearls(player, earned, "run")
-					deps.playerData.recordRun(player, result == "Victory", results.nightReached)
-					results.pearls[player.Name] = earned
 				end
-			end
-			-- Loot is run-scoped like shells: unsold loot is lost when the voyage ends
-			for _, player in Players:GetPlayers() do
-				deps.playerData.clearRunLoot(player)
-			end
-			if result ~= "Abandoned" and #voters > 0 then
-				for _, player in voters do
-					player:SetAttribute("WantsRematch", false)
+
+				setPhase(result, state:GetAttribute("Night"))
+				local results = EventLog.endRun(result, state:GetAttribute("Reason"))
+				results.cause = state:GetAttribute("Cause") or ""
+				results.shellsLeft = upgrades.getShells()
+				results.economy = Config.ECONOMY_ENABLED
+				setLighting(false, 4)
+				if result == "Victory" then
+					notifyAll(string.format("You kept the light alive for all %d nights!", Config.NIGHTS_TO_WIN))
+				elseif result == "Defeat" then
+					notifyAll(state:GetAttribute("Reason") .. " The sea claims the island.")
 				end
-				for _, player in voters do -- the results screen is for this voyage's crew only
-					if player.Parent then
-						deps.remotes.RunResults:FireClient(player, results)
-					end
-				end
-				EventLog.log("ResultsShown", { players = #voters })
-				EventLog.log("RematchOffered", { players = #voters })
-				countdown(Config.RESULT_SECONDS, function()
+
+				-- Results screen and rematch vote. Players who don't choose Play Again go back to the title
+				-- screen, which tells us whether people choose to replay (a key playtest question).
+				local voters = readyPlayers()
+
+				-- Pearl rewards (saved, personal) from the pure rule Voyage.pearlsFor: PEARLS_PER_NIGHT per night
+				-- survived, plus PEARLS_VICTORY_BONUS for a win (13-night win = 18), plus per-award Pearls here.
+				results.pearls = {}
+				if result ~= "Abandoned" then
+					local won = result == "Victory"
+					local nightReached = if won then Config.NIGHTS_TO_WIN else results.nightReached
 					for _, player in voters do
-						if player.Parent and not player:GetAttribute("WantsRematch") then
-							return false
+						local earned = Voyage.pearlsFor(nightReached, won, Config)
+						for _, award in results.awards do
+							if award.player == player.DisplayName then
+								earned += Config.PEARLS_PER_AWARD
+							end
 						end
-					end
-					return true -- everyone voted: start right away
-				end)
-				local again = 0
-				for _, player in voters do
-					if player.Parent then
-						local wants = player:GetAttribute("WantsRematch") == true
-						EventLog.log("RematchChoice", { player = player.Name, choice = if wants then "play again" else "menu" })
-						if wants then
-							again += 1
-						else
-							player:SetAttribute("Ready", false)
-							deps.sendToShip(player) -- back to the lobby ship
-						end
+						deps.playerData.addPearls(player, earned, "run")
+						deps.playerData.recordRun(player, result == "Victory", results.nightReached)
+						results.pearls[player.Name] = earned
 					end
 				end
-				EventLog.log("Rematch", { playAgain = again, of = #voters })
-				if again > 0 and deps.departure then
-					deps.departure.rematch() -- Play Again is a deliberate departure for the crew that chose it
+				-- Loot is run-scoped like shells: unsold loot is lost when the voyage ends
+				for _, player in Players:GetPlayers() do
+					deps.playerData.clearRunLoot(player)
 				end
-			else
-				task.wait(3)
+				if result ~= "Abandoned" and #voters > 0 then
+					for _, player in voters do
+						player:SetAttribute("WantsRematch", false)
+					end
+					for _, player in voters do -- the results screen is for this voyage's crew only
+						if player.Parent then
+							deps.remotes.RunResults:FireClient(player, results)
+						end
+					end
+					EventLog.log("ResultsShown", { players = #voters })
+					EventLog.log("RematchOffered", { players = #voters })
+					countdown(Config.RESULT_SECONDS, function()
+						for _, player in voters do
+							if player.Parent and not player:GetAttribute("WantsRematch") then
+								return false
+							end
+						end
+						return true -- everyone voted: start right away
+					end)
+					local again = 0
+					for _, player in voters do
+						if player.Parent then
+							local wants = player:GetAttribute("WantsRematch") == true
+							EventLog.log("RematchChoice", { player = player.Name, choice = if wants then "play again" else "menu" })
+							if wants then
+								again += 1
+							else
+								player:SetAttribute("Ready", false)
+								deps.sendToShip(player) -- back to the lobby ship
+							end
+						end
+					end
+					EventLog.log("Rematch", { playAgain = again, of = #voters })
+					if again > 0 and deps.departure then
+						deps.departure.rematch() -- Play Again is a deliberate departure for the crew that chose it
+					end
+				else
+					task.wait(3)
+				end
+			end, debug.traceback)
+			if not ok then
+				recoverFromError(departing, err)
 			end
 		end
 	end
