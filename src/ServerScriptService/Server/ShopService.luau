@@ -10,11 +10,13 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local HttpService = game:GetService("HttpService")
 
 local Items = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Items"))
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local EventLog = require(script.Parent.EventLog)
 local NetGuard = require(script.Parent.NetGuard) -- R1.4 remote guards
+local GrantService = require(script.Parent.GrantService) -- R1.3: the only writer of Pearl income
 
 local ShopService = {}
 
@@ -127,7 +129,8 @@ local function sell(player, itemId, quantity)
 		return false, string.format("You only have %d.", have)
 	end
 	playerData.removeItem(player, itemId, quantity)
-	playerData.addPearls(player, item.sell * quantity, "sell")
+	-- each sale is its own claim (the request itself is already de-duplicated by the replay map)
+	GrantService.Grant(player, "sell:" .. HttpService:GenerateGUID(false), { Pearls = item.sell * quantity }, "sell")
 	EventLog.log("ShopSell", { player = player.Name, item = itemId, quantity = quantity })
 	return true, string.format("Sold %d %s for %d Pearls.", quantity, item.name, item.sell * quantity)
 end

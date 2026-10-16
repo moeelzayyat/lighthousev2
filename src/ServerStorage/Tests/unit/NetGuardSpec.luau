@@ -18,6 +18,7 @@ local CONTRACT: { [string]: { number } } = {
 	ReportDevice = { 1, 1 },
 	CoachEvent = { 4, 8 },
 	ForecastVote = { 3, 5 },
+	AdminRequest = { 1, 3 },
 }
 
 return function(T: any)

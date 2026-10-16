@@ -15,6 +15,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local EventLog = require(script.Parent.EventLog)
+local GrantService = require(script.Parent.GrantService) -- R1.3: Pearl drops are idempotent claims
 local VoyageCast = require(script.Parent.VoyageCast)
 local Ground = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Ground"))
 local Creatures = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Creatures"))
@@ -37,6 +38,7 @@ local upgrades
 local remotes
 local playerData
 local drops = {}
+local dropSerial = 0 -- per-server id for each drop (part of its Pearl claim id)
 
 local function makePart(name, size, color, shape)
 	local part = Instance.new("Part")
@@ -81,7 +83,9 @@ local function spawnDrop(kind, value, position)
 	local angle = math.random() * math.pi * 2
 	local landing = position + Vector3.new(math.cos(angle) * 3, 0, math.sin(angle) * 3)
 	landing = Vector3.new(landing.X, Ground.heightAt(landing.X, landing.Z) + info.size / 2 + 0.2, landing.Z)
+	dropSerial += 1
 	local drop = {
+		serial = dropSerial,
 		kind = kind,
 		value = value,
 		orb = orb,
@@ -153,7 +157,7 @@ local function collect(index, player)
 	local info = KINDS[drop.kind]
 	if info.pearls then
 		-- Permanent currency straight into this player's saved Pearls
-		playerData.addPearls(player, drop.value, "boss drop")
+		GrantService.Grant(player, EventLog.voyageId() .. ":drop:" .. drop.serial .. ":" .. player.UserId, { Pearls = drop.value }, "boss drop")
 		EventLog.log("BossPearls", { player = player.Name, amount = drop.value })
 		remotes.LootCollected:FireClient(player, drop.kind, drop.value)
 		VoyageCast.fire(remotes.Notify, string.format("%s picked up %d Pearls from the monster!", player.DisplayName, drop.value))

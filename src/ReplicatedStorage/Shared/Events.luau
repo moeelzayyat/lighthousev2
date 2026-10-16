@@ -20,6 +20,9 @@ local Events: { [string]: Schema } = {
 	NightSurvived = { VoyageId = "string", Night = "number", Crew = "table" },
 	VoyageEnded = { VoyageId = "string", Outcome = "string", Cause = "string", NightReached = "number", Crew = "table" },
 
+	-- Data
+	ProfileLoaded = { UserId = "number", SchemaVersion = "number", IsNew = "boolean", Runs = "number" },
+
 	-- Economy (Pearls are per player and saved)
 	PearlsGranted = { UserId = "number", Amount = "number", Balance = "number", Source = "string", ClaimId = "string?" },
 	PearlsSpent = { UserId = "number", Amount = "number", Balance = "number", ItemId = "string?" },

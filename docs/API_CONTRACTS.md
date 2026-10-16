@@ -7,7 +7,7 @@
 - Economic remotes carry `requestId` (≤ 40 chars) with a **capped** replay map (40 entries), checked before the rate limit (as `ShopService` does today).
 - The server never trusts: damage, creature positions, amounts, item IDs it did not offer, rewards, or non-finite vectors.
 
-## Client → Server (the 15 client→server remotes of the current 29; guards implemented in R1.4 via `NetGuard`)
+## Client → Server (the 16 client→server remotes of the current 31; guards implemented in R1.4 via `NetGuard`)
 Every handler calls `NetGuard.allow(player, remote)` (per-player token bucket at the Rate below; counters `Allowed_<Remote>` / `Limited_<Remote>` on the `NetGuard` ModuleScript). Economic remotes check the replay map first, then the rate.
 | Remote | Payload | Guard (R1.4, implemented) | Rate |
 |---|---|---|---|
@@ -26,6 +26,7 @@ Every handler calls `NetGuard.allow(player, remote)` (per-player token bucket at
 | `ReportDevice` | `device` | whitelist; **once per session** | 1 / 1 |
 | `CoachEvent` | `kind, id` | enums, 60/session | 4 / 8 |
 | `ForecastVote` | `choice` | Ready, phase Waiting/Intermission, one of the two offered | 3 / 5 |
+| `AdminRequest` (R1.8) | `requestId, action, targetUserId, arg?` | requestId ≤ 40; action string ≤ 20; finite targetUserId; arg number or string ≤ 20; **owner UserId only** (`AdminDataService.OWNER_IDS`), anyone else refused and logged `AdminRejected`; actions inspect / grant (1–1000 Pearls, target online) / rollback (YYYY-MM-DD snapshot) | 1 / 3 |
 | `MerchantRequest` (new, S6.2) | `requestId, action, itemId, qty` | replay, Day phase, Ready, distance ≤ 18, stock, Shells | 5 / 8 |
 | `ObjectiveClaim` (new, S7.2) | `objectiveId, claimId` | complete, unclaimed, GrantService | 2 / 3 |
 | `CodeRedeem` (new, L1.4) | `code ≤ 32` | once per profile, expiry | 1 per 10 s |
@@ -33,15 +34,16 @@ Every handler calls `NetGuard.allow(player, remote)` (per-player token bucket at
 
 Deferred from this table: `Attack.Seq` + `CombatResult` (architecture §7.1 feel work) — not in the R1.4 roadmap row; lands with client prediction in S4.
 
-## All 29 current remotes
-Client → server (15): `Attack`, `BeamControl`, `LampAction`, `LampShift` (both directions), `BuyUpgrade`, `ShopRequest`, `TraderRequest`, `LoadoutRequest`, `GearAction`, `SetReady`, `VoteRematch`, `EnterLobby`, `ReportDevice`, `CoachEvent` (both directions), `ForecastVote`.
-Server → client only (14): `Notify`, `LootCollected`, `OpenUpgrades`, `PlaySound`, `RunResults`, `GearData`, `ShopOpen`, `ShopResult`, `LoadoutResult`, `Travel`, `UpgradeResult`, `TraderOpen`, `TraderResult`, `CrewFeed`. They have no server handler, so client input on them is ignored.
+## All 31 current remotes
+Client → server (16): `AdminRequest`, `Attack`, `BeamControl`, `LampAction`, `LampShift` (both directions), `BuyUpgrade`, `ShopRequest`, `TraderRequest`, `LoadoutRequest`, `GearAction`, `SetReady`, `VoteRematch`, `EnterLobby`, `ReportDevice`, `CoachEvent` (both directions), `ForecastVote`.
+Server → client only (15): `AdminResult`, `Notify`, `LootCollected`, `OpenUpgrades`, `PlaySound`, `RunResults`, `GearData`, `ShopOpen`, `ShopResult`, `LoadoutResult`, `Travel`, `UpgradeResult`, `TraderOpen`, `TraderResult`, `CrewFeed`. They have no server handler, so client input on them is ignored.
 
 ## Server → Client
 | Remote | Payload | Notes |
 |---|---|---|
 | `Notify`, `PlaySound`, `LootCollected`, `CrewFeed`, `CoachEvent` | as today | `PlaySound` client handler validates types (keep) |
 | `UpgradeResult`, `ShopResult`, `LoadoutResult`, `TraderResult`, `MerchantResult` | `{requestId, ok, reason?, state?}` | replayed for duplicate requestIds |
+| `AdminResult` (R1.8) | `requestId, ok, result` (table for inspect, message otherwise) | owner only in practice |
 | `RunResults` | results payload | |
 | `GearData` | profile view | **never** includes `Grants`, `RedeemedCodes` |
 | `CreatureSnapshot` (new, S4.2) | `buffer`: `[n][id u16, x f32, y f32, z f32, yaw u8, state u8, hpPct u8]` | 12 Hz, `U` |

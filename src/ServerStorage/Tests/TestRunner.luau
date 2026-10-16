@@ -305,11 +305,24 @@ end
 
 -- Running ----------------------------------------------------------------------
 
--- Requires a fresh clone so edits made in Studio since the last run are used.
--- The clone is unparented: modules required this way must use absolute paths.
+-- Requires a fresh copy so edits made in Studio since the last run are used. The module's whole folder is
+-- cloned once per run, so `script.Parent.Sibling` requires inside it resolve to the same fresh copies.
+local folderClones: { [Instance]: Instance } = {}
+
 function TestRunner.require(module: ModuleScript): any
-	local clone = module:Clone()
-	return (require :: any)(clone)
+	local parent = module.Parent
+	if parent and parent:IsA("Folder") then
+		local folder = folderClones[parent]
+		if not folder then
+			folder = parent:Clone()
+			folderClones[parent] = folder
+		end
+		local copy = (folder :: Instance):FindFirstChild(module.Name)
+		if copy and copy:IsA("ModuleScript") then
+			return (require :: any)(copy)
+		end
+	end
+	return (require :: any)(module:Clone())
 end
 
 -- Runs fn in its own thread so tests may yield (async); fails on error or timeout.
@@ -405,6 +418,7 @@ function TestRunner.run(options: RunOptions?): Result
 		end
 	end
 	reset()
+	table.clear(folderClones)
 	local started = os.clock()
 	local ctx: Ctx = { passed = 0, failed = 0, failures = {}, filter = opts.filter, verbose = opts.verbose == true, lines = {} }
 	local testsFolder = opts.root or script.Parent

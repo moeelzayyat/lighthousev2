@@ -6,7 +6,7 @@ Every asset, package and audio ID used in the place, recorded before it ships.
 |---|---|---|---|---|---|---|---|---|
 | Pirate UI skin atlas (`LK_PirateSkin_atlas.png`) | Image | 127395313470932 | Kenney UI Pack: RPG Expansion, packed by the project | CC0 (credit optional: "UI art: Kenney.nl") | Kenney / owner upload | 2026-10-12 | `Client.UiSkin` | Active |
 | Fredoka One | Font | Roblox built-in | Roblox | Roblox | — | — | UiKit display font | Active |
-| ProfileStore | Package | ______ | Creator Store | per listing | loleris | version: ______ | `Server/Domains/Data` | Pending (R1.3) |
+| ProfileStore | Module (vendored source) | — (not a Creator Store insert) | github.com/MadStudioRoblox/ProfileStore, commit 45c9847cbcf1fc260369c50eb335aba7c35aecdd, file `ProfileStore.luau`, 64,654 bytes, SHA-256 AD43737203688B8E88CAB34EBE8C483000C157E53BFB41E35F1B49EE89D0C95F (same file the TASK-004 audit read in full) | Apache-2.0 (repository licence; keep this attribution) | loleris / MadStudio | 2026-10-16 | `ServerScriptService.Server.ProfileStore` (used by `PlayerData`) | Active (R1.3), byte-identical in Studio and `src/` |
 | Creature models (Rock Crab, Barnacle Brute, Shipwreck Hermit) | Model | in place | project-built | owner | owner | — | `CreatureService` templates | Active |
 | Sounds (SoundFx catalog) | Audio | see `Shared/SoundFx` | Creator Store | per asset — **audit at B1.2** | — | — | `SoundFx` | Active, licence check pending |
 | Production place | Experience | place 132065051336560 / universe 10769064643 | owner | — | owner | — | — | Live |

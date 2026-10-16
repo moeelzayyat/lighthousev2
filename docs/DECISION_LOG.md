@@ -86,3 +86,9 @@ Decision (recommended, from `PERSISTENCE_COMPAT_AND_ROLLBACK.md` §2): ProfileSt
 Alternatives: (B) keep the custom `PlayerData` on v1 and harden it (lock, retries, budget), no ProfileStore — more own code to maintain, rejected by D-002. (C) Rewrite every v1 record into ProfileStore's wrapper ourselves — a mass production write that copies the library's internal format; rejected.
 Consequences: rollback to the old build shows players their frozen v1 progress (anything earned after the cutover is invisible until restored); the cutover stays one-way after the R1.9 soak. Tests run on `ProfileStore.Mock` only.
 Approved by: ______ (owner)
+
+## D-012 — decision
+2026-10-16 · R1.3 · **Status: Accepted (owner, variant: fresh start)**
+Owner (thread, 2026-10-16 16:58 UTC): "I don't care about saves, you can wipe them I don't care".
+Decision taken (simplest path that keeps the hard rules): ProfileStore on a **new store `LighthouseKeepers_PlayerData_v2`**, key `player_<UserId>`, **no import from v1**. Every player, the owner included, starts from the schema-v2 defaults after the R1.9 publish. v1 (`LighthouseKeepers_PlayerData_v1`) is **not deleted and never written again**; it stays as a frozen copy, so an import can still be added later if the owner changes his mind (`MigrationService.fromV1` is kept and tested for that case). No `RemoveAsync`, no production write by Claude.
+Consequence for R1.3's pass list: "v1 fixture loads as v2" is kept as a unit test of `MigrationService` but no live path calls it; "quick rejoin keeps Pearls" and `BindToClose` are tested on the mock store.

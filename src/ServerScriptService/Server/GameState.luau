@@ -16,6 +16,7 @@ local VoyageCast = require(script.Parent.VoyageCast)
 local Forecasts = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Forecasts"))
 local WaveDirector = require(script.Parent.WaveDirector) -- pure night plan (R1.2)
 local Voyage = require(script.Parent.Voyage) -- pure Pearl rules (R1.2)
+local GrantService = require(script.Parent.GrantService) -- R1.3: the only writer of Pearl income
 
 local GameState = {}
 
@@ -588,7 +589,9 @@ function GameState.run(deps)
 								earned += Config.PEARLS_PER_AWARD
 							end
 						end
-						deps.playerData.addPearls(player, earned, "run")
+						if earned > 0 then
+							GrantService.Grant(player, EventLog.voyageId() .. ":result:" .. player.UserId, { Pearls = earned }, "run")
+						end
 						deps.playerData.recordRun(player, result == "Victory", results.nightReached)
 						results.pearls[player.Name] = earned
 					end

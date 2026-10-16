@@ -138,3 +138,47 @@ NOT DONE BY CLAUDE (owner): the roadmap's 4-client check needs Studio's multi-cl
 MIRROR: Main, Config, ShipDepartureSpec FNV-1a identical; the four module files removed from `src/` (58 scripts, matches Studio).
 OWNER APPROVAL: pending (4-client check + step 2)
 NEXT: R1.8 (blocked behind R1.3: AdminDataService needs ProfileStore) → then R1.9 publish package
+
+CHECKPOINT: R1.3 ProfileStore (🟦 step 2 pending: Script Analysis; live part closes at R1.9)
+DATE: 2026-10-16
+STUDIO INSTANCE: placeId 132065051336560 verified · API access: OFF before every Play (probe: "Studio access to APIs is not allowed")
+BACKUP: ServerStorage.Backups.R1.3_before_2026-10-16 (Main [disabled copy], PlayerData, ShopService, LoadoutService, GameState, LootService, SessionLock; the live SessionLock was moved here too)
+DECISION: D-012 accepted by the owner as a fresh start: ProfileStore on `LighthouseKeepers_PlayerData_v2`, no import; v1 is never read, written or deleted by the new code.
+DELIVERED:
+ - `ProfileStore` vendored from GitHub commit 45c9847 (64,654 bytes, SHA-256 AD437372…C95F, identical to the file the TASK-004 audit read); copied into Studio in six pieces, each FNV-checked; final Studio source byte-identical. Pinned in `assets/ART_SOURCES.md` (Apache-2.0).
+ - `ProfileSchema` (schema v2 template + type validation), `MigrationService` (v1→v2 lift kept and tested; `upgrade` runs on every load), `GrantService` (idempotent claims, 30-day prune; the only writer of Pearl income), `PlayerData` rewritten on ProfileStore (session lock, `Cancel` on leave, kick when a save cannot be opened, immediate save after Pearl changes, purchases and runs, `EndSession` on leave, ProfileStore's own `BindToClose`; **Studio always uses `ProfileStore.Mock`**). Callers keep a v1-shaped read view (`PlayerData.get`, GearData), so no client code changed.
+ - Pearl income rerouted: voyage result (`<voyageId>:result:<userId>`), boss drops (`<voyageId>:drop:<serial>:<userId>`), Quartermaster sell (`sell:<guid>`), admin grants. `ProfileLoaded` bus event added.
+TESTRUNNER (Edit): `74 passed, 0 failed` (0.58 s). Adds ProfileSpec (14: schema, v1 fixtures incl. `pearls = "25"` becomes 0 and is reported, unknown fields kept, GrantService once-only, serialised, items, invalid, prune), PlayerDataSpec (7, stand-in store: new profile, quick rejoin keeps Pearls, replayed claim once, immediate save, held save gives a kick not a blank profile, left-while-loading, bad types repaired), ProfileStoreMockSpec (3, **real ProfileStore.Mock**: new profile, quick rejoin on the same server keeps Pearls and the claim, spend/buy round trip).
+PLAY TEST (API off; mock store; Studio player = owner account, nothing saved): boot logged `ProfileStoreMode mode=memory store=LighthouseKeepers_PlayerData_v2`; ProfileState=memory, SaveUnavailable=true, fast route. Studio was not rendering (0 frames; window unfocused), so ProximityPrompts could not be driven; departure and night-1 survival were driven by runtime-only TEMPTEST scripts that called the live modules (ShipDeparture.sailNow; LampService.addFuel and TowerService.repair until dawn 1), destroyed afterwards. Result: Night 1 survived, Defeat on night 2, `Grant claim=<voyage>:result:11752219158 pearls=1 source=run total=1`, economy event, RunsCompleted 1, Play Again gave SailAgain. Console: no game-script errors; the only red line is ProfileStore's own Studio probe being refused (`StudioAccessToApisNotAllowed … ____PS`), which is the API-off safety working. No TEMPTEST objects left in the place.
+NUMBERS: 74 tests; 1 Pearl for reaching night 2 (unchanged rule); ProfileStore 64,654 bytes; PlayerData 10,259 → 11,222 chars.
+NOT VERIFIED YET (needs the live game, R1.9): real-store session lock across servers, `BindToClose` on a real shutdown, Pearls kept across a real rejoin.
+MIRROR: 69 scripts, every touched file FNV-identical to Studio; `src/.gitattributes` keeps ProfileStore byte-exact; SessionLock removed from `src/`.
+OWNER APPROVAL: D-012 owner; checkpoint pending step 2 and the R1.9 live check
+NEXT: R1.8
+
+CHECKPOINT: R1.8 Admin tools (🟦 step 2 pending: Script Analysis)
+DATE: 2026-10-16
+DELIVERED: `AdminDataService` (`--!strict`): `handle(caller, action, target, arg)` for inspect, grant and rollback, owner-only (UserId 11752219158), refusals logged `AdminRejected`; daily snapshots (first of the UTC day, 7 newest) in `LighthouseKeepers_Snapshots_v2`, written on each `ProfileLoaded` (Studio: in-memory store); rollback applies now if the player is online (current state snapshotted first, data validated, saved) or at the next load. Remotes `AdminRequest` / `AdminResult` (contract row, guards, NetGuard 1/3). Usable from the live server console too.
+TESTRUNNER: included in the 74. AdminDataSpec (5): 7-day retention, stranger rejected and logged, online rollback restores the snapshot (99 Pearls), offline rollback applied at next load, inspect and bad-input refusals.
+PLAY TEST (same session, runtime-only TEMPTEST probe on the live instance): inspect showed online and snapshot day 2026-10-16; caller UserId 1 got "not allowed" (and a logged warning); owner grant 3 took Pearls 1 → 4; rollback to 2026-10-16 took Pearls back to 0 (the load-time snapshot).
+OWNER APPROVAL: pending step 2
+NEXT: R1.9 (publish, owner)
+
+=====================================================================
+R1.9 — READY FOR OWNER TO PUBLISH (🟦, Claude does not publish)
+=====================================================================
+What ships (everything since the live build 854f4e9): R1.2 night-plan and Pearl modules (numbers unchanged), R1.4 remote rate limits and bench checks, R1.5 voyage isolation, R1.6 event bus and Analytics funnel, R1.7 harbor/isle code removed, **R1.3 ProfileStore on a NEW save store (everyone, the owner included, starts at 0 Pearls; D-012)**, R1.8 admin tools. TestRunner 74/74.
+Before you publish:
+ 1. In the production Studio window: File → Save to File As → `Documents\LighthouseKeepers_before_R1.9_2026-10-16.rbxl` (extension `.rbxl`). This is the rollback copy.
+ 2. (Optional, closes checkpoint step 2 for R1.1–R1.8) View → Script Analysis: look at ProfileStore, ProfileSchema, MigrationService, GrantService, PlayerData, AdminDataService, NetGuard, EventBus, Analytics, WaveDirector, Voyage, Events and the Tests folder; tell Claude the warning count.
+ 3. (R1.7) Game Settings → Places → Max players = 4. Optionally Test → Clients and Servers → 4 players: walking all 4 onto the ship sails it automatically.
+Publish:
+ 4. File → Publish to Roblox.
+ 5. Creator Hub → Lighthouse Keepers → Servers → **Shut down all servers** (not "Migrate"), so no old server keeps writing the old store.
+Live check (about 10 minutes):
+ 6. Join the live game. Expect 0 Pearls, starter gear, the first-voyage fast path.
+ 7. Play one voyage to Results (losing on night 2 or later pays at least 1 Pearl). Note the Pearl count on the Results screen.
+ 8. Leave and rejoin within 30 seconds: the same Pearl count must be there.
+ 9. Tell Claude: Pearls after step 7, Pearls after step 8, anything odd. Claude then marks R1.3 and R1.9 ✅ and checks the Analytics funnel (R1.6) the next day.
+If something is wrong: Creator Hub → place → Version History → restore the previous version, then Shut down all servers. Players then see their old (frozen v1) progress again; nothing earned on the new store is lost, it is only hidden until a republish.
+Claude's state: stopped here, as the owner asked ("stop only at publish substages"). Studio is not being edited, so what you publish is exactly what was tested.

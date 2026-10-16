@@ -28,6 +28,8 @@ local ShipDeparture = require(script.Parent.ShipDeparture)
 local VoyageCast = require(script.Parent.VoyageCast)
 local NetGuard = require(script.Parent.NetGuard) -- R1.4: rate limits, replay maps, type guards (API_CONTRACTS.md)
 local Analytics = require(script.Parent.Analytics) -- R1.6: bus consumer -> Roblox AnalyticsService
+local GrantService = require(script.Parent.GrantService) -- R1.3: the only writer of Pearl income
+local AdminDataService = require(script.Parent.AdminDataService) -- R1.8: inspect / grant / rollback
 
 -- Telemetry consumes the bus before any player can join (funnel step 1 is PlayerJoined)
 Analytics.start(EventLog, Analytics.robloxSink(Config.EVENT_LOG_ENABLED))
@@ -55,7 +57,7 @@ stateFolder.Parent = ReplicatedStorage
 -- Client <-> server messages
 local remotes = Instance.new("Folder")
 remotes.Name = "Remotes"
-for _, name in { "BeamControl", "LampAction", "Notify", "Attack", "LootCollected", "OpenUpgrades", "BuyUpgrade", "ReportDevice", "PlaySound", "SetReady", "VoteRematch", "RunResults", "GearData", "GearAction", "ShopOpen", "ShopRequest", "ShopResult", "LoadoutRequest", "LoadoutResult", "EnterLobby", "Travel", "UpgradeResult", "TraderOpen", "TraderRequest", "TraderResult", "CrewFeed", "LampShift", "CoachEvent", "ForecastVote" } do
+for _, name in { "BeamControl", "LampAction", "Notify", "Attack", "LootCollected", "OpenUpgrades", "BuyUpgrade", "ReportDevice", "PlaySound", "SetReady", "VoteRematch", "RunResults", "GearData", "GearAction", "ShopOpen", "ShopRequest", "ShopResult", "LoadoutRequest", "LoadoutResult", "EnterLobby", "Travel", "UpgradeResult", "TraderOpen", "TraderRequest", "TraderResult", "CrewFeed", "LampShift", "CoachEvent", "ForecastVote", "AdminRequest", "AdminResult" } do
 	local remote = Instance.new("RemoteEvent")
 	remote.Name = name
 	remote.Parent = remotes
@@ -66,7 +68,41 @@ local refs = IslandBuilder.build()
 local lobbyRefs = LobbyBuilder.build(refs) -- the pirate-ship lobby (also moves the Quartermaster aboard)
 LampService.init(refs, stateFolder, remotes)
 TowerService.init(stateFolder, refs.repairPrompt, LampService.notify)
+-- R1.8 admin tools: snapshots on every profile load (Studio keeps them in memory, never in a real store)
+AdminDataService.init({
+	playerData = PlayerData,
+	grant = GrantService,
+	store = if game:GetService("RunService"):IsStudio()
+		then AdminDataService.memoryStore()
+		else game:GetService("DataStoreService"):GetDataStore(AdminDataService.SNAPSHOT_STORE),
+	findPlayer = function(userId)
+		return Players:GetPlayerByUserId(userId)
+	end,
+	now = os.time,
+	log = EventLog.log,
+	newId = function()
+		return game:GetService("HttpService"):GenerateGUID(false)
+	end,
+})
+EventLog.Subscribe("ProfileLoaded", function(e)
+	AdminDataService.onProfileLoaded(e.UserId)
+end)
 PlayerData.init(remotes, LampService.notify)
+
+-- Admin channel (R1.8): owner only; everyone else is refused and logged by AdminDataService
+remotes.AdminRequest.OnServerEvent:Connect(function(player, requestId, action, targetUserId, arg)
+	if not NetGuard.isRequestId(requestId) or not NetGuard.allow(player, "AdminRequest") then
+		return
+	end
+	if type(action) ~= "string" or #action > 20 or not NetGuard.isFiniteNumber(targetUserId) then
+		return
+	end
+	if arg ~= nil and not NetGuard.isFiniteNumber(arg) and (type(arg) ~= "string" or #arg > 20) then
+		return
+	end
+	local ok, result = AdminDataService.handle(player.UserId, action, targetUserId, arg)
+	remotes.AdminResult:FireClient(player, requestId, ok, if type(result) == "table" then result else tostring(result))
+end)
 ShopService.init(remotes, PlayerData, refs.shopCounter, refs.shopPrompt)
 LoadoutService.init(remotes, PlayerData)
 UpgradeService.init(stateFolder, LampService, TowerService)

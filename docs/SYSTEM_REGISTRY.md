@@ -58,9 +58,9 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 ## Platform and data
 | System | Status | Target | Notes |
 |---|---|---|---|
-| ProfileStore persistence, schema v2, migration | Planned | R1.3 | D-002 |
-| GrantService (idempotent) | Planned | R1.3 | |
-| AdminDataService (inspect/grant/rollback) | Planned | R1.8 | |
+| ProfileStore persistence, schema v2, migration | Tested (not yet published) | R1.3 | D-002, D-012: store `LighthouseKeepers_PlayerData_v2`, fresh start; Studio always uses the mock |
+| GrantService (idempotent) | Tested (not yet published) | R1.3 | only writer of Pearl income (voyage result, boss drops, selling, admin) |
+| AdminDataService (inspect/grant/rollback) | Tested (not yet published) | R1.8 | owner-only; 7 daily snapshots in `LighthouseKeepers_Snapshots_v2` |
 | Remote contract registry + guards + buckets | Tested (not yet published) | R1.4 | `NetGuard` on all 15 client→server remotes; 11 tests + Play spam test |
 | Event bus (EventLog) | Tested (not yet published) | R1.6 | `EventBus` + catalog `Shared/Events`; 7 bus tests; publishers for funnel, voyage and Pearl events |
 | Analytics funnel | Implemented (live dashboard check pending, R1.9) | R1.6 | `Analytics` bus consumer → AnalyticsService; 4 tests; every step except DawnPearl (S2.2) fired in Studio |
@@ -94,4 +94,4 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 ## Frozen (not in scope; history only)
 | System | Status | Notes |
 |---|---|---|
-| Harbor/Isle place split, reserved servers, teleports, manifests, custom SessionLock, hand-off/reclaim | Frozen | branch `multiship-test` tag `frozen-2026-10-16`; audit §6 corrections recorded; revive only per architecture §4.4. R1.7: PlaceRole, Voyages, IsleAdmission, HarborDepartures moved out of the live tree into `ServerStorage.Backups.R1.7_before_2026-10-16`; flags deleted from Config; SessionLock (unused) leaves at R1.3 |
+| Harbor/Isle place split, reserved servers, teleports, manifests, custom SessionLock, hand-off/reclaim | Frozen | branch `multiship-test` tag `frozen-2026-10-16`; audit §6 corrections recorded; revive only per architecture §4.4. R1.7: PlaceRole, Voyages, IsleAdmission, HarborDepartures moved out of the live tree into `ServerStorage.Backups.R1.7_before_2026-10-16`; flags deleted from Config; SessionLock moved to `ServerStorage.Backups.R1.3_before_2026-10-16` at R1.3 |
