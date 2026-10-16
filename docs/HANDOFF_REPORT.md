@@ -199,3 +199,10 @@ R1.9 live check in DEV (after Claude has re-run the tests in the DEV window):
  8. Creator Hub → Lighthouse Keepers DEV → Play. Expect 0 Pearls (DEV's own new store).
  9. Play one voyage to Results (losing on night 2 or later pays at least 1 Pearl); leave; rejoin within 30 seconds; the Pearl count must be the same. Tell Claude both numbers.
 Production: untouched until relaunch (L1.7), when the finished build is published there and D-012's fresh start applies to players.
+
+R1.9 (DEV) — DEV experience verified · 2026-10-16
+- Owner saved `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_seed_2026-10-16.rbxl` (git-ignored folder) and published it as a new experience: **Lighthouse Keepers DEV, PlaceId 102473202766620, GameId 10771322445**. The production window is closed; `list_roblox_studios` shows only Deadzone, Lighthouse Keepers DEV and Outlaw City.
+- DEV window checks: PlaceId asserted; Studio API access OFF (probe refused, error 7); 68 scripts, every FNV-1a hash identical to `src/` (SessionLock already removed); 37 backup folders carried over.
+- TestRunner in DEV: `74 passed, 0 failed` (0.57 s).
+- Play test in DEV: Studio rendering (61 frames/s), ProfileState=memory (mock store), fast route, boarded, SAIL NOW, Prologue started; console: only ProfileStore's refused Studio probe (API off), 0 game-script errors.
+- "Publish to Roblox As" already put this exact build live in DEV, so no further publish is needed for the live check. Waiting on the owner's numbers (steps 8–9 of the R1.9 DEV plan).
