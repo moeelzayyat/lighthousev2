@@ -10,3 +10,6 @@ vendor-review/
 .DS_Store
 Thumbs.db
 !assets/**
+
+# Local Claude Code permissions (per machine)
+.claude/settings.local.json
