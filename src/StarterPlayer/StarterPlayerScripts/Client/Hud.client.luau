@@ -559,7 +559,7 @@ local lastPhase
 local function refreshVoyage()
 	local phase = state:GetAttribute("Phase") or "Waiting"
 	local night = state:GetAttribute("Night") or 0
-	local total = Config.NIGHTS_TO_WIN
+	local total = state:GetAttribute("TotalNights") or Config.NIGHTS_TO_WIN -- S2.1: the voyage definition's length
 	local timeLeft = state:GetAttribute("TimeLeft") or 0
 	local title, sub, showTimer = "", "", true
 	if phase == "Waiting" then

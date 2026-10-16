@@ -120,6 +120,12 @@ local function load(store: any, player: Player)
 	-- Read-only signals for the first-voyage route and coach (launch R2/R3)
 	player:SetAttribute("RunsCompleted", data.Stats.Runs)
 	player:SetAttribute("ProfileState", mode)
+	-- unlocks as Unlock_<Key> attributes (S2.1: the crew card offers the Long Voyage to holders)
+	for key, value in data.Unlocks do
+		if type(value) == "boolean" then
+			player:SetAttribute("Unlock_" .. key, value)
+		end
+	end
 	push(player)
 	EventLog.Publish("ProfileLoaded", { UserId = player.UserId, SchemaVersion = data.SchemaVersion, IsNew = isNew, Runs = data.Stats.Runs })
 end
@@ -218,6 +224,21 @@ function PlayerData.recordRun(player: Player, won: boolean, nightReached: number
 	data.Stats.NightsSurvived += math.max(0, if won then nightReached else nightReached - 1)
 	player:SetAttribute("RunsCompleted", data.Stats.Runs)
 	changed(player, true)
+end
+
+-- Grants a boolean unlock (S2.1: "LongVoyage" after a Standard win). Saved now; mirrored as Unlock_<key>.
+function PlayerData.unlock(player: Player, key: string): boolean
+	local data = dataOf(player)
+	if not data or type(data.Unlocks[key]) ~= "boolean" then
+		return false
+	end
+	if not data.Unlocks[key] then
+		data.Unlocks[key] = true
+		player:SetAttribute("Unlock_" .. key, true)
+		EventLog.log("Unlocked", { player = player.Name, key = key })
+		changed(player, true)
+	end
+	return true
 end
 
 -- Spends Pearls if the player has enough. Returns true if spent. itemId (optional) names what was bought.

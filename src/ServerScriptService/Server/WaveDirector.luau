@@ -63,8 +63,44 @@ function WaveDirector.bigNights(config: WaveConfig): { number }
 	return picked
 end
 
--- Spawn counts for one night. crewSize is the raw ready-player count (clamped to 1..4 here).
-function WaveDirector.nightPlan(night: number, crewSize: number, forecast: ForecastDef?, config: WaveConfig): NightPlan
+-- A voyage definition (Shared/Definitions/Voyages), S2.1
+export type VoyageDef = { nights: number, bossNights: { number }, bossEveryNightFrom: number? }
+
+-- Big-monster nights of a voyage definition, ascending. BIG_MONSTERS_ENABLED false gives none.
+function WaveDirector.bossNightsFor(def: VoyageDef, config: WaveConfig): { number }
+	if not config.BIG_MONSTERS_ENABLED then
+		return {}
+	end
+	local set: { [number]: boolean } = {}
+	for _, n in def.bossNights do
+		if n >= 1 and n <= def.nights then
+			set[n] = true
+		end
+	end
+	if def.bossEveryNightFrom then
+		for n = def.bossEveryNightFrom, def.nights do
+			set[n] = true
+		end
+	end
+	local list: { number } = {}
+	for n in set do
+		table.insert(list, n)
+	end
+	table.sort(list)
+	return list
+end
+
+-- The config for one voyage: the definition's length replaces NIGHTS_TO_WIN (the final-night crisis lands on
+-- its last night). The shared Config is not modified.
+function WaveDirector.configFor(def: VoyageDef, config: WaveConfig): WaveConfig
+	local c = table.clone(config)
+	c.NIGHTS_TO_WIN = def.nights
+	return c
+end
+
+-- Spawn counts for one night. crewSize is the raw ready-player count (clamped to 1..4 here). With a voyage
+-- definition (S2.1) its boss schedule is used; without one, the old Config-driven schedule.
+function WaveDirector.nightPlan(night: number, crewSize: number, forecast: ForecastDef?, config: WaveConfig, def: VoyageDef?): NightPlan
 	local growth = WaveDirector.growth(night, config)
 	local crabMult = if forecast and forecast.crabMult then forecast.crabMult else 1
 	local crabs = math.floor((config.CRABS_BASE + config.CRABS_PER_NIGHT * growth) * crabMult + 0.5)
@@ -78,7 +114,8 @@ function WaveDirector.nightPlan(night: number, crewSize: number, forecast: Forec
 		skitters = 0
 	end
 	local boss: boolean? = nil
-	if table.find(WaveDirector.bigNights(config), night) then
+	local schedule = if def then WaveDirector.bossNightsFor(def, config) else WaveDirector.bigNights(config)
+	if table.find(schedule, night) then
 		boss = true
 	end
 	return { crabs = crabs, skitters = skitters, boss = boss }

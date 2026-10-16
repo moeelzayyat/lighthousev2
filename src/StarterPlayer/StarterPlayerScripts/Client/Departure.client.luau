@@ -218,6 +218,50 @@ local function renderForecastVote(crew)
 	end
 	forecastNote.Text = if mine then "Majority wins when the ship sails; a tie is a coin toss." else "Pick one. No vote = the crew's choice."
 end
+-- S2.1: once any crew member holds the Long Voyage unlock (a Standard win) the card offers the voyage choice;
+-- only holders can switch to the Long Voyage, everyone sees which one is picked. The server checks again.
+local Voyages = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Voyages"))
+local voyageBox = UiKit.new("Frame", { Name = "VoyageChoice", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = 3, Visible = false }, crewBody)
+UiKit.list(voyageBox, "y", 6)
+UiKit.Label(voyageBox, "Voyage", "Eyebrow", { LayoutOrder = 0 })
+local voyageButtons = {}
+for i, id in Voyages.ORDER do
+	local def = Voyages[id]
+	local b = UiKit.Button(voyageBox, string.upper(def.displayName .. " \u{00B7} " .. def.short), { name = "Voyage" .. id, variant = "secondary", size = "sm", fill = true, layoutOrder = i })
+	b.TextSize = 15
+	b.Activated:Connect(function()
+		remotes:WaitForChild("ChooseVoyage"):FireServer(id)
+	end)
+	voyageButtons[id] = b
+end
+local function renderVoyageChoice(crew)
+	local offered = false
+	for _, id in Voyages.ORDER do
+		local def = Voyages[id]
+		if def.unlock then
+			for _, p in crew do
+				if p:GetAttribute("Unlock_" .. def.unlock) == true then
+					offered = true
+				end
+			end
+		end
+	end
+	voyageBox.Visible = offered
+	if not offered then
+		return
+	end
+	local chosen = state:GetAttribute("VoyageDef")
+	for id, button in voyageButtons do
+		local def = Voyages[id]
+		local mine = def.unlock == nil or player:GetAttribute("Unlock_" .. def.unlock) == true
+		local selected = chosen == id
+		button.BackgroundColor3 = if selected then C.AccentLighthouse else C.SurfaceElevated
+		button.TextColor3 = if selected then C.TextOnAccent elseif mine then C.TextPrimary else C.TextSecondary
+		button.Active = mine
+		button.AutoButtonColor = mine
+	end
+end
+
 crewInvite.Activated:Connect(function()
 	invitedFromCrew = true
 	crewInvite.Visible = false
@@ -470,6 +514,7 @@ local function render()
 		local compact = crewBody.Parent and crewBody.Parent.Parent and crewBody.Parent.Parent:IsA("GuiObject") and UiKit.Breakpoint(crewBody.Parent.Parent.AbsoluteSize) == "phone"
 		crewInvite.Visible = canInvite and not invitedFromCrew and crewCount < 4 and not compact -- phones: invite lives on Results
 		renderForecastVote(crew)
+		renderVoyageChoice(crew)
 		-- phones: the top timer already says when the ship sails, and the card must stay above the jump button
 		local headline = crewBody:FindFirstChild("Headline")
 		if headline then

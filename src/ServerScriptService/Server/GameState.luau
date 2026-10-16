@@ -14,6 +14,7 @@ local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("S
 local EventLog = require(script.Parent.EventLog)
 local VoyageCast = require(script.Parent.VoyageCast)
 local Forecasts = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Forecasts"))
+local Voyages = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Voyages")) -- S2.1
 local WaveDirector = require(script.Parent.WaveDirector) -- pure night plan (R1.2)
 local Voyage = require(script.Parent.Voyage) -- pure Pearl rules (R1.2)
 local GrantService = require(script.Parent.GrantService) -- R1.3: the only writer of Pearl income
@@ -427,7 +428,27 @@ function GameState.run(deps)
 			local ok, err = xpcall(function()
 				deps.resetRound()
 				local forecast, votesA, votesB = chooseForecast(departing)
+				-- Voyage definition (S2.1): the crew's choice if a sailing member holds its unlock, else the default
+				local def = Voyages[state:GetAttribute("VoyageDef")]
+				if type(def) ~= "table" or not def.nights then
+					def = Voyages[Voyages.DEFAULT]
+				end
+				if def.unlock then
+					local allowed = false
+					for _, player in departing do
+						if player:GetAttribute("Unlock_" .. def.unlock) == true then
+							allowed = true
+						end
+					end
+					if not allowed then
+						def = Voyages[Voyages.DEFAULT]
+					end
+				end
+				local voyageConfig = WaveDirector.configFor(def, Config)
+				state:SetAttribute("VoyageDef", def.id)
+				state:SetAttribute("TotalNights", def.nights)
 				EventLog.startRun(departing)
+				EventLog.setVoyage(def.id, def.nights)
 				if forecast then
 					EventLog.setForecast(forecast)
 					EventLog.log("Forecast", { id = forecast, votesA = votesA, votesB = votesB, a = state:GetAttribute("ForecastA"), b = state:GetAttribute("ForecastB") })
@@ -446,13 +467,13 @@ function GameState.run(deps)
 				if not runPrologue() then
 					result = "Abandoned"
 				else
-					-- Big monsters this run: schedule from WaveDirector.bigNights (13 nights -> 13, 10, 7, 4),
-					-- one random kind per scheduled night, picked in schedule order.
+					-- Big monsters this run: the definition's schedule (Standard 4, 7; Long 4, 7 and every night
+					-- from 8), one random kind per scheduled night, picked in schedule order.
 					local bigNights = {}
-					for _, n in WaveDirector.bigNights(Config) do
+					for _, n in WaveDirector.bossNightsFor(def, Config) do
 						bigNights[n] = Creatures.BIG_POOL[math.random(1, #Creatures.BIG_POOL)]
 					end
-					for night = 1, Config.NIGHTS_TO_WIN do
+					for night = 1, def.nights do
 						-- DAY: prepare
 						setPhase("Day", night)
 						setLighting(false, 4)
@@ -474,7 +495,7 @@ function GameState.run(deps)
 						notifyAll(string.format("Night %d: the storm is here. Keep the light alive!", night))
 						lamp.setDraining(true)
 						-- Spawn counts from the pure night plan (growth, final-night crisis, swarm share by crew size)
-						local plan = WaveDirector.nightPlan(night, #readyPlayers(), { crabMult = state:GetAttribute("ForecastCrabMult") }, Config)
+						local plan = WaveDirector.nightPlan(night, #readyPlayers(), { crabMult = state:GetAttribute("ForecastCrabMult") }, voyageConfig, def)
 						local stopWave = startWave(plan.crabs, Config.NIGHT_SECONDS * Config.SPAWN_WINDOW)
 						local stopSwarm = startSwarm(plan.skitters, Config.NIGHT_SECONDS * (Config.SWARM_WINDOW or 0.85))
 						EventLog.log("NightSpawns", { night = night, crabs = plan.crabs, skitters = plan.skitters })
@@ -533,17 +554,17 @@ function GameState.run(deps)
 						-- Dawn loot window (Oct 12 2026): leftover loot stays on the beach most of the day at full
 						-- value, then the tide brings what's left in at DAWN_LOOT_FRACTION. The last night ends the run,
 						-- so there the tide comes quickly as before.
-						local lootSeconds = if night < Config.NIGHTS_TO_WIN
+						local lootSeconds = if night < def.nights
 							then math.min(Config.DAWN_LOOT_SECONDS or 25, Config.DAY_SECONDS - 3)
 							else 10
 						loot.keepFor(lootSeconds + 1)
-						if night < Config.NIGHTS_TO_WIN and Config.ECONOMY_ENABLED then
+						if night < def.nights and Config.ECONOMY_ENABLED then
 							if loot.count() > 0 then
 								notifyAll(string.format("Night %d survived! +%d shells wave bonus. Loot is still on the beach: grab it in the next %d seconds for full value. The tide brings the rest in at half.", night, bonus, lootSeconds))
 							else
 								notifyAll(string.format("Night %d survived! +%d shells wave bonus.", night, bonus))
 							end
-						elseif night < Config.NIGHTS_TO_WIN then
+						elseif night < def.nights then
 							notifyAll(string.format("Night %d survived! Dawn is coming.", night))
 						end
 						task.delay(lootSeconds, loot.tideCollect, Config.DAWN_LOOT_FRACTION) -- the tide brings leftover loot in at reduced value
@@ -567,7 +588,7 @@ function GameState.run(deps)
 				results.economy = Config.ECONOMY_ENABLED
 				setLighting(false, 4)
 				if result == "Victory" then
-					notifyAll(string.format("You kept the light alive for all %d nights!", Config.NIGHTS_TO_WIN))
+					notifyAll(string.format("You kept the light alive for all %d nights!", def.nights))
 				elseif result == "Defeat" then
 					notifyAll(state:GetAttribute("Reason") .. " The sea claims the island.")
 				end
@@ -581,7 +602,7 @@ function GameState.run(deps)
 				results.pearls = {}
 				if result ~= "Abandoned" then
 					local won = result == "Victory"
-					local nightReached = if won then Config.NIGHTS_TO_WIN else results.nightReached
+					local nightReached = if won then def.nights else results.nightReached
 					for _, player in voters do
 						local earned = Voyage.pearlsFor(nightReached, won, Config)
 						for _, award in results.awards do
@@ -593,6 +614,9 @@ function GameState.run(deps)
 							GrantService.Grant(player, EventLog.voyageId() .. ":result:" .. player.UserId, { Pearls = earned }, "run")
 						end
 						deps.playerData.recordRun(player, result == "Victory", results.nightReached)
+						if won and def.unlocks then
+							deps.playerData.unlock(player, def.unlocks) -- S2.1: a Standard win unlocks the Long Voyage
+						end
 						results.pearls[player.Name] = earned
 					end
 				end

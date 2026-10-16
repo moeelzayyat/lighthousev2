@@ -6,8 +6,8 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | System | Status | Target | Notes |
 |---|---|---|---|
 | Voyage phase loop (Waiting→Prologue→Day/Night→Results→Rematch) | Released; isolation Tested (not yet published) | R1.5, S2.1 | R1.5: each voyage in `xpcall`, `ErrorReport`, crew back to the deck; VoyageDefinition at S2.1 |
-| Standard Voyage (7 nights) | Planned | S2.1 | D-003 |
-| Long Voyage (13 nights, unlock) | Released as default | S2.1 | becomes the unlock |
+| Standard Voyage (7 nights) | Tested (not yet published) | S2.1 | D-003; `Definitions/Voyages`; bosses 4, 7; win = 12 Pearls, unlocks Long (play-tested in DEV) |
+| Long Voyage (13 nights, unlock) | Tested (not yet published) | S2.1 | now the unlock (`Unlocks.LongVoyage`, `ChooseVoyage`); bosses 4, 7, 10, 13 and every night from 8; win = 18 Pearls |
 | Lamp beam (wide/focused, fuel, auto-sweep, idle release) | Released | S4 | server pin of the Keeper |
 | Fuel / oil carry / emergency reserve | Released | S2.3 | Night-1 safety |
 | Tower integrity / repair | Released | — | |

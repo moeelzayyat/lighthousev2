@@ -30,6 +30,7 @@ local NetGuard = require(script.Parent.NetGuard) -- R1.4: rate limits, replay ma
 local Analytics = require(script.Parent.Analytics) -- R1.6: bus consumer -> Roblox AnalyticsService
 local GrantService = require(script.Parent.GrantService) -- R1.3: the only writer of Pearl income
 local AdminDataService = require(script.Parent.AdminDataService) -- R1.8: inspect / grant / rollback
+local Voyages = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Voyages")) -- S2.1
 
 -- Telemetry consumes the bus before any player can join (funnel step 1 is PlayerJoined)
 Analytics.start(EventLog, Analytics.robloxSink(Config.EVENT_LOG_ENABLED))
@@ -52,12 +53,14 @@ stateFolder:SetAttribute("Reason", "")
 stateFolder:SetAttribute("Shells", 0)
 stateFolder:SetAttribute("MaxFuel", Config.MAX_FUEL)
 stateFolder:SetAttribute("MaxIntegrity", Config.MAX_INTEGRITY)
+stateFolder:SetAttribute("VoyageDef", Voyages.DEFAULT) -- S2.1: the crew's voyage choice
+stateFolder:SetAttribute("TotalNights", Voyages[Voyages.DEFAULT].nights)
 stateFolder.Parent = ReplicatedStorage
 
 -- Client <-> server messages
 local remotes = Instance.new("Folder")
 remotes.Name = "Remotes"
-for _, name in { "BeamControl", "LampAction", "Notify", "Attack", "LootCollected", "OpenUpgrades", "BuyUpgrade", "ReportDevice", "PlaySound", "SetReady", "VoteRematch", "RunResults", "GearData", "GearAction", "ShopOpen", "ShopRequest", "ShopResult", "LoadoutRequest", "LoadoutResult", "EnterLobby", "Travel", "UpgradeResult", "TraderOpen", "TraderRequest", "TraderResult", "CrewFeed", "LampShift", "CoachEvent", "ForecastVote", "AdminRequest", "AdminResult" } do
+for _, name in { "BeamControl", "LampAction", "Notify", "Attack", "LootCollected", "OpenUpgrades", "BuyUpgrade", "ReportDevice", "PlaySound", "SetReady", "VoteRematch", "RunResults", "GearData", "GearAction", "ShopOpen", "ShopRequest", "ShopResult", "LoadoutRequest", "LoadoutResult", "EnterLobby", "Travel", "UpgradeResult", "TraderOpen", "TraderRequest", "TraderResult", "CrewFeed", "LampShift", "CoachEvent", "ForecastVote", "AdminRequest", "AdminResult", "ChooseVoyage" } do
 	local remote = Instance.new("RemoteEvent")
 	remote.Name = name
 	remote.Parent = remotes
@@ -715,6 +718,30 @@ remotes.ForecastVote.OnServerEvent:Connect(function(player, choice)
 		return
 	end
 	player:SetAttribute("ForecastVote", choice)
+end)
+
+-- Voyage choice (S2.1): a crew member who holds a voyage's unlock picks it before sailing. GameState checks
+-- the unlock again when the ship leaves (a member who has it must be sailing).
+remotes.ChooseVoyage.OnServerEvent:Connect(function(player, defId)
+	if type(defId) ~= "string" or #defId > 20 or not NetGuard.allow(player, "ChooseVoyage") then
+		return
+	end
+	local def = Voyages[defId]
+	local phase = stateFolder:GetAttribute("Phase")
+	if type(def) ~= "table" or not def.nights or player:GetAttribute("Ready") ~= true then
+		return
+	end
+	if phase ~= "Waiting" and phase ~= "Intermission" then
+		return
+	end
+	if def.unlock and player:GetAttribute("Unlock_" .. def.unlock) ~= true then
+		return
+	end
+	if stateFolder:GetAttribute("VoyageDef") ~= def.id then
+		stateFolder:SetAttribute("VoyageDef", def.id)
+		stateFolder:SetAttribute("TotalNights", def.nights)
+		EventLog.log("VoyageChosen", { player = player.Name, voyage = def.id })
+	end
 end)
 
 -- Title screen "Play": you're now on the ship

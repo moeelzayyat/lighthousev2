@@ -36,7 +36,7 @@ A stage exits when every substage is ✅ and its exit numbers are recorded. **GO
 |---|---|---|---|---|---|
 | R0 | Re-baseline | 6 | 0.5 | Decision | 🟨 (R0.2, R0.4 wait on owner actions) |
 | R1 | Safety & structure | 9 | 2 | Numeric + owner publish | 🟨 |
-| S2 | First session & voyage length | 8 | 1.5 | Numeric + owner publish | ⬜ |
+| S2 | First session & voyage length | 8 | 1.5 | Numeric + owner publish | 🟨 |
 | S3 | **Public test** | 6 | 2–3 live | **GO/NO-GO** | ⬜ |
 | S4 | Performance & mobile | 7 | 2 | Numeric | ⬜ |
 | S5 | Domain split & UI refactor | 8 | 2–3 | Standard | ⬜ |
@@ -89,7 +89,7 @@ Purpose: protect production saves, close the validation gaps, add the test harne
 
 | ID | Substage | Deliverables | Passes when | Verify |
 |---|---|---|---|---|
-| S2.1 | Voyage definitions | `Definitions/Voyages`: Standard (7 nights, bosses 4/7) and Long (13 nights, bosses 4/7/10/13, boss every night from 8); `VoyageService` takes a definition; Long unlocked by a Standard win (`Unlocks.LongVoyage`) | `nightPlan` tests for both; a Standard win sets the unlock; the crew card offers Long only when a member has it | TestRunner, play test |
+| S2.1 🟦 | Voyage definitions | `Definitions/Voyages`: Standard (7 nights, bosses 4/7) and Long (13 nights, bosses 4/7/10/13, boss every night from 8); `VoyageService` takes a definition; Long unlocked by a Standard win (`Unlocks.LongVoyage`) | `nightPlan` tests for both; a Standard win sets the unlock; the crew card offers Long only when a member has it | TestRunner, play test |
 | S2.2 | Dawn Pearl banking | `GrantService` at each dawn with claimId `voyageId:night:userId`; HUD "+1 Pearl banked" with the lantern sound; Results shows the total banked | Leaving at night 5 keeps 4 Pearls on rejoin (mock); replay of a dawn claim grants once | TestRunner, play test |
 | S2.3 | Night-1 safety | For `Stats.Runs == 0`: the emergency reserve refills once on the first Night-1 blackout; coach oil prompt forced; feed line | A 0-run player who never carries oil survives Night 1 once and loses Night 2; a 1-run player gets no refill | Play test ×2 accounts |
 | S2.4 | First beam hit ≤ 45 s | Prologue tightened: first crab reaches the beam arc by 35 s; coach aim marker at 30 s if no hit | 5 fresh-account runs, unassisted script: median first beam hit ≤ 45 s | Console timestamps |
@@ -262,5 +262,5 @@ NEXT: <next ID>
 ---
 
 **Mode:** unattended (D-010)
-**Current substage:** R1.9 (owner publish)
+**Current substage:** S2.2 (see docs/CURRENT_PHASE.md)
 **Last checkpoint passed:** R0.6

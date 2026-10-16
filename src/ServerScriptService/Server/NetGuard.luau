@@ -28,6 +28,7 @@ NetGuard.RATES = {
 	CoachEvent = { 4, 8 },
 	ForecastVote = { 3, 5 },
 	AdminRequest = { 1, 3 }, -- R1.8, owner-only channel
+	ChooseVoyage = { 2, 3 }, -- S2.1
 } :: { [string]: { number } }
 
 NetGuard.REPLAY_CAP = 40

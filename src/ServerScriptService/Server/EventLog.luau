@@ -273,6 +273,13 @@ function EventLog.towerLow(ratio)
 	end
 end
 
+-- The voyage definition this run sails (S2.1): its id and length go into the summary and results
+function EventLog.setVoyage(id, nights)
+	stats.voyage = id
+	stats.totalNights = nights
+	EventLog.log("Voyage", { voyage = id, nights = nights })
+end
+
 function EventLog.setForecast(id)
 	stats.forecast = id
 end
@@ -302,7 +309,7 @@ function EventLog.endRun(result, reason)
 			if Config.ECONOMY_ENABLED then "ON" else "OFF", if Config.BIG_MONSTERS_ENABLED then "ON" else "OFF",
 			if Config.PROTOTYPE_SHORT_RUN then "short" else "full"),
 		string.format("Result: %s%s", result, if reason and reason ~= "" then " (" .. reason .. ")" else ""),
-		string.format("Night reached: %d of %d   Duration: %d:%02d", stats.nightReached, Config.NIGHTS_TO_WIN, math.floor(duration / 60), math.floor(duration % 60)),
+		string.format("Night reached: %d of %d   Duration: %d:%02d", stats.nightReached, stats.totalNights or Config.NIGHTS_TO_WIN, math.floor(duration / 60), math.floor(duration % 60)),
 		"Players: " .. (if #stats.players > 0 then table.concat(stats.players, ", ") else "none"),
 		string.format("Kills: %d  [%s]", totalKills, listCounts(stats.kills)),
 		string.format("Weapon attacks: %d (%d hit)", stats.attacks, stats.attackHits),
@@ -412,7 +419,8 @@ function EventLog.endRun(result, reason)
 		result = result,
 		reason = reason or "",
 		nightReached = stats.nightReached,
-		totalNights = Config.NIGHTS_TO_WIN,
+		totalNights = stats.totalNights or Config.NIGHTS_TO_WIN,
+		voyage = stats.voyage,
 		duration = math.floor(duration),
 		totalKills = totalKills,
 		shellsEarned = stats.shellsEarned,

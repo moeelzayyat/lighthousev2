@@ -211,3 +211,22 @@ CHECKPOINT: R1.9 DEV cutover — live check ✅ · 2026-10-16
 Owner (thread, 19:30 UTC): played Lighthouse Keepers DEV in the normal Roblox player, finished a voyage, closed the game, reopened: "pearl stayed". The exact count was not given. This confirms on a real DEV server: ProfileStore session start, Pearl grant through GrantService, save on leave, reload on rejoin. Production untouched (D-013).
 R1 exit numbers: TestRunner 74 (≥ 60) ✓ · cutover check ✓ (DEV) · funnel: check the DEV Analytics dashboard after 24 h · Script Analysis: still unmeasured (owner item).
 NEXT: S2.1 in the DEV window.
+
+CHECKPOINT: S2.1 Voyage definitions — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-16
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (ProfileStore's Studio probe refused)
+BACKUP: ServerStorage.Backups.S2.1_before_2026-10-16 (Main, GameState, PlayerData, WaveDirector, EventLog, NetGuard, Hud, Departure, NetGuardSpec)
+BUILT:
+- `ReplicatedStorage.Shared.Definitions.Voyages`: Standard (7 nights, big monsters 4 and 7, a win unlocks `LongVoyage`) and Long (13 nights, big monsters 4, 7, 10, 13 and every night from 8; needs the unlock). Default Standard.
+- `WaveDirector.bossNightsFor(def, config)` and `configFor(def, config)`; `nightPlan` takes an optional definition (old Config schedule kept when none is given).
+- `GameState` runs one definition per voyage: picks the crew's choice only if a sailing member holds its unlock (else Standard), sets `VoyageDef` / `TotalNights` on the state folder, uses the definition's length for the night loop, final-night crisis, dawn loot and Pearl rule, and grants `def.unlocks` to every crew member on a win.
+- `PlayerData.unlock(player, key)` (saved at once, mirrored as `Unlock_<key>` attributes, also set on load); `EventLog.setVoyage` puts the voyage id and length into the summary and results.
+- New remote `ChooseVoyage(defId)` (Ready, phase Waiting/Intermission, unlock held; 2/s, burst 3). Crew card shows the voyage choice only to holders; HUD night counter reads `TotalNights`.
+TESTRUNNER (DEV): 83 passed, 0 failed. New: `VoyageDefinitionsSpec` (definitions well formed; Standard bosses {4,7}; Long {4,7,8,9,10,11,12,13}; none when big monsters are off; Standard night 7 = 69 crabs, night 6 = 42; Long night 13 = 105 crabs, night 1 = 42 skitters; configFor leaves Config untouched; Pearls 12 / 18) and the PlayerData unlock test (saved, mirrored, survives a rejoin on the mock store).
+SCRIPT ANALYSIS: not measured (owner item, same as R1).
+PLAY TEST (DEV, Studio play on the owner's account, mock store): full Standard voyage with SAIL NOW → Victory, 7 of 7 nights, 15 min 35 s. Big monsters on night 4 (ShipwreckHermit) and night 7 (BarnacleBrute) only. Night 7 had 96 crabs (Spring Tide forecast ×1.5 plus the final-night crisis). Grant `…:result:11752219158` paid 12 Pearls; `Unlocked LongVoyage` logged. The crew card's voyage choice was hidden before the win and shown after; `ChooseVoyage("Long")` during Intermission set `VoyageDef=Long` and the next voyage started with `TotalNights=13`. Console: only ProfileStore's refused Studio probe (API off), 0 game-script errors. Play stopped; the TEMPTEST keep-alive script was runtime-only and is gone.
+NUMBERS: Standard win = 12 Pearls (measured); voyage length 15:35 with SAIL NOW; night-7 crabs 96 with Spring Tide.
+MIRROR: 70 scripts in DEV, every FNV-1a hash identical to `src/`.
+OWNER APPROVAL: auto-approved (unattended, D-010)   PUBLISHED BY OWNER: n.a. (S2 publishes at S2.8, to DEV)
+NOTES / DEBT: Long Voyage gameplay past night 1 was not played through (13 nights ≈ 30 min); its plan is covered by tests. `VoyageService` from the roadmap row is `GameState` taking a definition until the S5 domain split.
+NEXT: S2.2 Dawn Pearl banking.
