@@ -69,3 +69,12 @@ Approved by: owner (2026-10-16, unattended-mode approval of all six recommendati
 Context: the owner wants the project to run without per-substage approval.
 Decision: checkpoint step 8 (owner approval) is replaced by an automatic log line for every substage **except** the publish substages (R1.9, S2.8, S4.7, S5.8, S6.7, S7.6, L1.7) and the GO/NO-GO gates (S3.6, B1.6), which still stop and wait for the owner. When the run reaches a publish substage it writes the publish package ("ready for the owner to publish" with the checklist) and **continues with the next substage that does not depend on the live build**. Decisions D-001, D-003, D-004, D-005, D-006, D-009 are pre-approved. Any *new* decision that would otherwise stop the run is made by the recommendation in `architecture.md`, logged here as `Accepted (unattended, recommendation)`, and flagged in `HANDOFF_REPORT.md` for the owner to reverse. Hard rules in `CLAUDE.md` are untouched: no publish, no production writes, API off, correct Studio window.
 Approved by: owner (2026-10-16)
+
+## CP — R0.1 passed · 2026-10-16 · auto-approved (unattended)
+## CP — R0.3 passed · 2026-10-16 · auto-approved (unattended)
+
+## D-011 — Live build identity (R0.5)
+2026-10-16 · R0 · Recorded
+Finding: the production Studio tree (PlaceVersion 172) is byte-identical to `src/` from the old repo's `main` 854f4e9: 49 of 49 scripts match by length and FNV-1a hash (`docs/STUDIO_MANIFEST.md`). Drift: none. The multi-ship modules (`HarborDepartures`, `IsleAdmission`, `PlaceRole`, `SessionLock`, `ShipBoarding`, `ShipDeparture`, `ShipRoster`, `Voyages`, `VoyageCast`) are present with `MULTI_SHIP_ENABLED = false` and `TELEPORT_ENABLED = false`; they leave the live path at R1.3/R1.7. Studio cannot see which version is published; if the owner published something after 854f4e9 was exported, R0.5 is re-run.
+## CP — R0.5 passed · 2026-10-16 · auto-approved (unattended)
+## CP — R0.6 passed · 2026-10-16 · auto-approved (unattended)

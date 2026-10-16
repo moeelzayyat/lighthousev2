@@ -34,8 +34,8 @@ A stage exits when every substage is ✅ and its exit numbers are recorded. **GO
 
 | Stage | Name | Substages | Est. weeks | Gate | Status |
 |---|---|---|---|---|---|
-| R0 | Re-baseline | 6 | 0.5 | Decision | ⬜ |
-| R1 | Safety & structure | 9 | 2 | Numeric + owner publish | ⬜ |
+| R0 | Re-baseline | 6 | 0.5 | Decision | 🟨 (R0.2, R0.4 wait on owner actions) |
+| R1 | Safety & structure | 9 | 2 | Numeric + owner publish | 🟨 |
 | S2 | First session & voyage length | 8 | 1.5 | Numeric + owner publish | ⬜ |
 | S3 | **Public test** | 6 | 2–3 live | **GO/NO-GO** | ⬜ |
 | S4 | Performance & mobile | 7 | 2 | Numeric | ⬜ |
@@ -54,12 +54,12 @@ Purpose: freeze the old direction, record the decisions, set up the new working 
 
 | ID | Substage | Deliverables | Passes when | Verify |
 |---|---|---|---|---|
-| R0.1 | Decision D-001 | **Accepted 2026-10-16 (Option A).** Record only. | Line in `DECISION_LOG.md` | — |
-| R0.2 | Freeze old repo | In `moeelzayyat/lighthousekeepers`: `multiship-test` tagged `frozen-2026-10-16`; repository archived; test experience 10771229467 left private and untouched | Tag pushed; archive flag set | Owner (GitHub) |
-| R0.3 | New repository | `moeelzayyat/lighthousev2` cloned to `C:\RobloxProjects\Lighthousev2`; `src/` and `tests/` copied from the old repo's `main`; old `docs/` copied to `docs/legacy/`; this docs set at the root | Tree matches `architecture.md` §4.3; first commit pushed | Repo |
-| R0.4 | Studio baseline | In the production window (API off): `list_roblox_studios` verified; full script export to `src/` at the current live build; restore point `R0 baseline`; local `.rbxl` saved by the owner | Export committed; restore point exists | Studio, repo |
-| R0.5 | Live build identity | Compare the Studio production scripts with `src/` (old `main` 854f4e9) via `script_read` hashes; record which build is live and any drift | Line in `DECISION_LOG.md`; drift listed | Studio (read-only, API off) |
-| R0.6 | Title and icon brief | D-009 accepted: write the owner instruction to rename the experience and set max players 4 in the handoff record; store section of `ART_BIBLE.md` finalised; icon production via Studio AI image generation attempted first, contractor as fallback | Instruction written; `ART_BIBLE.md` final | — |
+| R0.1 ✅ | Decision D-001 | **Accepted 2026-10-16 (Option A).** Record only. | Line in `DECISION_LOG.md` | — |
+| R0.2 🟦 | Freeze old repo | In `moeelzayyat/lighthousekeepers`: `multiship-test` tagged `frozen-2026-10-16`; repository archived; test experience 10771229467 left private and untouched | Tag pushed; archive flag set | Owner (GitHub) |
+| R0.3 ✅ | New repository | `moeelzayyat/lighthousev2` cloned to `C:\RobloxProjects\Lighthousev2`; `src/` and `tests/` copied from the old repo's `main`; old `docs/` copied to `docs/legacy/`; this docs set at the root | Tree matches `architecture.md` §4.3; first commit pushed | Repo |
+| R0.4 🟦 | Studio baseline | In the production window (API off): `list_roblox_studios` verified; full script export to `src/` at the current live build; restore point `R0 baseline`; local `.rbxl` saved by the owner | Export committed; restore point exists | Studio, repo |
+| R0.5 ✅ | Live build identity | Compare the Studio production scripts with `src/` (old `main` 854f4e9) via `script_read` hashes; record which build is live and any drift | Line in `DECISION_LOG.md`; drift listed | Studio (read-only, API off) |
+| R0.6 ✅ | Title and icon brief | D-009 accepted: write the owner instruction to rename the experience and set max players 4 in the handoff record; store section of `ART_BIBLE.md` finalised; icon production via Studio AI image generation attempted first, contractor as fallback | Instruction written; `ART_BIBLE.md` final | — |
 
 **R0 exit:** all ✅; `CURRENT_PHASE.md` = R1.1.
 
@@ -262,5 +262,5 @@ NEXT: <next ID>
 ---
 
 **Mode:** unattended (D-010)
-**Current substage:** R0.1
-**Last checkpoint passed:** none
+**Current substage:** R1.1
+**Last checkpoint passed:** R0.6

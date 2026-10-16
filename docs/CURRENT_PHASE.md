@@ -1,22 +1,21 @@
 # CURRENT PHASE
 
 **Mode:** UNATTENDED (D-010) — run substages back to back; stop only at publish substages (write the package, continue elsewhere) and GO/NO-GO gates.
-**Stage:** R0 — Re-baseline
-**Substage:** R0.1 — Decision D-001
-**Status:** ⬜ Not started
-**Last checkpoint passed:** none
+**Stage:** R1 — Safety & structure
+**Substage:** R1.1 — TestRunner
+**Status:** 🟨 In progress
+**Last checkpoint passed:** R0.6 (R0.2 and R0.4 are 🟦 waiting on owner actions listed in `HANDOFF_REPORT.md`)
 
-## R0.1
-D-001 is already **Accepted (Option A: one crew per server)**. This substage only records it: append `CP — R0.1 passed · <date> · auto-approved (unattended)` to `docs/DECISION_LOG.md`, set R0.1 ✅ in `docs/ROADMAP.md`, then move to R0.2.
+## R1.1
+Build `ServerStorage/Tests/TestRunner` (`describe/it/beforeEach/afterEach`, async `it`, the matchers in `TEST_PLAN.md`, `T.mock.service`, `T.clock`) with 3 sample tests. Passes when `require(game.ServerStorage.Tests.TestRunner).run()` via `execute_luau` prints `3 passed, 0 failed`.
 
-## R0.2 (next)
-The owner must tag and archive the old repo; Claude cannot push there. Write the instruction in `docs/HANDOFF_REPORT.md`, mark R0.2 🟦, continue to R0.3.
+## Pending owner actions (do not block the run)
+- R0.2: tag and archive the old repo.
+- R0.4: File > Save to Roblox (`R0 baseline`) and a local `.rbxl`.
+- R0.6: title A in Creator Hub; Max players 4 in Game Settings.
 
-## R0.3
-Already done (repo assembled and pushed 2026-10-16). Verify the tree matches `architecture.md` §4.3 and mark ✅.
-
-## R0.4 — first Studio contact
-Production window only: `list_roblox_studios` → PlaceId 132065051336560 → API access OFF → export all scripts, compare with `src/`, restore point `R0 baseline`. No edits.
+## Studio
+Production window only: `list_roblox_studios` → PlaceId 132065051336560 → API access OFF (probe returns "Studio access to APIs is not allowed") before any Play.
 
 ## Repository
 `https://github.com/moeelzayyat/lighthousev2` at `C:\RobloxProjects\Lighthousev2`.

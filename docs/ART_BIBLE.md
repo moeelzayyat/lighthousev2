@@ -14,8 +14,8 @@
 5. HUD: one layout pass with `variant = "glass"`; menus keep wood. No second restyle pass.
 
 ## Store assets (R0.6 → S2.7 → L1.5)
-- **Title A:** `Lighthouse Keepers 🌊 Keep the Light` · **Title B:** `Lighthouse Keepers: Storm Survival` · **Title C:** `13 Nights at the Lighthouse 🔦` (number-as-goal, the pattern of the category's winners). Remove "- Staging" immediately.
-- **Icon:** the lighthouse at the left third, beam sweeping right across rain, lighting the Barnacle Brute rising from the sea; three small survivors on the rocks (one carrying a barrel). Two palettes: A amber beam / navy storm; B white beam / teal storm. Text-free. Reconcile with `docs/legacy/ICON_BRIEF.md` (it predates the pirate skin).
+- **Title A:** `Lighthouse Keepers 🌊 Keep the Light` · **Title B:** `Lighthouse Keepers: Storm Survival` · **Title C:** `13 Nights at the Lighthouse 🔦` (number-as-goal, the pattern of the category's winners). Remove "- Staging" immediately. **Live title until S3: A**; S3.1 tests A/B/C with diagnostic ads.
+- **Icon:** the lighthouse at the left third, beam sweeping right across rain, lighting the Barnacle Brute rising from the sea; three small survivors on the rocks (one carrying a barrel). Two palettes: A amber beam / navy storm; B white beam / teal storm. Text-free. Reconciled with the pirate skin (R0.6): lighthouse and storm painterly, not cartoon; survivors may wear the keeper coats; no wood UI frame inside the icon. This paragraph replaces `ICON_BRIEF.md`, which was not carried into this repo.
 - **Thumbnails 16:9:** 1 clutch refuel with the lamp at 1% and the red banner; 2 focused beam burning the Brute with the boss bar; 3 four-crew deck with the forecast vote card; 4 (L1) cannon line at night; 5 (L1) "THE LIGHT HELD" dawn.
 - **Trailer (30 s, L1):** storm hits → light restored → oil run at 3% → Brute burn → dawn Pearl → "Keep the light."
 
@@ -23,5 +23,5 @@
 Beam colours (existing: Keeper's Amber, Sea Glass, Moonlight, Ember) · lamp housings · keeper coats · lantern skins · ship flags · emotes. Pearls for some, Robux for others; never power.
 
 ## Owner approval
-- [ ] Store direction approved · date: ____
-- [ ] Icon producer decided (owner / Studio AI / contractor) · date: ____
+- [x] Store direction approved · 2026-10-16 (D-009)
+- [x] Icon producer decided · 2026-10-16: Studio AI image generation first (S2.7), contractor if it fails the brief
