@@ -1,0 +1,96 @@
+# SYSTEM REGISTRY
+
+Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunner coverage or a recorded play test under v2.0) · `Released` (live in production). Items are never removed. "Target" = substage where v2.0 work on it lands. Statuses below reflect the live build as of 2026-10-16 (`Released` = in the published game) — most released systems still need v2.0 tests before they can be marked `Tested`.
+
+## Encounter (voyage)
+| System | Status | Target | Notes |
+|---|---|---|---|
+| Voyage phase loop (Waiting→Prologue→Day/Night→Results→Rematch) | Released | R1.5, S2.1 | pcall isolation; VoyageDefinition |
+| Standard Voyage (7 nights) | Planned | S2.1 | D-003 |
+| Long Voyage (13 nights, unlock) | Released as default | S2.1 | becomes the unlock |
+| Lamp beam (wide/focused, fuel, auto-sweep, idle release) | Released | S4 | server pin of the Keeper |
+| Fuel / oil carry / emergency reserve | Released | S2.3 | Night-1 safety |
+| Tower integrity / repair | Released | — | |
+| Harpoons (4) | Released | R1.4 | finite checks |
+| Armor (3) | Released | — | |
+| Cannons (build/upgrade/reload/ammo/health) | Released | S4 | |
+| Aggro / threat | Released | — | |
+| Rock Crab, Sand Skitter swarm | Released | S4 | render budget |
+| Big monsters (Barnacle Brute, Shipwreck Hermit) | Released | S6.1 | by crew size |
+| New monsters ×5 | Planned | S6.5–S6.6 | |
+| Wave director (`nightPlan` pure) | Released (inline) | R1.2 | extraction |
+| Loot drops, magnet, dawn window, tide | Released | S4.5 | |
+| Bench upgrades (4) + evolutions (2) | Released | S5.7 | StatPipeline |
+| Forecasts (3) + vote | Released | — | |
+| Island merchant (voyage-only Shell items) | Planned | S6.2 | |
+| Orbiting Blades | Planned | S6.3 | |
+| Results (cause, Moment, your part, rewards, next goal) | Released | S2.5 | Sail again |
+| Dawn Pearl banking | Planned | S2.2 | D-004 |
+
+## Crew and social
+| System | Status | Target | Notes |
+|---|---|---|---|
+| Crew roster / ready / departure rules | Released | R1.7 | 4-player servers |
+| Boarding (walk aboard), BoardingZone | Released | — | |
+| First-voyage fast path | Released | — | |
+| Coach prompts | Released | S2.3 | |
+| Crew feed + lamp flare | Released | — | |
+| Lamp shift | Released (untested 2+) | S3 | |
+| Invites (unrewarded) | Released | S7.5 | reward |
+| Leaderboards | Planned | S7.3 | |
+| Specialties | Planned | S7.4 | |
+| Controller beam aim | Planned | S2.6 | |
+
+## Economy and progression
+| System | Status | Target | Notes |
+|---|---|---|---|
+| Shells (crew pool) | Released | — | |
+| Pearls (saved) | Released | R1.3 | GrantService |
+| Quartermaster shop (idempotent) | Released | — | |
+| Locker / loadouts | Released | R1.4 | handled cap |
+| Trader (sell loot) | Released | S6.2 | merchant role |
+| Beam colours (Pearls) | Released | — | |
+| Quartermaster permanent boosts + gear | Planned | S6.4 | |
+| Logbook | Planned | S7.1 | |
+| Daily objective | Planned | S7.2 | |
+
+## Platform and data
+| System | Status | Target | Notes |
+|---|---|---|---|
+| ProfileStore persistence, schema v2, migration | Planned | R1.3 | D-002 |
+| GrantService (idempotent) | Planned | R1.3 | |
+| AdminDataService (inspect/grant/rollback) | Planned | R1.8 | |
+| Remote contract registry + guards + buckets | Planned | R1.4 | |
+| Event bus (EventLog) | Partial | R1.6 | |
+| Analytics funnel | Planned | R1.6 | |
+| Feature flags / remote config | Planned | S5.1 | |
+| Definitions registry | Planned | S5.4 | |
+| StatPipeline | Planned | S5.7 | |
+| Domain lifecycle | Planned | S5.1 | |
+| TestRunner | Planned | R1.1 | |
+| Creature 20 Hz step + snapshots + interpolation | Planned | S4.2–S4.3 | |
+| Ground height grid | Planned | S4.1 | |
+
+## UI
+| System | Status | Target | Notes |
+|---|---|---|---|
+| UiKit v2.1 (3.1k lines) | Released | S5.5 | split |
+| Pirate skin (UiSkin, Kenney atlas) | Released | — | |
+| Glass HUD | Released | S5.6 | single pass |
+| Menus / Shop / Inventory / Bench / Trader / Departure / Results / Coach | Released | S5.5 | |
+| Phone layouts | Released | S4.4 | real-phone FPS |
+| InputController (single) | Planned | S2.6 | |
+
+## Live ops and monetization
+| System | Status | Target | Notes |
+|---|---|---|---|
+| Cosmetics for Robux (housings, coats, lanterns, flags) | Planned | B1.1 / L1.3 | owner approval |
+| Supporter pack | Planned | L1.3 | |
+| Codes | Planned | L1.4 | |
+| Seasons / events (Shipwreck Rescue) | Planned | LO | |
+| Store assets (title, icon, thumbnails, trailer) | Planned | R0.6, S2.7, L1.5 | |
+
+## Frozen (not in scope; history only)
+| System | Status | Notes |
+|---|---|---|
+| Harbor/Isle place split, reserved servers, teleports, manifests, custom SessionLock, hand-off/reclaim | Frozen | branch `multiship-test` tag `frozen-2026-10-16`; audit §6 corrections recorded; revive only per architecture §4.4 |

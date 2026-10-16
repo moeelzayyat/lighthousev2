@@ -1,0 +1,12 @@
+# Owner rule: never push place/model files, backups, work, vendor-review, other games, credentials, player data
+*.rbxl
+*.rbxlx
+*.rbxm
+*.rbxmx
+backups/
+work/
+vendor-review/
+*.lock
+.DS_Store
+Thumbs.db
+!assets/**
