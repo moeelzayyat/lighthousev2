@@ -551,3 +551,20 @@ SCRIPT ANALYSIS: not measured (owner item).
 MIRROR: 99 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (eaf10b51).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
 NEXT: S5.4 Definitions registry.
+
+CHECKPOINT: S5.4 Definitions registry — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S5.4_before_2026-10-17 (Domains.Definitions)
+BUILT:
+- `ReplicatedStorage/Shared/_Registry` (new, `--!strict`, pure): rules for every catalog the game loads (Ammo, Creatures, Forecasts, Items, Upgrades, Weapons, Voyages, and the bus `Events` catalog). It checks types and ranges of every field the game reads; that every id in an order list (SHOP_ORDER, ORDER, BIG_POOL) is defined and listed once; duplicate evolution ids; cross-catalog links (an item of kind Weapon has `Weapons` stats and back; an ammo crate names a defined ammo type; a voyage's unlock is granted by another voyage; the default voyage needs no unlock; a test-only voyage is not on the crew card); one starter per slot; and that any definition's `loot` table sums to 1. Every problem comes back as `Catalog.id.field: what is wrong`.
+- `Domains/Definitions` Init calls `Registry.assertValid()`: on any problem the boot stops with one message listing them all ("Definitions: N problems; the server will not start until they are fixed"), before the island is built or the remotes are exposed. On success it logs `Definitions checked=35`.
+- Notes: no catalog has a weighted loot table today (drops are per-item chances in `Config`), so the sum-to-1 rule is in place for the first one and proven by the test. A key written twice inside one Lua table cannot be seen at run time (the second silently wins); duplicate ids are caught where they can exist (order lists, evolution ids). The catalogs stay where they are (`Shared/*`, `Shared/Definitions/Voyages`); moving them under `Definitions/` would touch every client and server require for no behaviour change.
+TESTRUNNER (DEV): **140 passed, 0 failed** (132 + new `RegistrySpec` 8: the real catalogs have no problems and 35 definitions; a negative price names `Items.FlareGun.price`; duplicate ids in SHOP_ORDER and EVOLUTIONS; a loot table summing to 0.9 fails and 1.0 passes; weapon/item, ammo and unlock links; ranges (a boss night past the last night, NaN health, 150% damage reduction, an unknown event field type); `assertValid` lists every problem in one message).
+PLAY TEST ×2 (DEV, owner's account, mock store):
+1. Good catalogs: `Definitions checked=35`, then the full boot order; remotes exposed; phase Waiting; 0 client errors; server only ProfileStore's refused Studio write (API off).
+2. Broken sample (`Items.FlareGun.price` set to −5 in Studio, marked `--TEMPTEST`): the server stopped at boot with "Definitions: 1 problem; the server will not start until they are fixed: - Items.FlareGun.price: must be a positive number, got -5"; no island built, no remotes exposed. Play stopped and the price restored to 60 at once (0 `TEMPTEST` lines in any game script afterwards).
+SCRIPT ANALYSIS: not measured (owner item).
+MIRROR: 101 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (c9f9576e).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+NEXT: S5.5 UiKit split.

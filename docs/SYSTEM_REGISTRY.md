@@ -66,7 +66,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Event bus (EventLog) | Tested (not yet published) | R1.6, S5.3 | `EventBus` + catalog `Shared/Events`; 12 bus tests; publishers for funnel, voyage, Pearl and (S5.3) every catalogued voyage event; cross-service callbacks replaced by events (`BusEventsSpec`) |
 | Analytics funnel | Implemented (live dashboard check pending, R1.9) | R1.6 | `Analytics` bus consumer → AnalyticsService; 4 tests; every step fired in Studio (DawnPearl from S2.2) |
 | Feature flags / remote config | Planned | S5.1 | |
-| Definitions registry | Planned | S5.4 | |
+| Definitions registry | Tested (not yet published) | S5.4 | `Shared/_Registry` checks 8 catalogs (35 definitions) in the Definitions domain at boot; a bad definition stops the boot with every problem listed; `RegistrySpec` 8 tests |
 | StatPipeline | Planned | S5.7 | |
 | Domain lifecycle | Tested (not yet published) | S5.1–S5.2 | `Server/Bootstrap` (asserted order, Inits then Starts, Boot log) + 10 `Server/Domains`; `Main` 14 lines; remotes exposed last; `BootstrapSpec` 8 tests |
 | TestRunner | Implemented | R1.1 | `ServerStorage.Tests.TestRunner`; specs named `<Name>Spec` |

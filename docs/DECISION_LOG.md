@@ -148,3 +148,5 @@ The roadmap's GO thresholds (Night-1 survival ≥ 50 %, rematch ≥ 60 %, beam m
 - Accepted (unattended, recommendation): remotes are created by Platform and exposed (parented) by Network last, instead of created last, because handlers connect during Init. To revise: say so.
 ## CP — S5.3 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 6 callbacks → bus; 20 publishers; TestRunner 132/132
 - Accepted (unattended, recommendation): the Bootstrap `ctx` keeps handing the round loop its ship/travel functions once at boot (composition root); only service-to-service callback assignment is removed. `LampService.colorFor` became a player attribute rather than an event (it is a lookup, not a reaction). To revise: say so.
+## CP — S5.4 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 35 definitions checked at boot; a broken price stops the boot with a clear message; TestRunner 140/140
+- Accepted (unattended, recommendation): catalogs stay in `Shared/` (no move under `Definitions/`); `_Registry` sits at `Shared/_Registry` as the architecture names it. To revise: say so.
