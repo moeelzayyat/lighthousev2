@@ -110,13 +110,16 @@ local function buildTemplate(kind)
 		-- Pivot sits 0.7 studs above the ground; turn the model to face -Z
 		local lift = body.Size.Y / 2 - 0.7
 		body.PivotOffset = (CFrame.new(0, lift, 0) * CFrame.Angles(0, math.rad(art:GetAttribute("YawOffset") or 0), 0)):Inverse()
-		-- Textured models can't be recolored, so hit/burn feedback is a colored glow
-		local feedback = Instance.new("PointLight")
-		feedback.Name = "Feedback"
-		feedback.Range = 7 + stats.bodyRadius * 2
-		feedback.Brightness = 4
-		feedback.Enabled = false
-		feedback.Parent = body
+		-- Textured models can't be recolored, so hit/burn feedback on big monsters is a colored glow. S4.4: only big
+		-- monsters carry a light (the render budget allows about 4 during a swarm); small ones flash their eyes.
+		if stats.big then
+			local feedback = Instance.new("PointLight")
+			feedback.Name = "Feedback"
+			feedback.Range = 7 + stats.bodyRadius * 2
+			feedback.Brightness = 4
+			feedback.Enabled = false
+			feedback.Parent = body
+		end
 	else
 		-- Fallback: simple parts (scaled for big monsters)
 		local s = stats.bodyRadius

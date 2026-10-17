@@ -424,3 +424,25 @@ PLAY TEST / PROBES (DEV, owner's account, mock store, TEMPTEST keep-alive and pr
 MIRROR: 84 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (9c0f6415).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
 NEXT: S4.4 Render budget.
+
+CHECKPOINT: S4.4 Render budget — 🟦 (Script Analysis unmeasured; phone FPS is the owner's check)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S4.4_before_2026-10-17 (CreatureService, CreatureView, SoundFx, Storm)
+BUILT:
+- No per-creature lights: only big monsters' templates carry the feedback PointLight; small creatures show a hit (white) and burning (orange) by their eyes (client hit flash).
+- Shared boss bar: big monsters no longer show an over-the-head health bar; the HUD's boss list (already there) is the one bar.
+- Sound pool: client 3D sounds play from a ring of 24 Attachments on one invisible part (`SoundFx.slotAt`) instead of creating a part per sound.
+- Kill bursts reuse 6 pooled neon balls (outside the creature folder, so the coach does not count them).
+- Rain per device: touch devices are capped at 300 drops/s (was 315); PC unchanged; "Low effects" still turns rain off.
+- Not done as written: "neon eyes". The eyes stay a client-side billboard (two frames): with S4.3 they are no longer replicated, and neon parts would need per-art eye positions. Logged here as the recommendation (D-015).
+MEASURED (DEV Play, owner's account, mock store; TEMPTEST scripts held 45 creatures plus a Barnacle Brute on night 1 and killed one every 0.5 s):
+- Replicated instances per creature: 0 (S4.3).
+- Over 60 s: 119 kills, 119 sounds, 0 new sound or burst parts (1 sound anchor with 24 attachments and 6 burst balls in total); enabled lights at most 1 (the Brute's); client 60 FPS minimum each second with 46 models; 0 client errors; server console only ProfileStore's refused Studio write (API off) and CorePackages UIBlox warnings.
+- New non-creature parts in that minute were loot drops (166, e.g. Loot_Shells), which S4.5 handles.
+- Phone FPS during a night-7 swarm: not measured (needs the owner's phone; queued).
+TESTRUNNER (DEV): 119 passed, 0 failed (no new pure logic).
+SCRIPT ANALYSIS: not measured (owner item).
+MIRROR: 84 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (32f19f1d).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+NEXT: S4.5 Loot.

@@ -15,11 +15,11 @@ Targets from `architecture.md` §23. Measured cells hold real numbers only. Base
 | Metric | Target | Baseline | S4.3 | S4.4 (phone) | B1.4 |
 |---|---|---|---|---|---|
 | FPS PC during night-7 swarm | 60 | not meaningful (unfocused Studio) | 60 (Studio PC, focused, 45 creatures, worst frame 18.6 ms) | | |
-| FPS low-end Android (device: ______) | ≥ 30 | not measured | | | |
+| FPS low-end Android (device: ______) | ≥ 30 | not measured | | owner check pending (S4.4/S4.7) | |
 | Replicated instances per creature | ≤ 3 | 7 | 0 (drawn by the client; the server creature folder holds only the prologue silhouette) | | |
-| Dynamic lights during a swarm | ≤ 4 (bosses) | up to ~20 | | | |
-| Transient sound/VFX parts per minute | ≤ 60 | hundreds (Part per sound) | | | |
-| Rain particles/s (touch) | ≤ 300 | 315 | | | |
+| Dynamic lights during a swarm | ≤ 4 (bosses) | up to ~20 | | 1 (S4.4: 45 creatures + a Barnacle Brute, 60 s; only big monsters carry a light) | |
+| Transient sound/VFX parts per minute | ≤ 60 | hundreds (Part per sound) | | 0 new (S4.4: 119 kills and 119 sounds in 60 s used 1 pooled sound part with 24 attachments and 6 pooled burst balls; loot drops are S4.5) | |
+| Rain particles/s (touch) | ≤ 300 | 315 | | 300 (S4.4 cap; set in code, not measured on a phone) | |
 
 ## First session
 | Metric | Target | Baseline | S2.4 | S3 (live) |

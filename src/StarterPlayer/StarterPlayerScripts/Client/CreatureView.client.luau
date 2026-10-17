@@ -5,6 +5,8 @@
 -- art) into workspace.Island.Creatures (client-only children, named by kind, so the coach still finds them),
 -- and pooled when a creature is gone. The walk bob, eye colour, health bar, beam tint, hit flash and the burst
 -- when one is burned away are all drawn here; nothing about a creature is replicated as an instance.
+-- S4.4 render budget: small creatures have no light (their eyes flash white when hit and orange when burning);
+-- big monsters show their health on the shared boss bar, not over their heads; kill bursts reuse a few parts.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
@@ -33,6 +35,9 @@ local EYE_PLAYER = Color3.fromRGB(255, 60, 50)
 local kinds = Snap.kinds(Creatures)
 local views = {} -- id -> view
 local pool = {} -- kind -> { model }
+local BURST_POOL = 6
+local bursts = {} -- reused kill-burst balls
+local nextBurst = 0
 
 local function has(state, bit)
 	return state // bit % 2 == 1
@@ -59,7 +64,12 @@ local function newView(id, kindIndex)
 			end
 		end
 	end
+	local stats = Creatures[kind]
 	local bar = body:FindFirstChild("HealthBar")
+	if bar and stats and stats.big then
+		bar.Enabled = false
+		bar = nil -- the HUD's boss bar shows a big monster's health
+	end
 	local view = {
 		id = id,
 		kind = kind,
@@ -86,22 +96,25 @@ local function newView(id, kindIndex)
 end
 
 local function burst(position)
-	local puff = Instance.new("Part")
-	puff.Shape = Enum.PartType.Ball
+	nextBurst = nextBurst % BURST_POOL + 1
+	local puff = bursts[nextBurst]
+	if not puff then
+		puff = Instance.new("Part")
+		puff.Name = "Burst"
+		puff.Shape = Enum.PartType.Ball
+		puff.Anchored = true
+		puff.CanCollide = false
+		puff.CanQuery = false
+		puff.CanTouch = false
+		puff.Material = Enum.Material.Neon
+		puff.Color = BURN_COLOR
+		puff.Parent = Workspace -- not the creature folder: the coach counts what is in there
+		bursts[nextBurst] = puff
+	end
 	puff.Size = Vector3.new(2, 2, 2)
-	puff.Anchored = true
-	puff.CanCollide = false
-	puff.CanQuery = false
-	puff.CanTouch = false
-	puff.Material = Enum.Material.Neon
-	puff.Color = BURN_COLOR
+	puff.Transparency = 0
 	puff.CFrame = CFrame.new(position)
-	puff.Parent = folder
-	local tween = TweenService:Create(puff, TweenInfo.new(0.35), { Size = Vector3.new(7, 7, 7), Transparency = 1 })
-	tween.Completed:Connect(function()
-		puff:Destroy()
-	end)
-	tween:Play()
+	TweenService:Create(puff, TweenInfo.new(0.35), { Size = Vector3.new(7, 7, 7), Transparency = 1 }):Play()
 end
 
 local function release(view)
@@ -180,7 +193,9 @@ RunService.RenderStepped:Connect(function()
 				view.feedback.Color = color
 			end
 		end
-		local eyeColor = if has(state, Snap.TARGET_PLAYER) then EYE_PLAYER
+		local eyeColor = if has(state, Snap.HIT) then HIT_COLOR
+			elseif has(state, Snap.BURNING) then BURN_COLOR
+			elseif has(state, Snap.TARGET_PLAYER) then EYE_PLAYER
 			elseif has(state, Snap.TARGET_CANNON) then EYE_CANNON
 			else EYE_TOWER
 		if eyeColor ~= view.eyeColor then

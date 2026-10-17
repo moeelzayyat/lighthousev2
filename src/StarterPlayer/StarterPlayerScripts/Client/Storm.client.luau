@@ -117,7 +117,8 @@ local function setStorm(on)
 	-- still reads as heavy rain): 900 drops/s was the heaviest thing on screen for mobile GPUs (Oct 12).
 	local touch = game:GetService("UserInputService").TouchEnabled
 	drops.Size = NumberSequence.new(if touch then 0.16 else 0.12)
-	drops.Rate = if localPlayer:GetAttribute("LowEffects") then 0 elseif touch then math.floor(preset.rainRate * 0.35) else preset.rainRate
+	-- S4.4: touch devices are capped at 300 drops/s (the render budget)
+	drops.Rate = if localPlayer:GetAttribute("LowEffects") then 0 elseif touch then math.min(300, math.floor(preset.rainRate * 0.35)) else preset.rainRate
 end
 
 localPlayer:GetAttributeChangedSignal("LowEffects"):Connect(function()

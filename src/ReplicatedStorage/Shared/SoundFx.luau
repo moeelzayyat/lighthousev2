@@ -67,22 +67,43 @@ local function makeSound(name)
 	return sound
 end
 
+-- S4.4 sound pool: 3D sounds play from a ring of Attachments on one invisible part instead of a new part each
+local SOUND_SLOTS = 24
+local soundAnchor = nil
+local soundSlots = {}
+local nextSlot = 0
+local function slotAt(position)
+	if not soundAnchor or not soundAnchor.Parent then
+		soundAnchor = Instance.new("Part")
+		soundAnchor.Name = "SoundAnchor"
+		soundAnchor.Size = Vector3.new(0.2, 0.2, 0.2)
+		soundAnchor.Transparency = 1
+		soundAnchor.Anchored = true
+		soundAnchor.CanCollide = false
+		soundAnchor.CanQuery = false
+		soundAnchor.CanTouch = false
+		soundAnchor.CFrame = CFrame.new()
+		soundAnchor.Parent = Workspace
+		soundSlots = {}
+		for i = 1, SOUND_SLOTS do
+			local slot = Instance.new("Attachment")
+			slot.Name = "Slot" .. i
+			slot.Parent = soundAnchor
+			soundSlots[i] = slot
+		end
+	end
+	nextSlot = nextSlot % SOUND_SLOTS + 1
+	local slot = soundSlots[nextSlot]
+	slot.WorldPosition = position
+	return slot
+end
+
 local function playLocalAt(name, position)
 	local sound = makeSound(name)
 	if not sound then
 		return
 	end
-	local anchor = Instance.new("Part")
-	anchor.Name = "SoundAnchor"
-	anchor.Size = Vector3.new(0.2, 0.2, 0.2)
-	anchor.Transparency = 1
-	anchor.Anchored = true
-	anchor.CanCollide = false
-	anchor.CanQuery = false
-	anchor.CanTouch = false
-	anchor.CFrame = CFrame.new(position)
-	anchor.Parent = Workspace
-	sound.Parent = anchor
+	sound.Parent = slotAt(position)
 	if sound.IsLoaded then
 		sound:Play()
 	else
@@ -97,7 +118,7 @@ local function playLocalAt(name, position)
 			end
 		end)
 	end
-	Debris:AddItem(anchor, 8)
+	Debris:AddItem(sound, 8)
 end
 
 local remote -- Remotes.PlaySound, found when first needed
