@@ -1349,3 +1349,20 @@ SIZES: PC window 2004×985: smallest tap 58.4 px; simulated 926×428 and 667×37
 SCREENSHOTS: `assets/screens/trader_menu/`.
 MIRROR: 166 scripts in DEV, digest identical to `src/` (9c75663d).
 OWNER: it reaches players with the next DEV publish.
+
+CHECKPOINT: MP.3 the BAG on the menu pattern — ✅ in DEV (Script Analysis unmeasured; the keeper picture and item icons could not be checked in Studio captures: its 3D view drew white; the owner judges the look)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: ServerStorage.Backups.BAG_before_2026-10-17 (Inventory, CodeBox) · restore points "BAG before", "BAG passed"
+BUILT:
+- `Inventory.client` rewritten on `UI/Tiles` (--!strict): KEEPER tab (your keeper: a turnable copy of your character holding the equipped weapon, with health, damage blocked and weapon damage per second; one tile per equipped slot, empty cosmetic slots shown; Fire Shell crates; Codes), WEAPONS, ARMOR, COSMETICS, SUPPLIES (crates and voyage loot). The detail pane compares with what is equipped (StatPipeline) and has one EQUIP / UNEQUIP button (starter gear stays on until something else is equipped; crates and loot explain where they are used).
+- The harbor HUD part is unchanged: the BAG button, B / D-pad Up, the Pearls pill and CODES (which now opens the BAG straight at the code box).
+- `CodeBox.send`: the code-sending rule (one code every 10 s) shared by the title screen box and the BAG's new box.
+- No server script or remote changed.
+TESTRUNNER (DEV, Play server): **258 passed, 0 failed**.
+PLAY TEST (DEV, harbor, Studio memory store; runtime helper gave a Storm Harpoon, a Storm Blue Coat and 3 crates): B opened it on KEEPER; equipped the Storm Harpoon (server profile: weapon StormHarpoon), equipped then unequipped the Storm Blue Coat (coat CoatStormBlue, then none); typed LIGHTHOUSE and pressed Redeem: "Code redeemed: 10 Pearls!" (50 → 60). 0 errors from game scripts.
+SIZES: PC 2004×985: smallest tap 56.5 px; simulated 926×428 and 667×375: smallest tap 56.1 px, no text overflowing; the code field was narrow on 667×375 and was widened after the screenshot.
+KNOWN: the code field is redrawn when new profile data arrives, so a half-typed code can clear then (rare: data arrives on changes).
+SCREENSHOTS: `assets/screens/bag_menu/`.
+MIRROR: 166 scripts in DEV, digest identical to `src/` (8a3c7939).
+NEXT: the owner's two island changes, ISL.1 (sniper tower into the water with a bridge) and ISL.2 (lighthouse island about 50% bigger).

@@ -295,3 +295,5 @@ Revisit: the owner's look verdict and a real phone.
 To revise: the place, the height, the damage (2 crab shots = 15), the fire rate, or letting creatures reach the climber.
 ## DEV published by the owner · 2026-10-17 23:16 UTC · carries the S3 measures and the sniper tower (SNP.1); backup `backups/LighthouseKeepers_DEV_S3_2026-10-17.rbxl`
 ## CP — MP.2 Trader on the menu pattern passed (🟦 Script Analysis unmeasured; the 3D item icons could not be checked: Studio's 3D view drew white) · 2026-10-17 · auto-approved (unattended) · DEV only · no server, remote or price change; TestRunner 258/258; smallest tap 56.1 px
+## CP — MP.3 the BAG on the menu pattern passed (🟦 Script Analysis unmeasured; the keeper picture could not be checked: Studio's 3D view drew white) · 2026-10-17 · auto-approved (unattended) · DEV only · no server or remote change; TestRunner 258/258; smallest tap 56.1 px
+## Owner request · 2026-10-17 23:42 UTC · project chat: put the sniper tower a little into the water with a small bridge (the island is crowded) and make the lighthouse island about 50% bigger; added to the plan as ISL.1 and ISL.2

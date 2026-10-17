@@ -1,15 +1,14 @@
--- Inventory (client): the player's own Locker / Loadout. Opens anywhere once you're in the game:
--- the BAG button (top right), the B key, or D-pad Up on a controller.
+--!strict
+-- Inventory (client): the BAG, the player's own locker and loadout. Opens anywhere once you're in the game: the BAG
+-- button, the B key, or D-pad Up on a controller (the harbor's CODES button opens it at the code box).
 --
 -- Shows ONLY owned items. No shop, no prices, no buying. Equip / Unequip go to LoadoutService
--- (LoadoutRequest -> LoadoutResult), the profile arrives on GearData. Nothing here changes data.
+-- (LoadoutRequest -> LoadoutResult); the profile arrives on GearData. Nothing here changes data.
 --
--- Built on UiKit v2.1 (Stage 3 of the UI redesign).
---   Wide (desktop):  EQUIPPED slots | avatar | owned-item grid | selected-item details
---   Medium (tablet / laptop): avatar over slots | grid | details
---   Phone (landscape): ITEMS view (grid first) -> tap -> DETAIL view (Back); separate LOADOUT view
--- Studio only: player attribute HudSimulate = smallPhone / largePhone / tablet / laptop draws this
--- menu inside a screen of that exact size (shared with the HUD simulator).
+-- MP.3: built on the menu pattern (UI/Tiles, D-041/D-042, like the Quartermaster, the bench and the Trader). Tabs:
+-- KEEPER (your keeper with what the gear adds up to, one tile per equipped slot, and the code box), WEAPONS, ARMOR,
+-- COSMETICS and SUPPLIES (ammo crates and voyage loot). The detail pane compares an item with what is equipped and
+-- has one big EQUIP / UNEQUIP button. Studio only: player attribute HudSimulate is handled by Tiles.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -17,46 +16,65 @@ local HttpService = game:GetService("HttpService")
 local GuiService = game:GetService("GuiService")
 local UserInputService = game:GetService("UserInputService")
 local ContextActionService = game:GetService("ContextActionService")
-local RunService = game:GetService("RunService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
-local Items = require(Shared:WaitForChild("Items"))
-local Weapons = require(Shared:WaitForChild("Weapons"))
-local Ammo = require(Shared:WaitForChild("Ammo"))
-local StatPipeline = require(Shared:WaitForChild("StatPipeline")) -- S5.7: the values previews and voyages share
-local UiKit = require(script.Parent:WaitForChild("UiKit"))
-local ItemPreview = require(script.Parent:WaitForChild("ItemPreview"))
+local Items = require(Shared:WaitForChild("Items")) :: any
+local Weapons = require(Shared:WaitForChild("Weapons")) :: any
+local Ammo = require(Shared:WaitForChild("Ammo")) :: any
+local SoundFx = require(Shared:WaitForChild("SoundFx")) :: any
+local StatPipeline = require(Shared:WaitForChild("StatPipeline")) :: any -- S5.7: the values previews and voyages share
+local UiKit = require(script.Parent:WaitForChild("UiKit")) :: any
+local Tiles = require(script.Parent:WaitForChild("UI"):WaitForChild("Tiles")) :: any
+local ItemPreview = require(script.Parent:WaitForChild("ItemPreview")) :: any
+local CodeBox = require(script.Parent:WaitForChild("CodeBox")) :: any
 
-local C, F = UiKit.Color, UiKit.Font
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local ItemModels = ReplicatedStorage:WaitForChild("ItemModels")
 local player = Players.LocalPlayer
 
-local STARTERS = { Primary = "DriftwoodHarpoon", Armor = "OilskinCoat", Beam = "BeamAmber" }
+local STARTERS: { [string]: string } = { Primary = "DriftwoodHarpoon", Armor = "OilskinCoat", Beam = "BeamAmber" }
 local REQUEST_TIMEOUT = 8
+local SLOTS = {
+	{ key = "Primary", label = "Primary weapon" },
+	{ key = "Armor", label = "Armor" },
+	{ key = "Beam", label = "Lamp beam colour" },
+	{ key = "Housing", label = "Lamp housing" },
+	{ key = "Coat", label = "Keeper coat" },
+	{ key = "Lantern", label = "Lantern" },
+	{ key = "Flag", label = "Ship flag" },
+}
+local TABS = {
+	{ id = "Keeper", label = "Keeper" },
+	{ id = "Weapons", label = "Weapons" },
+	{ id = "Armor", label = "Armor" },
+	{ id = "Cosmetics", label = "Cosmetics" },
+	{ id = "Supplies", label = "Supplies" },
+}
+local TAB_CATEGORIES: { [string]: { [string]: boolean } } = {
+	Weapons = { Weapons = true },
+	Armor = { Armor = true },
+	Cosmetics = { Cosmetics = true },
+	Supplies = { Ammunition = true, Materials = true },
+}
 
-local profile = nil
+local profile: any = nil
 local isOpen = false
-local filter = "All"
-local selectedId = nil
-local pendingId = nil
-local mode = "wide" -- "wide" | "medium" | "phone"
-local phoneView = "items" -- "items" | "detail" | "loadout"
-local simulated = nil
-local layout, setOpen, cardsFocusTarget -- forward declarations
+local tab = "Keeper"
+local selectedId: string? = nil
+local pendingId: string? = nil
 
 ---------------------------------------------------------------------
 -- FACTS
 ---------------------------------------------------------------------
 
-local function count(itemId)
+local function count(itemId: string): number
 	return if profile then (profile.counts[itemId] or 0) else 0
 end
-local function owns(itemId)
+local function owns(itemId: string): boolean
 	return profile ~= nil and (profile.owned[itemId] == true or count(itemId) > 0)
 end
 local EQUIPPED_FIELDS = { "equippedWeapon", "equippedArmor", "equippedBeam", "equippedHousing", "equippedCoat", "equippedLantern", "equippedFlag" }
-local function isEquipped(itemId)
+local function isEquipped(itemId: string): boolean
 	if not profile then
 		return false
 	end
@@ -67,11 +85,11 @@ local function isEquipped(itemId)
 	end
 	return false
 end
-local function dps(weaponId)
+local function dps(weaponId: string): number
 	local w = StatPipeline.weapon(weaponId)
 	return w.damage / w.cooldown
 end
-local function equippedFor(slot)
+local function equippedFor(slot: string): string?
 	if not profile then
 		return nil
 	end
@@ -81,7 +99,7 @@ local function equippedFor(slot)
 		elseif slot == "Housing" or slot == "Coat" or slot == "Lantern" or slot == "Flag" then profile["equipped" .. slot] -- L1.3
 		else nil
 end
-local function typeLabel(item)
+local function typeLabel(item: any): string
 	if item.kind == "Weapon" then
 		return "Primary weapon"
 	elseif item.kind == "Armor" then
@@ -91,246 +109,76 @@ local function typeLabel(item)
 	elseif item.kind == "Material" then
 		return "Voyage loot"
 	elseif item.kind == "Cosmetic" then
-		local labels = { Beam = "Beam colour", Housing = "Lamp housing", Coat = "Keeper coat", Lantern = "Lantern", Flag = "Ship flag" }
+		local labels: { [string]: string } = { Beam = "Lamp beam colour", Housing = "Lamp housing", Coat = "Keeper coat", Lantern = "Lantern", Flag = "Ship flag" }
 		return (labels[item.slot] or "Cosmetic") .. " \u{00B7} looks only"
 	end
 	return item.category
 end
 
--- Stat rows for an item: { label, value, delta = number or nil, better = true/false/nil }
--- delta compares with what is equipped in the same slot (nil when this IS the equipped item)
-local function statRows(itemId)
+-- the detail pane's stat lines, compared with what is equipped in the same slot (StatPipeline)
+local function statLines(itemId: string): { any }
 	local item = Items[itemId]
-	local rows = {}
+	local lines = {}
+	local function add(labelText: string, value: number, now: number?, higherIsBetter: boolean, fmt: (number) -> string)
+		if now ~= nil and now ~= value then
+			table.insert(lines, { label = labelText, from = fmt(now), to = fmt(value), better = if higherIsBetter then value > now else value < now })
+		else
+			table.insert(lines, { label = labelText, value = fmt(value) })
+		end
+	end
 	if item.kind == "Weapon" then
 		local w = StatPipeline.weapon(itemId)
 		local current = profile and profile.equippedWeapon
-		local cw = current and current ~= itemId and Weapons[current] and StatPipeline.weapon(current)
-		local function add(label, value, a, b, higherIsBetter, fmt)
-			local delta, better
-			if cw and a ~= b then
-				delta = a - b
-				better = if higherIsBetter then delta > 0 else delta < 0
-			end
-			table.insert(rows, { label = label, value = value, delta = delta, better = better, fmt = fmt })
-		end
-		add("Damage per hit", tostring(w.damage), w.damage, cw and cw.damage, true, "%+d")
-		add("Reload", string.format("%.1f s", w.cooldown), w.cooldown, cw and cw.cooldown, false, "%+.1f s")
-		add("Targets per throw", if w.maxTargets > 1 then ("up to " .. w.maxTargets) else "1", w.maxTargets, cw and cw.maxTargets, true, "%+d")
-		add("Damage per second", tostring(math.floor(dps(itemId) + 0.5)), math.floor(dps(itemId) + 0.5), cw and math.floor(dps(current) + 0.5), true, "%+d")
+		local cw = if current and current ~= itemId and Weapons[current] then StatPipeline.weapon(current) else nil
+		add("Damage per hit", w.damage, cw and cw.damage, true, tostring)
+		add("Reload", w.cooldown, cw and cw.cooldown, false, function(v)
+			return string.format("%.1f s", v)
+		end)
+		add("Targets per throw", w.maxTargets, cw and cw.maxTargets, true, tostring)
+		add("Damage per second", math.floor(dps(itemId) + 0.5), if cw and current then math.floor(dps(current) + 0.5) else nil, true, tostring)
 	elseif item.kind == "Armor" then
 		local current = profile and profile.equippedArmor
-		local ca = current and current ~= itemId and Items[current] and StatPipeline.armor(current)
+		local ca = if current and current ~= itemId and Items[current] then StatPipeline.armor(current) else nil
 		local mine = StatPipeline.armor(itemId)
-		local function add(label, value, a, b, fmt)
-			local delta, better
-			if ca and a ~= b then
-				delta = a - b
-				better = delta > 0
-			end
-			table.insert(rows, { label = label, value = value, delta = delta, better = better, fmt = fmt })
-		end
-		add("Health", tostring(mine.maxHealth), mine.maxHealth, ca and ca.maxHealth, "%+d")
-		local red = math.floor(mine.damageReduction * 100 + 0.5)
-		add("Damage blocked", red .. "%", red, ca and math.floor(ca.damageReduction * 100 + 0.5), "%+d%%")
+		add("Health", mine.maxHealth, ca and ca.maxHealth, true, tostring)
+		add("Damage blocked", math.floor(mine.damageReduction * 100 + 0.5), if ca then math.floor(ca.damageReduction * 100 + 0.5) else nil, true, function(v)
+			return v .. "%"
+		end)
 	elseif item.kind == "Ammo" then
 		local a = Ammo[item.ammoType]
-		table.insert(rows, { label = "Crates", value = string.format("%d / %d", count(itemId), item.maxStack) })
-		table.insert(rows, { label = "Shots per crate", value = tostring(a.shotsPerLoad) })
-		table.insert(rows, { label = "Cannon damage", value = string.format("x%.1f", a.damageMultiplier) })
+		table.insert(lines, { label = "Crates", value = string.format("%d / %d", count(itemId), item.maxStack) })
+		table.insert(lines, { label = "Shots per crate", value = tostring(a.shotsPerLoad) })
+		table.insert(lines, { label = "Cannon damage", value = string.format("x%.1f", a.damageMultiplier) })
 	elseif item.kind == "Material" then
 		local n = count(itemId)
-		table.insert(rows, { label = "Carried", value = tostring(n) })
-		table.insert(rows, { label = "Trader pays each", value = (item.shellValue or 0) .. " Shells" })
-		table.insert(rows, { label = "Worth now", value = (n * (item.shellValue or 0)) .. " Shells" })
+		table.insert(lines, { label = "Carried", value = tostring(n) })
+		table.insert(lines, { label = "Trader pays each", value = (item.shellValue or 0) .. " Shells" })
+		table.insert(lines, { label = "Worth now", value = (n * (item.shellValue or 0)) .. " Shells" })
+	elseif item.kind == "Cosmetic" then
+		table.insert(lines, { label = "Power", value = "none: looks only" })
 	end
-	return rows
-end
-
-local function ownedList()
-	local list = {}
-	for _, itemId in Items.SHOP_ORDER do
-		local item = Items[itemId]
-		if owns(itemId) and (filter == "All" or item.category == filter) then
-			table.insert(list, itemId)
-		end
-	end
-	return list
+	return lines
 end
 
 ---------------------------------------------------------------------
--- SCREENS
+-- MENU
 ---------------------------------------------------------------------
 
-local scrimGui = UiKit.Screen("InventoryScrim", 17, true)
-scrimGui.Enabled = false
-local scrim = UiKit.new("TextButton", {
-	Name = "Scrim",
-	Text = "",
-	AutoButtonColor = false,
-	Selectable = false,
-	BackgroundColor3 = C.Scrim,
-	BackgroundTransparency = 0.3,
-	BorderSizePixel = 0,
-	Size = UDim2.fromScale(1, 1),
-}, scrimGui)
-
-local gui = UiKit.Screen("Inventory", 18)
-gui.Enabled = false
-local root = UiKit.new("Frame", { Name = "Root", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1) }, gui)
-local rootOutline = UiKit.border(root, C.BorderFocus, 1, 0.4)
-rootOutline.Enabled = false
-
-local panel = UiKit.Panel(root, { name = "LockerPanel", kind = "housing", beam = true, padding = 0, anchor = Vector2.new(0.5, 0.5), position = UDim2.fromScale(0.5, 0.5) })
-panel.ClipsDescendants = false
-
--- header ------------------------------------------------------------------
-local header = UiKit.new("Frame", { Name = "Header", BackgroundTransparency = 1, Position = UDim2.fromOffset(20, 14), Size = UDim2.new(1, -40, 0, 52) }, panel)
-local titleBlock = UiKit.new("Frame", { Name = "TitleBlock", BackgroundTransparency = 1, Size = UDim2.new(0, 260, 1, 0) }, header)
-UiKit.list(titleBlock, "y", 0, { VerticalAlignment = Enum.VerticalAlignment.Center })
-local eyebrow = UiKit.Label(titleBlock, "Keeper's locker", "Eyebrow", { LayoutOrder = 1, Size = UDim2.new(1, 0, 0, 18), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false })
-local title = UiKit.Label(titleBlock, "Loadout", "H2", { LayoutOrder = 2, Size = UDim2.new(1, 0, 0, 30), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false })
-
-local saveNote = UiKit.new("Frame", { Name = "SaveNote", BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, -56, 0.5, 0), Size = UDim2.fromOffset(0, 24), AutomaticSize = Enum.AutomaticSize.X, Visible = false }, header)
-UiKit.list(saveNote, "x", 6, { VerticalAlignment = Enum.VerticalAlignment.Center })
-UiKit.Glyph(saveNote, "warning", C.StateWarning, 14).LayoutOrder = 1
-UiKit.Label(saveNote, "Saving is offline. Changes last until you leave.", "Micro", { LayoutOrder = 2, Size = UDim2.fromOffset(0, 18), AutomaticSize = Enum.AutomaticSize.X, TextWrapped = false, TextColor3 = C.StateWarning })
-
-local phoneNav = UiKit.Tabs(header, { { id = "items", label = "Items" }, { id = "loadout", label = "Loadout" } }, {
-	size = UDim2.fromOffset(240, 46),
-	textSize = 16,
-	minWidth = 100,
-	onChange = function(id)
-		phoneView = id
-		layout()
+local setOpen: (boolean, string?) -> () -- forward
+local renderAll: () -> () -- forward
+local equip: (string, string) -> () -- forward
+local menu = Tiles.Menu({
+	name = "Inventory",
+	displayOrder = 18,
+	title = "Bag",
+	onClose = function()
+		setOpen(false)
 	end,
 })
-phoneNav.frame.AnchorPoint = Vector2.new(0.5, 0.5)
-phoneNav.frame.Position = UDim2.fromScale(0.5, 0.5)
 
-local backButton = UiKit.Button(header, "Back", { name = "Back", variant = "secondary", size = "sm", minWidth = 96, onClick = function()
-	phoneView = "items"
-	layout()
-	if cardsFocusTarget then
-		cardsFocusTarget()
-	end
-end })
-backButton.AnchorPoint = Vector2.new(0, 0.5)
-backButton.Position = UDim2.new(0, 0, 0.5, 0)
-
-local closeButton = UiKit.IconButton(header, "close", { name = "Close", quiet = true, tip = "Close", onClick = function()
-	setOpen(false)
-end })
-closeButton.AnchorPoint = Vector2.new(1, 0.5)
-closeButton.Position = UDim2.new(1, 6, 0.5, 0)
-
-local body = UiKit.new("Frame", { Name = "Body", BackgroundTransparency = 1 }, panel)
-
--- column containers (positioned by layout) ---------------------------------
-local slotsCol = UiKit.new("Frame", { Name = "SlotsColumn", BackgroundTransparency = 1 }, body)
-local avatarCol = UiKit.new("Frame", { Name = "AvatarColumn", BackgroundTransparency = 1 }, body)
-local gridCol = UiKit.new("Frame", { Name = "GridColumn", BackgroundTransparency = 1 }, body)
-local detailCol = UiKit.new("Frame", { Name = "DetailColumn", BackgroundTransparency = 1 }, body)
-
----------------------------------------------------------------------
--- EQUIPPED SLOTS
----------------------------------------------------------------------
-
-local slotsList = UiKit.Scroll(slotsCol, { Name = "Slots", ScrollBarThickness = 4 }) -- scrolls only when a short screen needs it
-UiKit.list(slotsList, "y", 8)
-UiKit.pad(slotsList, 2, 6, 2, 0)
-local slotsSection = UiKit.Section(slotsList, "Equipped", { layoutOrder = 1, gap = 8 })
-
-local slotWidgets = {}
-local function makeSlot(parent, order, key, label)
-	local b = UiKit.new("TextButton", {
-		Name = "Slot_" .. key,
-		Text = "",
-		AutoButtonColor = false,
-		BackgroundColor3 = C.SurfaceSecondary,
-		Size = UDim2.new(1, 0, 0, 66),
-		LayoutOrder = order,
-	}, parent)
-	UiKit.round(b, UiKit.Radius.card)
-	local stroke = UiKit.border(b, C.BorderSubtle, 1, 0.2)
-	UiKit.focusable(b)
-	local well = UiKit.Inset(b, { Name = "Well", Position = UDim2.fromOffset(7, 7), Size = UDim2.fromOffset(52, 52), ClipsDescendants = true })
-	local icon = ItemPreview.new(well, {})
-	local slotLabel = UiKit.Label(b, label, "Caption", { Position = UDim2.fromOffset(70, 10), Size = UDim2.new(1, -80, 0, 16), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false })
-	local name = UiKit.Label(b, "", "H3", {
-		Name = "ItemName",
-		Position = UDim2.fromOffset(70, 28),
-		Size = UDim2.new(1, -80, 0, 22),
-		AutomaticSize = Enum.AutomaticSize.None,
-		TextWrapped = false,
-		TextTruncate = Enum.TextTruncate.AtEnd,
-		TextSize = 17,
-	})
-	b.MouseEnter:Connect(function()
-		b.BackgroundColor3 = C.SurfaceHover
-	end)
-	b.MouseLeave:Connect(function()
-		b.BackgroundColor3 = C.SurfaceSecondary
-	end)
-	slotWidgets[key] = { button = b, icon = icon, name = name, label = slotLabel, stroke = stroke }
-	return b
-end
-makeSlot(slotsSection, 1, "Primary", "Primary weapon")
-makeSlot(slotsSection, 2, "Armor", "Armor")
-makeSlot(slotsSection, 3, "Beam", "Lamp beam colour") -- launch R15: looks only
-makeSlot(slotsSection, 4, "Housing", "Lamp housing") -- L1.3: looks only
-makeSlot(slotsSection, 5, "Coat", "Keeper coat")
-makeSlot(slotsSection, 6, "Lantern", "Lantern")
-makeSlot(slotsSection, 7, "Flag", "Ship flag")
-
--- supplies: Fire Shell crates are used automatically by cannons (not an equip slot)
-local suppliesSection = UiKit.Section(slotsList, "Supplies", { layoutOrder = 2, gap = 8 })
-makeSlot(suppliesSection, 1, "Ammo", "Cannon ammo")
-
--- loadout summary: what your gear adds up to
-local summarySection = UiKit.Section(slotsList, "Your keeper", { layoutOrder = 3, gap = 6 })
--- LO.4: codes here too, so players who skip the title screen can use them
-local codesSection = UiKit.Section(slotsList, "Codes", { layoutOrder = 4, gap = 6 })
-require(script.Parent:WaitForChild("CodeBox")).build(codesSection, root, 1)
-local summaryRows = {}
-local function summaryRow(order, label)
-	local row = UiKit.new("Frame", { Name = "Summary_" .. order, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 22), LayoutOrder = order }, summarySection)
-	UiKit.Label(row, label, "BodySmall", { Size = UDim2.new(0.62, 0, 1, 0), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false, TextYAlignment = Enum.TextYAlignment.Center })
-	local value = UiKit.new("TextLabel", {
-		BackgroundTransparency = 1,
-		FontFace = F.Numeric,
-		TextSize = 17,
-		TextColor3 = C.TextPrimary,
-		TextXAlignment = Enum.TextXAlignment.Right,
-		AnchorPoint = Vector2.new(1, 0),
-		Position = UDim2.fromScale(1, 0),
-		Size = UDim2.new(0.38, 0, 1, 0),
-	}, row)
-	summaryRows[order] = value
-	return value
-end
-summaryRow(1, "Health")
-summaryRow(2, "Damage blocked")
-summaryRow(3, "Weapon damage / s")
----------------------------------------------------------------------
--- AVATAR
----------------------------------------------------------------------
-
-local avatarWell = UiKit.Inset(avatarCol, { Name = "AvatarWell", Size = UDim2.fromScale(1, 1), ClipsDescendants = true })
-UiKit.border(avatarWell, C.BorderStructural, 1, 0.6)
-local avatarPreview = ItemPreview.new(avatarWell, { rotatable = true })
-UiKit.Label(avatarWell, "Drag to turn", "Micro", {
-	Name = "Hint",
-	AnchorPoint = Vector2.new(0.5, 1),
-	Position = UDim2.new(0.5, 0, 1, -8),
-	Size = UDim2.new(1, -16, 0, 16),
-	AutomaticSize = Enum.AutomaticSize.None,
-	TextXAlignment = Enum.TextXAlignment.Center,
-	ZIndex = 4,
-})
-
-local function placeHeld(copy, hand, model)
-	local held = model:Clone()
+-- your keeper as the detail pane's picture: a copy of your character holding the equipped weapon
+local function placeHeld(copy: Model, hand: BasePart, model: Instance)
+	local held = model:Clone() :: any
 	local bboxCf, size = held:GetBoundingBox()
 	local long = math.max(size.X, size.Y, size.Z)
 	-- stand long weapons upright in the hand like a staff; small ones keep their own pose
@@ -342,14 +190,14 @@ local function placeHeld(copy, hand, model)
 			rot = CFrame.Angles(math.rad(-90), 0, 0)
 		end
 	end
-	local hrp = copy:FindFirstChild("HumanoidRootPart")
+	local hrp = copy:FindFirstChild("HumanoidRootPart") :: BasePart?
 	local yaw = if hrp then hrp.CFrame.Rotation else CFrame.new()
 	local target = CFrame.new(hand.Position + Vector3.new(0, if long >= 2 then long * 0.22 else 0, 0)) * yaw * rot
 	held:PivotTo(target * bboxCf:ToObjectSpace(held:GetPivot()))
 	held.Parent = copy
 end
 
-local function refreshAvatar()
+local function avatarIcon(holder: Instance)
 	local character = player.Character
 	if not character or not profile then
 		return
@@ -364,595 +212,335 @@ local function refreshAvatar()
 			d:Destroy()
 		end
 	end
-	local hand = copy:FindFirstChild("RightHand") or copy:FindFirstChild("Right Arm")
+	local hand = (copy:FindFirstChild("RightHand") or copy:FindFirstChild("Right Arm")) :: BasePart?
 	local weaponItem = Items[profile.equippedWeapon]
 	local weaponModel = weaponItem and ItemModels:FindFirstChild(weaponItem.model)
 	if hand and weaponModel then
 		pcall(placeHeld, copy, hand, weaponModel)
 	end
-	avatarPreview:setModel(copy, "Avatar")
+	local preview = ItemPreview.new(holder, { rotatable = true, backdrop = false })
+	preview:setModel(copy, "Avatar")
 	copy:Destroy()
 end
 
+local function glyphIcon(kind: string, color: Color3): (Instance) -> ()
+	return function(holder: Instance)
+		Tiles.glyph(holder, kind, color)
+	end
+end
+
 ---------------------------------------------------------------------
--- GRID
+-- TILES
 ---------------------------------------------------------------------
 
-local filterItems = {}
-for _, name in Items.INVENTORY_FILTERS do
-	-- short labels so all five fit on one row at every size
-	local short = ({ Ammunition = "Ammo", Materials = "Loot" })[name] or name
-	table.insert(filterItems, { id = name, label = short, color = if name == "All" then nil else UiKit.CATEGORY[name] })
+local function keeperTiles(): { any }
+	local list: { any } = {
+		{ id = "Keeper", name = "Your keeper", icon = glyphIcon("heart", Color3.fromRGB(240, 80, 90)) },
+	}
+	for _, slot in SLOTS do
+		local itemId = equippedFor(slot.key)
+		if itemId and Items[itemId] then
+			table.insert(list, { id = "Slot_" .. slot.key, name = Items[itemId].name, icon = itemId, owned = true, ownedText = "Equipped" })
+		elseif slot.key ~= "Primary" and slot.key ~= "Armor" then
+			table.insert(list, { id = "Slot_" .. slot.key, name = slot.label, icon = glyphIcon("plus", Color3.fromRGB(120, 140, 160)) })
+		end
+	end
+	local crates = count("FireShellCrate")
+	if crates > 0 then
+		table.insert(list, { id = "FireShellCrate", name = Items.FireShellCrate.name, icon = "FireShellCrate", qty = crates })
+	end
+	table.insert(list, { id = "Codes", name = "Codes", icon = glyphIcon("check", Color3.fromRGB(255, 200, 80)) })
+	return list
 end
-local renderGrid
-local filterTabs = UiKit.Tabs(gridCol, filterItems, {
-	size = UDim2.new(1, 0, 0, 46),
-	textSize = 16,
-	minWidth = 0,
-	shoulders = true,
-	onChange = function(id)
-		filter = id
-		selectedId = nil
-		renderGrid()
-	end,
-})
-local gridScroll = UiKit.Scroll(gridCol, { Name = "Grid", Position = UDim2.fromOffset(0, 56), Size = UDim2.new(1, 0, 1, -56) })
-local gridLayout = UiKit.new("UIGridLayout", { CellPadding = UDim2.fromOffset(10, 10), SortOrder = Enum.SortOrder.LayoutOrder }, gridScroll)
-UiKit.pad(gridScroll, 6, 6, 6, 6)
-local gridState = nil -- StateView shown instead of cards
+
+local function itemTiles(): { any }
+	local list = {}
+	local cats = TAB_CATEGORIES[tab] or {}
+	for _, itemId in Items.SHOP_ORDER do
+		local item = Items[itemId]
+		if cats[item.category] and owns(itemId) then
+			local n = count(itemId)
+			local equipped = isEquipped(itemId)
+			table.insert(list, {
+				id = itemId,
+				name = item.name,
+				icon = itemId,
+				owned = equipped,
+				ownedText = "Equipped",
+				qty = if n > 0 then n else nil,
+			})
+		end
+	end
+	return list
+end
 
 ---------------------------------------------------------------------
 -- DETAIL
 ---------------------------------------------------------------------
 
-local detail = UiKit.new("Frame", { Name = "Detail", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1) }, detailCol)
-local detailWell = UiKit.Inset(detail, { Name = "PreviewWell", ClipsDescendants = true })
-local bigPreview = ItemPreview.new(detailWell, { rotatable = true })
-local detailInfo = UiKit.Scroll(detail, { Name = "Info", ScrollBarThickness = 4 })
-UiKit.list(detailInfo, "y", 8)
-UiKit.pad(detailInfo, 0, 6, 8, 0)
-
-local dName = UiKit.Label(detailInfo, "", "H2", { Name = "ItemName", LayoutOrder = 1 })
-local dTags = UiKit.new("Frame", { Name = "Tags", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 20), LayoutOrder = 2 }, detailInfo)
-UiKit.list(dTags, "x", 6)
-local dDesc = UiKit.Label(detailInfo, "", "BodySmall", { Name = "Description", LayoutOrder = 3, TextColor3 = C.TextPrimary })
-local statsSection = UiKit.Section(detailInfo, "Stats", { layoutOrder = 4, gap = 4 })
-local compareCaption = UiKit.Label(detailInfo, "", "Micro", { Name = "CompareCaption", LayoutOrder = 5 })
-local tradeFrame = UiKit.new("Frame", { Name = "Tradeoffs", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = 6 }, detailInfo)
-UiKit.list(tradeFrame, "y", 4)
-local function tradeLine(order, glyph, color)
-	local row = UiKit.new("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = order }, tradeFrame)
-	local g = UiKit.Glyph(row, glyph, color, 14)
-	g.Position = UDim2.fromOffset(0, 2)
-	local text = UiKit.Label(row, "", "BodySmall", { Position = UDim2.fromOffset(22, 0), Size = UDim2.new(1, -22, 0, 0), TextColor3 = C.TextPrimary })
-	return row, text
-end
-local strengthRow, strengthText = tradeLine(1, "plus", C.StateSuccess)
-local tradeoffRow, tradeoffText = tradeLine(2, "minus", C.StateWarning)
-local statusText = UiKit.Label(detailInfo, "", "Micro", { Name = "Status", LayoutOrder = 7 })
-
-local actionButton = UiKit.Button(detail, "Equip", { name = "EquipButton", variant = "primary", size = "md", fill = true })
-actionButton.AnchorPoint = Vector2.new(0, 1)
-actionButton.Position = UDim2.fromScale(0, 1)
-
-local detailEmpty = UiKit.StateView(detail, "empty", { title = "Nothing selected", body = "Pick an item or an equipped slot to see its details." })
-detailEmpty.Visible = false
-
-local statWidgets = {}
-local function renderStats(rows)
-	for _, w in statWidgets do
-		w:Destroy()
-	end
-	table.clear(statWidgets)
-	for index, r in rows do
-		local row = UiKit.new("Frame", { Name = "Stat_" .. index, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 24), LayoutOrder = index }, statsSection)
-		UiKit.Label(row, r.label, "BodySmall", { Size = UDim2.new(1, -170, 1, 0), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false, TextTruncate = Enum.TextTruncate.AtEnd, TextYAlignment = Enum.TextYAlignment.Center })
-		local right = UiKit.new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0), Position = UDim2.fromScale(1, 0), Size = UDim2.fromOffset(0, 24), AutomaticSize = Enum.AutomaticSize.X }, row)
-		UiKit.list(right, "x", 6, { HorizontalAlignment = Enum.HorizontalAlignment.Right, VerticalAlignment = Enum.VerticalAlignment.Center })
-		if r.delta then
-			-- sign + word, never color alone
-			local text = string.format(r.fmt, r.delta)
-			local tag = UiKit.Tag(right, text .. (if r.better then "  better" else "  worse"), if r.better then "StateSuccess" else "StateWarning", { layoutOrder = 1 })
-			tag.Name = "Delta"
-		end
-		UiKit.new("TextLabel", {
-			Name = "Value",
-			BackgroundTransparency = 1,
-			FontFace = F.Numeric,
-			TextSize = 17,
-			TextColor3 = C.TextPrimary,
-			Size = UDim2.fromOffset(0, 24),
-			AutomaticSize = Enum.AutomaticSize.X,
-			Text = r.value,
-			LayoutOrder = 2,
-		}, right)
-		table.insert(statWidgets, row)
-	end
-end
----------------------------------------------------------------------
--- RENDERING
----------------------------------------------------------------------
-
-local cards = {}
-
-local function renderSlots()
-	if not profile then
-		return
-	end
-	for key, w in slotWidgets do
-		local itemId = if key == "Ammo" then nil else equippedFor(key)
-		if key == "Ammo" then
-			local crates = count("FireShellCrate")
-			if crates > 0 then
-				w.icon:setItem("FireShellCrate")
-				w.name.Text = string.format("Fire Shells  x%d", crates)
-				w.name.TextColor3 = C.TextPrimary
-			else
-				w.icon:setModel(nil)
-				w.name.Text = "None: cannons use oil"
-				w.name.TextColor3 = C.TextMuted
-			end
-			itemId = if crates > 0 then "FireShellCrate" else nil
-		else
-			w.icon:setItem(itemId)
-			w.name.Text = if itemId and Items[itemId] then Items[itemId].name else "None"
-			w.name.TextColor3 = C.TextPrimary
-		end
-		local selected = itemId ~= nil and itemId == selectedId
-		w.stroke.Color = if selected then C.BorderSelected else C.BorderSubtle
-		w.stroke.Transparency = if selected then 0 else 0.2
-	end
-	local armor = Items[profile.equippedArmor] and StatPipeline.armor(profile.equippedArmor)
-	summaryRows[1].Text = tostring(armor and armor.maxHealth or 100)
-	summaryRows[2].Text = (if armor then math.floor(armor.damageReduction * 100 + 0.5) else 0) .. "%"
-	summaryRows[3].Text = if Weapons[profile.equippedWeapon] then tostring(math.floor(dps(profile.equippedWeapon) + 0.5)) else "-"
+local function keeperDetail(): any
+	local armor = if profile and Items[profile.equippedArmor] then StatPipeline.armor(profile.equippedArmor) else nil
+	return {
+		icon = avatarIcon,
+		name = player.DisplayName,
+		description = "What your gear adds up to. Pick a slot to change it.",
+		stats = {
+			{ label = "Health", value = tostring(armor and armor.maxHealth or 100) },
+			{ label = "Damage blocked", value = (if armor then math.floor(armor.damageReduction * 100 + 0.5) else 0) .. "%" },
+			{ label = "Weapon damage / s", value = if profile and Weapons[profile.equippedWeapon] then tostring(math.floor(dps(profile.equippedWeapon) + 0.5)) else "-" },
+		},
+	}
 end
 
-local renderDetail
-
-local function select(itemId)
-	if selectedId and cards[selectedId] then
-		cards[selectedId].setSelected(false)
-	end
-	selectedId = itemId
-	if itemId and cards[itemId] then
-		cards[itemId].setSelected(true)
-	end
-	if mode == "phone" and itemId then
-		phoneView = "detail"
-		layout()
-	end
-	renderSlots()
-	renderDetail()
+local function codesDetail(): any
+	return {
+		icon = glyphIcon("check", Color3.fromRGB(255, 200, 80)),
+		name = "Codes",
+		description = "Type a code from the game's page or a creator, then press Redeem. Each code works once.",
+		extra = function(container: Instance, unit: any)
+			local row = UiKit.new("Frame", { Name = "CodeRow", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, unit.min + 8) }, container)
+			local box = UiKit.new("TextBox", {
+				Name = "CodeBox",
+				BackgroundColor3 = Color3.fromRGB(20, 34, 50),
+				BorderSizePixel = 0,
+				Size = UDim2.new(1, -(unit.min + 52), 0, unit.min),
+				FontFace = UiKit.Font.BodyBold,
+				TextSize = 28,
+				TextColor3 = Color3.new(1, 1, 1),
+				PlaceholderColor3 = Color3.fromRGB(150, 165, 185),
+				PlaceholderText = "Type a code",
+				Text = "",
+				ClearTextOnFocus = false,
+				TextXAlignment = Enum.TextXAlignment.Left,
+			}, row)
+			UiKit.new("UICorner", { CornerRadius = UDim.new(0, 14) }, box)
+			UiKit.new("UIStroke", { Thickness = 3, Color = Color3.fromRGB(10, 18, 28) }, box)
+			UiKit.new("UIPadding", { PaddingLeft = UDim.new(0, 14), PaddingRight = UDim.new(0, 14) }, box)
+			local redeem = Tiles.bigButton(row, "Redeem")
+			redeem.button.AnchorPoint = Vector2.new(1, 0)
+			redeem.button.Position = UDim2.new(1, 0, 0, 0)
+			redeem.button.Size = UDim2.fromOffset(unit.min + 40, unit.min) -- the field gets the room on phones
+			redeem.paint({ face = Color3.fromRGB(255, 194, 61), edge = Color3.fromRGB(179, 123, 12), text = Color3.fromRGB(42, 21, 0) }, "Redeem")
+			redeem.button.Activated:Connect(function()
+				CodeBox.send(box.Text, menu.root)
+			end)
+		end,
+	}
 end
 
-local function setPending(id)
-	pendingId = id
-	if id then
-		task.delay(REQUEST_TIMEOUT, function()
-			if pendingId == id then
-				pendingId = nil
-				UiKit.Toast(root, "No reply from the server. Your loadout didn't change. Try again.", "danger")
-				renderDetail()
-			end
-		end)
-	end
-end
-
-renderDetail = function()
-	for _, child in dTags:GetChildren() do
-		if child:IsA("GuiObject") then
-			child:Destroy()
+local function emptySlotDetail(slotKey: string): any
+	local label = slotKey
+	for _, slot in SLOTS do
+		if slot.key == slotKey then
+			label = slot.label
 		end
 	end
-	local item = selectedId and Items[selectedId]
-	local show = item ~= nil and profile ~= nil
-	detailEmpty.Visible = not show
-	detailWell.Visible = show
-	detailInfo.Visible = show
-	actionButton.Visible = false
-	if not show then
-		bigPreview:setModel(nil)
-		return
-	end
-	bigPreview:setItem(selectedId)
-	dName.Text = item.name
-	UiKit.Tag(dTags, typeLabel(item), C[UiKit.CATEGORY[item.category] or "CatMaterials"], { layoutOrder = 1 })
-	local equipped = isEquipped(selectedId)
-	if equipped then
-		UiKit.Badge(dTags, "equipped", nil, { layoutOrder = 2 })
-	elseif item.slot then
-		UiKit.Badge(dTags, "owned", nil, { layoutOrder = 2 })
-	end
-	if item.runScoped then
-		UiKit.Tag(dTags, "This voyage", "AccentSea", { layoutOrder = 3 })
-	end
-	dDesc.Text = item.description or ""
-	renderStats(statRows(selectedId))
-	local current = item.slot and equippedFor(item.slot)
-	if item.slot and current and current ~= selectedId then
-		compareCaption.Text = "Compared with your equipped " .. Items[current].name .. "."
-		compareCaption.Visible = true
-	else
-		compareCaption.Visible = false
-	end
-	strengthRow.Visible = item.strengths ~= nil
-	tradeoffRow.Visible = item.tradeoffs ~= nil
-	strengthText.Text = item.strengths or ""
-	tradeoffText.Text = item.tradeoffs or ""
+	return {
+		icon = glyphIcon("plus", Color3.fromRGB(120, 140, 160)),
+		name = label,
+		description = "Nothing worn here yet. Cosmetics are looks only; the Quartermaster in the harbor sells them.",
+	}
+end
 
+local function itemDetail(itemId: string): any
+	local item = Items[itemId]
+	local equipped = isEquipped(itemId)
+	local description = item.description or ""
+	if item.strengths then
+		description ..= "\n+ " .. item.strengths
+	end
+	if item.tradeoffs then
+		description ..= "\n\u{2212} " .. item.tradeoffs
+	end
+	local detail: any = {
+		icon = itemId,
+		name = item.name,
+		description = typeLabel(item) .. ". " .. description,
+		stats = statLines(itemId),
+	}
 	if not item.slot then
-		statusText.Text = if item.kind == "Ammo"
-			then "Used automatically when you reload a cannon. Nothing to equip."
-			else "Loot lasts one voyage. Sell it to the Trader on the lighthouse island for Shells."
-		statusText.TextColor3 = C.TextMuted
-		return
+		detail.action = if item.kind == "Ammo"
+			then { text = "Used by cannons", enabled = false, reason = "Used automatically when you reload a cannon. Nothing to equip." }
+			else { text = "Sell at the Trader", enabled = false, reason = "Loot lasts one voyage. Sell it to the Trader on the lighthouse island for Shells." }
+		return detail
 	end
-	actionButton.Visible = true
-	local isStarter = STARTERS[item.slot] == selectedId
+	local isStarter = STARTERS[item.slot] == itemId
 	if pendingId then
-		UiKit.SetBusy(actionButton, true, if equipped then "Unequipping..." else "Equipping...")
-		statusText.Text = "Updating your loadout..."
-		statusText.TextColor3 = C.TextMuted
+		detail.action = { text = "Updating...", enabled = false, reason = "Updating your loadout..." }
+	elseif equipped and isStarter then
+		detail.action = { text = "Equipped", enabled = false, reason = "Starter gear stays on until you equip something else." }
+	elseif equipped then
+		detail.action = { text = "Unequip", enabled = true, variant = "robux", onPress = function()
+			equip(itemId, "unequip")
+		end }
+	else
+		detail.action = { text = "Equip", enabled = true, onPress = function()
+			equip(itemId, "equip")
+		end }
+	end
+	return detail
+end
+
+local function renderDetail()
+	local id = selectedId
+	if not profile then
+		menu:setDetail({ name = "Opening your bag", description = "Fetching your gear from the harbor." })
+	elseif id == "Keeper" then
+		menu:setDetail(keeperDetail())
+	elseif id == "Codes" then
+		menu:setDetail(codesDetail())
+	elseif id and string.sub(id, 1, 5) == "Slot_" then
+		local slotKey = string.sub(id, 6)
+		local itemId = equippedFor(slotKey)
+		menu:setDetail(if itemId and Items[itemId] then itemDetail(itemId) else emptySlotDetail(slotKey))
+	elseif id and Items[id] then
+		menu:setDetail(itemDetail(id))
+	else
+		local empty = {
+			Weapons = "Weapons you own show up here. The Quartermaster in the harbor sells more.",
+			Armor = "Armor you own shows up here. The Quartermaster in the harbor sells more.",
+			Cosmetics = "Looks-only items you own show up here: beam colours, housings, coats, lanterns and flags.",
+			Supplies = "Fire Shell crates and voyage loot show up here. Loot lasts one voyage.",
+		}
+		menu:setDetail({ name = "Nothing here yet", description = empty[tab] or "" })
+	end
+end
+
+renderAll = function()
+	if not isOpen then
 		return
 	end
-	UiKit.SetBusy(actionButton, false)
-	local function label(text)
-		actionButton.Text = text
-		actionButton:SetAttribute("BaseText", text)
-	end
-	if equipped and isStarter then
-		label("EQUIPPED")
-		UiKit.SetDisabled(actionButton, true, "Starter gear stays on until you equip something else.")
-		statusText.Text = "Starter gear stays on until you equip something else."
-	elseif equipped then
-		label("UNEQUIP")
-		UiKit.SetDisabled(actionButton, false)
-		statusText.Text = if STARTERS[item.slot] then "Unequipping switches back to your " .. Items[STARTERS[item.slot]].name .. "." else "Unequipping takes it off."
-	else
-		label("EQUIP")
-		UiKit.SetDisabled(actionButton, false)
-		statusText.Text = if current then ("Replaces your " .. Items[current].name .. ". You keep both.") else ""
-	end
-	statusText.TextColor3 = C.TextMuted
-end
-
-local function cellSize(gridWidth)
-	local minCard = if mode == "phone" then 132 else 150
-	local gap = 10
-	local usable = gridWidth - 12 - 8 -- padding + scrollbar
-	local columns = math.max(1, math.floor((usable + gap) / (minCard + gap)))
-	local w = math.floor((usable - gap * (columns - 1)) / columns)
-	local h = math.floor(w * (if mode == "phone" then 1.22 else 1.3))
-	return w, h
-end
-
-renderGrid = function()
-	for _, card in cards do
-		card.frame:Destroy()
-	end
-	table.clear(cards)
-	if gridState then
-		gridState:Destroy()
-		gridState = nil
-	end
+	menu:setResources({ { kind = "Pearls", amount = if profile then profile.pearls or 0 else 0 } })
+	menu.subtitle.Text = if player:GetAttribute("SaveUnavailable") == true then "Saving is offline. Changes last until you leave." else ""
 	if not profile then
-		gridState = UiKit.StateView(gridCol, "loading", { title = "Opening your locker", body = "Fetching your gear from the harbor." })
-		gridState.Position = UDim2.fromOffset(0, 56)
-		gridState.Size = UDim2.new(1, 0, 1, -56)
+		menu:setTiles({}, nil)
 		renderDetail()
 		return
 	end
-	local list = ownedList()
-	if #list == 0 then
-		local titleText, bodyText = "Nothing here yet", "Gear you own shows up here."
-		if filter == "Materials" then
-			titleText, bodyText = "No loot right now", "Creatures drop claws, sea glass and pearls during a voyage. Loot lasts one voyage."
-		elseif filter == "Ammunition" then
-			titleText, bodyText = "No ammo crates", "Cannons use oil from the island. The Quartermaster at the harbor sells Fire Shell crates."
+	local list = if tab == "Keeper" then keeperTiles() else itemTiles()
+	local stillThere = false
+	for _, t in list do
+		if t.id == selectedId then
+			stillThere = true
 		end
-		gridState = UiKit.StateView(gridCol, "empty", { title = titleText, body = bodyText })
-		gridState.Position = UDim2.fromOffset(0, 56)
-		gridState.Size = UDim2.new(1, 0, 1, -56)
 	end
-	for order, itemId in list do
-		local item = Items[itemId]
-		local qty = count(itemId)
-		local card = UiKit.ItemCard(gridScroll, {
-			itemId = itemId,
-			name = item.name,
-			category = item.category,
-			subtitle = typeLabel(item),
-			quantity = if qty > 0 then qty else nil,
-			equipped = isEquipped(itemId),
-			selected = itemId == selectedId,
-			layoutOrder = order,
-			onClick = function(id)
-				select(id)
-			end,
-		})
-		cards[itemId] = card
+	if not stillThere then
+		selectedId = list[1] and list[1].id
 	end
-	if selectedId and not cards[selectedId] and not isEquipped(selectedId) then
-		selectedId = nil
-	end
-	if not selectedId and mode ~= "phone" and list[1] then
-		selectedId = list[1]
-		cards[list[1]].setSelected(true)
-	end
-	renderSlots()
+	menu:setTiles(list, selectedId)
 	renderDetail()
 end
 
-local function renderAll()
-	renderGrid()
-	refreshAvatar()
+menu.onSelect = function(id: string)
+	selectedId = id
+	renderDetail()
 end
 
-cardsFocusTarget = function()
-	if not UiKit.usingGamepad() then
+---------------------------------------------------------------------
+-- EQUIP / UNEQUIP (the server decides)
+---------------------------------------------------------------------
+
+equip = function(itemId: string, action: string)
+	if pendingId then
 		return
 	end
-	local target = (selectedId and cards[selectedId] and cards[selectedId].frame) or filterTabs.buttons[filter].button
-	GuiService.SelectedObject = target
-end
----------------------------------------------------------------------
--- LAYOUT
----------------------------------------------------------------------
-
-local function place(frame, x, y, w, h)
-	frame.Position = UDim2.fromOffset(x, y)
-	frame.Size = UDim2.fromOffset(w, h)
-	frame.Visible = true
-end
-local function setBox(frame, x, y, w, h)
-	frame.Position = UDim2.fromOffset(x, y)
-	frame.Size = UDim2.fromOffset(w, h)
-end
-
-function layout()
-	local size = root.AbsoluteSize
-	if size.X <= 0 then
-		return
-	end
-	local W, H = size.X, size.Y
-	mode = if W < 760 or H < 500 then "phone" elseif W >= 1300 and H >= 700 then "wide" else "medium"
-	local pw, ph
-	if mode == "phone" then
-		pw, ph = W, H
-	elseif mode == "wide" then
-		pw, ph = math.min(W - 64, 1240), math.min(H - 64, 720)
-	else
-		pw, ph = math.min(W - 32, 1180), math.min(H - 32, 720)
-	end
-	panel.Size = UDim2.fromOffset(pw, ph)
-	panel:SetAttribute("RestPosition", UDim2.fromScale(0.5, 0.5))
-	local phone = mode == "phone"
-	local pad = if phone then 10 else 20
-	local headerH = if phone then 46 else 52
-	local headerTop = if phone then 6 else 14
-	header.Position = UDim2.fromOffset(pad, headerTop)
-	header.Size = UDim2.new(1, -pad * 2, 0, headerH)
-	local bodyTop = headerTop + headerH + (if phone then 6 else 12)
-	body.Position = UDim2.fromOffset(pad, bodyTop)
-	body.Size = UDim2.new(1, -pad * 2, 1, -bodyTop - pad)
-	local bw, bh = pw - pad * 2, ph - bodyTop - pad
-
-	-- header contents
-	eyebrow.Visible = not phone
-	title.Text = if phone then "Locker" else "Loadout"
-	title.TextSize = if phone then 20 else 23
-	titleBlock.Size = UDim2.new(0, if phone then 120 else 260, 1, 0)
-	phoneNav.frame.Visible = phone and phoneView ~= "detail"
-	backButton.Visible = phone and phoneView == "detail"
-	titleBlock.Visible = not (phone and phoneView == "detail")
-	saveNote.Visible = player:GetAttribute("SaveUnavailable") == true and not phone
-	if phone and phoneView ~= "detail" then
-		phoneNav.set(phoneView, true)
-	end
-
-	-- detail internals (shared by every mode)
-	local function layoutDetail(w, h, side)
-		local buttonH = 48
-		if side then
-			-- phone detail: preview on the left, info on the right
-			local pwid = math.floor(w * 0.4)
-			setBox(detailWell, 0, 0, pwid, h)
-			detailInfo.Position = UDim2.fromOffset(pwid + 14, 0)
-			detailInfo.Size = UDim2.fromOffset(w - pwid - 14, h - buttonH - 10)
-			actionButton.Position = UDim2.new(0, pwid + 14, 1, 0)
-			actionButton.Size = UDim2.fromOffset(w - pwid - 14, buttonH)
-		else
-			local wellH = math.clamp(math.floor(h * 0.3), 120, 190)
-			setBox(detailWell, 0, 0, w, wellH)
-			detailInfo.Position = UDim2.fromOffset(0, wellH + 12)
-			detailInfo.Size = UDim2.fromOffset(w, h - wellH - 12 - buttonH - 12)
-			actionButton.Position = UDim2.new(0, 0, 1, 0)
-			actionButton.Size = UDim2.new(1, 0, 0, buttonH)
-		end
-	end
-
-	local gap = 16
-	if mode == "wide" then
-		local slotsW, avatarW, detailW = 250, 250, 300
-		local gridW = bw - slotsW - avatarW - detailW - gap * 3
-		place(slotsCol, 0, 0, slotsW, bh)
-		place(slotsList, 0, 0, slotsW, bh)
-		place(avatarCol, slotsW + gap, 0, avatarW, bh)
-		place(gridCol, slotsW + avatarW + gap * 2, 0, gridW, bh)
-		place(detailCol, bw - detailW, 0, detailW, bh)
-		layoutDetail(detailW, bh, false)
-		summarySection.Visible = true
-	elseif mode == "medium" then
-		local leftW, detailW = 250, 290
-		local gridW = bw - leftW - detailW - gap * 2
-		local avatarH = math.floor(bh * 0.4)
-		place(avatarCol, 0, 0, leftW, avatarH)
-		place(slotsCol, 0, avatarH + 12, leftW, bh - avatarH - 12)
-		place(slotsList, 0, 0, leftW, bh - avatarH - 12)
-		place(gridCol, leftW + gap, 0, gridW, bh)
-		place(detailCol, bw - detailW, 0, detailW, bh)
-		layoutDetail(detailW, bh, false)
-		summarySection.Visible = false
-	else
-		slotsCol.Visible, avatarCol.Visible, gridCol.Visible, detailCol.Visible = false, false, false, false
-		if phoneView == "items" then
-			place(gridCol, 0, 0, bw, bh)
-		elseif phoneView == "detail" then
-			place(detailCol, 0, 0, bw, bh)
-			layoutDetail(bw, bh, true)
-		else
-			local avatarW = math.floor(bw * 0.42)
-			place(avatarCol, 0, 0, avatarW, bh)
-			place(slotsCol, avatarW + 14, 0, bw - avatarW - 14, bh)
-			place(slotsList, 0, 0, bw - avatarW - 14, bh)
-			summarySection.Visible = true
-		end
-	end
-	if isOpen then
-		renderDetail()
-	end
-	local cw, ch = cellSize(gridCol.Size.X.Offset)
-	gridLayout.CellSize = UDim2.fromOffset(cw, ch)
-	-- notices: above the panel on big screens, at the very top on phones
-	root:SetAttribute("NoticeTop", if phone then 6 else math.max(8, (H - ph) / 2 - 56))
-	root:SetAttribute("NoticeWidth", if phone then 280 else nil)
-	root:SetAttribute("NoticeLimit", if phone then 1 else 2)
-end
-root:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
-	if isOpen then
-		layout()
-	end
-end)
-
----------------------------------------------------------------------
--- OPEN / CLOSE
----------------------------------------------------------------------
-
-function setOpen(open)
-	if open == isOpen then
-		return
-	end
-	isOpen = open
-	if open then
-		gui.Enabled = true
-		scrimGui.Enabled = true
-		UiKit.pushModal("Inventory")
-		phoneView = "items"
-		layout()
-		if mode == "phone" then
-			selectedId = nil
-		end
-		renderAll()
-		layout()
-		UiKit.Open(panel)
-		ContextActionService:BindAction("CloseInventory", function(_, state)
-			if state == Enum.UserInputState.Begin then
-				if mode == "phone" and phoneView == "detail" then
-					phoneView = "items"
-					layout()
-				else
-					setOpen(false)
-				end
-			end
-			return Enum.ContextActionResult.Sink
-		end, false, Enum.KeyCode.ButtonB, Enum.KeyCode.Backspace)
-		task.defer(cardsFocusTarget)
-	else
-		ContextActionService:UnbindAction("CloseInventory")
-		GuiService.SelectedObject = nil
-		UiKit.popModal("Inventory")
-		-- the Quartermaster's shop may be opening right now: keep gameplay input locked for it
-		local shop = player.PlayerGui:FindFirstChild("QuartermasterShop")
-		if shop and shop.Enabled then
-			player:SetAttribute("MenuOpen", true)
-		end
-		UiKit.Close(panel, function()
-			if not isOpen then
-				gui.Enabled = false
-				scrimGui.Enabled = false
-			end
-		end)
-	end
-end
-
-scrim.Activated:Connect(function()
-	setOpen(false)
-end)
-
--- slot clicks select the equipped item
-for key, w in slotWidgets do
-	w.button.Activated:Connect(function()
-		UiKit.click()
-		if not profile then
-			return
-		end
-		local id = if key == "Primary" then profile.equippedWeapon
-			elseif key == "Armor" then profile.equippedArmor
-			elseif key == "Beam" then (profile.equippedBeam or "BeamAmber")
-			elseif count("FireShellCrate") > 0 then "FireShellCrate" else nil
-		if id then
-			select(id)
+	local id = string.sub(HttpService:GenerateGUID(false), 1, 36)
+	pendingId = id
+	remotes.LoadoutRequest:FireServer(id, action, itemId)
+	renderDetail()
+	task.delay(REQUEST_TIMEOUT, function()
+		if pendingId == id then
+			pendingId = nil
+			UiKit.Toast(menu.root, "No reply from the server. Your loadout didn't change. Try again.", "danger")
+			renderAll()
 		end
 	end)
 end
 
-actionButton.Activated:Connect(function()
-	if actionButton:GetAttribute("Disabled") or not selectedId or pendingId then
-		return
-	end
-	local action = if isEquipped(selectedId) then "unequip" else "equip"
-	setPending(string.sub(HttpService:GenerateGUID(false), 1, 36))
-	remotes.LoadoutRequest:FireServer(pendingId, action, selectedId)
-	renderDetail()
-end)
-
-local function flashSlot(itemId)
-	local item = Items[itemId]
-	local w = item and item.slot and slotWidgets[item.slot]
-	if not w then
-		return
-	end
-	w.stroke.Color = C.StateSuccess
-	w.stroke.Transparency = 0
-	task.delay(0.6, renderSlots)
-end
-
 remotes.LoadoutResult.OnClientEvent:Connect(function(requestId, ok, message)
 	if requestId ~= pendingId then
-		return
+		return -- the Quartermaster's own requests are answered there
 	end
-	local itemId = selectedId
 	pendingId = nil
 	if isOpen then
-		UiKit.Toast(root, message or (if ok then "Loadout updated." else "That didn't work. Your loadout didn't change."), if ok then "success" else "danger")
-		if ok then
-			flashSlot(itemId)
+		SoundFx.play2D(if ok then "lantern" else "denied")
+		UiKit.Toast(menu.root, message or (if ok then "Loadout updated." else "That didn't work. Your loadout didn't change."), if ok then "success" else "danger")
+		renderAll()
+		if ok and selectedId then
+			menu:pop(selectedId)
 		end
-		renderDetail()
 	end
 end)
 
 remotes.GearData.OnClientEvent:Connect(function(data)
 	profile = data
 	if isOpen then
-		renderGrid()
-		-- the server puts new armor on the character a moment after the data changes
+		renderAll()
+		-- the server puts new armor on the character a moment after the data changes: redraw the keeper then
 		task.delay(0.35, function()
-			if isOpen then
-				refreshAvatar()
+			if isOpen and selectedId == "Keeper" then
+				renderDetail()
 			end
 		end)
 	end
 end)
 
-player:GetAttributeChangedSignal("SaveUnavailable"):Connect(function()
-	if isOpen then
-		layout()
-	end
-end)
+player:GetAttributeChangedSignal("SaveUnavailable"):Connect(renderAll)
 
--- Opening the Quartermaster's shop closes the locker
+---------------------------------------------------------------------
+-- OPEN / CLOSE
+---------------------------------------------------------------------
+
+local function onTab(id: string)
+	tab = id
+	selectedId = nil
+	renderAll()
+end
+
+setOpen = function(open: boolean, focus: string?)
+	if open == isOpen then
+		if open and focus then
+			tab, selectedId = "Keeper", focus
+			menu:setTabs(TABS, tab, onTab)
+			renderAll()
+		end
+		return
+	end
+	isOpen = open
+	if open then
+		tab = "Keeper"
+		selectedId = focus or "Keeper"
+		pendingId = nil
+		UiKit.pushModal("Inventory")
+		menu:open()
+		menu:setTabs(TABS, tab, onTab)
+		renderAll()
+		remotes.GearAction:FireServer("sync")
+		ContextActionService:BindAction("CloseInventory", function(_, state)
+			if state == Enum.UserInputState.Begin then
+				setOpen(false)
+			end
+			return Enum.ContextActionResult.Sink
+		end, false, Enum.KeyCode.ButtonB, Enum.KeyCode.Backspace)
+		task.defer(function()
+			if UiKit.usingGamepad() and selectedId and menu.tiles[selectedId] then
+				GuiService.SelectedObject = menu.tiles[selectedId].tile
+			end
+		end)
+	else
+		menu:close()
+		ContextActionService:UnbindAction("CloseInventory")
+		GuiService.SelectedObject = nil
+		UiKit.popModal("Inventory")
+		-- the Quartermaster's shop may be opening right now: keep gameplay input locked for it
+		local shop = player.PlayerGui:FindFirstChild("QuartermasterShop") :: ScreenGui?
+		if shop and shop.Enabled then
+			player:SetAttribute("MenuOpen", true)
+		end
+	end
+end
+
+-- Opening the Quartermaster's shop closes the bag
 remotes.ShopOpen.OnClientEvent:Connect(function(open)
 	if open then
 		setOpen(false)
@@ -1078,7 +666,7 @@ local codesButton = UiKit.Button(hud, "Codes", {
 	size = "sm",
 	width = 96,
 	onClick = function()
-		setOpen(true)
+		setOpen(true, "Codes")
 	end,
 })
 codesButton.AnchorPoint = Vector2.new(1, 1)
@@ -1115,41 +703,5 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		setOpen(not isOpen)
 	end
 end)
-
----------------------------------------------------------------------
--- STUDIO ONLY: draw the locker inside a simulated screen (HudSimulate attribute)
----------------------------------------------------------------------
-
-if RunService:IsStudio() then
-	local SIZES = {
-		smallPhone = Vector2.new(667, 375),
-		largePhone = Vector2.new(932, 430),
-		tablet = Vector2.new(1180, 820),
-		laptop = Vector2.new(1366, 768),
-	}
-	local function applySimulation()
-		local spec = SIZES[player:GetAttribute("HudSimulate") or ""]
-		simulated = spec
-		rootOutline.Enabled = spec ~= nil
-		if spec then
-			root.AnchorPoint = Vector2.new(0.5, 0.5)
-			root.Position = UDim2.fromScale(0.5, 0.5)
-			root.Size = UDim2.fromOffset(spec.X, spec.Y)
-		else
-			root.AnchorPoint = Vector2.zero
-			root.Position = UDim2.new()
-			root.Size = UDim2.fromScale(1, 1)
-		end
-		task.defer(function()
-			if isOpen then
-				layout()
-				renderGrid()
-				layout()
-			end
-		end)
-	end
-	player:GetAttributeChangedSignal("HudSimulate"):Connect(applySimulation)
-	applySimulation()
-end
 
 remotes.GearAction:FireServer("sync")

@@ -18,6 +18,21 @@ remotes:WaitForChild("CodeResult").OnClientEvent:Connect(function(ok, message)
 	end
 end)
 
+-- Sends a code (the BAG's menu-pattern box draws its own field and button); notices go to `toastRoot`
+function CodeBox.send(text, toastRoot)
+	if string.gsub(text, "%s", "") == "" then
+		UiKit.Toast(toastRoot, "Type a code first.", "info")
+		return
+	end
+	if os.clock() < readyAt then
+		UiKit.Toast(toastRoot, "One code every 10 seconds. Try again in a moment.", "info")
+		return
+	end
+	readyAt = os.clock() + 10
+	answerRoot = toastRoot
+	remotes.CodeRedeem:FireServer(text)
+end
+
 -- A box and a button filling `parent`'s width; notices go to `toastRoot`
 function CodeBox.build(parent, toastRoot, layoutOrder)
 	local row = new("Frame", {
@@ -49,18 +64,7 @@ function CodeBox.build(parent, toastRoot, layoutOrder)
 	UiKit.pad(box, 0, 10, 0, 10)
 	local redeem = UiKit.Button(row, "Redeem", { name = "RedeemButton", variant = "secondary", width = 110, layoutOrder = 2 })
 	redeem.Activated:Connect(function()
-		local text = box.Text
-		if string.gsub(text, "%s", "") == "" then
-			UiKit.Toast(toastRoot, "Type a code first.", "info")
-			return
-		end
-		if os.clock() < readyAt then
-			UiKit.Toast(toastRoot, "One code every 10 seconds. Try again in a moment.", "info")
-			return
-		end
-		readyAt = os.clock() + 10
-		answerRoot = toastRoot
-		remotes.CodeRedeem:FireServer(text)
+		CodeBox.send(box.Text, toastRoot)
 	end)
 	return row
 end
