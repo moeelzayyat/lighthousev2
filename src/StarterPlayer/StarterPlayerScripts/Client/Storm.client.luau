@@ -89,15 +89,21 @@ end)
 local clouds = Workspace.Terrain:FindFirstChildOfClass("Clouds") or Instance.new("Clouds")
 clouds.Parent = Workspace.Terrain
 
+-- V1: the sea swells and the sky closes over in the storm (both are local to this device)
+local sky = Lighting:FindFirstChildOfClass("Sky")
 local CALM = {
-	clouds = { Cover = 0.55, Density = 0.35, Color = Color3.fromRGB(235, 238, 245) },
+	clouds = { Cover = 0.78, Density = 0.55, Color = Color3.fromRGB(176, 182, 190) },
 	volumes = { waves = 0.45, wind = 0, rain = 0 },
 	rainRate = 0,
+	sea = { WaterWaveSize = 0.35, WaterWaveSpeed = 14 },
+	stars = 1500,
 }
 local STORM = {
-	clouds = { Cover = 0.88, Density = 0.75, Color = Color3.fromRGB(60, 66, 80) },
+	clouds = { Cover = 0.8, Density = 0.6, Color = Color3.fromRGB(96, 106, 120) },
 	volumes = { waves = 0.25, wind = 0.35, rain = 0.5 },
 	rainRate = 900,
+	sea = { WaterWaveSize = 0.85, WaterWaveSpeed = 26 },
+	stars = 0,
 }
 
 local stormy = nil
@@ -109,6 +115,10 @@ local function setStorm(on)
 	local preset = if on then STORM else CALM
 	local info = TweenInfo.new(4, Enum.EasingStyle.Sine)
 	TweenService:Create(clouds, info, preset.clouds):Play()
+	TweenService:Create(Workspace.Terrain, info, preset.sea):Play()
+	if sky then
+		sky.StarCount = preset.stars
+	end
 	TweenService:Create(waves, info, { Volume = preset.volumes.waves }):Play()
 	TweenService:Create(wind, info, { Volume = preset.volumes.wind }):Play()
 	TweenService:Create(rain, info, { Volume = preset.volumes.rain }):Play()

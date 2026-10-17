@@ -235,6 +235,19 @@ Floor: biweekly, announced. Scaling trigger for a shared harbor: `architecture.m
 | LO.4 ✅ | Small fixes | Shop card type line no longer runs under the price; the code box also in the BAG | Seen in Studio | Play test |
 | LO.5 🟦 | Publish (owner) | Package in HANDOFF_REPORT.md; published 2026-10-17 | Live check (pending) | Owner |
 
+### Visual overhaul (2026-10-17, ahead of the relaunch; the owner rejected the current look; plan: project file `research/visual_overhaul_plan.md`)
+The owner judges every step from before/after screenshots (`assets/screens/visual_<step>/`) and can keep or veto it.
+| ID | Step | Deliverables | Passes when | Verify |
+|---|---|---|---|---|
+| V1 ✅ | Sea and sky | The sea reaches 3,072 studs out (was 800, a visible edge); an overcast day and a dark, hazy storm night; storm waves and cloud cover on the voyage crew's devices | No sea edge in view; night still dark enough for the beam; TestRunner green | Screenshots + TestRunner |
+| V2 | The beam | Layered soft beam, a SpotLight, rain glints, no ground clipping | Screenshots | Owner |
+| V3 | Storm effects | Rain sheets (capped per device), lightning over the sea, spray, foam around rocks, swaying lanterns and flags | Screenshots, FPS | Owner |
+| V4 | Island rebuild | Cliffs, tower mound, paths, keeper's hut, oil shed, dock (owner saves `backups\LighthouseKeepers_DEV_preVisual_2026-10-17.rbxl` first) | Spawns, ground grid and pads re-checked; TestRunner green | Play test |
+| V5 | One material style | Stylized terrain and props on one palette | Screenshots | Owner |
+| V6 | Harbor at dusk | Golden-hour harbor, campfire, pier, palms | Screenshots | Owner |
+| V7 | Hit and death feel | Hit flash, foam burst, camera shake, lamp flicker | Play test | Owner |
+| V8 | Phone check | Low-quality screenshots, emulator FPS, budget table | Numbers recorded | Owner (real phone) |
+
 ---
 
 ## 13. Risk register

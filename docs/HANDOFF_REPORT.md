@@ -1092,3 +1092,18 @@ Live checks:
 If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.
 
 LO.5 PUBLISHED · 2026-10-17 17:19 UTC · the owner saved `backups/LighthouseKeepers_DEV_LO1_2026-10-17.rbxl` and published DEV. Live checks (crew card offers Shipwreck Rescue; a castaway carried to the shelter; the BAG's Codes box) still to be reported.
+
+CHECKPOINT: V1 Sea and sky (visual overhaul) — 🟦 (Script Analysis unmeasured; the owner judges the look from the screenshots)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF (probe refused, error 7)
+BACKUP: ServerStorage.Backups.VIS_V1_before_2026-10-17 (GameState, Storm, and a note with the old terrain and lighting values) · restore point "VIS_V1 before"
+BUILT:
+- Terrain: the sea was an 800-stud square around the voyage island, and its jagged edge showed at night. It now reaches 3,072 studs on every side (water from y = -36 to 0 over a sand floor, the same profile as before). To undo: fill Air outside the 800-stud square from y = -50 to 0.
+- `GameState` (server lighting): a darker, hazier storm night and an overcast day (values in D-038). The haze hides where the sea ends.
+- `Storm.client`: in the storm the sea's waves rise (0.35 → 0.85, speed 14 → 26), the clouds close over (cover 0.8) and the stars go; calm weather is overcast. Local to each device, so the harbor's own weather is unchanged.
+TESTRUNNER (DEV, Play server): **249 passed, 0 failed**. (A first run in the same Play session showed 2 Security failures because my test helper was sailing the same real player at the same moment; the clean run after it passed.)
+PLAY TEST (DEV): a voyage sailed with the runtime helper; prologue storm and Day 1 seen with a pinned camera; 0 errors in the output (only the expected refused Studio data-store calls and Roblox's own UIBlox warnings). Client 60 FPS in Studio. Whole-Studio TerrainVoxels memory 96 MB in Play (not separable from the old terrain; the phone check is V8).
+SCREENSHOTS: `assets/screens/visual_v1/` (before and after, night and day).
+MIRROR: 155 scripts in DEV; GameState and Storm hashes identical to `src/` (e3423a70, 436709a3).
+OWNER: judge the screenshots; say yes or no to downloading the free CC0 Cloudy Skyboxes pack for a real storm-cloud sky.
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-038 flagged

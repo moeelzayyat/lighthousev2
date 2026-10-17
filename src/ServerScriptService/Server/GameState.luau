@@ -28,30 +28,38 @@ local GameState = {}
 local FORECAST_KEYS = { wideMult = "ForecastWideMult", crabMult = "ForecastCrabMult", crabHpMult = "ForecastCrabHpMult", fuelMult = "ForecastFuelMult" }
 
 -- Note: when an Atmosphere exists, Roblox ignores the Fog settings, so fog is done with Atmosphere.
+-- V1 (visual overhaul, Oct 17): an overcast sea day and a dark, foggy storm night in cold navy and teal,
+-- so warm lights and the beam stand out; the haze also hides where the sea ends.
+-- Was: day Brightness 2, Ambient 110/110/115, OutdoorAmbient 128/128/135; atmosphere Density 0.3, Haze 0.5, Color 199/215/230.
 local DAY_LIGHTING = {
 	ClockTime = 14,
-	Brightness = 2,
-	Ambient = Color3.fromRGB(110, 110, 115),
-	OutdoorAmbient = Color3.fromRGB(128, 128, 135),
+	Brightness = 1.4,
+	Ambient = Color3.fromRGB(96, 104, 112),
+	OutdoorAmbient = Color3.fromRGB(118, 126, 136),
 }
--- Night (lighting pass, Oct 13): moonlit blue instead of near-black, so the island reads at night.
--- Was ClockTime 22.5, Brightness 0.2, Ambient 18/20/30, OutdoorAmbient 30/34/48.
+-- Was (Oct 13 pass): ClockTime 23.2, Brightness 1.6, Ambient 40/48/78, OutdoorAmbient 92/108/158 (a bright moonlit blue).
 local NIGHT_LIGHTING = {
 	ClockTime = 23.2,
-	Brightness = 1.6,
-	Ambient = Color3.fromRGB(40, 48, 78),
-	OutdoorAmbient = Color3.fromRGB(92, 108, 158),
+	Brightness = 1.3,
+	Ambient = Color3.fromRGB(34, 42, 58),
+	OutdoorAmbient = Color3.fromRGB(70, 88, 112),
 }
 local DAY_ATMOSPHERE = {
-	Density = 0.3,
-	Haze = 0.5,
-	Color = Color3.fromRGB(199, 215, 230),
+	Density = 0.4,
+	Offset = 0.2,
+	Haze = 2.4,
+	Glare = 0,
+	Color = Color3.fromRGB(150, 164, 174),
+	Decay = Color3.fromRGB(96, 112, 124),
 }
--- was Density 0.45, Haze 1.5, Color 40/45/60 (a grey murk)
+-- Was (Oct 13 pass): Density 0.32, Haze 0.6, Color 52/72/122.
 local NIGHT_ATMOSPHERE = {
-	Density = 0.32,
-	Haze = 0.6,
-	Color = Color3.fromRGB(52, 72, 122),
+	Density = 0.34,
+	Offset = 0.3,
+	Haze = 1.2,
+	Glare = 0,
+	Color = Color3.fromRGB(46, 64, 80),
+	Decay = Color3.fromRGB(26, 36, 52),
 }
 
 -- UserIds of a player list (bus payloads carry ids, never Instances)

@@ -3,7 +3,7 @@
 ## Direction (as built, owner-approved)
 - **Menus:** wooden "pirate" skin — Kenney UI Pack RPG Expansion (CC0), one atlas (`LK_PirateSkin_atlas.png`, image 127395313470932), display font **Fredoka One**. `Config.UI_SKIN = "pirate"`.
 - **In-game HUD:** glassy navy panels (12,20,40 at 18% transparency, 1.5 px blue glow stroke, 14 px corners) from the owner's mock-up. Phones: left column 150 px, right 146 px, 28 px gauges, cannon card hidden.
-- **Lighting:** moonlit blue nights (ClockTime 23.2, Brightness 1.6, blue ambients, atmosphere density 0.32), moon 18, stars 4,000, bloom for lanterns, `GlassPop` colour correction (+12% sat, +6% contrast). Night stays dark enough that the beam matters.
+- **Lighting (V1, D-038):** a dark, hazy storm night in cold navy and teal (ClockTime 23.2, Brightness 1.3, OutdoorAmbient 70/88/112, atmosphere density 0.34, offset 0.3, haze 1.2, colour 46/64/80) and an overcast sea day (Brightness 1.4, atmosphere density 0.4, haze 2.4, grey-teal); storm cloud cover 0.8 and no stars in the storm; the sea reaches 3,072 studs so its edge is lost in the haze. Was: moonlit blue nights (ClockTime 23.2, Brightness 1.6, blue ambients, atmosphere density 0.32), moon 18, stars 4,000, bloom for lanterns, `GlassPop` colour correction (+12% sat, +6% contrast). Night stays dark enough that the beam matters.
 - **World:** Studio terrain island and sea; code-built tower, pads, barrels, harbor ship, Quartermaster stall. Creature models are simple meshes; Sand Skitter = Rock Crab at 60%.
 
 ## Rules going forward
