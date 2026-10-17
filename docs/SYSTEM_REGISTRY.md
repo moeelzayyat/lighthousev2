@@ -70,7 +70,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | StatPipeline | Planned | S5.7 | |
 | Domain lifecycle | Planned | S5.1 | |
 | TestRunner | Implemented | R1.1 | `ServerStorage.Tests.TestRunner`; specs named `<Name>Spec` |
-| Creature 20 Hz step + snapshots + interpolation | Planned | S4.2–S4.3 | |
+| Creature 20 Hz step + snapshots + interpolation | Tested (not yet published) | S4.2–S4.3 | `CreatureService` tables at 20 Hz; `Shared/CreatureSnapshot` 12 Hz; `Client/CreatureView` pooled models; 10.0 KB/s per client at 45 creatures |
 | Ground height grid | Planned | S4.1 | |
 
 ## UI

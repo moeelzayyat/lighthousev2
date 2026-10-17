@@ -10,7 +10,10 @@
 --   player -> bites (armor reduces the damage); players can die
 -- Eye color shows intent: yellow = tower, orange = a cannon, red = a player.
 --
--- Creatures are anchored models moved by code (no physics), which keeps 40 of them cheap on mobile.
+-- S4.2/S4.3: creatures are tables stepped at 20 Hz. The server keeps no creature models: 12 times a second it
+-- sends every creature's position and state as one binary snapshot (Shared/CreatureSnapshot, an
+-- UnreliableRemoteEvent), and each client draws them (Client/CreatureView) from the templates published in
+-- ReplicatedStorage.CreatureTemplates.
 -- Beam rules: wide beam pushes them away from the lighthouse; focused beam stops and burns them.
 
 local TweenService = game:GetService("TweenService")
@@ -24,17 +27,13 @@ local EventLog = require(script.Parent.EventLog)
 local Ground = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Ground"))
 local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SoundFx"))
 local Creatures = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Creatures"))
+local CreatureSnapshot = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("CreatureSnapshot"))
 
 local CreatureService = {}
 
 local CRAB_COLOR = Color3.fromRGB(176, 64, 44)
 local CLAW_COLOR = Color3.fromRGB(150, 50, 35)
-local BURN_COLOR = Color3.fromRGB(255, 170, 60)
-local EYE_COLOR = Color3.fromRGB(255, 240, 120)
-local EYE_CANNON = Color3.fromRGB(255, 150, 60)
-local EYE_PLAYER = Color3.fromRGB(255, 60, 50)
-local HIT_COLOR = Color3.fromRGB(255, 255, 255)
-local LIT_TINT = Color3.fromRGB(235, 150, 95)
+local EYE_COLOR = Color3.fromRGB(255, 240, 120) -- the template's eyes; the client recolours them (S4.3)
 
 local refs
 local lamp
@@ -48,6 +47,18 @@ local creatures = {}
 local templates = {} -- creature type -> template model
 local state -- GameState folder (the boss bar reads BossName / BossHealth / BossMax)
 local center = Config.ISLAND_CENTER
+
+local STEP = 1 / 20 -- simulation step (S4.2)
+local SEND_INTERVAL = 1 / 12 -- snapshots per second (S4.2)
+local kinds = CreatureSnapshot.kinds(Creatures)
+local kindIndex = {}
+for i, name in kinds do
+	kindIndex[name] = i - 1
+end
+local nextId = 0
+local dying = {} -- killed creatures, sent a few more times with the DYING flag so clients play the burst
+local snapshotRemote -- UnreliableRemoteEvent Remotes.CreatureSnapshot
+CreatureService.bytesSent = 0 -- probe: snapshot bytes sent to each client since boot
 
 -- Same convention as the beam: bearing 0 points along -Z
 local function directionFor(bearing)
@@ -168,27 +179,16 @@ local function getTemplate(kind)
 	return templates[kind]
 end
 
-local function updateHealthBar(crab)
-	local ratio = math.clamp(crab.health / crab.maxHealth, 0, 1)
-	if math.abs(ratio - crab.shownRatio) < 0.02 then
-		return
-	end
-	crab.shownRatio = ratio
-	crab.healthBar.Enabled = ratio < 1
-	crab.healthFill.Size = UDim2.fromScale(ratio, 1)
-end
-
-local function place(crab, now)
-	local bob = if crab.moving then math.abs(math.sin(now * 12 + crab.phase)) * 0.25 else 0
+-- Where the creature stands (world position on the ground) and which way it faces; the client adds the walk bob
+local function place(crab)
 	local surface, inWater = Ground.heightAt(crab.pos.X, crab.pos.Z)
+	crab.inWater = inWater
 	local heightOffset = if inWater then -0.5 else 0.7 -- half-submerged while still in the sea
-	local position = Vector3.new(crab.pos.X, surface + heightOffset + bob, crab.pos.Z)
+	crab.worldPos = Vector3.new(crab.pos.X, surface + heightOffset, crab.pos.Z)
 	local face = crab.facing or Vector3.new(center.X, 0, center.Z)
-	local lookTarget = Vector3.new(face.X, position.Y, face.Z)
-	if (lookTarget - position).Magnitude > 0.05 then
-		crab.model:PivotTo(CFrame.lookAt(position, lookTarget))
-	else
-		crab.model:PivotTo(CFrame.new(position))
+	local dx, dz = face.X - crab.pos.X, face.Z - crab.pos.Z
+	if dx * dx + dz * dz > 0.0025 then
+		crab.yaw = math.deg(math.atan2(-dx, -dz))
 	end
 end
 
@@ -253,14 +253,11 @@ local function chooseTarget(crab)
 	return best
 end
 
+-- Eye colour shows intent (drawn by the client): the snapshot carries which kind of target it is after
 local function setEyes(crab, target)
-	local color = if target == "tower" then EYE_COLOR elseif typeof(target) == "Instance" then EYE_PLAYER else EYE_CANNON
-	if crab.eyeColor ~= color then
-		crab.eyeColor = color
-		for _, eye in crab.eyes do
-			eye.BackgroundColor3 = color
-		end
-	end
+	crab.targetBits = if target == "tower" then 0
+		elseif typeof(target) == "Instance" then CreatureSnapshot.TARGET_PLAYER
+		else CreatureSnapshot.TARGET_CANNON
 end
 
 -- A bite or slam on a player: armor reduces it; records deaths
@@ -279,32 +276,51 @@ local function bitePlayer(player, crabPosition, damage, cause)
 	end
 end
 
--- Small burst of light when a creature is burned away
-local function burst(position)
-	SoundFx.playAt("crabDeath", position)
-	local puff = Instance.new("Part")
-	puff.Shape = Enum.PartType.Ball
-	puff.Size = Vector3.new(2, 2, 2)
-	puff.Anchored = true
-	puff.CanCollide = false
-	puff.CanQuery = false
-	puff.CanTouch = false
-	puff.Material = Enum.Material.Neon
-	puff.Color = BURN_COLOR
-	puff.CFrame = CFrame.new(position)
-	puff.Parent = refs.creatureFolder
-	local tween = TweenService:Create(puff, TweenInfo.new(0.35), { Size = Vector3.new(7, 7, 7), Transparency = 1 })
-	tween.Completed:Connect(function()
-		puff:Destroy()
-	end)
-	tween:Play()
+-- One snapshot entry for a live creature
+local function entryFor(crab, now)
+	local p = crab.worldPos
+	local state = crab.targetBits or 0
+	if crab.moving then
+		state += CreatureSnapshot.MOVING
+	end
+	if crab.lit then
+		state += CreatureSnapshot.LIT
+	end
+	if crab.burning then
+		state += CreatureSnapshot.BURNING
+	end
+	if crab.flashUntil > now then
+		state += CreatureSnapshot.HIT
+	end
+	if crab.inWater then
+		state += CreatureSnapshot.IN_WATER
+	end
+	return {
+		id = crab.id,
+		kind = crab.kindIndex,
+		x = p.X,
+		y = p.Y,
+		z = p.Z,
+		yaw = crab.yaw or 0,
+		state = state,
+		hp = math.clamp(crab.health / crab.maxHealth, 0, 1),
+	}
+end
+
+-- Burned away: the sound plays from here; the client draws the burst when it sees the DYING flag
+local function burst(crab)
+	SoundFx.playAt("crabDeath", crab.worldPos)
+	local entry = entryFor(crab, os.clock())
+	entry.state = bit32.bor(entry.state, CreatureSnapshot.DYING)
+	entry.hp = 0
+	table.insert(dying, { entry = entry, untilT = os.clock() + 0.3 })
 end
 
 local function removeAt(index, reason)
 	local crab = table.remove(creatures, index)
 	if reason == "killed" then
 		EventLog.kill(crab.lastSource, if typeof(crab.lastAttacker) == "Instance" then crab.lastAttacker else nil)
-		burst(crab.body.Position)
+		burst(crab)
 		if crab.stats.big then
 			EventLog.log("BigMonsterKilled", { kind = crab.kind, by = crab.lastSource })
 			local monster = string.gsub(tostring(crab.kind), "(%l)(%u)", "%1 %2") -- "BarnacleBrute" -> "Barnacle Brute"
@@ -318,7 +334,7 @@ local function removeAt(index, reason)
 			end
 		end
 		if CreatureService.onKilled then
-			CreatureService.onKilled(crab.body.Position, crab.kind)
+			CreatureService.onKilled(crab.worldPos, crab.kind)
 		end
 	end
 	if crab.bossEntry then
@@ -344,7 +360,6 @@ local function removeAt(index, reason)
 			state:SetAttribute("BossName", "")
 		end
 	end
-	crab.model:Destroy()
 end
 
 -- Spawns a creature of the given type (see Shared/Creatures) climbing out of the sea
@@ -356,40 +371,28 @@ function CreatureService.spawn(kind, bearing)
 	if #creatures >= Config.MAX_CREATURES and not stats.big then
 		return false
 	end
-	local model = getTemplate(kind):Clone()
 	bearing = bearing or math.random() * 360
-	local eyes = {}
-	for _, eye in model.PrimaryPart.GlowEyes:GetChildren() do
-		if eye:IsA("Frame") then
-			table.insert(eyes, eye)
-		end
-	end
+	nextId = nextId % 65535 + 1
 	local crab = {
+		id = nextId,
 		kind = kind,
+		kindIndex = kindIndex[kind] or 0,
 		stats = stats,
-		model = model,
-		body = model.PrimaryPart,
 		bearing = bearing,
 		pos = flat(center + directionFor(bearing) * Config.CREATURE_SPAWN_RADIUS),
 		radius = Config.CREATURE_SPAWN_RADIUS,
 		threat = { tower = Config.THREAT_BASE_TOWER },
 		target = "tower",
-		eyes = eyes,
+		targetBits = 0,
 		nextBite = 0,
 		health = stats.health * (if stats.big then 1 else (state:GetAttribute("ForecastCrabHpMult") or 1)),
 		maxHealth = stats.health * (if stats.big then 1 else (state:GetAttribute("ForecastCrabHpMult") or 1)),
-		shownRatio = 1,
-		healthBar = model.PrimaryPart.HealthBar,
-		healthFill = model.PrimaryPart.HealthBar.Frame.Fill,
-		phase = math.random() * 10,
 		moving = true,
+		lit = false,
 		burning = false,
 		flashUntil = 0,
-		currentColor = CRAB_COLOR,
-		feedback = model.PrimaryPart:FindFirstChild("Feedback"),
 	}
-	place(crab, os.clock())
-	model.Parent = refs.creatureFolder
+	place(crab)
 	table.insert(creatures, crab)
 	if stats.big and state then
 		state:SetAttribute("BossName", stats.displayName)
@@ -424,7 +427,7 @@ end
 function CreatureService.damageArea(position, radius, amount, maxTargets, source, attacker)
 	local candidates = {}
 	for index, crab in creatures do
-		local offset = crab.body.Position - position
+		local offset = crab.worldPos - position
 		local distance = Vector3.new(offset.X, 0, offset.Z).Magnitude
 		if distance <= radius + crab.stats.bodyRadius then
 			table.insert(candidates, { index = index, distance = distance })
@@ -438,7 +441,7 @@ function CreatureService.damageArea(position, radius, amount, maxTargets, source
 	local killed = {}
 	for n = 1, math.min(maxTargets, #candidates) do
 		local crab = creatures[candidates[n].index]
-		table.insert(hits, crab.body.Position)
+		table.insert(hits, crab.worldPos)
 		crab.health -= amount
 		crab.lastSource = source or "Unknown"
 		crab.lastAttacker = attacker
@@ -449,7 +452,6 @@ function CreatureService.damageArea(position, radius, amount, maxTargets, source
 			addThreat(crab, attacker, amount * Config.THREAT_CANNON_MULT)
 		end
 		crab.flashUntil = os.clock() + 0.12
-		updateHealthBar(crab)
 		if crab.health <= 0 then
 			table.insert(killed, candidates[n].index)
 		end
@@ -470,12 +472,12 @@ end
 function CreatureService.findTarget(position, range)
 	local best, bestRadius = nil, math.huge
 	for _, crab in creatures do
-		local offset = crab.body.Position - position
+		local offset = crab.worldPos - position
 		if Vector3.new(offset.X, 0, offset.Z).Magnitude <= range and crab.radius < bestRadius then
 			best, bestRadius = crab, crab.radius
 		end
 	end
-	return best and best.body.Position
+	return best and best.worldPos
 end
 
 function CreatureService.count()
@@ -525,7 +527,8 @@ function CreatureService.showSilhouette(bearing)
 	end)
 end
 
-local function onHeartbeat(dt)
+-- One simulation step (S4.2: fixed 1/20 s)
+local function step(dt)
 	if #creatures == 0 then
 		return
 	end
@@ -609,21 +612,9 @@ local function onHeartbeat(dt)
 				EventLog.beamHit(crab.lastAttacker) -- onboarding telemetry: first beam hit per Keeper
 			end
 		end
-		updateHealthBar(crab)
 
 		crab.burning = burning
-		local color = if crab.flashUntil > now then HIT_COLOR
-			elseif burning then BURN_COLOR
-			elseif lit then LIT_TINT
-			else CRAB_COLOR
-		if color ~= crab.currentColor then
-			crab.currentColor = color
-			crab.body.Color = color
-			if crab.feedback then
-				crab.feedback.Enabled = color ~= CRAB_COLOR
-				crab.feedback.Color = color
-			end
-		end
+		crab.lit = lit
 
 		if crab.health <= 0 then
 			removeAt(index, "killed")
@@ -671,12 +662,12 @@ local function onHeartbeat(dt)
 							local center3 = targetPosition(target) or crab.pos
 							for _, entry in players do
 								if entry.pos and (entry.pos - center3).Magnitude <= stats.slamRadius then
-									bitePlayer(entry.player, crab.body.Position, stats.playerDamage, stats.displayName)
+									bitePlayer(entry.player, crab.worldPos, stats.playerDamage, stats.displayName)
 								end
 							end
-							SoundFx.playAt("cannonImpact", crab.body.Position)
+							SoundFx.playAt("cannonImpact", crab.worldPos)
 						else
-							bitePlayer(target, crab.body.Position, stats.playerDamage, stats.displayName)
+							bitePlayer(target, crab.worldPos, stats.playerDamage, stats.displayName)
 						end
 					end
 				elseif defense then
@@ -695,7 +686,7 @@ local function onHeartbeat(dt)
 		if crab.radius > Config.CREATURE_SPAWN_RADIUS + 1 then
 			removeAt(index, "fled") -- pushed back into the sea
 		else
-			place(crab, now)
+			place(crab)
 			-- keep the boss bar up to date
 			if stats.big and state then
 				local shown = math.max(0, math.ceil(crab.health))
@@ -710,6 +701,58 @@ local function onHeartbeat(dt)
 	end
 end
 
+-- Sends every creature (and the ones just burned away) to every client, in packets of at most 50
+local function sendSnapshot()
+	local now = os.clock()
+	local entries = table.create(#creatures + #dying)
+	for _, crab in creatures do
+		table.insert(entries, entryFor(crab, now))
+	end
+	for i = #dying, 1, -1 do
+		if dying[i].untilT < now then
+			table.remove(dying, i)
+		else
+			table.insert(entries, dying[i].entry)
+		end
+	end
+	if #entries == 0 or not snapshotRemote then
+		return
+	end
+	local serverTime = workspace:GetServerTimeNow()
+	local per = CreatureSnapshot.MAX_PER_PACKET
+	for first = 1, #entries, per do
+		local packet = CreatureSnapshot.encode(entries, serverTime, first, math.min(first + per - 1, #entries))
+		CreatureService.bytesSent += buffer.len(packet)
+		snapshotRemote:FireAllClients(packet)
+	end
+end
+
+local stepAccumulator, sendAccumulator = 0, 0
+local function onHeartbeat(dt)
+	stepAccumulator = math.min(stepAccumulator + dt, STEP * 3) -- never more than 3 steps behind
+	while stepAccumulator >= STEP do
+		stepAccumulator -= STEP
+		step(STEP)
+	end
+	sendAccumulator += dt
+	if sendAccumulator >= SEND_INTERVAL then
+		sendAccumulator %= SEND_INTERVAL
+		sendSnapshot()
+	end
+end
+
+-- The creature models clients draw: built once from the art and published for every client
+local function publishTemplates()
+	local published = Instance.new("Folder")
+	published.Name = "CreatureTemplates"
+	for _, kind in kinds do
+		local template = getTemplate(kind):Clone()
+		template.Name = kind
+		template.Parent = published
+	end
+	published.Parent = ReplicatedStorage
+end
+
 -- defenseService is used to damage cannons that creatures attack
 function CreatureService.init(islandRefs, lampService, towerService, upgradeService, defenseService, stateFolder)
 	refs = islandRefs
@@ -720,6 +763,14 @@ function CreatureService.init(islandRefs, lampService, towerService, upgradeServ
 	state = stateFolder
 	if state then
 		state:SetAttribute("BossName", "")
+	end
+	publishTemplates()
+	local remotes = ReplicatedStorage:WaitForChild("Remotes")
+	snapshotRemote = remotes:FindFirstChild("CreatureSnapshot")
+	if not snapshotRemote then
+		snapshotRemote = Instance.new("UnreliableRemoteEvent")
+		snapshotRemote.Name = "CreatureSnapshot"
+		snapshotRemote.Parent = remotes
 	end
 	RunService.Heartbeat:Connect(onHeartbeat)
 end

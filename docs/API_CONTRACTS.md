@@ -47,7 +47,7 @@ Server → client only (15): `AdminResult`, `Notify`, `LootCollected`, `OpenUpgr
 | `AdminResult` (R1.8) | `requestId, ok, result` (table for inspect, message otherwise) | owner only in practice |
 | `RunResults` | results payload (S2.2 adds `banked`, S2.5 `crewSize`) | |
 | `GearData` | profile view | **never** includes `Grants`, `RedeemedCodes` |
-| `CreatureSnapshot` (new, S4.2) | `buffer`: `[n][id u16, x f32, y f32, z f32, yaw u8, state u8, hpPct u8]` | 12 Hz, `U` |
+| `CreatureSnapshot` (S4.2, `UnreliableRemoteEvent`) | `buffer`: header `[serverTime f64][n u16]`, then per creature `[id u16][kind u8][x f32][y f32][z f32][yaw u8][state u8][hp u8]` (18 bytes; `kind` added so a client can draw a creature from its first packet); at most 50 creatures per packet (910 bytes) | 12 Hz, `U`, to every client; the client checks `typeof` = buffer and the length (`CreatureSnapshot.decode`) |
 | `CombatResult` (new, S4) | `{Seq, Hits}` | `U`, batched |
 | ~~`DawnPearl` (new, S2.2)~~ | — | S2.2 used the existing `LootCollected` instead: `LootCollected("PearlBanked", amount)`; `RunResults` carries `banked[playerName]` |
 | `LeaderboardUpdate` (new, S7.3) | `{board, rows}` | 60 s |

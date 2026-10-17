@@ -403,3 +403,24 @@ PLAY TEST: console showed only ProfileStore's refused Studio write (API off) and
 MIRROR: 81 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (a608ef19).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
 NEXT: S4.2 20 Hz step + snapshots.
+
+CHECKPOINT: S4.2 20 Hz step + snapshots — 🟦 (Script Analysis unmeasured; measured with 1 client, see notes)
+CHECKPOINT: S4.3 Client interpolation — 🟦 (Script Analysis unmeasured)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S4.2_before_2026-10-17 (CreatureService)
+BUILT (one batch: the server stops drawing creatures, so the client must draw them in the same change):
+- `CreatureService`: creatures are tables only. A fixed 1/20 s simulation step (at most 3 steps behind); `place` keeps a world position and yaw instead of moving a model; damage, targeting, loot and sounds use `worldPos`. 12 times a second `sendSnapshot` sends every creature (and the ones just killed, with the DYING flag for 0.3 s) over the new `UnreliableRemoteEvent` `Remotes.CreatureSnapshot`, in packets of at most 50. The art templates (eyes, health bar, feedback light) are built once and published to `ReplicatedStorage.CreatureTemplates`. `CreatureService.bytesSent` counts bytes for the probe.
+- `Shared/CreatureSnapshot` (new, `--!strict`, pure): 18-byte entries (id, kind, x, y, z, yaw, state flags, hp), encode/decode with a length check, the creature-kind list, and `sample` (interpolation with short-way yaw, no extrapolation).
+- `Client/CreatureView` (new LocalScript): keeps the last 6 snapshots per creature, draws it 2/12 s in the past (interpolated), adds the walk bob, eye colour, health bar, beam tint, hit flash and the kill burst; pools models per kind; a creature missing for 0.4 s is removed. Models go into `workspace.Island.Creatures` on the client (named by kind), so the coach and the aim marker still find them.
+- Contract: `CreatureSnapshot` row updated (the `kind` byte and the header were added to the planned layout).
+TESTRUNNER (DEV): 119 passed, 0 failed. New `CreatureSnapshotSpec` (6): round trip of every field, 50 creatures = 910 bytes (one packet), a short buffer decodes to nothing, the kind list, interpolation halfway with yaw through 0, hold before/after.
+SCRIPT ANALYSIS: not measured (owner item).
+PLAY TEST / PROBES (DEV, owner's account, mock store, TEMPTEST keep-alive and probe scripts, runtime only):
+- Server: the island's creature folder held 4 instances all night (the prologue silhouette), i.e. 0 replicated instances per creature.
+- Send (S4.2): 31 creatures on night 1 gave 6.8 KB/s of snapshots; topped up to the 45-creature cap on night 2: **10.0 KB/s average, 10.7 KB/s max** over 10 s (target ≤ 30; the old per-frame model moves were ~50). `Stats.DataSendKbps` peaked at 16.7 (all server traffic). Measured with one client; the same packet is sent to each client, so per-client send does not grow with the crew. A 4-client run is part of S4.6.
+- Client (S4.3): 45 creatures drawn, 60 FPS, worst frame 18.6 ms (Studio PC, window focused). Smoothness: walking creatures moved on every rendered frame (0 still frames out of 180 in 3 s) with the largest frame step 1.3–1.4 × the average (stepping at 12 Hz would show about 4 still frames in 5 and 5 × jumps). One crab that stopped mid-sample is excluded.
+- Gameplay still works: the first crab is drawn in the prologue; a harpoon strike on a crab at the tower registered (`step=strike`); the coach's lamp prompt saw the creatures; night 1 survived; 0 client errors; server console only ProfileStore's refused Studio write (API off) and CorePackages UIBlox warnings. Play stopped; 0 TEMPTEST scripts remain.
+MIRROR: 84 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (9c0f6415).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+NEXT: S4.4 Render budget.
