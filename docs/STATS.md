@@ -32,6 +32,9 @@ Final = clamp((Base + ΣFlat) × (1 + ΣAdditivePct) × ΠMultipliers, Min, Max)
 | `AutoSweepSpeed` | deg/s | 25 | AdditivePct | 10 | 60 | Clockwork Sweep |
 | `CannonDamage` | per shot | level table | AdditivePct | 5 | 60 | — |
 | `CannonRange` | studs | level table | AdditivePct | 25 | 60 | — |
+| `SniperDamage` ✅ | per shot | 12 (`Config.SNIPER_DAMAGE`, D-044) | AdditivePct | 1 | 100 | — (no boost yet) |
+| `SniperCooldown` ✅ | s | 1.0 | AdditivePct | 0.3 | 5 | — |
+| `SniperRange` ✅ | studs | 220 | AdditivePct | 50 | 300 | — |
 | `ShellGainPct` ✅ | share of loot Shells | 0 | Flat (S6.4: a share, so it adds as Flat on a 0 base) | 0 | +15% | Quartermaster Shell Pouch (+2% a rank, 5 ranks = +10%), specialties; fractions round up by chance (`LootService`) |
 | `LootMagnetRadius` | studs | 10 | Flat, AdditivePct | 6 | 24 | specialties |
 | `CrabCount(night)` | int | `nightPlan` | Multiplier | — | `MAX_CREATURES` | Spring tide (+40% at −20% HP) |

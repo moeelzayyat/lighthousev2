@@ -58,6 +58,8 @@ local function freshStats()
 		darkEvents = 0,
 		attacks = 0,
 		attackHits = 0,
+		sniperShots = 0, -- D-044: rifle shots from the sniper tower
+		sniperHits = 0,
 		nightReached = 0,
 		players = {},
 		autoSweepSeconds = 0, -- time the lamp swept on its own at night (nobody at the console)
@@ -315,6 +317,7 @@ function EventLog.endRun(result, reason)
 		"Players: " .. (if #stats.players > 0 then table.concat(stats.players, ", ") else "none"),
 		string.format("Kills: %d  [%s]", totalKills, listCounts(stats.kills)),
 		string.format("Weapon attacks: %d (%d hit)", stats.attacks, stats.attackHits),
+		string.format("Sniper tower shots: %d (%d hit)", stats.sniperShots, stats.sniperHits),
 		string.format("Shells earned: %d  Loot: [%s]", stats.shellsEarned, listCounts(stats.loot)),
 		"Upgrades bought: " .. (if #stats.upgrades > 0 then table.concat(stats.upgrades, ", ") else "none"),
 		string.format("Cannons built: %d  upgraded: %d  reloaded: %d  ran empty: %d  destroyed: %d", stats.cannons, stats.cannonUpgrades, stats.cannonReloads, stats.cannonsEmptied, stats.cannonsDestroyed),

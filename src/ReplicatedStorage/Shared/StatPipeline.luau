@@ -33,6 +33,9 @@ StatPipeline.STATS = {
 	AutoSweepDps = { unit = "DPS", min = 0, max = 30, flat = true },
 	MaxFuel = { unit = "fuel", min = 60, max = 200, flat = true, add = true },
 	MaxIntegrity = { unit = "integrity", min = 60, max = 250, flat = true, add = true },
+	SniperDamage = { unit = "per shot", min = 1, max = 100, add = true }, -- D-044: the sniper tower's rifle
+	SniperCooldown = { unit = "s", min = 0.3, max = 5, add = true },
+	SniperRange = { unit = "studs", min = 50, max = 300, add = true },
 } :: { [string]: StatDef }
 
 local function sum(list: { number }?): number
@@ -71,6 +74,17 @@ function StatPipeline.weapon(weaponId: string, mods: { [string]: Mods }?): Weapo
 		range = StatPipeline.compute("WeaponRange", w.range, m.range),
 		hitRadius = StatPipeline.compute("WeaponHitRadius", w.hitRadius, m.hitRadius),
 		maxTargets = StatPipeline.compute("WeaponMaxTargets", w.maxTargets, m.maxTargets),
+	}
+end
+
+export type SniperStats = { damage: number, cooldown: number, range: number }
+
+-- D-044: the sniper tower's rifle as it applies in a voyage (no boost touches it yet)
+function StatPipeline.sniper(): SniperStats
+	return {
+		damage = StatPipeline.compute("SniperDamage", Config.SNIPER_DAMAGE),
+		cooldown = StatPipeline.compute("SniperCooldown", Config.SNIPER_COOLDOWN),
+		range = StatPipeline.compute("SniperRange", Config.SNIPER_RANGE),
 	}
 end
 

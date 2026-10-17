@@ -1309,10 +1309,25 @@ OWNER: to start S3, see "S3 — START THE PUBLIC TEST" below.
 S3 — START THE PUBLIC TEST (owner; DEV experience only; production stays untouched)
 =====================================================================
 D-016: the public test runs on DEV, made public. Testers' DEV progress does not carry over to production at the relaunch.
- 0. Publish DEV once more first, so the live game sends the new S3 measures: File → Save to File As → `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_S3_2026-10-17.rbxl`; Studio API access stays OFF; File → Publish to Roblox (DEV); Creator Hub → Servers → Shut down all servers. Nothing a player sees changes.
+ 0. Publish DEV once more first, so the live game sends the new S3 measures: File → Save to File As → `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_S3_2026-10-17.rbxl`; Studio API access stays OFF; File → Publish to Roblox (DEV); Creator Hub → Servers → Shut down all servers. This publish also brings the sniper tower (SNP.1, D-044).
  1. Make Lighthouse Keepers DEV **Public**: in the DEV Studio window, Game Settings → Permissions → Public (or the experience's Public/Private switch in Creator Hub).
  2. The store page on DEV: icon and thumbnails from `assets/` (L1.5 files), description and title A from `assets/store/STORE_PAGE.md`.
  3. Creator Hub → DEV → Ads Manager: a small sponsored campaign of your choosing. Run it for at least 48 hours, as a diagnostic, not for ranking. If thumbnail or icon testing is offered, use icon A and icon B from `assets/icons/`.
  4. Run the S3.2 sessions with `docs/PLAYTEST_KIT.md`: 5 or more, a real phone in each, one with no verbal help.
  5. After 48 hours and then weekly: send Claude the Creator Hub numbers listed in the kit's §3 and the observer sheets. Claude makes the weekly change (S3.3) and writes the review (S3.4). The GO/NO-GO (S3.6) is yours.
 To end the test: set DEV back to Private, and turn the mode test off (`Config.MODE_TEST_ENABLED = false`, ask Claude).
+
+CHECKPOINT: SNP.1 Sniper tower (the owner's idea) — 🟦 (Script Analysis unmeasured; no screenshot: Studio's 3D view drew only white for every capture this time, in Edit too, while the HUD drew normally; the owner judges it in play)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF (probe refused, error 7)
+BACKUP: ServerStorage.Backups.SNIPER_before_2026-10-17 (Config, StatPipeline, SoundFx, CreatureService, Platform, NetGuard, Encounter, EventLog, NetGuardSpec, SecuritySpec) · restore points "SNIPER before", "SNIPER passed"
+BUILT (D-044):
+- `SniperService` (new, server, --!strict): builds the tower into the island at boot (legs, braces, platform with rails, roof, ladder, rifle on a swivel, a lantern), the climb prompt, the climber's state, and the `SniperAction` handler: the shot is traced from the muzzle along the aimed line against the creature table (`CreatureService.damageRay`, first creature only) and a tracer flashes for everyone. Pure rules (`rayHit`, `canClimb`, `canFire`) are unit-tested.
+- `SniperView` (new, client, --!strict): first-person view, crosshair with a reload bar, hold right mouse / L2 (or ZOOM on touch) to zoom to FOV 20 with a dark scope ring, click / R2 / FIRE to shoot, E / B / CLIMB DOWN to come down.
+- `CreatureService`: `damageRay`; a player up the tower is not a valid target. `Encounter`: wires it; on-foot attacks are refused while up the tower. `Config.SNIPER_*`, `StatPipeline.sniper()` + 3 STATS rows, the `sniper` sound (the cannon's asset, sharper), `SniperAction` in the remotes, its rate (3/5) and its contract row; run summary counts "Sniper tower shots".
+TESTRUNNER (DEV, Play server): **258 passed, 0 failed** (7 new in SniperSpec; NetGuard and Security specs list the new remote).
+PLAY TEST (DEV, one player, keyboard, runtime helpers to sail and to publish a target position): climbed with E (first person, walk speed 0); 12 shots in the prologue: 9 kills (6 Sand Skitters at 1 shot each, 3 Rock Crabs at 2 shots each in a Spring Tide); in a second run 9 tracers seen on the client for 9 shots; stayed up through the start of Night 1 firing 30 more shots (19 kills in total): health stayed at 100 while up the tower; climbed down with E: walk speed 16, jump power 50, at the foot of the ladder, the prompt back on. The first run found a bug (the run counters for sniper shots did not exist, so the tracer and sound after the damage never ran): fixed, then 0 errors from game scripts.
+NUMBERS: D-044 (all new; no existing number changed).
+MIRROR: 166 scripts in DEV, digest identical to `src/` (1e1412bc).
+NOT DONE: screenshots (Studio's 3D view was blank white for captures); a phone and a controller test; the tower's look is the owner's call.
+OWNER: in the next DEV publish (the S3 step 0 package now also carries the sniper tower), climb the tower on the island's west side and tell me if the numbers feel right.

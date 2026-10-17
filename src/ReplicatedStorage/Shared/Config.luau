@@ -99,6 +99,14 @@ local Config = {
 	LOOT_LIFETIME = 60, -- uncollected loot washes away after this long (and at dawn)
 	WAVE_BONUS_PER_NIGHT = 13, -- surviving night N gives N x this many shells (was 10; +30% Shells, Oct 12)
 
+	-- Sniper tower (owner's idea 2026-10-17, D-044): one crew member at a time shoots a scoped rifle from it
+	SNIPER_TOWER_AT = Vector3.new(-44, 0, 0), -- flat position on the island's west side, between two cannon pads
+	SNIPER_TOWER_HEIGHT = 22, -- studs from the ground to the platform
+	SNIPER_DAMAGE = 12, -- per shot: a Sand Skitter (6 HP) in one, a Rock Crab (30 HP) in three (two in a Spring Tide)
+	SNIPER_COOLDOWN = 1.0, -- seconds between shots
+	SNIPER_RANGE = 220, -- studs from the rifle
+	SNIPER_AIM_PAD = 2.5, -- studs added to a creature's body radius when a shot is traced (aim forgiveness)
+
 	-- Cannons (built on fixed pads with crew shells; reset every run)
 	CANNON_PAD_RADIUS = 34, -- distance of the pads from the tower
 	CANNON_PAD_BEARINGS = { 0, 60, 120, 180, 240, 300 }, -- six pads around the island

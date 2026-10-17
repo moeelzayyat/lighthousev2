@@ -209,6 +209,7 @@ return function(T: any)
 				ChooseVoyage = function() return { "NoSuchVoyage" } end,
 				MerchantRequest = function() return { rid(), "buy", "NoSuchItem", 1 } end,
 				CodeRedeem = function() return { "NOSUCHCODE" } end,
+				SniperAction = function() return { "fire", Vector3.new(0, -500, 0) } end, -- D-044: not up the tower
 			}
 			local over = {}
 			for remote, rate in NetGuard.RATES do

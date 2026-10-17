@@ -14,6 +14,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Harpoons (4) | Released | R1.4 | finite checks |
 | Armor (3) | Released | — | |
 | Cannons (build/upgrade/reload/ammo/health) | Released | S4 | |
+| Sniper tower (one climber, scoped rifle, server-traced shots) | Tested (not yet published) | owner's idea 2026-10-17 | D-044; `SniperService`, `SniperView`; out of the creatures' reach while up; numbers in `Config.SNIPER_*` |
 | Aggro / threat | Released | — | |
 | Rock Crab, Sand Skitter swarm | Released | S4 | render budget |
 | Big monsters (Barnacle Brute, Shipwreck Hermit) | Released; by crew size tested (not yet published) | S6.1 | S6.1: one per crew member on boss nights, evenly spread bearings (`WaveDirector.bossBearings`); a boss counts as 5 toward `MAX_CREATURES` (`Config.BOSS_SLOTS`, `CreatureService.load`); `BossesByCrewSpec` 5 tests |

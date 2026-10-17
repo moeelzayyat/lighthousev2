@@ -58,6 +58,7 @@ SoundFx.SOUNDS = {
 	witchTide = { id = "rbxasset://sounds/impact_water.mp3", volume = 0.8, speed = 1.0 },
 	shamanChime = { id = "rbxasset://sounds/electronicpingshort.wav", volume = 0.7, speed = 1.6 },
 	shamanMend = { id = "rbxasset://sounds/snap.wav", volume = 0.6, speed = 1.6 },
+	sniper = { id = "rbxassetid://9114361763", volume = 0.5, speed = 2.1 }, -- D-044: the cannon's crack, sharper
 }
 
 local function makeSound(name)

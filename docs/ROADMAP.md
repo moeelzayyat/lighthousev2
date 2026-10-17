@@ -258,6 +258,7 @@ The owner judges every step from before/after screenshots (`assets/screens/visua
 | HUI.4 ✅ | Harbor board | `Client/HarborBoard`: "HARBOR LEGENDS" face with a podium for the top 3 and rows 4–10 per board, a "your rank" strip, and a full-screen view from a prompt on the board. It reads the rows the server already writes (no new remote); the board is 16 x 9.5 studs (was 13 x 7.5) | Rows, podium and rank drawn from sample rows; 0 errors | Play test |
 | HUI.5 ✅ | Harbor HUD | Chunky bag button (same spot and size), a Pearls pill (top right) and a CODES button (opens the BAG with the code box), shown on the harbor island only | Shown in the harbor, hidden on a voyage | Play test |
 | VIS.P ✅ | Publish the new look (owner) | Package "VISUAL + HARBOR UI + S2.5c — READY FOR OWNER TO PUBLISH" in HANDOFF_REPORT.md: V1–V8, HUI.1–HUI.5, the first-10-minutes pass, the bigger harbor island, S2.5c | Live checks in the package; the LO.5 live checks ride along | Owner |
+| SNP.1 🟦 | Sniper tower (the owner's idea, 2026-10-17) | `SniperService` (tower built on the island's west side at boot, climb prompt, server-traced rifle shots, `SniperAction` remote), `SniperView` (first-person scope, crosshair, zoom, FIRE/ZOOM/CLIMB DOWN on touch), D-044 numbers | One shot kills a Sand Skitter, a Rock Crab takes 3 (2 in a Spring Tide); the climber is out of reach; TestRunner green | TestRunner, play test; the owner judges it after the next DEV publish |
 
 ---
 

@@ -26,6 +26,7 @@ local NetGuard = require(Server.NetGuard)
 local OilCarry = require(Server.OilCarry)
 local OrbitService = require(Server.OrbitService) -- S6.3
 local RescueService = require(Server.RescueService) -- LO.2
+local SniperService = require(Server.SniperService) -- D-044
 local GrantService = require(Server.GrantService)
 
 local Encounter = { Name = "Encounter" }
@@ -251,8 +252,8 @@ local function hookAttack(ctx)
 		if not NetGuard.isFiniteVector3(target) or not NetGuard.allow(player, "Attack") then
 			return
 		end
-		if LampService.getKeeper() == player then
-			return
+		if LampService.getKeeper() == player or player:GetAttribute("OnSniperTower") then
+			return -- the Keeper and the sniper (D-044) have their hands full
 		end
 		local character = player.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
@@ -445,6 +446,45 @@ function Encounter.Start(ctx)
 			return (GrantService.Grant(player, claimId, rewards, source))
 		end,
 		state = ctx.state,
+	})
+
+	-- D-044: the sniper tower (the owner's idea): a scoped rifle one crew member at a time
+	SniperService.start({
+		island = refs.folder,
+		remote = ctx.remotes.SniperAction,
+		at = Config.SNIPER_TOWER_AT,
+		height = Config.SNIPER_TOWER_HEIGHT,
+		aimPad = Config.SNIPER_AIM_PAD,
+		groundY = function(x, z)
+			local hit = workspace:Raycast(Vector3.new(x, 250, z), Vector3.new(0, -500, 0), groundParams)
+			return if hit then hit.Position.Y else Config.GROUND_Y
+		end,
+		center = center,
+		stats = StatPipeline.sniper,
+		phase = function()
+			return ctx.state:GetAttribute("Phase") or ""
+		end,
+		isKeeper = function(player)
+			return LampService.getKeeper() == player
+		end,
+		carryingOil = OilCarry.has,
+		allow = function(player)
+			return NetGuard.allow(player, "SniperAction")
+		end,
+		connect = NetGuard.connect,
+		isFiniteVector3 = NetGuard.isFiniteVector3,
+		damageRay = CreatureService.damageRay,
+		walkSpeed = function(player)
+			return StatPipeline.compute("PlayerSpeed", game:GetService("StarterPlayer").CharacterWalkSpeed, { add = { player:GetAttribute("Boost_PlayerSpeed") or 0 } })
+		end,
+		notify = LampService.notify,
+		playAt = SoundFx.playAt,
+		log = EventLog.log,
+		count = function(name)
+			EventLog.count(name)
+		end,
+		first = EventLog.first,
+		mark = EventLog.mark,
 	})
 
 	-- The round loop runs for the life of the server; it starts once boot has finished (Network last).

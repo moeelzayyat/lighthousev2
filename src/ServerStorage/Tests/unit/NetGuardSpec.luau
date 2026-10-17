@@ -22,6 +22,7 @@ local CONTRACT: { [string]: { number } } = {
 	ChooseVoyage = { 2, 3 },
 	MerchantRequest = { 5, 8 }, -- S6.2
 	CodeRedeem = { 0.1, 1 }, -- L1.4
+	SniperAction = { 3, 5 }, -- D-044
 }
 
 return function(T: any)

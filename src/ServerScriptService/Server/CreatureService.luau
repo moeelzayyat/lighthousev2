@@ -24,6 +24,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local EventLog = require(script.Parent.EventLog)
+local SniperService = require(script.Parent.SniperService) -- D-044: the rifle's shot line
 local Ground = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Ground"))
 local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SoundFx"))
 local Creatures = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Creatures"))
@@ -243,6 +244,9 @@ local function targetValid(target)
 	elseif typeof(target) == "Instance" then
 		if target.Parent ~= Players or not target:GetAttribute("Ready") then
 			return false
+		end
+		if target:GetAttribute("OnSniperTower") then
+			return false -- D-044: out of reach up the sniper tower
 		end
 		local character = target.Character
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
@@ -616,6 +620,26 @@ function CreatureService.damageArea(position, radius, amount, maxTargets, source
 		removeAt(index, "killed")
 	end
 	return hits
+end
+
+-- D-044: a rifle shot from the sniper tower: damages the first creature along the line (one creature).
+-- Returns where it was hit, or nil for a miss.
+function CreatureService.damageRay(origin, direction, range, pad, amount, source, attacker)
+	local best, bestT = nil, math.huge
+	for _, crab in creatures do
+		if not crab.stats.weaponImmune then
+			local centre = crab.worldPos + Vector3.new(0, crab.stats.bodyRadius, 0)
+			local t = SniperService.rayHit(origin, direction, range, centre, crab.stats.bodyRadius + pad)
+			if t and t < bestT then
+				best, bestT = crab, t
+			end
+		end
+	end
+	if not best then
+		return nil
+	end
+	local hits = CreatureService.damageArea(best.worldPos, 0, amount, 1, source, attacker)
+	return hits[1]
 end
 
 -- Finds the creature within `range` of `position` that is closest to the tower
