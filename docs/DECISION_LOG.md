@@ -76,3 +76,9 @@ Approved by: owner (2026-10-16)
 **Accepted with a change:** permanent upgrade tree — honeycomb UI accepted; bonuses capped at +15% total across stats (not +50%), fewer levels, no "earnings" stat (→ S7.4 Specialties).
 **Rejected (conflict with the owner's monetization rules and the fairness test):** paid revive; 2× earnings pass; premium weapon/armor set stronger than standard gear; Robux-only chests with power drops; direct Robux→currency; a second premium currency.
 **Noted:** the document validates the beam as the strongest feature. It contains no behavioural data (Night-1 survival, beam-mode use, rematch); the next tester session should use `docs/legacy/PLAYTEST_KIT.md`'s observer sheet.
+
+## D-012 — Menu pattern: grid + detail pane with big buttons
+2026-10-17 · S2.5c / S5.5 · Accepted
+Context: the owner showed the *99 Nights in the Forest* crafting screen and said players like the big buttons. The current menus (3.1k-line UiKit with a second restyle pass) have phone text overflow (D-011) and no shared layout.
+Decision: one menu pattern for every full-screen menu — equal square tiles (icon → name → icon+number cost), one tile always selected, a fixed right-hand detail pane with one line, stat delta and one 112 px action button, locked items dimmed under a single reason divider, resource totals in the header, a huge red close top-right, hotbar and night strip visible behind. Full spec in `docs/ART_BIBLE.md` *Menu pattern*. Built as `UiKit/Tiles` on the Quartermaster shop and workbench in **S2.5c**; folded into the UiKit split in S5.5; `StatPipeline` previews in S5.7. Pirate skin kept for the header; panel body uses the HUD glass tokens. Rule 5 (no second restyle pass) stands: screens are rebuilt on the pattern or left alone.
+Approved by: owner (2026-10-17)

@@ -84,6 +84,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Menus / Shop / Inventory / Bench / Trader / Departure / Results / Coach | Released | S5.5 | |
 | Phone layouts | Released | S4.4 | real-phone FPS |
 | InputController (single) | Planned | S2.6 | |
+| Menu pattern (grid + detail pane; `UiKit/Tiles`) | Planned | S2.5c → S5.5 | D-012, `ART_BIBLE.md` |
 
 ## Live ops and monetization
 | System | Status | Target | Notes |
