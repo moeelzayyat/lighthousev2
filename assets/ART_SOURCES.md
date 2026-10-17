@@ -6,6 +6,7 @@ Every asset, package and audio ID used in the place, recorded before it ships.
 |---|---|---|---|---|---|---|---|---|
 | Pirate UI skin atlas (`LK_PirateSkin_atlas.png`) | Image | 127395313470932 | Kenney UI Pack: RPG Expansion, packed by the project | CC0 (credit optional: "UI art: Kenney.nl") | Kenney / owner upload | 2026-10-12 | `Client.UiSkin` | Active |
 | Fredoka One | Font | Roblox built-in | Roblox | Roblox | — | — | UiKit display font | Active |
+| Luckiest Guy | Font | Roblox built-in | Roblox | Roblox | — | 2026-10-17 | Harbor UI Look A titles and buttons (`Client.UiSkinBold`) | Active (DEV) |
 | Soft smoke texture (`rbxasset://textures/particles/smoke_main.dds`) | Texture | Roblox built-in (ships with the client) | Roblox | Roblox | — | 2026-10-17 | `Client.BeamFx` (soft edges of the lighthouse beam, V2) | Active (DEV) |
 | Fire and sparkle textures (`rbxasset://textures/particles/fire_main.dds`, `sparkles_main.dds`) | Texture | Roblox built-in (ships with the client) | Roblox | Roblox | — | 2026-10-17 | harbor campfire (V6) | Active (DEV) |
 | Harbor dressing V6 (campfire stones and logs, lantern caps, pier bollards and rope, 10 more palms copied from the place's own palm) | Parts | in place (`Workspace.LobbyIslandDecor`) | project-built in Studio | owner | owner | 2026-10-17 | the harbor | Active (DEV) |

@@ -1041,11 +1041,67 @@ end
 UserInputService.LastInputTypeChanged:Connect(refreshBagLabel)
 refreshBagLabel()
 
+-- Harbor UI: in the Bold look the bag is a chunky 3D button; on the harbor island a Pearls pill (top right) and a
+-- CODES button (beside the bag, opens the BAG where the code box is) join it. Same bag position and touch size.
+local Skin = UiKit.Skin
+local harborExtras = {}
+if Skin and Skin.Bold then
+	Skin.Bold.button(bagButton, "secondary")
+	for _, layer in { "BoldShadow", "BoldFace" } do
+		local f = bagButton:FindFirstChild(layer)
+		local c = f and f:FindFirstChildOfClass("UICorner")
+		if c then
+			c.CornerRadius = UDim.new(0.5, 0)
+		end
+	end
+end
+local pearlPill = UiKit.Currency(hud, "Pearls", if profile then profile.pearls or 0 else 0, { size = "lg" })
+pearlPill.frame.Name = "PearlsPill"
+pearlPill.frame.AnchorPoint = Vector2.new(1, 0)
+pearlPill.frame.Position = UDim2.new(1, -12, 0, 12)
+if Skin and Skin.Bold then
+	pearlPill.frame.BackgroundColor3 = UiKit.Color.SurfacePrimary
+	Skin.Bold.outline(pearlPill.frame, 3)
+	local c = pearlPill.frame:FindFirstChildOfClass("UICorner")
+	if c then
+		c.CornerRadius = UDim.new(0.5, 0)
+	end
+end
+remotes.GearData.OnClientEvent:Connect(function(data)
+	if type(data) == "table" then
+		pearlPill.set(data.pearls or 0)
+	end
+end)
+local codesButton = UiKit.Button(hud, "Codes", {
+	name = "CodesButton",
+	variant = "primary",
+	size = "sm",
+	width = 96,
+	onClick = function()
+		setOpen(true)
+	end,
+})
+codesButton.AnchorPoint = Vector2.new(1, 1)
+table.insert(harborExtras, pearlPill.frame)
+table.insert(harborExtras, codesButton)
+local function placeHarbor()
+	local bag = bagButton.Position
+	local size = bagButton.Size.X.Offset
+	codesButton.Position = UDim2.new(1, bag.X.Offset - size - 14, 1, bag.Y.Offset - math.floor((size - 44) / 2))
+end
+workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(placeHarbor)
+placeHarbor()
+
 local function refreshHud()
 	hud.Enabled = player:GetAttribute("Ready") == true or player:GetAttribute("InLobby") == true
 	if not hud.Enabled then
 		setOpen(false)
 	end
+	local inHarbor = player:GetAttribute("InLobby") == true and player:GetAttribute("Ready") ~= true
+	for _, extra in harborExtras do
+		extra.Visible = inHarbor
+	end
+	placeHarbor()
 end
 player:GetAttributeChangedSignal("Ready"):Connect(refreshHud)
 player:GetAttributeChangedSignal("InLobby"):Connect(refreshHud)

@@ -3,7 +3,7 @@
 
 local Config = {
 	-- PLAYTEST SWITCHES -------------------------------------------------
-	UI_SKIN = "pirate", -- "pirate" = wood/parchment art skin (Kenney RPG pack, CC0); false = original lighthouse look
+	UI_SKIN = "bold", -- harbor UI (2026-10-17): "bold" = Look A (navy, thick outlines, chunky buttons); "pirate" = wood/parchment art skin (Kenney RPG pack, CC0); false = original lighthouse look
 	UI_SKIN_ATLAS = "rbxassetid://127395313470932", -- one image holding every skin piece (LK_PirateSkin_atlas.png)
 	PROTOTYPE_SHORT_RUN = true, -- true = 30 s days / 90 s nights; false = the longer 45 s / 75 s timings
 	ECONOMY_ENABLED = true, -- false = "stripped core" test: no loot, shells, upgrades, or cannons

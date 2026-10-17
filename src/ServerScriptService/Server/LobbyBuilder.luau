@@ -209,10 +209,11 @@ function LobbyBuilder.build(islandRefs)
 
 	-- S7.3: the leaderboard board across the path from the stall, facing the path (LeaderboardService fills it)
 	local boardBase = Vector3.new(-shopXZ.X, Ground.heightAt(-shopXZ.X, shopXZ.Z), shopXZ.Z)
-	local boardCenter = boardBase + Vector3.new(0, 5.5, 0)
-	local board = makePart("LeaderboardBoard", Vector3.new(13, 7.5, 0.6), CFrame.lookAt(boardCenter, Vector3.new(0, boardCenter.Y, shopXZ.Z)), Color3.fromRGB(70, 50, 35), Enum.Material.Wood, lobby)
+	-- harbor UI: a bigger board (was 13 x 7.5) for the "HARBOR LEGENDS" face each client draws (Client/HarborBoard)
+	local boardCenter = boardBase + Vector3.new(0, 6.2, 0)
+	local board = makePart("LeaderboardBoard", Vector3.new(16, 9.5, 0.6), CFrame.lookAt(boardCenter, Vector3.new(0, boardCenter.Y, shopXZ.Z)), Color3.fromRGB(70, 50, 35), Enum.Material.Wood, lobby)
 	for _, side in { -1, 1 } do
-		makePart("BoardPost", Vector3.new(0.6, 9.5, 0.6), board.CFrame * CFrame.new(side * 6.2, -1, 0.5), Color3.fromRGB(90, 62, 40), Enum.Material.Wood, lobby)
+		makePart("BoardPost", Vector3.new(0.6, 11, 0.6), board.CFrame * CFrame.new(side * 7.7, -1.3, 0.5), Color3.fromRGB(90, 62, 40), Enum.Material.Wood, lobby)
 	end
 	local surface = Instance.new("SurfaceGui")
 	surface.Name = "Boards"

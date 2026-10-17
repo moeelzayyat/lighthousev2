@@ -44,6 +44,15 @@ return function(T: any)
 			T.expect(hasProblem(Registry.check(all), "Items.FlareGun.price: must be a positive number, got -5")).toBe(true)
 		end)
 
+		T.it("harbor UI: a sold item needs a known rarity tier (display only)", function()
+			local all = fresh()
+			all.Items.FlareGun.tier = "Mythic"
+			all.Items.KeepersCoat.tier = nil
+			local problems = Registry.check(all)
+			T.expect(hasProblem(problems, "Items.FlareGun.tier")).toBe(true)
+			T.expect(hasProblem(problems, "Items.KeepersCoat.tier")).toBe(true)
+		end)
+
 		T.it("a duplicate id in an order list fails", function()
 			local all = fresh()
 			table.insert(all.Items.SHOP_ORDER, "FlareGun")

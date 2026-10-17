@@ -248,6 +248,15 @@ The owner judges every step from before/after screenshots (`assets/screens/visua
 | V7 ✅ | Hit and death feel | `CreatureView`: a sea-foam death burst (foam and droplets from one shared emitter; was an orange ball) and white sparks when a hit lands (the white body flash was already there); `HitFx`: a small camera shake for a cannon firing within 70 studs and for a hit of 8+ health on this player (off with Low effects); `BeamFx`: the lamp stutters under 15% oil | Play test: sparks and bursts seen, shake measured, flicker measured; 0 errors; TestRunner green | Play test |
 | V8 🟦 | Phone check | Screenshots at the lowest graphics quality and at Automatic; Studio frame times at both (capped at 60 on this PC, so they prove nothing for phones); the visual budget per device in `PERFORMANCE_BUDGETS.md` ("Visual overhaul"). Not done: Studio's device emulator (not reachable from the tools) and a real phone (the owner's) | Numbers recorded; a real-phone FPS check by the owner | Owner (real phone) |
 
+### Harbor UI (2026-10-17, the owner's ask "Let's start with the harbor isle, we need new UI for shops and leaderboard etc"; spec: project file `research/harbor_ui_spec.md`)
+| ID | Step | Deliverables | Passes when | Verify |
+|---|---|---|---|---|
+| HUI.1 ✅ | Look A "Bold" skin | `Client/UiSkinBold` (navy panels, thick dark outlines, big corners, 3D buttons, Luckiest Guy + Fredoka One, rarity colours), switched by `Config.UI_SKIN = "bold"` (was "pirate"); a Look B would be one more skin and the same switch | Every UiKit screen draws in the new look with 0 errors | Screenshots |
+| HUI.2 ✅ | Rarity tiers | Display-only `tier` on every item (`Items.TIERS`), checked by `_Registry` (D-040); no price or stat changed | Registry refuses a missing or unknown tier; TestRunner green | TestRunner |
+| HUI.3 ✅ | Quartermaster shop | Tab rail (Weapons, Armor, Ammo, Boosts, Cosmetics), 3-column cards (`UiKit.ShopCard`: rarity tag, item in a rarity ring, price / Robux / EQUIPPED / OWNED plate), detail panel with stat bars and +/- against what is equipped, big green BUY beside the Robux button; phone: rail + grid, tap for the detail view | Same ShopRequest/ShopResult and MarketplaceService flow; screenshots wide and phone | Play test |
+| HUI.4 ✅ | Harbor board | `Client/HarborBoard`: "HARBOR LEGENDS" face with a podium for the top 3 and rows 4–10 per board, a "your rank" strip, and a full-screen view from a prompt on the board. It reads the rows the server already writes (no new remote); the board is 16 x 9.5 studs (was 13 x 7.5) | Rows, podium and rank drawn from sample rows; 0 errors | Play test |
+| HUI.5 ✅ | Harbor HUD | Chunky bag button (same spot and size), a Pearls pill (top right) and a CODES button (opens the BAG with the code box), shown on the harbor island only | Shown in the harbor, hidden on a voyage | Play test |
+
 ---
 
 ## 13. Risk register

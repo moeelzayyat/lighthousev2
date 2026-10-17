@@ -4,10 +4,12 @@
 -- walks away. Every purchase is a request (ShopRequest -> ShopResult); the server validates
 -- price, Pearls, ownership, stack limits, range and duplicate requests. Nothing here changes data.
 --
--- Built on UiKit v2.1 (Stage 4 of the UI redesign).
---   Wide / medium: category tabs + supply grid | selected-item counter panel (preview, stats,
---                  comparison, price tag, buy). Buying opens the UiKit purchase dialog (ledger).
---   Phone (landscape): grid first -> tap -> detail view with Back.
+-- Built on UiKit v2.1 (Stage 4 of the UI redesign). Harbor UI (2026-10-17): the layout is a rail of big tab
+-- buttons | a 3-column grid of item cards (rarity tag, item in a coloured ring, price or EQUIPPED/OWNED plate)
+-- | the selected item's panel (rarity, stats with bars and +/- against what is equipped, a big green BUY).
+-- The look (colours, fonts, 3D buttons) comes from the UiKit skin (Config.UI_SKIN), never from this screen.
+--   Wide / medium: rail | grid | detail. Buying opens the UiKit purchase dialog (ledger).
+--   Phone (landscape): rail + grid first -> tap -> detail view with Back.
 -- Studio only: player attribute HudSimulate draws it inside a simulated screen size.
 
 local Players = game:GetService("Players")
@@ -109,7 +111,8 @@ local function statRows(itemId)
 			delta = a - b
 			better = if higherIsBetter then delta > 0 else delta < 0
 		end
-		table.insert(rows, { label = label, value = value, delta = delta, better = better, fmt = fmt })
+		-- harbor UI: raw is the number the stat bar measures (nil = no bar)
+		table.insert(rows, { label = label, value = value, delta = delta, better = better, fmt = fmt, raw = if higherIsBetter ~= nil then a else nil, higher = higherIsBetter })
 	end
 	if item.kind == "Weapon" then
 		local w = StatPipeline.weapon(itemId)
@@ -165,6 +168,12 @@ local noticeRoot = UiKit.new("Frame", { Name = "Root", BackgroundTransparency = 
 noticeRoot:SetAttribute("NoticeTop", 140)
 
 local panel = UiKit.Panel(root, { name = "CounterPanel", kind = "housing", beam = true, padding = 0, anchor = Vector2.new(0.5, 0.5), position = UDim2.fromScale(0.5, 0.5) })
+local skinStyle = UiKit.Skin and UiKit.Skin.style -- the look's tokens (nil for the plain looks)
+
+-- harbor UI: a header strip behind the title row (square lower edge, rounded upper corners from the panel)
+local headerStrip = UiKit.new("Frame", { Name = "HeaderStrip", BackgroundColor3 = C.SurfaceElevated, BorderSizePixel = 0, Visible = skinStyle ~= nil }, panel)
+UiKit.round(headerStrip, if skinStyle then skinStyle.panelRadius else 6)
+UiKit.new("Frame", { Name = "SquareEdge", BackgroundColor3 = C.SurfaceElevated, BorderSizePixel = 0, AnchorPoint = Vector2.new(0, 1), Position = UDim2.fromScale(0, 1), Size = UDim2.new(1, 0, 0.5, 0) }, headerStrip)
 
 -- header: who you're talking to, what they said, your Pearls, close ---------
 local header = UiKit.new("Frame", { Name = "Header", BackgroundTransparency = 1 }, panel)
@@ -172,6 +181,12 @@ local titleBlock = UiKit.new("Frame", { Name = "TitleBlock", BackgroundTranspare
 UiKit.list(titleBlock, "y", 0, { VerticalAlignment = Enum.VerticalAlignment.Center })
 local eyebrow = UiKit.Label(titleBlock, "Harbor supply counter", "Eyebrow", { LayoutOrder = 1, Size = UDim2.new(1, 0, 0, 18), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false })
 local title = UiKit.Label(titleBlock, "The Quartermaster", "H2", { LayoutOrder = 2, Size = UDim2.new(1, 0, 0, 30), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false })
+if skinStyle and UiKit.Skin.Bold then
+	-- harbor UI: amber title with a thick dark outline
+	title.Text = "THE QUARTERMASTER"
+	title.TextColor3 = skinStyle.title
+	UiKit.Skin.Bold.textStroke(title, 3)
+end
 local greeting = UiKit.Label(titleBlock, "", "BodySmall", { LayoutOrder = 3, Size = UDim2.new(1, 0, 0, 20), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false, TextTruncate = Enum.TextTruncate.AtEnd, FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Italic) })
 
 local purse = UiKit.Currency(header, "Pearls", 0, { size = "lg" })
@@ -192,6 +207,7 @@ closeButton.AnchorPoint = Vector2.new(1, 0.5)
 closeButton.Position = UDim2.new(1, 6, 0.5, 0)
 
 local body = UiKit.new("Frame", { Name = "Body", BackgroundTransparency = 1 }, panel)
+local railCol = UiKit.new("Frame", { Name = "RailColumn", BackgroundTransparency = 1 }, body)
 local gridCol = UiKit.new("Frame", { Name = "GridColumn", BackgroundTransparency = 1 }, body)
 local detailCol = UiKit.new("Frame", { Name = "DetailColumn", BackgroundTransparency = 1 }, body)
 ---------------------------------------------------------------------
@@ -199,15 +215,21 @@ local detailCol = UiKit.new("Frame", { Name = "DetailColumn", BackgroundTranspar
 ---------------------------------------------------------------------
 
 local renderGrid, renderDetail
+-- harbor UI: Weapons, Armor, Ammo, Boosts, Cosmetics as a rail of big buttons
+local TAB_LABELS = { Ammunition = "Ammo" }
 local tabItems = {}
 for _, cat in Items.SHOP_CATEGORIES do
-	table.insert(tabItems, { id = cat, label = cat, color = UiKit.CATEGORY[cat] })
+	if cat == "Cosmetics" then
+		table.insert(tabItems, { id = "Boosts", label = "Boosts" }) -- S6.4
+	end
+	table.insert(tabItems, { id = cat, label = TAB_LABELS[cat] or cat, color = UiKit.CATEGORY[cat] })
 end
-table.insert(tabItems, { id = "Boosts", label = "Boosts" }) -- S6.4
-local tabs = UiKit.Tabs(gridCol, tabItems, {
-	size = UDim2.new(1, 0, 0, 46),
-	textSize = 17,
-	minWidth = 90,
+local tabs = UiKit.Tabs(railCol, tabItems, {
+	size = UDim2.fromScale(1, 1),
+	vertical = true,
+	tabHeight = 54,
+	gap = 12,
+	textSize = 19,
 	shoulders = true,
 	onChange = function(id)
 		category = id
@@ -216,8 +238,8 @@ local tabs = UiKit.Tabs(gridCol, tabItems, {
 		renderGrid()
 	end,
 })
-local gridScroll = UiKit.Scroll(gridCol, { Name = "Grid", Position = UDim2.fromOffset(0, 56), Size = UDim2.new(1, 0, 1, -56) })
-local gridLayout = UiKit.new("UIGridLayout", { CellPadding = UDim2.fromOffset(10, 10), SortOrder = Enum.SortOrder.LayoutOrder }, gridScroll)
+local gridScroll = UiKit.Scroll(gridCol, { Name = "Grid", Position = UDim2.fromOffset(0, 0), Size = UDim2.fromScale(1, 1) })
+local gridLayout = UiKit.new("UIGridLayout", { CellPadding = UDim2.fromOffset(12, 12), SortOrder = Enum.SortOrder.LayoutOrder }, gridScroll)
 UiKit.pad(gridScroll, 6, 6, 6, 6)
 local gridState = nil
 
@@ -227,7 +249,12 @@ local gridState = nil
 
 local detail = UiKit.new("Frame", { Name = "Detail", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1) }, detailCol)
 local well = UiKit.Inset(detail, { Name = "PreviewWell", ClipsDescendants = true })
-UiKit.border(well, C.BorderStructural, 1, 0.6)
+local wellStroke = UiKit.border(well, C.BorderStructural, 1, 0.6)
+if skinStyle then
+	UiKit.round(well, skinStyle.cardRadius)
+	wellStroke.Thickness = 4
+	wellStroke.Transparency = 0
+end
 local bigPreview = ItemPreview.new(well, { rotatable = true })
 UiKit.Label(well, "Drag to turn", "Micro", {
 	AnchorPoint = Vector2.new(1, 1),
@@ -284,12 +311,12 @@ local plusButton = UiKit.IconButton(stepper, "plus", { name = "More", layoutOrde
 local maxButton = UiKit.Button(stepper, "Max", { name = "Max", variant = "ghost", size = "sm", minWidth = 64, layoutOrder = 4 })
 
 local affordText = UiKit.Label(buyArea, "", "Micro", { Name = "Affordability", Size = UDim2.new(1, 0, 0, 18), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false, TextTruncate = Enum.TextTruncate.AtEnd })
-local buyButton = UiKit.Button(buyArea, "Buy", { name = "BuyButton", variant = "primary", size = "md", fill = true })
+local buyButton = UiKit.Button(buyArea, "Buy", { name = "BuyButton", variant = "buy", size = "lg", fill = true }) -- harbor UI: the big green BUY
 buyButton.AnchorPoint = Vector2.new(0, 1)
 buyButton.Position = UDim2.fromScale(0, 1)
 local BUY_SIZE = buyButton.Size
 -- L1.3: a cosmetic with a Robux product also gets a Robux button (shares the row; alone for a Robux-only item)
-local robuxButton = UiKit.Button(buyArea, "Robux", { name = "RobuxButton", variant = "secondary", size = "md", fill = true })
+local robuxButton = UiKit.Button(buyArea, "Robux", { name = "RobuxButton", variant = "primary", size = "lg", fill = true })
 robuxButton.AnchorPoint = Vector2.new(1, 1)
 robuxButton.Position = UDim2.fromScale(1, 1)
 robuxButton.Visible = false
@@ -298,14 +325,27 @@ local detailEmpty = UiKit.StateView(detail, "empty", { title = "Pick something f
 detailEmpty.Visible = false
 
 local statWidgets = {}
-local function renderStats(rows)
+-- harbor UI: each stat with a bar measured against the best on the same shelf
+local function renderStats(rows, best)
 	for _, w in statWidgets do
 		w:Destroy()
 	end
 	table.clear(statWidgets)
 	for index, r in rows do
-		local row = UiKit.new("Frame", { Name = "Stat_" .. index, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 24), LayoutOrder = index }, statsSection)
-		UiKit.Label(row, r.label, "BodySmall", { Size = UDim2.new(1, -170, 1, 0), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false, TextTruncate = Enum.TextTruncate.AtEnd, TextYAlignment = Enum.TextYAlignment.Center })
+		local hasBar = r.raw ~= nil and best and best[r.label] ~= nil
+		local row = UiKit.new("Frame", { Name = "Stat_" .. index, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, if hasBar then 38 else 24), LayoutOrder = index }, statsSection)
+		if hasBar then
+			local b = best[r.label]
+			local fraction = if r.higher then (if b.max > 0 then r.raw / b.max else 0) else (if r.raw > 0 then b.min / r.raw else 0)
+			local track = UiKit.new("Frame", { Name = "Bar", BackgroundColor3 = C.SurfaceInset, BorderSizePixel = 0, Position = UDim2.fromOffset(0, 27), Size = UDim2.new(1, 0, 0, 8) }, row)
+			UiKit.round(track, 4)
+			if skinStyle then
+				UiKit.border(track, skinStyle.outline, 2, 0)
+			end
+			local fill = UiKit.new("Frame", { Name = "Fill", BackgroundColor3 = C.AccentLighthouse, BorderSizePixel = 0, Size = UDim2.new(math.clamp(fraction, 0.04, 1), 0, 1, 0) }, track)
+			UiKit.round(fill, 4)
+		end
+		UiKit.Label(row, r.label, "BodySmall", { Size = UDim2.new(1, -170, 0, 24), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false, TextTruncate = Enum.TextTruncate.AtEnd, TextYAlignment = Enum.TextYAlignment.Center })
 		local right = UiKit.new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0), Position = UDim2.fromScale(1, 0), Size = UDim2.fromOffset(0, 24), AutomaticSize = Enum.AutomaticSize.X }, row)
 		UiKit.list(right, "x", 6, { HorizontalAlignment = Enum.HorizontalAlignment.Right, VerticalAlignment = Enum.VerticalAlignment.Center })
 		if r.delta then
@@ -353,7 +393,7 @@ end
 -- BOOSTS (S6.4): permanent, rank by rank, all together capped (their own tab: a list, not item cards)
 ---------------------------------------------------------------------
 
-local boostList = UiKit.Scroll(gridCol, { Name = "BoostList", Position = UDim2.fromOffset(0, 56), Size = UDim2.new(1, 0, 1, -56), Visible = false })
+local boostList = UiKit.Scroll(gridCol, { Name = "BoostList", Position = UDim2.fromOffset(0, 0), Size = UDim2.fromScale(1, 1), Visible = false })
 UiKit.list(boostList, "y", 10)
 UiKit.pad(boostList, 6, 6, 6, 6)
 local boostTotal = UiKit.Label(boostList, "", "BodySmall", { Name = "Total", LayoutOrder = 0, TextColor3 = C.TextPrimary })
@@ -472,6 +512,12 @@ renderDetail = function()
 	end
 	bigPreview:setItem(selectedId)
 	dName.Text = item.name
+	-- harbor UI: the rarity tag first, and the preview framed in the rarity colour
+	local tierColor = if UiKit.Skin and UiKit.Skin.rarityColor then UiKit.Skin.rarityColor(item.tier or "Common") else C.AccentSea
+	UiKit.Tag(dTags, item.tier or "Common", tierColor, { layoutOrder = 0, filled = true }).TextColor3 = Color3.fromRGB(16, 24, 32)
+	if skinStyle then
+		wellStroke.Color = tierColor
+	end
 	UiKit.Tag(dTags, typeLabel(item), C[UiKit.CATEGORY[item.category] or "CatMaterials"], { layoutOrder = 1 })
 	if isEquipped(selectedId) then
 		UiKit.Badge(dTags, "equipped", nil, { layoutOrder = 2 })
@@ -479,7 +525,19 @@ renderDetail = function()
 		UiKit.Badge(dTags, "owned", nil, { layoutOrder = 2 })
 	end
 	dDesc.Text = item.description or ""
-	renderStats(statRows(selectedId))
+	-- the best value of each stat on this shelf, for the bars
+	local best = {}
+	for _, otherId in itemsIn(item.category) do
+		for _, r in statRows(otherId) do
+			if r.raw ~= nil then
+				local b = best[r.label] or { max = r.raw, min = r.raw }
+				b.max = math.max(b.max, r.raw)
+				b.min = math.min(b.min, r.raw)
+				best[r.label] = b
+			end
+		end
+	end
+	renderStats(statRows(selectedId), best)
 	local current = if item.kind == "Weapon" then profile.equippedWeapon
 		elseif item.kind == "Armor" then profile.equippedArmor
 		elseif item.kind == "Cosmetic" and item.slot == "Beam" then (profile.equippedBeam or "BeamAmber")
@@ -496,7 +554,7 @@ renderDetail = function()
 	local isAmmo = item.kind == "Ammo"
 	stepper.Visible = isAmmo
 	priceHolder.Visible = true
-	local tagHeight = if isAmmo then 172 else 124
+	local tagHeight = if isAmmo then 184 else 136
 	buyArea.Size = UDim2.new(buyArea.Size.X.Scale, buyArea.Size.X.Offset, 0, tagHeight)
 	-- the info scroll fills whatever the price tag leaves
 	local detailH = detail.AbsoluteSize.Y
@@ -601,12 +659,12 @@ robuxButton.Activated:Connect(function()
 end)
 
 local function cellSize(gridWidth)
-	local minCard = if mode == "phone" then 132 else 156
-	local gap = 10
+	-- harbor UI: three columns of cards (fewer only if the grid is too narrow for 120-pixel cards)
+	local gap = 12
 	local usable = gridWidth - 12 - 8
-	local columns = math.max(1, math.floor((usable + gap) / (minCard + gap)))
+	local columns = math.clamp(math.floor((usable + gap) / (120 + gap)), 1, 3)
 	local w = math.floor((usable - gap * (columns - 1)) / columns)
-	return w, math.floor(w * (if mode == "phone" then 1.22 else 1.32))
+	return w, math.floor(w * 0.66 + 124)
 end
 
 renderGrid = function()
@@ -631,16 +689,16 @@ renderGrid = function()
 	end
 	if not profile then
 		gridState = UiKit.StateView(gridCol, "loading", { title = "Opening the counter", body = "The Quartermaster is checking your account." })
-		gridState.Position = UDim2.fromOffset(0, 56)
-		gridState.Size = UDim2.new(1, 0, 1, -56)
+		gridState.Position = UDim2.fromOffset(0, 0)
+		gridState.Size = UDim2.fromScale(1, 1)
 		renderDetail()
 		return
 	end
 	local list = itemsIn(category)
 	if #list == 0 then
 		gridState = UiKit.StateView(gridCol, "empty", { title = "Nothing on this shelf", body = "The Quartermaster has nothing in this category right now." })
-		gridState.Position = UDim2.fromOffset(0, 56)
-		gridState.Size = UDim2.new(1, 0, 1, -56)
+		gridState.Position = UDim2.fromOffset(0, 0)
+		gridState.Size = UDim2.fromScale(1, 1)
 	end
 	local balance = pearls()
 	for order, itemId in list do
@@ -649,18 +707,17 @@ renderGrid = function()
 		local owned = owns(itemId)
 		local price = item.price or 0
 		local full = item.kind == "Ammo" and qty >= item.maxStack
-		local card = UiKit.ItemCard(gridScroll, {
+		-- harbor UI: rarity tag, the item in a ring of its rarity colour, a price or EQUIPPED / OWNED plate
+		local product = if item.kind == "Cosmetic" then Cosmetics.productFor(itemId) else nil
+		local equipped = isEquipped(itemId)
+		local card = UiKit.ShopCard(gridScroll, {
 			itemId = itemId,
-			name = item.name,
-			category = item.category,
-			subtitle = if item.kind == "Ammo" then (Ammo[item.ammoType].shotsPerLoad .. " shots / crate") elseif item.kind == "Weapon" then "Weapon" else typeLabel(item),
-			quantity = if item.kind == "Ammo" and qty > 0 then qty else nil,
-			price = if price > 0 then { kind = "Pearls", amount = price } else nil,
-			shortBy = if balance < price then price - balance else nil,
+			name = if item.kind == "Ammo" and qty > 0 then string.format("%s  x%d", item.name, qty) else item.name,
+			tier = item.tier,
+			price = if price > 0 and not (owned and item.kind ~= "Ammo") then { kind = "Pearls", amount = price } else nil,
+			robux = if product and not owned then priceFor(product) else nil,
+			plate = if equipped then "EQUIPPED" elseif owned and item.kind ~= "Ammo" then "OWNED" elseif full then "FULL" else nil,
 			affordable = balance >= price,
-			owned = owned,
-			equipped = isEquipped(itemId),
-			locked = if full then "Stack full" else nil,
 			selected = itemId == selectedId,
 			layoutOrder = order,
 			onClick = function(id)
@@ -783,6 +840,8 @@ function layout()
 	local bw, bh = pw - pad * 2, ph - bodyTop - pad
 
 	local inDetail = phone and phoneView == "detail"
+	headerStrip.Position = UDim2.fromOffset(0, 0)
+	headerStrip.Size = UDim2.new(1, 0, 0, headerTop + headerH + (if phone then 4 else 6))
 	eyebrow.Visible = not phone
 	greeting.Visible = not phone
 	title.Text = if phone then "Quartermaster" else "The Quartermaster"
@@ -802,7 +861,7 @@ function layout()
 			buyArea.Position = UDim2.new(0, pwid + 14, 1, 0)
 			buyArea.Size = UDim2.new(0, w - pwid - 14, 0, tagH)
 		else
-			local wellH = math.clamp(math.floor(h * 0.3), 120, 200)
+			local wellH = math.clamp(math.floor(h * 0.26), 110, 170)
 			well.Position, well.Size = UDim2.fromOffset(0, 0), UDim2.fromOffset(w, wellH)
 			info.Position = UDim2.fromOffset(0, wellH + 12)
 			info.Size = UDim2.fromOffset(w, h - wellH - 12 - tagH - 10)
@@ -812,17 +871,30 @@ function layout()
 		end
 	end
 
+	-- harbor UI: rail | grid | detail (phone: rail | grid, then the detail view)
+	local railW = if phone then 112 else 150
+	-- the rail fits five tabs on a landscape phone: 44-pixel tabs (the touch minimum) with smaller text
+	for _, t in tabs.buttons do
+		t.button.Size = UDim2.new(1, 0, 0, if phone then 44 else 54)
+		t.button.TextSize = if phone then 16 else 19
+	end
+	local railList = tabs.frame:FindFirstChild("Row") and tabs.frame.Row:FindFirstChildOfClass("UIListLayout")
+	if railList then
+		railList.Padding = UDim.new(0, if phone then 8 else 12)
+	end
 	if phone then
-		gridCol.Visible, detailCol.Visible = false, false
+		railCol.Visible, gridCol.Visible, detailCol.Visible = false, false, false
 		if inDetail then
 			place(detailCol, 0, 0, bw, bh)
 			layoutDetail(bw, bh, true)
 		else
-			place(gridCol, 0, 0, bw, bh)
+			place(railCol, 0, 0, railW, bh)
+			place(gridCol, railW + 10, 0, bw - railW - 10, bh)
 		end
 	else
 		local detailW = if mode == "wide" then 360 else 320
-		place(gridCol, 0, 0, bw - detailW - 18, bh)
+		place(railCol, 0, 0, railW, bh)
+		place(gridCol, railW + 14, 0, bw - railW - 14 - detailW - 18, bh)
 		place(detailCol, bw - detailW, 0, detailW, bh)
 		layoutDetail(detailW, bh, false)
 	end

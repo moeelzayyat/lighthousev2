@@ -1210,3 +1210,21 @@ VISUAL OVERHAUL V1–V8 — summary for the owner
 =====================================================================
 V1 sea and sky · V2 the beam · V3 storm effects · V4 island rebuild · V5 one palette · V6 harbor at dusk · V7 hit and death feel · V8 phone check (🟦). Decisions D-038 (lighting) and D-039 (palette) are flagged for you. Every step has a backup in `ServerStorage.Backups.VIS_<step>_before_2026-10-17` and before/after screenshots in `assets/screens/visual_<step>/`. Scripts are mirrored in `src/`; the terrain, the island props and the harbor dressing are place content and reach players with your next DEV publish.
 Still asked of you: save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_preVisual_2026-10-17.rbxl` (a copy of the place as it is now is also useful: `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_visual_2026-10-17.rbxl`); say yes or no to the free storm-sky download; judge the look.
+
+CHECKPOINT: Harbor UI (HUI.1–HUI.5), Look A "Bold" — 🟦 (Script Analysis unmeasured; the owner judges the look and may pick Look B)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: ServerStorage.Backups.HUI_before_2026-10-17 (Config, Items, _Registry, RegistrySpec, UI.Controls, UiSkin, Shop, Inventory, Hud, LobbyBuilder, LiveOps) · restore points "HUI before", "HUI passed"
+BUILT (spec: project file `research/harbor_ui_spec.md`; D-040):
+- `Client/UiSkinBold` (new) + `UiSkin` + `Config.UI_SKIN = "bold"`: the Bold look as a UiKit skin (one switch): navy #16304A panels, #07111B outlines 3–5 px, corners 18–26, 3D buttons (amber primary, green buy, red close, navy idle tab) with a darker copy 6 px below that presses down, Luckiest Guy titles and buttons, Fredoka One text, rarity colours. Auto-sized buttons are sized to their text; long labels shrink to fit.
+- `Items` + `_Registry`: a display-only `tier` on all 27 items, checked at boot (`Items.TIERS`); `RegistrySpec` +1 test.
+- `UI.Controls`: `UiKit.ShopCard` (rarity tag, item in a ring of its rarity colour, price/Robux/EQUIPPED/OWNED plate, white outline when selected), a `buy` button variant, vertical tabs.
+- `Shop.client`: tab rail | 3-column cards | detail panel (rarity tag, preview framed in the rarity colour, stat bars measured against the best on the shelf, +/- against what is equipped, big green BUY next to the Robux button). Phone: rail + grid, tap for the detail view with Back. ShopRequest/ShopResult and the Robux purchase flow are unchanged.
+- `Client/HarborBoard` (new) + `LobbyBuilder`: "HARBOR LEGENDS" drawn on each device from the rows the server already writes into the board (the plain face is hidden on the device): a gold/silver/bronze podium for the top 3, rows 4–10, a "your rank" strip (from the names already on the boards), and a full-screen view from a "View the boards" prompt. No new remote, so no API_CONTRACTS row. The board is 16 x 9.5 studs (was 13 x 7.5).
+- `Inventory.client`: the bag button is a chunky 3D button (same place and size); on the harbor island a Pearls pill (top right) and a CODES button (opens the BAG, where the code box is) appear; both hide on a voyage.
+TESTRUNNER (DEV, Play server): **250 passed, 0 failed** (249 + the tier test).
+PLAY TEST (DEV): the shop opened through the Quartermaster's real prompt; Weapons and Cosmetics tabs, card selection, the BUY and Robux buttons (a runtime-only helper gave 120 Pearls in Studio's memory store so the green BUY shows; API access off, nothing saved); the small-phone layout (667 x 375) grid and detail view; the board drawn from sample rows a runtime-only helper wrote into its labels; the full-screen board from its prompt; the BAG opened from CODES; 0 client and 0 server errors.
+SCREENSHOTS: `assets/screens/harbor_ui/` (before and after: shop weapons, shop cosmetics, phone, board; plus the full-screen board and the harbor HUD).
+MIRROR: 162 scripts in DEV, digest identical to `src/` (8fa221ea).
+NOT DONE: Look B "Captain's Ledger" (waits for the owner's pick); the CODES button opens the BAG but does not scroll to the code box.
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-040 flagged

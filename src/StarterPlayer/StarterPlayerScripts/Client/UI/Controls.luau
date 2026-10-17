@@ -30,6 +30,7 @@ local BUTTON_VARIANTS = {
 	secondary = { bg = Color.SurfaceElevated, hover = Color.SurfaceHover, text = Color.TextPrimary, stroke = Color.BorderStructural },
 	ghost = { bg = Color.SurfaceSecondary, hover = Color.SurfaceSecondary, text = Color.TextSecondary, transparent = true },
 	danger = { bg = rgb(56, 30, 32), hover = rgb(76, 38, 38), text = Color.StateDanger, stroke = Color.StateDanger },
+	buy = { bg = Color.StateSuccess, hover = Color.StateSuccess:Lerp(Color3.new(1, 1, 1), 0.15), text = rgb(16, 32, 20), stroke = Color.StateSuccess }, -- harbor UI: the big BUY
 }
 
 local function attachFeedback(b)
@@ -451,8 +452,10 @@ end
 -- TABS (L1/R1 on a controller). Underline + ivory text marks the selected tab.
 ---------------------------------------------------------------------
 
+-- harbor UI: opts.vertical = true makes a rail of full-width tabs (tabHeight each) instead of a row
 function UiKit.Tabs(parent, items, opts)
 	opts = opts or {}
+	local vertical = opts.vertical == true
 	local bar = new("Frame", { Name = "Tabs", BackgroundTransparency = 1, Size = opts.size or UDim2.new(1, 0, 0, 46), LayoutOrder = opts.layoutOrder or 0 }, parent)
 	new("Frame", {
 		Name = "Rule",
@@ -460,6 +463,7 @@ function UiKit.Tabs(parent, items, opts)
 		BorderSizePixel = 0,
 		Size = UDim2.new(1, 0, 0, 1),
 		Position = UDim2.new(0, 0, 1, -1),
+		Visible = not vertical,
 	}, bar)
 	local row = new("ScrollingFrame", {
 		Name = "Row",
@@ -467,12 +471,15 @@ function UiKit.Tabs(parent, items, opts)
 		BorderSizePixel = 0,
 		Size = UDim2.fromScale(1, 1),
 		CanvasSize = UDim2.new(),
-		AutomaticCanvasSize = Enum.AutomaticSize.X,
-		ScrollingDirection = Enum.ScrollingDirection.X,
+		AutomaticCanvasSize = if vertical then Enum.AutomaticSize.Y else Enum.AutomaticSize.X,
+		ScrollingDirection = if vertical then Enum.ScrollingDirection.Y else Enum.ScrollingDirection.X,
 		ScrollBarThickness = 0,
 		Selectable = false,
 	}, bar)
-	UiKit.list(row, "x", opts.gap or 2)
+	UiKit.list(row, if vertical then "y" else "x", opts.gap or 2)
+	if vertical then
+		UiKit.pad(row, 2, 4, 10, 2) -- room for the outlines and the buttons' lower edge
+	end
 	local tabs = {}
 	local self = { frame = bar, buttons = tabs, selected = nil }
 
@@ -500,8 +507,8 @@ function UiKit.Tabs(parent, items, opts)
 			FontFace = Fonts.LabelBold,
 			TextSize = opts.textSize or 18,
 			TextColor3 = Color.TextSecondary,
-			Size = UDim2.fromOffset(opts.minWidth or 84, 45),
-			AutomaticSize = Enum.AutomaticSize.X,
+			Size = if vertical then UDim2.new(1, 0, 0, opts.tabHeight or 52) else UDim2.fromOffset(opts.minWidth or 84, 45),
+			AutomaticSize = if vertical then Enum.AutomaticSize.None else Enum.AutomaticSize.X,
 			LayoutOrder = index,
 		}, row)
 		UiKit.round(b, UiKit.Radius.tag)
@@ -1169,6 +1176,155 @@ function UiKit.ItemCard(parent, opts)
 	state.locked = opts.locked
 	state.isNew = opts.isNew == true
 	self.setQuantity(opts.quantity)
+	return self
+end
+
+-- Harbor UI: the Quartermaster's item card. A rarity tag, the item in a ring of its rarity colour, the name,
+-- and a price plate (Pearls or Robux) or an EQUIPPED / OWNED plate. The selected card gets a white outline.
+-- UiKit.ShopCard(parent, { itemId, name, tier, price = { kind, amount }?, robux = n?, plate = "EQUIPPED" | "OWNED"?,
+--     affordable, selected, layoutOrder, onClick(itemId) }) -> { frame, setSelected(on) }
+function UiKit.ShopCard(parent, opts)
+	local ItemPreview = require(script.Parent.Parent:WaitForChild("ItemPreview"))
+	local Skin = UiKit.Skin
+	local style = Skin and Skin.style or {}
+	local outlineColor = style.outline or Color.BorderStructural
+	local tierColor = if Skin and Skin.rarityColor then Skin.rarityColor(opts.tier or "Common") else Color.AccentSea
+	local card = new("TextButton", {
+		Name = "Card_" .. tostring(opts.itemId),
+		Text = "",
+		AutoButtonColor = false,
+		BackgroundColor3 = Color.SurfaceSecondary,
+		Size = UDim2.fromOffset(160, 210),
+		LayoutOrder = opts.layoutOrder or 0,
+	}, parent)
+	UiKit.round(card, style.cardRadius or UiKit.Radius.card)
+	local stroke = UiKit.border(card, outlineColor, style.stroke or 2, 0)
+	UiKit.focusable(card)
+
+	-- rarity tag (top-left)
+	local tag = new("TextLabel", {
+		Name = "Rarity",
+		BackgroundColor3 = tierColor,
+		Text = string.upper(opts.tier or "Common"),
+		FontFace = Fonts.LabelBold,
+		TextSize = 13,
+		TextColor3 = Color3.fromRGB(16, 24, 32),
+		Position = UDim2.fromOffset(8, 8),
+		Size = UDim2.fromOffset(0, 20),
+		AutomaticSize = Enum.AutomaticSize.X,
+		ZIndex = 3,
+	}, card)
+	UiKit.round(tag, 10)
+	UiKit.pad(tag, 1, 8, 0, 8)
+
+	-- the item in a ring of its rarity colour
+	local ring = new("Frame", {
+		Name = "Ring",
+		BackgroundColor3 = Color.SurfaceInset,
+		AnchorPoint = Vector2.new(0.5, 0),
+		Position = UDim2.new(0.5, 0, 0, 30),
+		Size = UDim2.new(0.66, 0, 0.66, 0),
+		SizeConstraint = Enum.SizeConstraint.RelativeXX,
+	}, card)
+	new("UICorner", { CornerRadius = UDim.new(1, 0) }, ring)
+	UiKit.border(ring, tierColor, 4, 0)
+	local holder = new("Frame", { Name = "Icon", BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromScale(0.86, 0.86), ClipsDescendants = true }, ring)
+	local preview = ItemPreview.new(holder, {})
+	preview:setItem(opts.itemId)
+
+	local name = new("TextLabel", {
+		Name = "ItemName",
+		BackgroundTransparency = 1,
+		FontFace = Fonts.BodyBold,
+		TextSize = 17,
+		TextColor3 = Color.TextPrimary,
+		TextScaled = true,
+		Text = opts.name or tostring(opts.itemId),
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 1, -48),
+		Size = UDim2.new(1, -16, 0, 20),
+	}, card)
+	new("UITextSizeConstraint", { MaxTextSize = 17, MinTextSize = 11 }, name)
+
+	-- the plate at the bottom: a price, or what you already have
+	local plate = new("Frame", {
+		Name = "Plate",
+		AnchorPoint = Vector2.new(0.5, 1),
+		Position = UDim2.new(0.5, 0, 1, -12),
+		Size = UDim2.new(1, -20, 0, 30),
+	}, card)
+	UiKit.round(plate, 10)
+	UiKit.border(plate, outlineColor, 3, 0)
+	local plateRow = new("Frame", { Name = "Row", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1) }, plate)
+	UiKit.list(plateRow, "x", 6, { HorizontalAlignment = Enum.HorizontalAlignment.Center, VerticalAlignment = Enum.VerticalAlignment.Center })
+	local plateText = new("TextLabel", {
+		Name = "Text",
+		BackgroundTransparency = 1,
+		FontFace = Fonts.LabelBold,
+		TextSize = 17,
+		Size = UDim2.fromOffset(0, 26),
+		AutomaticSize = Enum.AutomaticSize.X,
+		LayoutOrder = 2,
+	}, plateRow)
+	if opts.plate then
+		plate.BackgroundColor3 = if opts.plate == "EQUIPPED" then Color.StateSuccess else Color.SurfaceHover
+		plateText.Text = opts.plate
+		plateText.TextColor3 = if opts.plate == "EQUIPPED" then Color3.fromRGB(16, 32, 20) else Color.TextPrimary
+	elseif opts.price then
+		UiKit.CurrencyIcon(plateRow, opts.price.kind, 18).LayoutOrder = 1
+		plate.BackgroundColor3 = if opts.affordable ~= false then Color.AccentLighthouse else Color.StateDisabled
+		plateText.Text = formatNumber(opts.price.amount)
+		plateText.TextColor3 = if opts.affordable ~= false then Color.TextOnAccent else Color.StateDisabledText
+	elseif opts.robux then
+		plate.BackgroundColor3 = Color.StateSuccess
+		plateText.Text = "R$ " .. formatNumber(opts.robux)
+		plateText.TextColor3 = Color3.fromRGB(16, 32, 20)
+	else
+		plate.BackgroundColor3 = Color.SurfaceHover
+		plateText.Text = "EARNED"
+		plateText.TextColor3 = Color.TextSecondary
+	end
+	-- a small Robux chip when the card shows a Pearl price but Robux also works
+	if opts.robux and (opts.price or opts.plate) and not opts.plate then
+		local chip = new("TextLabel", {
+			Name = "RobuxChip",
+			BackgroundColor3 = Color.StateSuccess,
+			Text = "R$",
+			FontFace = Fonts.LabelBold,
+			TextSize = 12,
+			TextColor3 = Color3.fromRGB(16, 32, 20),
+			AnchorPoint = Vector2.new(1, 0),
+			Position = UDim2.new(1, -8, 0, 8),
+			Size = UDim2.fromOffset(28, 20),
+			ZIndex = 3,
+		}, card)
+		UiKit.round(chip, 10)
+	end
+
+	local self = { frame = card, preview = preview }
+	local selected = opts.selected == true
+	local function render()
+		stroke.Color = if selected then Color3.new(1, 1, 1) else outlineColor
+		stroke.Thickness = if selected then (style.stroke or 2) + 1 else (style.stroke or 2)
+		card.BackgroundColor3 = if selected then Color.SurfaceElevated else Color.SurfaceSecondary
+	end
+	function self.setSelected(on)
+		selected = on
+		render()
+	end
+	card.MouseEnter:Connect(function()
+		if not selected then
+			card.BackgroundColor3 = Color.SurfaceHover
+		end
+	end)
+	card.MouseLeave:Connect(render)
+	card.Activated:Connect(function()
+		click()
+		if opts.onClick then
+			opts.onClick(opts.itemId, self)
+		end
+	end)
+	render()
 	return self
 end
 

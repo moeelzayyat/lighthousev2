@@ -3,6 +3,8 @@
 -- One atlas image (Config.UI_SKIN_ATLAS) holds every piece at 2x; pieces are 9-sliced.
 -- Layouts are untouched: the art is a background ImageLabel (ZIndex -5) and button text is mirrored
 -- into a label above it. Set UI_SKIN = false to return to the original lighthouse look.
+-- Harbor UI: "bold" = Look A (UiSkinBold: navy panels, thick outlines, chunky 3D buttons, rarity colours).
+-- Screens read the look's tokens from UiSkin.style and rarity colours from UiSkin.rarityColor.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -21,6 +23,24 @@ end
 local ATLAS = Config.UI_SKIN_ATLAS
 UiSkin.enabled = Config.UI_SKIN == "pirate"
 UiSkin.images = UiSkin.enabled and type(ATLAS) == "string" and ATLAS:match("%d%d%d%d+") ~= nil
+UiSkin.look = Config.UI_SKIN or "lighthouse"
+local Bold = if Config.UI_SKIN == "bold" then require(script.Parent:WaitForChild("UiSkinBold")) else nil
+UiSkin.bold = Bold ~= nil
+UiSkin.style = if Bold then Bold.style else nil
+UiSkin.Bold = Bold
+
+-- harbor UI: the display-only rarity colours (the same five in every look unless the look sets its own)
+local RARITY = {
+	Common = Color3.fromRGB(138, 160, 180),
+	Uncommon = Color3.fromRGB(79, 201, 122),
+	Rare = Color3.fromRGB(74, 163, 255),
+	Epic = Color3.fromRGB(176, 113, 255),
+	Legendary = Color3.fromRGB(255, 176, 46),
+}
+function UiSkin.rarityColor(tier)
+	local own = UiSkin.style and UiSkin.style.rarity
+	return (own and own[tier]) or RARITY[tier] or RARITY.Common
+end
 
 -- x, y, w, h, slice corner (atlas pixels; 0 = not sliced)
 local R = {
@@ -67,6 +87,10 @@ end
 
 -- Warm the shared colour tokens (runs before any UI is built). Fonts: cartoon display face.
 function UiSkin.remap(Color, Fonts)
+	if Bold then
+		Bold.remap(Color, Fonts)
+		return
+	end
 	if not UiSkin.enabled then
 		return
 	end
@@ -256,6 +280,10 @@ local HIDE = { Brackets = true, Beacon = true, Tick = true, LensArc = true, Lamp
 
 -- Wrap UiKit constructors (called once, at the end of UiKit)
 function UiSkin.install(UiKit)
+	if Bold then
+		Bold.install(UiKit)
+		return
+	end
 	if not UiSkin.images then
 		return
 	end

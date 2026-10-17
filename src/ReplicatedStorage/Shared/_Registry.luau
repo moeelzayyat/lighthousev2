@@ -268,6 +268,10 @@ RULES.Items = function(c, Items, all)
 		if item.price ~= nil then
 			c.pos(w .. ".price", item.price)
 		end
+		-- harbor UI: every item the Quartermaster shows has a display-only rarity tier
+		if item.tier ~= nil or item.kind ~= "Material" then
+			c.oneOf(w .. ".tier", item.tier, Items.TIERS or {})
+		end
 		if item.kind ~= "Material" and item.price == nil and item.starter ~= true and item.reward == nil then
 			c.add(w, "needs a price (or starter = true, or reward = how it is earned)")
 		end
