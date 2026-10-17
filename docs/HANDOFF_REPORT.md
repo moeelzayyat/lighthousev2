@@ -1050,3 +1050,11 @@ OWNER STEPS (to start selling):
  2. Send Claude the 12 product ids (name → id).
  3. Reply "switch on Robux sales" in the thread (or set `ROBUX_ENABLED = true` in `ReplicatedStorage.Shared.Definitions.Cosmetics` yourself). Claude then fills in the ids, runs TestRunner, and makes a Studio test purchase (Studio purchases are free test purchases) to check the item arrives once.
  4. Publish DEV, buy one cheap item for real, check it arrives once; then the same in production at the relaunch (production needs its own products: L1.7).
+
+L1.3 FOLLOW-UP · 2026-10-17 · product ids and selling switch
+- The owner created the 12 developer products in Lighthouse Keepers DEV and said "switch on Robux sales". `ROBUX_ENABLED = true`; ids read from the experience with MarketplaceService:GetDeveloperProductsAsync (read-only; names and Robux prices matched the list) and filled into `Definitions/Cosmetics`.
+- TestRunner (DEV, Play server): 240 passed, 0 failed.
+- Shop: the Cosmetics tab shows "R$ 49" beside the Pearl price for Driftwood Housing; clicking it calls PromptProductPurchase (click registered), but Studio's purchase dialog did not appear in this session (Studio API access is off; no dialog, no error). Not verified: the Roblox purchase dialog itself.
+- Receipt path with the real product id (runtime-only script through the real PurchaseService, GrantService and catalogue, mock profile): first receipt `granted` and Driftwood Housing owned; the same receipt again `granted` with no second claim (1 receipt claim).
+OWNER CHECK: in the published DEV game (after the S7.6 publish), open the Quartermaster → Cosmetics → a cheap item (Sea Glass Beam, 29) → R$ button → buy. It should arrive in your BAG once, with a "Thank you!" notice.
+MIRROR: 150 scripts, digest identical to `src/`.

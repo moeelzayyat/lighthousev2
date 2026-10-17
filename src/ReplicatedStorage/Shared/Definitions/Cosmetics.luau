@@ -20,18 +20,18 @@ local Cosmetics = {
 		"LanternMoth", "LanternTide", "FlagGull", "FlagKraken", "FlagFounder",
 	},
 
-	BeamSeaGlass = { robux = 29, productId = 0 } :: Product,
-	BeamMoonlight = { robux = 39, productId = 0 } :: Product,
-	BeamEmber = { robux = 59, productId = 0 } :: Product,
-	HousingDriftwood = { robux = 49, productId = 0 } :: Product,
-	HousingBrass = { robux = 99, productId = 0 } :: Product,
-	CoatStormBlue = { robux = 59, productId = 0 } :: Product,
-	CoatKelpGreen = { robux = 59, productId = 0 } :: Product,
-	LanternMoth = { robux = 75, productId = 0 } :: Product,
-	LanternTide = { robux = 75, productId = 0 } :: Product,
-	FlagGull = { robux = 39, productId = 0 } :: Product,
-	FlagKraken = { robux = 99, productId = 0 } :: Product,
-	FlagFounder = { robux = 149, productId = 0 } :: Product, -- the supporter item: Robux only (a cosmetic, so allowed)
+	BeamSeaGlass = { robux = 29, productId = 3719247063 } :: Product,
+	BeamMoonlight = { robux = 39, productId = 3719247106 } :: Product,
+	BeamEmber = { robux = 59, productId = 3719247149 } :: Product,
+	HousingDriftwood = { robux = 49, productId = 3719246592 } :: Product,
+	HousingBrass = { robux = 99, productId = 3719246658 } :: Product,
+	CoatStormBlue = { robux = 59, productId = 3719246701 } :: Product,
+	CoatKelpGreen = { robux = 59, productId = 3719246762 } :: Product,
+	LanternMoth = { robux = 75, productId = 3719246814 } :: Product,
+	LanternTide = { robux = 75, productId = 3719246864 } :: Product,
+	FlagGull = { robux = 39, productId = 3719246928 } :: Product,
+	FlagKraken = { robux = 99, productId = 3719246972 } :: Product,
+	FlagFounder = { robux = 149, productId = 3719247016 } :: Product, -- the supporter item: Robux only (a cosmetic, so allowed)
 }
 
 -- The item a developer product buys, or nil
