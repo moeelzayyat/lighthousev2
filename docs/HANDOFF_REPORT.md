@@ -568,3 +568,21 @@ SCRIPT ANALYSIS: not measured (owner item).
 MIRROR: 101 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (c9f9576e).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
 NEXT: S5.5 UiKit split.
+
+CHECKPOINT: S5.5 UiKit split — 🟦 (Script Analysis unmeasured; real-phone look is part of the owner's S4.7 check)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S5.5_before_2026-10-17 (UiKit, Gear.client)
+BUILT:
+- `Client/UI/` (new): `Kit` (the one UiKit table and the helpers the parts share), `Tokens` (colour, fonts, type, spacing, radii, motion), `Primitives` (new/tween/number helpers, click sound, focus ring, modals, text, glyphs, panels and structure), `Controls` (buttons, tooltip, input hints, tabs, settings controls, currency/tags/badges, item card), `Gauges` (HUD gauges), `Dialogs` (notices, pickups, dialogs, motion). The section code moved unchanged; only `script.Parent` paths and the shared-helper hand-over (`K.new`, `K.tween`, ...) are new.
+- `Client/UiKit`: 3,115 → 40 lines. It loads the five parts in order and applies the art skin, so every screen keeps `require(UiKit)` with no change.
+- Deleted: the v1 API (THEME, make, corner, stroke, text, button, setEnabled, tag, toast, layoutFor, CATEGORY_COLORS, MIN_TOUCH; nothing in the game used them) and `Gear.client` (the old disabled GEAR screen, replaced by Shop and Inventory). Both are in the backup folder.
+VERIFIED "renders unchanged" (DEV Play, owner's account, mock store; TEMPTEST client scripts, runtime only):
+- Every ScreenGui's whole tree (class, name, position, size, anchor, colours, transparency, text, text colour/size, font, images, corners, strokes, padding, lists, z-index, visibility) hashed before and after: **20 of 20 screens identical** (Coach, Departure, GameHUD, HudTopBar, Inventory, InventoryButton/Scrim, LighthouseHUD, Menus, Prompts, QuartermasterShop/Scrim, Results, ResultsContent, SalvageTrader, ShopNotice, TravelCard, UpgradeBench, Freecam, StyleSheet). Two samples 2 s apart matched, so the hashes are stable.
+- The UiKit style guide (every component) on all 5 tabs at desktop size and at phone size (667 × 375): an A/B in the same Studio (original UiKit restored for one Play, then the split) gave **10 of 10 identical hashes**, once the two animated loading spinners were left out (their rotation changes every frame, so they differ between any two runs). Before/after screenshots of the phone-size Controls page match.
+- 0 client errors.
+TESTRUNNER (DEV): 140 passed, 0 failed (no new pure logic).
+SCRIPT ANALYSIS: not measured (owner item).
+MIRROR: 106 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (1f7647b1).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+NEXT: S5.6 HUD single pass.

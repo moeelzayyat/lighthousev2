@@ -145,7 +145,7 @@ Purpose: real players answer whether the loop retains, before content work.
 | S5.2 🟦 | Dissolve `Main` | Remote handlers, oil carrying, tool building, routing, trader moved into their domains; `Main` ≤ 80 lines | Every remote still works (contract tests); diff reviewed | TestRunner, play test |
 | S5.3 🟦 | Callback wiring → bus | `CreatureService.onKilled`, `PlayerData.onChanged`, `ShipRoster.onChange` etc. replaced by bus events | `EVENTS.md` complete; no cross-domain function assignment remains (`script_grep`) | Review |
 | S5.4 🟦 | Definitions registry | `_Registry` validates all catalogs; loot tables must sum to 1; duplicate IDs fail boot | Broken sample fails boot with a clear message | Play test ×2 |
-| S5.5 | UiKit split | `Tokens/Primitives/Controls/Gauges/Dialogs`; dead v1 API deleted; `Gear.client` deleted | Every screen renders unchanged (screenshot diff at PC + phone) | `screen_capture` |
+| S5.5 🟦 | UiKit split | `Tokens/Primitives/Controls/Gauges/Dialogs`; dead v1 API deleted; `Gear.client` deleted | Every screen renders unchanged (screenshot diff at PC + phone) | `screen_capture` |
 | S5.6 | HUD single pass | Glass variant native to gauges; `glassTree`/`restyle` deleted | HUD identical at PC/phone/tablet sizes; `Hud.client` ≤ 900 lines | `screen_capture` |
 | S5.7 | Stat pipeline | `StatPipeline` with `STATS.md` rows and caps; shop previews use it | Preview == in-voyage value test | TestRunner |
 | S5.8 | Publish (owner) | | Live check | Owner |

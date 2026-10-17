@@ -76,7 +76,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 ## UI
 | System | Status | Target | Notes |
 |---|---|---|---|
-| UiKit v2.1 (3.1k lines) | Released | S5.5 | split |
+| UiKit v2.1 (3.1k lines) | Released; split tested (not yet published) | S5.5 | S5.5: `Client/UiKit` (40-line facade) + `Client/UI/{Kit,Tokens,Primitives,Controls,Gauges,Dialogs}`; v1 API and the old `Gear.client` screen deleted (in `Backups.S5.5_before_2026-10-17`) |
 | Pirate skin (UiSkin, Kenney atlas) | Released | — | |
 | Glass HUD | Released | S5.6 | single pass |
 | Menus / Shop / Inventory / Bench / Trader / Departure / Results / Coach | Released | S5.5 | |
