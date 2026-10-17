@@ -82,7 +82,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Menus / Shop / Inventory / Bench / Trader / Departure / Results / Coach | Released | S5.5 | |
 | Phone layouts | Released | S4.4 | real-phone FPS |
 | InputController (single) | Tested (not yet published) | S2.6 | replaces the input-mode copies in Coach, Hud, Menus, Departure, UiKit |
-| Menu pattern (grid + detail pane; `UiKit/Tiles`) | Planned | S2.5c → S5.5 | D-041, `ART_BIBLE.md` |
+| Menu pattern (grid + detail pane; `UI/Tiles`) | Built (shop, workbench) | S2.5c | D-041, D-042, D-043, `ART_BIBLE.md` |
 
 ## Live ops and monetization
 | System | Status | Target | Notes |

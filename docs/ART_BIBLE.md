@@ -61,7 +61,7 @@ Reference: the crafting screen of *99 Nights in the Forest*. The owner's note: *
 Plants vs. Zombies (wave bar with flags — the night strip), Don't Starve (day clock dial — the dawn countdown), Overcooked (every teammate's state visible — the crew panel), Pet Simulator 99 (reward pop-ups — dawn banking), Dead Rails (how little HUD a wave needs), Doors (HUD recedes in tension), Hades / Vampire Survivors (3-card choice — specialties), Sea of Thieves / Dredge (lantern-against-the-dark mood). *99 Nights in the Forest* is the direct category comparator and the bar players will measure the menus against.
 
 ### Where it is built
-- **S2.5c — Menu pattern v1:** `UiKit/Tiles` (TileGrid, Tile, DetailPane, BigButton, ReasonDivider) as a self-contained module on the current UiKit; applied to the **Quartermaster shop** and the **workbench** first (the two screens every first session opens). Other screens keep their current layout until S5.
+- **S2.5c — Menu pattern v1 (built 2026-10-17, `Client/UI/Tiles.luau`, Bold look per D-042; phone details in D-043):** `UiKit/Tiles` (TileGrid, Tile, DetailPane, BigButton, ReasonDivider) as a self-contained module on the current UiKit; applied to the **Quartermaster shop** and the **workbench** first (the two screens every first session opens). Other screens keep their current layout until S5.
 - **S5.5 — UiKit split:** `Tiles` becomes part of `Primitives`/`Dialogs`; locker, merchant, specialties and cosmetics move onto the pattern as they are touched (S6.2, S7.4, B1.1).
 - `StatPipeline` previews in the detail pane land in **S5.7** (before that the pane shows the definition's base numbers).
 

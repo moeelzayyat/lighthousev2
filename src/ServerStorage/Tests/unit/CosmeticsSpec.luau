@@ -97,7 +97,11 @@ return function(T: any)
 			T.expect(receipts).toEqual({ "Economy" }) -- the Economy domain hands receipts to PurchaseService
 			T.expect(prompts).toEqual({ "Shop" })
 			local shop = (game.StarterPlayer.StarterPlayerScripts.Client.Shop :: any).Source :: string
-			T.expect(shop).toContain("Cosmetics.productFor(selectedId)")
+			-- S2.5c: the one prompt is for the product the Cosmetics catalogue lists for that item (nil when Robux is off)
+			T.expect(shop).toContain("Cosmetics.productFor(itemId)")
+			T.expect(shop).toContain("PromptProductPurchase(player, product.productId)")
+			local _, prompted = string.gsub(shop, ":Prompt", "")
+			T.expect(prompted).toBe(1)
 		end)
 	end)
 

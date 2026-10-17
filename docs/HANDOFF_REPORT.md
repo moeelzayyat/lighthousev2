@@ -1250,3 +1250,21 @@ BUILT: the harbor island grew from 16,912 to 48,096 studs² of land (2.8×), mos
 TESTRUNNER (DEV, Play server): **250 passed, 0 failed**. PLAY TEST: spawn, walk to the far south edge (golden-hour lighting holds), 0 errors.
 SCREENSHOTS: `assets/screens/harbor_size/`.
 NO SCRIPT CHANGED: place content only; it reaches players with the owner's next DEV publish.
+
+CHECKPOINT: S2.5c — Menu pattern v1 (grid + detail pane) — 🟦 (Script Analysis unmeasured; phone sizes are simulated layouts, not Device Simulator; the owner judges the look)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF (GetAsync probe refused with error 7 before the first Play)
+BACKUP: ServerStorage.Backups.S2.5c_before_2026-10-17 (Shop, Bench, CosmeticsSpec) · restore points "S2.5c before", "S2.5c passed"
+BUILT:
+- `Client/UI/Tiles.luau` (new, --!strict): the D-041 menu pattern in the Bold look (D-042): header with title, resources and a big red close; category buttons; a grid of equal tiles (icon, name on up to two lines, cost; owned/equipped check; level badge); one tile always selected; locked tiles dimmed under one reason divider; the detail pane (big icon, name, gold description, stat lines "now → this" in green/red, cost) and one big action button (a second one for Robux). UI scale clamp(height/1080, 0.55, 1); every tap target is at least 56 screen pixels.
+- Quartermaster shop (`Shop.client.luau`, rewritten on Tiles): Weapons, Armor, Ammo, Boosts, Cosmetics. Stat lines compare with what is equipped (StatPipeline). Ammo has − / + / MAX. A Pearl purchase needs a second tap (CONFIRM, D-043). Owned items get EQUIP. Cosmetics show Pearls and Robux (Robux via the existing PromptProductPurchase / PurchaseService path).
+- Workbench (`Bench.client.luau`, rewritten on Tiles): one tile per upgrade (level badge, Shells cost, red when short, "Maxed"), the two evolutions dimmed under "MAX BOTH UPGRADES TO FORGE"; detail shows level and value now → next (StatPipeline); one tap buys; keys 1–4 still buy. Fixed on the way: the bench stayed open over the results screen when a voyage was lost; it now closes when the voyage ends.
+- No server script, remote, price, stat or save field changed. `CosmeticsSpec` reads the new shop code (same guarantee: the only purchase prompt is for the product the Cosmetics catalogue lists).
+TESTRUNNER (DEV, Play server): **250 passed, 0 failed** (5.37 s).
+PLAY TEST (DEV, keyboard, Studio memory store with TEMPTEST Pearls; this is the owner's account in DEV, not production): opened the shop from the Quartermaster; bought the Storm Harpoon (Buy → CONFIRM → 300 → 270 Pearls, owned, then equipped; checked on the server profile); bought a Shell Pouch rank (300 → 280 Pearls, rank 1); ammo quantity ×3 = 24 Pearls; sailed and bought two Lens Power upgrades at the bench (Shells 120 → 30, level 2, both checked on the server). Console: 0 errors from game scripts in the last run (an earlier run showed a detail-pane error, fixed before this record).
+SIZES (Studio, screen pixels): PC window 2004×985 (UI scale 0.91): smallest tap 56.5 px (ammo − button), 0 labels overflowing, the detail pane fits without scrolling. Simulated 926×428 (iPhone 13 Pro Max size) and 667×375 (iPhone 7 size): smallest tap 56.1 px (close), 0 labels overflowing on every shop tab and the bench; the detail pane scrolls on phones (D-043). These are the game's own simulated layouts (`HudSimulate`); Device Simulator is not reachable from the tools.
+NUMBERS: none of the game's numbers changed.
+SCREENSHOTS: `assets/screens/s25c/` (00_ = the first draft before the fixes; PC shop tabs, the CONFIRM step, after the purchase, Robux cosmetic, ammo, boosts, the bench before and after two upgrades, phone 667×375).
+MIRROR: 163 scripts in DEV, digest identical to `src/` (cd53c796).
+NOT DONE / OPEN: Script Analysis count (not reachable from the tools); a real phone; the owner's look verdict. Other menus (BAG, merchant, locker) keep their current layout (S2.5c scope).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-043 flagged
