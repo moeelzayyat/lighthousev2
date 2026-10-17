@@ -1090,3 +1090,5 @@ Live checks:
  6. Carry a castaway from the wreck on the shore to the lit shelter by the lighthouse; the crew sees "… brought a castaway to safety (1/8)".
  7. Open the BAG: a "Codes" box sits under "Your keeper".
 If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.
+
+LO.5 PUBLISHED · 2026-10-17 17:19 UTC · the owner saved `backups/LighthouseKeepers_DEV_LO1_2026-10-17.rbxl` and published DEV. Live checks (crew card offers Shipwreck Rescue; a castaway carried to the shelter; the BAG's Codes box) still to be reported.

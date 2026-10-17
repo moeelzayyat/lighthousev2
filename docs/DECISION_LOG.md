@@ -245,3 +245,4 @@ Owner (thread, 2026-10-17): "Skip the test for now, keep going into the plan ahe
 ## DEV published by the owner · 2026-10-17 · covers the S2.8, S4.7, S5.8, S6.7 and S7.6 packages; their live checks are still to be reported
 ## CP — LO.1–LO.4 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · event windows, Shipwreck Rescue voyage played to a win (8/8 saved, +4 Pearls, Rescuer's Flag once), shop card label, codes in the BAG; TestRunner 249/249
 ## CP — LO.5 publish package written (🟦, waits for the owner's DEV publish) · 2026-10-17
+## LO.5 published by the owner · 2026-10-17 17:19 UTC · DEV only · backup `backups/LighthouseKeepers_DEV_LO1_2026-10-17.rbxl` (1.0 MB) · live checks pending

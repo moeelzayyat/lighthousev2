@@ -233,7 +233,7 @@ Floor: biweekly, announced. Scaling trigger for a shared harbor: `architecture.m
 | LO.2 ✅ | Shipwreck Rescue | `Rescue` voyage (5 nights, event `ShipwreckRescue`); `RescueService`: a wreck with 8 castaways, carried one at a time to a shelter; Shells per rescue; 1 Pearl per 2 saved | Count, drop and rewards tested; a full Rescue voyage played | TestRunner + play test |
 | LO.3 ✅ | Event cosmetic | Rescuer's Flag (`reward = "event"`), given once when every castaway is saved | Granted once at the end of a won voyage | Play test |
 | LO.4 ✅ | Small fixes | Shop card type line no longer runs under the price; the code box also in the BAG | Seen in Studio | Play test |
-| LO.5 🟦 | Publish (owner) | Package in HANDOFF_REPORT.md | Live check | Owner |
+| LO.5 🟦 | Publish (owner) | Package in HANDOFF_REPORT.md; published 2026-10-17 | Live check (pending) | Owner |
 
 ---
 
