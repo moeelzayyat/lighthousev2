@@ -11,6 +11,8 @@
 
 local Players = game:GetService("Players")
 
+local EventLog = require(script.Parent.EventLog)
+
 local ShipRoster = {}
 ShipRoster.CAPACITY = 4
 
@@ -35,11 +37,10 @@ local function publish(ship)
 		state:SetAttribute("Ship_" .. ship.id .. "_Count", #memberList(ship))
 		state:SetAttribute("Ship_" .. ship.id .. "_Locked", ship.locked)
 	end
-	-- departure revision: ShipDeparture re-checks its countdown on every roster change (synchronously,
-	-- so a 4 -> 3 -> 4 change inside one frame is never missed)
-	if ShipRoster.onChange then
-		ShipRoster.onChange(ship.id)
-	end
+	-- departure revision: ShipDeparture re-checks its countdown on every roster change. S5.3: it hears this on
+	-- the bus; the bus starts each handler with task.spawn, which runs it at once, so a 4 -> 3 -> 4 change
+	-- inside one frame is still never missed.
+	EventLog.Publish("CrewRosterChanged", { ShipId = ship.id })
 end
 
 function ShipRoster.init(stateFolder, capacity, shipIds)

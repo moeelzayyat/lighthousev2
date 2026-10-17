@@ -108,6 +108,7 @@ local function buy(player, itemId, quantity)
 	end
 	playerData.addItem(player, itemId, quantity)
 	EventLog.log("ShopBuy", { player = player.Name, item = itemId, quantity = quantity, cost = cost })
+	EventLog.Publish("ShopPurchase", { UserId = player.UserId, ItemId = itemId, Price = cost, Currency = "Pearls" })
 	if quantity > 1 then
 		return true, string.format("Bought %d %s for %d Pearls.", quantity, item.name, cost)
 	end

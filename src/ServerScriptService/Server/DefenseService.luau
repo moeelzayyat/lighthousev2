@@ -33,22 +33,23 @@ local SHOT_TRAVEL_TIME = 0.25
 local folder
 local creatures
 local upgrades
+local Items = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Items"))
+local OilCarry = require(script.Parent.OilCarry) -- the barrel a player carries (S5.3: was a setter Main called)
+local PlayerData = require(script.Parent.PlayerData) -- shop ammo crates (S5.3: was a setter Main called)
+
 local notifyAll
 local notify
 local pads = {}
 
--- Set by Main once oil carrying exists: hasOil(player) -> bool, takeOil(player)
-local hasOil = function()
-	return false
-end
-local takeOil = function() end
-
--- Set by Main: crateFor(player) -> itemId, ammoType (or nil); takeCrate(player, itemId) -> bool
-local crateFor = function()
+-- The first shop ammo crate the player owns: itemId, ammoType (or nil)
+local function crateFor(player)
+	for _, itemId in Items.SHOP_ORDER do
+		local item = Items[itemId]
+		if item.kind == "Ammo" and PlayerData.count(player, itemId) > 0 then
+			return itemId, item.ammoType
+		end
+	end
 	return nil
-end
-local takeCrate = function()
-	return false
 end
 
 local GLOW_READY = Color3.fromRGB(255, 190, 110)
@@ -274,6 +275,7 @@ local function onPadTriggered(pad, player)
 	if nextLevel == 1 then
 		EventLog.count("cannons")
 		EventLog.log("CannonBuilt", { player = player.Name, pad = table.find(pads, pad) })
+		EventLog.Publish("CannonBuilt", { VoyageId = EventLog.voyageId(), UserId = player.UserId, Pad = table.find(pads, pad) or 0, Level = 1 })
 		notifyAll(player.DisplayName .. " built a cannon!")
 	else
 		EventLog.count("cannonUpgrades")
@@ -292,7 +294,7 @@ local function onReloadTriggered(pad, player)
 	local newType
 	if crateId then
 		newType = crateAmmoType
-	elseif hasOil(player) then
+	elseif OilCarry.has(player) then
 		newType = Ammo.DEFAULT
 	else
 		notify(player, "Grab an oil barrel (or buy ammo crates in the GEAR shop), then reload.")
@@ -305,11 +307,11 @@ local function onReloadTriggered(pad, player)
 	end
 
 	if crateId then
-		if not takeCrate(player, crateId) then
+		if not PlayerData.removeItem(player, crateId, 1) then
 			return
 		end
 	else
-		takeOil(player)
+		OilCarry.remove(player)
 	end
 	-- Switching ammo types replaces what was loaded
 	if newType ~= pad.ammoType then
@@ -322,6 +324,7 @@ local function onReloadTriggered(pad, player)
 	EventLog.count("cannonReloads", 1, player)
 	EventLog.mark(player, "reload")
 	EventLog.log("CannonReloaded", { player = player.Name, pad = table.find(pads, pad), ammo = pad.ammo, type = newType })
+	EventLog.Publish("CannonReloaded", { VoyageId = EventLog.voyageId(), UserId = player.UserId, Pad = table.find(pads, pad) or 0, Level = pad.level })
 end
 
 local function onHeartbeat()
@@ -343,17 +346,6 @@ local function onHeartbeat()
 			end
 		end
 	end
-end
-
--- Called by Main once oil carrying is set up
-function DefenseService.setOilHandlers(hasOilFn, takeOilFn)
-	hasOil = hasOilFn
-	takeOil = takeOilFn
-end
-
-function DefenseService.setCrateHandlers(crateForFn, takeCrateFn)
-	crateFor = crateForFn
-	takeCrate = takeCrateFn
 end
 
 -- A creature chewing on a cannon (called every frame while it attacks)
@@ -394,6 +386,7 @@ function DefenseService.damageCannon(pad, amount)
 		notifyAll("A cannon was destroyed! Rebuild it on its pad.")
 		EventLog.count("cannonsDestroyed")
 		EventLog.log("CannonDestroyed", { pad = table.find(pads, pad) })
+		EventLog.Publish("CannonDestroyed", { VoyageId = EventLog.voyageId(), Pad = table.find(pads, pad) or 0, Level = pad.level })
 	end
 end
 

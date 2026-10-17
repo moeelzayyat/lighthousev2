@@ -8,7 +8,6 @@ local TweenService = game:GetService("TweenService")
 local Server = script.Parent.Parent
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local Weapons = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Weapons"))
-local Items = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Items"))
 local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SoundFx"))
 local Voyages = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Voyages"))
 local EventLog = require(Server.EventLog)
@@ -22,6 +21,7 @@ local LootService = require(Server.LootService)
 local DefenseService = require(Server.DefenseService)
 local VoyageCast = require(Server.VoyageCast)
 local NetGuard = require(Server.NetGuard)
+local OilCarry = require(Server.OilCarry)
 
 local Encounter = { Name = "Encounter" }
 
@@ -29,67 +29,16 @@ local Encounter = { Name = "Encounter" }
 -- Oil carrying: grab a barrel from the pile, bring it to the fuel tank
 ---------------------------------------------------------------------
 
-local function removeCarriedOil(player)
-	player:SetAttribute("CarryingOil", false)
-	local character = player.Character
-	local barrel = character and character:FindFirstChild("CarriedOil")
-	if barrel then
-		barrel:Destroy()
-	end
-end
-
-local function giveOil(player)
-	player:SetAttribute("CarryingOil", true)
-
-	-- Visual: a small barrel strapped to the player's back
-	local character = player.Character
-	local root = character and character:FindFirstChild("HumanoidRootPart")
-	if root then
-		local barrel = Instance.new("Part")
-		barrel.Name = "CarriedOil"
-		barrel.Shape = Enum.PartType.Cylinder
-		barrel.Size = Vector3.new(2.2, 1.6, 1.6)
-		barrel.Color = Color3.fromRGB(45, 40, 35)
-		barrel.Material = Enum.Material.Metal
-		barrel.CanCollide = false
-		barrel.CanQuery = false
-		barrel.Massless = true
-		barrel.CFrame = root.CFrame * CFrame.new(0, 0, 1.3) * CFrame.Angles(0, 0, math.rad(90))
-		local weld = Instance.new("WeldConstraint")
-		weld.Part0 = root
-		weld.Part1 = barrel
-		weld.Parent = barrel
-		barrel.Parent = character
-	end
-end
-
+-- (S5.3: the barrel itself is `OilCarry`, which the cannons and the trip back to the ship use too)
 local function hookOil(ctx)
 	local refs, remotes, stateFolder = ctx.refs, ctx.remotes, ctx.state
 
-	-- Cannons reload with the same oil barrels
-	DefenseService.setOilHandlers(function(player)
-		return player:GetAttribute("CarryingOil") == true
-	end, removeCarriedOil)
-
-	-- ...or with ammo crates bought in the shop (used first if the player has any)
-	DefenseService.setCrateHandlers(function(player)
-		for _, itemId in Items.SHOP_ORDER do
-			local item = Items[itemId]
-			if item.kind == "Ammo" and PlayerData.count(player, itemId) > 0 then
-				return itemId, item.ammoType
-			end
-		end
-		return nil
-	end, function(player, itemId)
-		return PlayerData.removeItem(player, itemId, 1)
-	end)
-
 	refs.oilPrompt.Triggered:Connect(function(player)
-		if player:GetAttribute("CarryingOil") then
+		if OilCarry.has(player) then
 			LampService.notify(player, "You're already carrying oil. Take it to the fuel tank by the lighthouse.")
 			return
 		end
-		giveOil(player)
+		OilCarry.give(player)
 		EventLog.mark(player, "firstAction")
 		EventLog.count("oilGrabbed", 1, player)
 		EventLog.first("oil pickup")
@@ -97,7 +46,7 @@ local function hookOil(ctx)
 	end)
 
 	refs.fuelPrompt.Triggered:Connect(function(player)
-		if not player:GetAttribute("CarryingOil") then
+		if not OilCarry.has(player) then
 			LampService.notify(player, "Grab oil from the barrels on the island first.")
 			return
 		end
@@ -106,8 +55,15 @@ local function hookOil(ctx)
 			return
 		end
 		local fuelBefore = LampService.getFuel()
-		removeCarriedOil(player)
+		OilCarry.remove(player)
 		LampService.addFuel(Config.FUEL_PER_REFILL)
+		EventLog.Publish("Refuelled", {
+			VoyageId = EventLog.voyageId(),
+			UserId = player.UserId,
+			Amount = LampService.getFuel() - fuelBefore,
+			FuelBefore = fuelBefore,
+			Night = stateFolder:GetAttribute("Phase") == "Night",
+		})
 		EventLog.count("refuels", 1, player)
 		EventLog.first("lamp refuel")
 		EventLog.log("Refueled", { player = player.Name, fuelBefore = math.floor(fuelBefore) })
@@ -218,6 +174,7 @@ local function hookBench(ctx)
 		if ok then
 			EventLog.upgrade(id, UpgradeService.getLevel(id))
 			EventLog.log("UpgradeBought", { player = player.Name, id = id, level = UpgradeService.getLevel(id) })
+			EventLog.Publish("UpgradeBought", { VoyageId = EventLog.voyageId(), UserId = player.UserId, Id = id, Rank = UpgradeService.getLevel(id) })
 			local benchPart = refs.upgradePrompt.Parent
 			if benchPart then
 				SoundFx.playAt("build", benchPart.Position)
@@ -399,12 +356,10 @@ function Encounter.Init(ctx)
 	UpgradeService.init(stateFolder, LampService, TowerService)
 	CreatureService.init(refs, LampService, TowerService, UpgradeService, DefenseService, stateFolder, remotes)
 	LootService.init(refs.folder, UpgradeService, remotes, PlayerData)
-	CreatureService.onKilled = LootService.dropFrom
 	DefenseService.init(refs.folder, CreatureService, UpgradeService, function(text)
 		VoyageCast.fire(remotes.Notify, text) -- cannon news is for the voyage crew, not the harbor
 	end, LampService.notify)
 
-	ctx.removeCarriedOil = removeCarriedOil
 	hookOil(ctx)
 	hookBench(ctx)
 	hookAttack(ctx)
@@ -424,7 +379,7 @@ function Encounter.Start(ctx)
 		CreatureService.clearAll()
 		LootService.clearAll()
 		for _, player in Players:GetPlayers() do
-			removeCarriedOil(player)
+			OilCarry.remove(player)
 		end
 	end
 
@@ -444,7 +399,6 @@ function Encounter.Start(ctx)
 		departure = ctx.departure,
 		departShip = ctx.departShip,
 		lampVisuals = LampService.refreshVisuals,
-		autoSell = ctx.autoSell,
 	})
 end
 

@@ -12,3 +12,4 @@ for _, name in Bootstrap.ORDER do
 end
 
 Bootstrap.run(domains, {}, EventLog.log)
+EventLog.Publish("BootCompleted", { Domains = Bootstrap.ORDER })

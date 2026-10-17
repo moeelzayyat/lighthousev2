@@ -41,8 +41,6 @@ local tower
 local upgrades
 local defense
 
--- Set by Main: called with a position whenever a creature is killed (used for loot)
-CreatureService.onKilled = nil
 local creatures = {}
 local templates = {} -- creature type -> template model
 local state -- GameState folder (the boss bar reads BossName / BossHealth / BossMax)
@@ -336,8 +334,21 @@ local function removeAt(index, reason)
 				EventLog.moment(2, "The crew brought down the " .. monster)
 			end
 		end
-		if CreatureService.onKilled then
-			CreatureService.onKilled(crab.worldPos, crab.kind)
+		-- S5.3: loot (and later results, the logbook and objectives) react to the kill on the bus
+		local killer = if typeof(crab.lastAttacker) == "Instance" and crab.lastAttacker:IsA("Player") then crab.lastAttacker.UserId else nil
+		EventLog.Publish("CreatureKilled", {
+			VoyageId = EventLog.voyageId(),
+			CreatureId = crab.id,
+			DefId = crab.kind,
+			Source = tostring(crab.lastSource or "unknown"),
+			KillerId = killer,
+			X = crab.worldPos.X,
+			Y = crab.worldPos.Y,
+			Z = crab.worldPos.Z,
+			Big = crab.stats.big == true,
+		})
+		if crab.stats.big then
+			EventLog.Publish("BossDefeated", { VoyageId = EventLog.voyageId(), DefId = crab.kind, FinalBlow = killer })
 		end
 	end
 	if crab.bossEntry then
@@ -397,6 +408,7 @@ function CreatureService.spawn(kind, bearing)
 	}
 	place(crab)
 	table.insert(creatures, crab)
+	EventLog.Publish("CreatureSpawned", { VoyageId = EventLog.voyageId(), CreatureId = crab.id, DefId = kind, Big = stats.big == true })
 	if stats.big and state then
 		state:SetAttribute("BossName", stats.displayName)
 		state:SetAttribute("BossMax", stats.health)

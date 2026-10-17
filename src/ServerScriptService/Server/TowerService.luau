@@ -28,12 +28,14 @@ function TowerService.init(stateFolder, repairPrompt, notify)
 			notify(player, "The tower is already in good shape.")
 			return
 		end
+		local before = integrity
 		-- evolution (Shared.Upgrades.EVOLUTIONS): Clockwork Bastion restores 50% more per repair
 		TowerService.repair(Config.REPAIR_AMOUNT * (if state:GetAttribute("Evo_ClockworkBastion") then 1.5 else 1))
 		EventLog.count("repairs", 1, player)
 	EventLog.mark(player, "repair")
 		EventLog.first("repair")
 		EventLog.log("Repaired", { player = player.Name, integrity = math.ceil(integrity) })
+		EventLog.Publish("TowerRepaired", { VoyageId = EventLog.voyageId(), UserId = player.UserId, Amount = integrity - before, IntegrityBefore = before })
 		SoundFx.playAt("repair", repairPrompt.Parent.Position)
 	end)
 end

@@ -63,7 +63,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | GrantService (idempotent) | Tested (not yet published) | R1.3 | only writer of Pearl income (voyage result, boss drops, selling, admin) |
 | AdminDataService (inspect/grant/rollback) | Tested (not yet published) | R1.8 | owner-only; 7 daily snapshots in `LighthouseKeepers_Snapshots_v2` |
 | Remote contract registry + guards + buckets | Tested (not yet published) | R1.4 | `NetGuard` on all 15 client→server remotes; 11 tests + Play spam test |
-| Event bus (EventLog) | Tested (not yet published) | R1.6 | `EventBus` + catalog `Shared/Events`; 7 bus tests; publishers for funnel, voyage and Pearl events |
+| Event bus (EventLog) | Tested (not yet published) | R1.6, S5.3 | `EventBus` + catalog `Shared/Events`; 12 bus tests; publishers for funnel, voyage, Pearl and (S5.3) every catalogued voyage event; cross-service callbacks replaced by events (`BusEventsSpec`) |
 | Analytics funnel | Implemented (live dashboard check pending, R1.9) | R1.6 | `Analytics` bus consumer → AnalyticsService; 4 tests; every step fired in Studio (DawnPearl from S2.2) |
 | Feature flags / remote config | Planned | S5.1 | |
 | Definitions registry | Planned | S5.4 | |

@@ -22,7 +22,6 @@ LampService.darkSeconds = 0 -- how long the lamp has been out during the current
 
 local LIT_COLOR = Color3.fromRGB(255, 226, 150)
 local litColor = LIT_COLOR -- the current Keeper's beam colour (launch R15: looks only)
-LampService.colorFor = nil -- set by Main: function(player) -> Color3 or nil
 local DARK_COLOR = Color3.fromRGB(70, 60, 50)
 local PUSH_INTERVAL = 0.2 -- how often fuel numbers are sent to clients
 
@@ -96,8 +95,10 @@ local function setLit(lit)
 	if draining and not lit then
 		EventLog.count("darkEvents")
 		EventLog.log("LampDark")
+		EventLog.Publish("LampDark", { VoyageId = EventLog.voyageId() })
 	elseif draining and lit then
 		EventLog.log("LampRelit", { darkFor = LampService.darkSeconds })
+		EventLog.Publish("LampLit", { VoyageId = EventLog.voyageId(), Seconds = LampService.darkSeconds })
 	end
 	isLit = lit
 	refs.beam.Enabled = lit
@@ -155,8 +156,10 @@ function LampService.setKeeper(player, reason)
 
 	keeper = player
 	lastKeeperInput = os.clock()
-	-- beam colour: the Keeper's equipped cosmetic, or the lighthouse amber (colours only, never range or damage)
-	litColor = (player and Config.COSMETICS_ENABLED and LampService.colorFor and LampService.colorFor(player)) or LIT_COLOR
+	-- beam colour: the Keeper's equipped cosmetic, or the lighthouse amber (colours only, never range or damage).
+	-- S5.3: the Economy keeps the player's BeamColor attribute current (was a LampService.colorFor callback).
+	local beamColor = player and player:GetAttribute("BeamColor")
+	litColor = if Config.COSMETICS_ENABLED and typeof(beamColor) == "Color3" then beamColor else LIT_COLOR
 	if refs then
 		refs.beam.Color = ColorSequence.new(litColor)
 		refs.spotLight.Color = litColor

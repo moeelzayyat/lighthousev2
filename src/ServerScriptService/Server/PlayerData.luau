@@ -31,9 +31,6 @@ local profiles: { [Player]: any } = {} -- player -> ProfileStore profile (Data i
 local remotes: any = nil
 local mode = "memory" -- "saved" (live store) or "memory" (Studio mock)
 
--- Called whenever a profile changes (Main uses this to refresh tools and armor)
-PlayerData.onChanged = nil :: ((Player) -> ())?
-
 local function keyFor(userId: number): string
 	return "player_" .. userId
 end
@@ -62,10 +59,8 @@ local function push(player: Player)
 	if data and remotes then
 		remotes.GearData:FireClient(player, HttpService:JSONDecode(HttpService:JSONEncode(view(data))), mode == "saved")
 	end
-	local onChanged = PlayerData.onChanged
-	if onChanged then
-		onChanged(player)
-	end
+	-- S5.3: the Economy refreshes tools, armor and beam colour when it hears this
+	EventLog.Publish("ProfileChanged", { UserId = player.UserId })
 end
 
 local function changed(player: Player, saveNow: boolean?)

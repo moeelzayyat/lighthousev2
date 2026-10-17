@@ -528,3 +528,26 @@ SCRIPT ANALYSIS: not measured (owner item).
 MIRROR: 97 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (2455f1ec).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
 NEXT: S5.3 Callback wiring → bus.
+
+CHECKPOINT: S5.3 Callback wiring → bus — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S5.3_before_2026-10-17 (16 scripts: Events, Main, CreatureService, DefenseService, Domains.Crew/Economy/Encounter, GameState, LampService, LootService, PlayerData, ShipDeparture, ShipRoster, ShopService, TowerService, UpgradeService)
+BUILT:
+- Callbacks replaced (none left; `BusEventsSpec` greps every server script for them):
+  - `CreatureService.onKilled` → `CreatureKilled` on the bus; `LootService` subscribes and drops loot where it fell.
+  - `PlayerData.onChanged` → `ProfileChanged`; the Economy domain re-syncs tools, armor and beam colour.
+  - `ShipRoster.onChange` → `CrewRosterChanged`; `ShipDeparture` subscribes when given `subscribe` (the Crew domain passes the bus; the unit test does not).
+  - The dawn auto-sell callback (`deps.autoSell`) → GameState publishes `DawnLootWindow`; the Economy sells 2 s after it closes (still behind `AUTO_SELL_LOOT`, off).
+  - `LampService.colorFor` → the player's `BeamColor` attribute, kept current by the Economy's gear sync; the lamp reads it when a Keeper takes over.
+  - `DefenseService.setOilHandlers/setCrateHandlers` → new `Server/OilCarry` (`--!strict`: has/give/remove, used by the oil prompts, the cannons and the trip back to the ship) and direct calls to `PlayerData.count/removeItem` for shop ammo crates.
+- New publishers for every catalogued `S5.3` event: Refuelled, ReserveUsed, LampDark/LampLit, TowerRepaired, CannonBuilt/Reloaded/Destroyed, CreatureSpawned, CreatureKilled, BossWarning/BossDefeated, LootCollected, ShellsChanged (with a reason), UpgradeBought, EvolutionUnlocked, DawnLootWindow, ShopPurchase, BootCompleted; new rows CrewRosterChanged and ProfileChanged. MerchantPurchase moves to S6.2 (no merchant yet). `EVENTS.md` and `Shared/Events` updated together.
+- Kept as composition, not callbacks: the Bootstrap `ctx` hands the round loop its ship and travel functions (`sendToIsland`, `sendToShip`, `departure`, `departShip`) and `notify`. They are wiring done once at boot by the composition root, not one service assigning into another; logged as the recommendation (D-015).
+TESTRUNNER (DEV): **132 passed, 0 failed** (127 + new `BusEventsSpec` 5: every new event validates with a real payload; a kill without a position and an Instance payload are rejected; a non-yielding handler has run when Publish returns; a failing handler does not stop the next one or the publisher; no server script assigns `.onKilled/.onChanged/.onChange/.colorFor/autoSell` or calls the old setters).
+PLAY TEST (DEV, owner's account, mock store; TEMPTEST server script counted bus events, runtime only):
+- Boarded, sailed (CrewRosterChanged ×3), oil → tank (Refuelled), built a cannon (CannonBuilt), bought Lens Power (UpgradeBought, ShellsChanged −30 "upgrade"). On night 1 the cannon fired, then a carried barrel reloaded it (CannonReloaded; the barrel left the player's back through `OilCarry`). A scripted harpoon strike killed 10 creatures, cannons more: CreatureKilled 29, CreatureSpawned 40, **14 loot orbs dropped through the bus subscription**, LootCollected 3, ProfileChanged 3 (loot into the inventory; tools and armor still in place: Driftwood Harpoon, Oilskin Coat; `BeamColor` set). The Night-1 reserve caught a blackout (LampDark, ReserveUsed, LampLit). Dawn: NightSurvived, DawnLootWindow, ShellsChanged +13 "waveBonus".
+- 0 bus rejections or handler errors; 0 client errors; server only ProfileStore's refused Studio write (API off). Play stopped; 0 TEMPTEST scripts remain.
+SCRIPT ANALYSIS: not measured (owner item).
+MIRROR: 99 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (eaf10b51).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+NEXT: S5.4 Definitions registry.

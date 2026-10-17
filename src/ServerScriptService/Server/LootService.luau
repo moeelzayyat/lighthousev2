@@ -165,6 +165,7 @@ local function collect(index, player)
 		GrantService.Grant(player, EventLog.voyageId() .. ":drop:" .. drop.serial .. ":" .. player.UserId, { Pearls = drop.value }, "boss drop")
 		EventLog.log("BossPearls", { player = player.Name, amount = drop.value })
 		remotes.LootCollected:FireClient(player, drop.kind, drop.value)
+		EventLog.Publish("LootCollected", { VoyageId = EventLog.voyageId(), UserId = player.UserId, ItemId = drop.kind, Qty = drop.value })
 		VoyageCast.fire(remotes.Notify, string.format("%s picked up %d Pearls from the monster!", player.DisplayName, drop.value))
 		removeAt(index)
 		return
@@ -174,13 +175,14 @@ local function collect(index, player)
 		playerData.addItem(player, info.item, drop.value)
 		EventLog.loot(drop.kind, 0, player)
 	else
-		upgrades.addShells(drop.value)
+		upgrades.addShells(drop.value, "loot")
 		EventLog.loot(drop.kind, drop.value, player)
 	end
 	if drop.kind == "SeaGlass" or drop.kind == "BlackPearl" then
 		EventLog.log("RareLoot", { player = player.Name, kind = drop.kind })
 	end
 	remotes.LootCollected:FireClient(player, drop.kind, drop.value)
+	EventLog.Publish("LootCollected", { VoyageId = EventLog.voyageId(), UserId = player.UserId, ItemId = drop.kind, Qty = drop.value })
 	if drop.kind == "BlackPearl" then
 		VoyageCast.fire(remotes.Notify, string.format("%s found %s!", player.DisplayName, info.name))
 	elseif drop.kind == "SeaGlass" then
@@ -225,7 +227,7 @@ function LootService.tideCollect(fraction)
 	LootService.clearAll()
 	local shells = math.floor(total * fraction)
 	if shells > 0 then
-		upgrades.addShells(shells)
+		upgrades.addShells(shells, "tide")
 		EventLog.loot("Tide", shells)
 		EventLog.log("TideLoot", { shells = shells, fullValue = total })
 		VoyageCast.fire(remotes.Notify, string.format("The tide brought in %d shells from uncollected loot.", shells))
@@ -283,6 +285,10 @@ function LootService.init(islandFolder, upgradeService, remoteFolder, playerData
 	folder.Name = "Loot"
 	folder.Parent = islandFolder
 	RunService.Heartbeat:Connect(onHeartbeat)
+	-- S5.3: a killed creature drops its loot (was CreatureService.onKilled)
+	EventLog.Subscribe("CreatureKilled", function(e)
+		LootService.dropFrom(Vector3.new(e.X, e.Y, e.Z), e.DefId)
+	end)
 end
 
 return LootService

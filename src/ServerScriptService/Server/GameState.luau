@@ -545,6 +545,7 @@ function GameState.run(deps)
 								SoundFx.playAt("monster", Vector3.new(-math.sin(rad) * 80, 5, -math.cos(rad) * 80))
 								notifyAll(string.format("A %s climbs out of the sea! Big monsters hit hard: bring your best gear.", string.upper(Creatures[bigKind].displayName)))
 								EventLog.log("BigMonsterSpawned", { kind = bigKind, night = night })
+								EventLog.Publish("BossWarning", { VoyageId = EventLog.voyageId(), DefId = bigKind, Night = night })
 							end)
 						end
 
@@ -559,6 +560,7 @@ function GameState.run(deps)
 								lamp.setFuel(lamp.getMaxFuel())
 								state:SetAttribute("ReserveUsed", true)
 								EventLog.log("NightOneReserve", { night = night, crew = #runs })
+								EventLog.Publish("ReserveUsed", { VoyageId = EventLog.voyageId(), Reason = "night1safety" })
 								for _, p in readyPlayers() do
 									deps.remotes.CrewFeed:FireClient(p, { kind = "reserve" })
 								end
@@ -590,7 +592,7 @@ function GameState.run(deps)
 							break
 						end
 						local bonus = if Config.ECONOMY_ENABLED then Config.WAVE_BONUS_PER_NIGHT * night else 0
-						upgrades.addShells(bonus)
+						upgrades.addShells(bonus, "waveBonus")
 						EventLog.log("NightSurvived", { night = night, bonus = bonus, fuel = math.floor(lamp.getFuel()), tower = state:GetAttribute("Integrity") })
 						EventLog.Publish("NightSurvived", { VoyageId = EventLog.voyageId(), Night = night, Crew = userIds(readyPlayers()) })
 						-- Dawn loot window (Oct 12 2026): leftover loot stays on the beach most of the day at full
@@ -610,9 +612,8 @@ function GameState.run(deps)
 							notifyAll(string.format("Night %d survived! Dawn is coming.", night))
 						end
 						task.delay(lootSeconds, loot.tideCollect, Config.DAWN_LOOT_FRACTION) -- the tide brings leftover loot in at reduced value
-						if deps.autoSell then
-							task.delay(lootSeconds + 2, deps.autoSell) -- launch R10 switch (Config.AUTO_SELL_LOOT, off by default)
-						end
+						-- S5.3: the Economy's auto-sell (launch R10 switch, off by default) listens for this
+						EventLog.Publish("DawnLootWindow", { VoyageId = EventLog.voyageId(), Seconds = lootSeconds })
 					end
 				end
 

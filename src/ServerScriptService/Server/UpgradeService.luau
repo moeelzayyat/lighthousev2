@@ -47,6 +47,7 @@ local function checkEvolutions()
 			if ready then
 				evolved[evo.id] = true
 				EventLog.log("Evolution", { id = evo.id })
+				EventLog.Publish("EvolutionUnlocked", { VoyageId = EventLog.voyageId(), Id = evo.id })
 				EventLog.moment(4, "The crew forged the " .. evo.displayName)
 				return evo
 			end
@@ -87,9 +88,11 @@ function UpgradeService.getShells()
 	return shells
 end
 
-function UpgradeService.addShells(amount)
+-- reason: what paid them ("loot", "tide", "waveBonus", "trader"), for ShellsChanged
+function UpgradeService.addShells(amount, reason)
 	shells += amount
 	push()
+	EventLog.Publish("ShellsChanged", { VoyageId = EventLog.voyageId(), Delta = amount, Reason = reason or "other" })
 end
 
 -- Applies upgrades that change other systems the moment they're bought
@@ -120,6 +123,7 @@ function UpgradeService.buy(id)
 	end
 	shells -= cost
 	EventLog.count("shellsSpent", cost)
+	EventLog.Publish("ShellsChanged", { VoyageId = EventLog.voyageId(), Delta = -cost, Reason = "upgrade" })
 	levels[id] = level + 1
 	applyEffects(id)
 	local evo = checkEvolutions()

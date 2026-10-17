@@ -54,7 +54,7 @@ local function cancel(shipId, why, text)
 	end
 end
 
--- Re-checks one ship. Called on every roster change (ShipRoster.onChange) and by a light poll.
+-- Re-checks one ship. Called on every roster change (CrewRosterChanged on the bus) and by a light poll.
 function ShipDeparture.evaluate(shipId)
 	if deps.roster.isLocked(shipId) then
 		return -- sailed: nothing to decide until the ship is back in port
@@ -121,14 +121,19 @@ function ShipDeparture.departed(shipId)
 	publish(shipId)
 end
 
--- d: roster (ShipRoster), state (GameState folder), shipIds, notify(player, text), log(kind, data), manual (tests: no poll)
+-- d: roster (ShipRoster), state (GameState folder), shipIds, notify(player, text), log(kind, data),
+-- subscribe(name, handler) (the bus; tests leave it out), manual (tests: no poll)
 function ShipDeparture.init(d)
 	deps = d
 	requests = {}
 	for _, id in d.shipIds do
 		publish(id)
 	end
-	d.roster.onChange = ShipDeparture.evaluate
+	if d.subscribe then
+		d.subscribe("CrewRosterChanged", function(e)
+			ShipDeparture.evaluate(e.ShipId)
+		end)
+	end
 	if d.manual then
 		return
 	end

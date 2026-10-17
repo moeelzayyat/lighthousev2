@@ -13,6 +13,7 @@ local ShipRoster = require(Server.ShipRoster)
 local ShipBoarding = require(Server.ShipBoarding)
 local ShipDeparture = require(Server.ShipDeparture)
 local NetGuard = require(Server.NetGuard)
+local OilCarry = require(Server.OilCarry)
 
 local Crew = { Name = "Crew" }
 
@@ -95,7 +96,7 @@ function Crew.Init(ctx)
 	end
 
 	local function sendToShip(player)
-		ctx.removeCarriedOil(player)
+		OilCarry.remove(player)
 		if LampService.getKeeper() == player then
 			LampService.setKeeper(nil, "leave")
 		end
@@ -180,6 +181,7 @@ function Crew.Init(ctx)
 		shipIds = SHIP_IDS,
 		notify = LampService.notify,
 		log = EventLog.log,
+		subscribe = EventLog.Subscribe, -- S5.3: CrewRosterChanged
 	})
 
 	-- The server checks everything; the client only shows the prompt to members who can use it.

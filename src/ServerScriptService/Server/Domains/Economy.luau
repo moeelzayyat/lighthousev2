@@ -129,6 +129,12 @@ end
 -- Makes the player's tools and armor match their saved loadout.
 -- Runs on spawn and whenever their profile changes (buying, equipping).
 local function syncGear(player)
+	-- Beam colour cosmetics (launch R15): the lamp reads this attribute when the player takes it (S5.3: was a
+	-- LampService.colorFor callback)
+	local profile = PlayerData.get(player)
+	local beam = profile and Items[profile.equippedBeam]
+	player:SetAttribute("BeamColor", if beam and beam.beamColor then Color3.fromRGB(beam.beamColor[1], beam.beamColor[2], beam.beamColor[3]) else nil)
+
 	local character = player.Character
 	local backpack = player:FindFirstChildOfClass("Backpack")
 	if not backpack then
@@ -169,7 +175,6 @@ local function syncGear(player)
 	end
 
 	-- Armor: max health + damage reduction, and the visible model on the character
-	local profile = PlayerData.get(player)
 	local armor = profile and Items[profile.equippedArmor]
 	if humanoid and armor then
 		local ratio = if humanoid.MaxHealth > 0 then humanoid.Health / humanoid.MaxHealth else 1
@@ -235,17 +240,13 @@ function Economy.Init(ctx)
 	})
 
 	LoadoutService.init(remotes, PlayerData)
-	PlayerData.onChanged = syncGear
-
-	-- Beam colour cosmetics (launch R15): the lamp takes the Keeper's equipped colour
-	LampService.colorFor = function(player)
-		local profile = PlayerData.get(player)
-		local item = profile and Items[profile.equippedBeam]
-		if item and item.beamColor then
-			return Color3.fromRGB(item.beamColor[1], item.beamColor[2], item.beamColor[3])
+	-- S5.3: tools, armor and beam colour follow the profile (was PlayerData.onChanged)
+	EventLog.Subscribe("ProfileChanged", function(e)
+		local player = Players:GetPlayerByUserId(e.UserId)
+		if player then
+			syncGear(player)
 		end
-		return nil
-	end
+	end)
 
 	-- The Trader (lighthouse island): sells all of a player's loot for crew shells.
 	-- Returns ok, message, shells paid.
@@ -265,7 +266,7 @@ function Economy.Init(ctx)
 			total += (item.shellValue or 0) * entry[2]
 			table.insert(parts, string.format("%d %s", entry[2], item.name))
 		end
-		UpgradeService.addShells(total)
+		UpgradeService.addShells(total, "trader")
 		SoundFx.playAt("build", ctx.refs.traderPrompt.Parent.Position)
 		VoyageCast.fire(remotes.Notify, string.format("%s sold %s to the Trader for %d shells!", player.DisplayName, table.concat(parts, ", "), total)) -- island Trader: crew only
 		EventLog.log("SoldLoot", { player = player.Name, shells = total })
@@ -275,17 +276,20 @@ function Economy.Init(ctx)
 	ctx.sellAllLoot = sellAllLoot
 
 	-- launch R10 (owner: keep OFF until Test B): with Config.AUTO_SELL_LOOT, each crew member's carried
-	-- loot sells itself at dawn at the same Trader values. GameState calls this after a night is survived.
-	ctx.autoSell = function()
+	-- loot sells itself at dawn at the same Trader values, 2 s after the dawn loot window closes (S5.3: hears
+	-- DawnLootWindow on the bus; GameState used to call it).
+	EventLog.Subscribe("DawnLootWindow", function(e)
 		if not (Config.AUTO_SELL_LOOT and Config.ECONOMY_ENABLED) then
 			return
 		end
-		for _, player in Players:GetPlayers() do
-			if player:GetAttribute("Ready") then
-				sellAllLoot(player)
+		task.delay(e.Seconds + 2, function()
+			for _, player in Players:GetPlayers() do
+				if player:GetAttribute("Ready") then
+					sellAllLoot(player)
+				end
 			end
-		end
-	end
+		end)
+	end)
 end
 
 function Economy.Start(ctx)
