@@ -1228,3 +1228,16 @@ SCREENSHOTS: `assets/screens/harbor_ui/` (before and after: shop weapons, shop c
 MIRROR: 162 scripts in DEV, digest identical to `src/` (8fa221ea).
 NOT DONE: Look B "Captain's Ledger" (waits for the owner's pick); the CODES button opens the BAG but does not scroll to the code box.
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-040 flagged
+
+CHECKPOINT: First 10 minutes as a new player, pass 1 (scripted, one Studio account) — 🟦 (not a real-player test; Script Analysis unmeasured)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: the Coach script before this change is in git (commit 57e04ac); the Studio backup folder `ServerStorage.Backups.NP_before_2026-10-17` was made after the edit and holds only that note (a lapse: the copy should have been taken first) · restore point "NP coach helm"
+WHAT A FIRST-TIMER MEETS (fresh profile, Studio memory store, keyboard):
+- Join → harbor: the goal line ("Walk the pier onto the ship…") is clear; the ship is straight ahead. Walking from the spawn onto the deck took 7.0 s.
+- **On the deck, alone: nothing pointed at the wheel.** A solo first-timer waits on a full-crew rule (the ship sails at 4/4 or on SAIL NOW at the wheel); the only guidance was a toast and a line on the crew card. **Fixed:** the coach now shows "Take the wheel to set sail" with its marker on the wheel after 6 s aboard, for first-voyage players in the harbor with no departure running; it disappears as soon as a departure starts (checked).
+- SAIL NOW → island: 10.5 s countdown, then the prologue; the coach chain (oil → tank → lamp → aim) showed in order with markers.
+- Open (not fixed): on boarding, the camera faces the mast and cargo, so the wheel and its marker are behind the player; a camera turn toward the wheel when a first-timer boards would help. Holding E works; scripted `InputHoldBegin` on hold prompts (the fuel tank) did not trigger and is a test-driver limit, not a game bug (a real E key press refuelled).
+TESTRUNNER (DEV, Play server): **250 passed, 0 failed**. 0 client and 0 server errors.
+MIRROR: Coach c8b43d2c identical in DEV and `src/`.
+OWNER: a real first session (a friend who has never played) is still the test that counts; this pass only removes what a script can find.

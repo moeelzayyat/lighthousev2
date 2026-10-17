@@ -182,9 +182,44 @@ local function nearestCreaturePart()
 	return best
 end
 
+-- First-10-minutes pass (2026-10-17): a first-timer alone on the deck waited with nothing pointing at the wheel.
+-- Once they have been aboard a few seconds and no departure is running, point at SAIL NOW on the wheel.
+local readySince = if player:GetAttribute("Ready") == true then os.clock() else nil
+player:GetAttributeChangedSignal("Ready"):Connect(function()
+	readySince = if player:GetAttribute("Ready") == true then os.clock() else nil
+end)
+local function departureRunning()
+	for name, value in state:GetAttributes() do
+		if string.match(name, "^Ship_.+_Departure$") and value ~= nil then
+			return true
+		end
+	end
+	return false
+end
+local function wheel()
+	local lobby = Workspace:FindFirstChild("Lobby")
+	local stand = lobby and lobby:FindFirstChild("WheelStand", true)
+	return partOf(stand)
+end
+
 local X = Enum.KeyCode.ButtonX
 -- priority = order. keys: keyboard / touch / gamepad (nil = no hint on that input)
+-- harbor = true: shown on the ship in the harbor (before the voyage), not during the run
 local PROMPTS = {
+	{
+		id = "helm",
+		icon = "next",
+		text = "Take the wheel to set sail",
+		keys = { keyboard = "E", touch = "Tap", gamepad = X },
+		harbor = true,
+		when = function()
+			local character = player.Character
+			local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+			local inHarbor = root ~= nil and (root.Position - Config.LOBBY_SPAWN).Magnitude < 300
+			return inHarbor and readySince ~= nil and os.clock() - readySince > 6 and not departureRunning()
+		end,
+		targetFn = wheel,
+	},
 	{
 		id = "tank",
 		icon = "lamp",
@@ -393,11 +428,16 @@ UserInputService.LastInputTypeChanged:Connect(function()
 end)
 
 local function choose()
-	if not eligible() or not inRun() or player:GetAttribute("MenuOpen") then
+	if not eligible() or player:GetAttribute("MenuOpen") then
+		return nil
+	end
+	local running = inRun()
+	local onDeck = not running and player:GetAttribute("Ready") == true
+	if not running and not onDeck then
 		return nil
 	end
 	for _, prompt in PROMPTS do
-		if not retired[prompt.id] and (shownCount[prompt.id] or 0) < 4 and prompt.when() then
+		if (prompt.harbor == true) == onDeck and not retired[prompt.id] and (shownCount[prompt.id] or 0) < 4 and prompt.when() then
 			return prompt
 		end
 	end
