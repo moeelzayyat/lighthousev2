@@ -978,3 +978,21 @@ TESTRUNNER: 226 passed, 0 failed.
 CHECKPOINT: L1.3 Monetization — 🟦 WAITS FOR THE OWNER (nothing enabled)
 What is ready: the cosmetics list with suggested Robux prices (B1.1 record); the registry refuses a stat on any cosmetic and refuses `ROBUX_ENABLED = true`; no code prompts or processes a purchase.
 What L1.3 would build once you approve: `PurchaseService` with an idempotent `ProcessReceipt` (each receipt id granted once through GrantService), the cosmetic products and a supporter pack wired to your product ids, wearing the new cosmetic slots, test purchases in Studio. Say "approve L1.3" (and send the product ids) to start it.
+
+CHECKPOINT: L1.4 Codes — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.L1.4_before_2026-10-17 (Items, Cosmetics, _Registry, Platform, NetGuard, LiveOps, NetGuardSpec, SecuritySpec, EconomySim, Menus) · restore point "L1.4 passed"
+BUILT:
+- `Shared/Definitions/Codes` (new): LIGHTHOUSE (promo, 10 Pearls) and KEEPER (creator template: the Keeper's Glow beam colour). `_Registry` checks codes at boot (84 definitions): capital letters and digits ≤ 32, no code twice, promo Pearls 1–25, creator codes give one cosmetic and nothing else, an end date if any.
+- `Shared/Items`: Keeper's Glow beam colour (`reward = "code"`, no price); the registry allows `reward = "code"`.
+- `Server/CodeService` (new, `--!strict`): normalise (case and spaces), find, check expiry, profile loaded, `RedeemedCodes`; grant through GrantService (claim `code:<CODE>`), then write `RedeemedCodes` (kept forever, unlike the 30-day claims). A claim already granted is not paid twice.
+- Remotes `CodeRedeem` (NetGuard 0.1/1: one per 10 s) and `CodeResult`, connected in the LiveOps domain through `NetGuard.connect`; `SecuritySpec` spams it with the others.
+- Settings → Codes: a code box and a Redeem button; the answer shows as a notice.
+- `EconomySim` knows the new Pearl source (`code`, finite).
+TESTRUNNER (DEV, Play server): **234 passed, 0 failed** (226 + `CodesSpec` 8: promo pays once whatever the case and spaces; still once after the claim prune; a claim granted before a crash is not paid twice; the creator code gives its beam colour; bad, unknown, too-long, not-loaded and expired codes change nothing; the catalogue passes the registry and a creator code giving a harpoon and Pearls, a lowercase code with 500 Pearls and a duplicate code all fail; the beam colour is never sold; LiveOps wiring and the contract rate).
+PLAY TEST (DEV, the title route forced for the test with a `--TEMPTEST` Config value, reverted and checked: 0 TEMPTEST scripts left): Title → Settings → Codes; typed "lighthouse", clicked Redeem: `Grant claim=code:LIGHTHOUSE pearls=10 … source=code total=10`, `CodeRedeemed`; 10 s later Redeem again: the notice "You already used that code." and no second grant. Boot clean ("Definitions checked=84"; only the expected refused Studio data-store calls with API access off).
+MIRROR: 148 scripts in DEV, digest identical to `src/` (a9e5eed3).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-034 flagged
+OWNER STEPS (when you want them): for each creator, ask Claude to add a row to `Definitions/Codes` with their code; announce LIGHTHOUSE with the relaunch.
+NEXT: L1.5 store final (art; uploading is the owner's), L1.6 community documents, L1.7 release checklist.

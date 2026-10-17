@@ -88,7 +88,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 |---|---|---|---|
 | Cosmetics for Robux (housings, coats, lanterns, flags) | Catalogue defined (B1.1), nothing sold or enabled | B1.1 / L1.3 | B1.1: `Shared/Definitions/Cosmetics` (9 items: 2 housings, 2 coats, 2 lanterns, 3 flags; Pearl and suggested Robux prices; product ids 0); `_Registry` refuses any stat field on a cosmetic and `ROBUX_ENABLED = true`; no script uses MarketplaceService; `CosmeticsSpec` 5 tests. Wearing housings, coats, lanterns and flags is not drawn yet; owner approval at L1.3 |
 | Supporter pack | Planned | L1.3 | |
-| Codes | Planned | L1.4 | |
+| Codes | Tested (not yet published) | L1.4 | `Definitions/Codes` (LIGHTHOUSE: 10 Pearls; KEEPER: creator template giving the Keeper's Glow beam colour), `CodeService` (once per profile via `RedeemedCodes` + GrantService claim), remote `CodeRedeem`/`CodeResult`, Settings → Codes box; `_Registry` refuses a creator code giving anything but a cosmetic and Pearls over 25; `CodesSpec` 8 tests |
 | Seasons / events (Shipwreck Rescue) | Planned | LO | |
 | Store assets (title, icon, thumbnails, trailer) | Planned | R0.6, S2.7, L1.5 | |
 

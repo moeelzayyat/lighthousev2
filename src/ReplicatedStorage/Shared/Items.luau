@@ -19,7 +19,7 @@ local Items = {
 		"OilskinCoat", "KeepersCoat", "KelpweaveVest", "IronclawPlate",
 		"FireShellCrate",
 		"CrabClaw", "SeaGlass", "BlackPearl",
-		"BeamAmber", "BeamSeaGlass", "BeamMoonlight", "BeamEmber", "BeamSharedLantern",
+		"BeamAmber", "BeamSeaGlass", "BeamMoonlight", "BeamEmber", "BeamSharedLantern", "BeamKeepersGlow",
 	},
 	SHOP_CATEGORIES = { "Weapons", "Armor", "Ammunition", "Cosmetics" }, -- loot is sold to the Trader during a voyage, for shells
 	INVENTORY_FILTERS = { "All", "Weapons", "Armor", "Ammunition", "Materials" },
@@ -202,6 +202,16 @@ local Items = {
 		tradeoffs = "Looks only: no power. Earned by sailing with a friend you invited",
 		reward = "invite",
 		beamColor = { 255, 200, 120 },
+	},
+	-- L1.4: never sold; given by a creator code (Definitions/Codes, CodeService)
+	BeamKeepersGlow = {
+		kind = "Cosmetic", category = "Cosmetics", slot = "Beam",
+		name = "Keeper's Glow",
+		description = "A soft sea-green light, shared by the keepers who follow a lighthouse creator.",
+		strengths = "Shown to the crew while you hold the lamp",
+		tradeoffs = "Looks only: no power. Earned with a creator code",
+		reward = "code",
+		beamColor = { 140, 235, 200 },
 	},
 }
 

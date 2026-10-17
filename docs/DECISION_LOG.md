@@ -184,6 +184,9 @@ Owner (project chat, 2026-10-17): keep going through the GO/NO-GO gates while he
 ## D-033 — Economy: no price or reward change before beta data (L1.1)
 2026-10-17 · L1.1 · **Status: Accepted (unattended, recommendation)**
 A 10,000-voyage model of the live numbers (assumed crews and survival, stated in the L1.1 record) gives about 11 Pearls a voyage (p95 28, highest 50; the hard bound for one voyage is 146), the whole live catalogue (538 Pearls of gear and beam colours plus 320 Pearls of boost ranks to the +15 % cap) after about 62–83 voyages, or 33 for a crew that never loses. Every Pearl source is per night, per voyage, once per category or once a day: nothing pays per kill, per minute or per repeat, so inflow cannot run away. Decision: change nothing now; tune `pearlsFor`, prices and the merchant from the beta's real numbers. To revise: say so.
+## D-034 — Codes and their rewards (L1.4)
+2026-10-17 · L1.4 · **Status: Accepted (unattended, recommendation)** — flagged for the owner
+Taken: two codes to start. LIGHTHOUSE (promo, 10 Pearls, about one voyage) for the relaunch; KEEPER as the creator-code template, giving a new beam colour, the Keeper's Glow (looks only, never sold). The owner adds one row per creator (their code, the same or a new cosmetic) and can give any code an end date. Each code pays once per profile, kept forever in `RedeemedCodes`. The code box is in Settings, which a returning player reaches from the title screen (a first-time player goes straight to the ship and has no codes to use yet). One code every 10 seconds per player (the contract rate). To revise: say so.
 ## CP — S4.1 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 0 creature raycasts over night 1
 ## CP — S4.2 + S4.3 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 10.0 KB/s per client at 45 creatures; 60 FPS
 ## CP — S4.4 passed (🟦 Script Analysis; phone FPS pending, owner) · 2026-10-17 · auto-approved (unattended) · DEV only · 1 light in a 45-creature swarm; 0 new sound/burst parts
@@ -223,3 +226,4 @@ A 10,000-voyage model of the live numbers (assumed crews and survival, stated in
 ## CP — L1.1 passed (🟦 beta data) · 2026-10-17 · auto-approved (unattended) · DEV only · 10,000-voyage model, inflow bounded; no number changed (D-033); TestRunner 226/226
 ## CP — L1.2 passed · 2026-10-17 · auto-approved (unattended) · DEV only · migration chain on 6 fixture saves, idempotent, JSON round trip; rollback drill green (AdminDataSpec); TestRunner 226/226
 ## CP — L1.3 waits for the owner's approval (🟦; nothing enabled) · 2026-10-17
+## CP — L1.4 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · codes once per profile; Settings code box clicked through in a play test; TestRunner 234/234

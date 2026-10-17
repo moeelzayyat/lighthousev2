@@ -15,6 +15,8 @@ local ObjectiveService = require(Server.ObjectiveService) -- S7.2
 local LeaderboardService = require(Server.LeaderboardService) -- S7.3
 local SpecialtyService = require(Server.SpecialtyService) -- S7.4
 local InviteService = require(Server.InviteService) -- S7.5
+local CodeService = require(Server.CodeService) -- L1.4
+local NetGuard = require(Server.NetGuard)
 
 local LiveOps = { Name = "LiveOps" }
 
@@ -97,6 +99,23 @@ end
 
 function LiveOps.Init(ctx)
 	local state = ctx.state
+	-- L1.4: Settings → Codes. One code every 10 s; each code pays once per profile (CodeService)
+	local codeDeps = {
+		data = PlayerData.data,
+		mutate = PlayerData.mutate,
+		grant = function(player, claimId, rewards, source)
+			return (GrantService.Grant(player, claimId, rewards, source))
+		end,
+		now = os.time,
+		log = EventLog.log,
+	}
+	NetGuard.connect(ctx.remotes.CodeRedeem, function(player, text)
+		if type(text) ~= "string" or #text > 64 or not NetGuard.allow(player, "CodeRedeem") then
+			return
+		end
+		local ok, message = CodeService.redeem(player, text, codeDeps)
+		ctx.remotes.CodeResult:FireClient(player, ok, message)
+	end)
 	-- S7.1: the logbook hears kills, bosses, evolutions and survived nights on the bus
 	LogbookService.start({
 		subscribe = EventLog.Subscribe,

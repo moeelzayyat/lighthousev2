@@ -17,6 +17,7 @@ EconomySim.SOURCES = {
 	sell = "Quartermaster sale of a Material with a `sell` price (no Material has one today: 0)",
 	admin = "owner-only support grant (not income)",
 	invite = "an item (the Shared Lantern), no Pearls",
+	code = "a promo code's Pearls, once per profile (Definitions/Codes; finite)",
 }
 
 export type Model = {

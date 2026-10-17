@@ -32,6 +32,7 @@ NetGuard.RATES = {
 	AdminRequest = { 1, 3 }, -- R1.8, owner-only channel
 	ChooseVoyage = { 2, 3 }, -- S2.1
 	MerchantRequest = { 5, 8 }, -- S6.2
+	CodeRedeem = { 0.1, 1 }, -- L1.4: one code every 10 s
 } :: { [string]: { number } }
 
 NetGuard.REPLAY_CAP = 40

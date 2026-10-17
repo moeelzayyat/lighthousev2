@@ -208,6 +208,7 @@ return function(T: any)
 				AdminRequest = function() return { rid(), "nope", 1, nil } end,
 				ChooseVoyage = function() return { "NoSuchVoyage" } end,
 				MerchantRequest = function() return { rid(), "buy", "NoSuchItem", 1 } end,
+				CodeRedeem = function() return { "NOSUCHCODE" } end,
 			}
 			local over = {}
 			for remote, rate in NetGuard.RATES do

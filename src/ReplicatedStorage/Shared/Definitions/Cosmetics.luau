@@ -20,7 +20,7 @@ export type CosmeticDef = {
 local Cosmetics = {
 	ROBUX_ENABLED = false, -- owner approval at L1.3; until then the Robux catalogue is a list only
 	SLOTS = { "Beam", "Housing", "Coat", "Lantern", "Flag" },
-	BEAMS = { "BeamAmber", "BeamSeaGlass", "BeamMoonlight", "BeamEmber", "BeamSharedLantern" }, -- in Shared/Items
+	BEAMS = { "BeamAmber", "BeamSeaGlass", "BeamMoonlight", "BeamEmber", "BeamSharedLantern", "BeamKeepersGlow" }, -- in Shared/Items
 	ORDER = { "HousingDriftwood", "HousingBrass", "CoatStormBlue", "CoatKelpGreen", "LanternMoth", "LanternTide", "FlagGull", "FlagKraken", "FlagFounder" },
 
 	HousingDriftwood = { id = "HousingDriftwood", displayName = "Driftwood Housing", slot = "Housing", description = "A lamp housing pieced together from the beach.", pearls = 40, robux = 49, productId = 0, color = Color3.fromRGB(150, 115, 80) } :: CosmeticDef,

@@ -31,19 +31,20 @@ B1.3: every handler is connected with `NetGuard.connect(remote, handler)`; no ot
 | `AdminRequest` (R1.8) | `requestId, action, targetUserId, arg?` | requestId ≤ 40; action string ≤ 20; finite targetUserId; arg number or string ≤ 20; **owner UserId only** (`AdminDataService.OWNER_IDS`), anyone else refused and logged `AdminRejected`; actions inspect / grant (1–1000 Pearls, target online) / rollback (YYYY-MM-DD snapshot) | 1 / 3 |
 | `MerchantRequest` (S6.2 ✅) | `requestId, action, itemId, qty` | requestId ≤ 40; action `"buy"`; itemId a string ≤ 40 in `Merchant.ORDER`; qty exactly 1; capped replay map (checked before the rate); Ready; phase Day; distance to the Trader ≤ 18; the item's per-voyage limit; the effect would do something (hurt for Heal, lamp not full for Oil, no shield up for Shield); crew Shells | 5 / 8 |
 | `ObjectiveClaim` (S7.2: not built, D-026) | — | the reward is paid by the server the moment the objective is done (GrantService claim `objective:<day>:<id>`), so no client request exists to guard | — |
-| `CodeRedeem` (new, L1.4) | `code ≤ 32` | once per profile, expiry | 1 per 10 s |
+| `CodeRedeem` (L1.4, implemented) | `text: string` (≤ 64 raw; letters and digits ≤ 32 after spaces are removed) | type and length, then the bucket; `CodeService.redeem`: known code, not expired, profile loaded, not in `RedeemedCodes`; reward through `GrantService` (claim `code:<CODE>`), then `RedeemedCodes[code] = true` (never pruned); answers with `CodeResult` | 0.1 / 1 (one per 10 s) |
 | `Settings` (new, S5) | `key, value` | whitelist of keys | 5 / 10 |
 
 Deferred from this table: `Attack.Seq` + `CombatResult` (architecture §7.1 feel work) — not in the R1.4 roadmap row; lands with client prediction in S4.
 
 ## All 34 current remotes
 Client → server (18): `AdminRequest`, `Attack`, `ChooseVoyage`, `BeamControl`, `LampAction`, `LampShift` (both directions), `BuyUpgrade`, `ShopRequest`, `TraderRequest`, `MerchantRequest` (S6.2), `LoadoutRequest`, `GearAction`, `SetReady`, `VoteRematch`, `EnterLobby`, `ReportDevice`, `CoachEvent` (both directions), `ForecastVote`.
-Server → client only (16): `AdminResult`, `Notify`, `LootCollected`, `OpenUpgrades`, `PlaySound`, `RunResults`, `GearData`, `ShopOpen`, `ShopResult`, `LoadoutResult`, `Travel`, `UpgradeResult`, `TraderOpen`, `TraderResult`, `MerchantResult` (S6.2), `CrewFeed`. They have no server handler, so client input on them is ignored.
+Server → client only (17): `AdminResult`, `Notify`, `LootCollected`, `OpenUpgrades`, `PlaySound`, `RunResults`, `GearData`, `ShopOpen`, `ShopResult`, `LoadoutResult`, `Travel`, `UpgradeResult`, `TraderOpen`, `TraderResult`, `MerchantResult` (S6.2), `CrewFeed`, `CodeResult` (L1.4). They have no server handler, so client input on them is ignored.
 
 ## Server → Client
 | Remote | Payload | Notes |
 |---|---|---|
 | `Notify`, `PlaySound`, `LootCollected`, `CrewFeed`, `CoachEvent` | as today; `LootCollected` kinds: loot item ids, `Shells`, `Pearls`, and `PearlBanked` (S2.2, amount banked at dawn); `CrewFeed` kinds: `refuel`, `clutch`, `reserve` (S2.3, the Night-1 reserve refilled the lamp) | `PlaySound` client handler validates types (keep) |
+| `CodeResult` (L1.4) | `ok, message` | one answer per accepted `CodeRedeem` |
 | `UpgradeResult`, `ShopResult`, `LoadoutResult`, `TraderResult`, `MerchantResult` | `{requestId, ok, reason?, state?}` (`MerchantResult`: `requestId, ok, message, {itemId, count, shells}`) | replayed for duplicate requestIds |
 | `AdminResult` (R1.8) | `requestId, ok, result` (table for inspect, message otherwise) | owner only in practice |
 | `RunResults` | results payload (S2.2 adds `banked`, S2.5 `crewSize`) | |

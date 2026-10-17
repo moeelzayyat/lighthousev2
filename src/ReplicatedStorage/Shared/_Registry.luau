@@ -26,6 +26,7 @@ function Registry.catalogs(): Catalogs
 		Leaderboards = require(Shared:WaitForChild("Definitions"):WaitForChild("Leaderboards")) :: any, -- S7.3
 		Specialties = require(Shared:WaitForChild("Definitions"):WaitForChild("Specialties")) :: any, -- S7.4
 		Cosmetics = require(Shared:WaitForChild("Definitions"):WaitForChild("Cosmetics")) :: any, -- B1.1
+		Codes = require(Shared:WaitForChild("Definitions"):WaitForChild("Codes")) :: any, -- L1.4
 		Events = require(Shared:WaitForChild("Events")) :: any,
 	}
 end
@@ -270,7 +271,7 @@ RULES.Items = function(c, Items, all)
 			c.add(w, "needs a price (or starter = true, or reward = how it is earned)")
 		end
 		if item.reward ~= nil then -- S7.5: earned, never sold
-			c.oneOf(w .. ".reward", item.reward, { "invite" })
+			c.oneOf(w .. ".reward", item.reward, { "invite", "code" })
 			if item.price ~= nil then
 				c.add(w, "is a reward, so it has no price")
 			end
@@ -642,6 +643,48 @@ RULES.Cosmetics = function(c, Cosmetics, all)
 		end
 		if not table.find(Cosmetics.ORDER or {}, id) then
 			c.add(w, "is not listed in Cosmetics.ORDER")
+		end
+	end
+end
+
+-- L1.4: codes. A creator code gives a cosmetic only (never power); a promo code a few Pearls; once per profile
+RULES.Codes = function(c, Codes, all)
+	c.order("Codes.ORDER", Codes.ORDER, Codes)
+	local items = all.Items
+	local seen = {}
+	for id, def in c.defs(Codes) do
+		local w = "Codes." .. id
+		if type(def.code) ~= "string" or #def.code == 0 or #def.code > 32 or string.find(def.code, "[^%u%d]") then
+			c.add(w .. ".code", "must be capital letters and digits, at most 32")
+		elseif seen[def.code] then
+			c.add(w .. ".code", "is used twice (" .. def.code .. ")")
+		end
+		seen[def.code or ""] = true
+		c.oneOf(w .. ".kind", def.kind, { "promo", "creator" })
+		c.str(w .. ".note", def.note)
+		local reward = def.reward
+		if type(reward) ~= "table" or (reward.Pearls == nil and reward.Items == nil) then
+			c.add(w .. ".reward", "must give Pearls or items")
+		else
+			if reward.Pearls ~= nil then
+				c.num(w .. ".reward.Pearls", reward.Pearls, 1, 25, true)
+			end
+			for itemId, n in reward.Items or {} do
+				local item = if type(items) == "table" then items[itemId] else nil
+				if type(item) ~= "table" or item.kind ~= "Cosmetic" then
+					c.add(w .. ".reward.Items." .. tostring(itemId), "must be a cosmetic (codes never give power)")
+				end
+				c.num(w .. ".reward.Items." .. tostring(itemId), n, 1, 1, true)
+			end
+			if def.kind == "creator" and (reward.Items == nil or reward.Pearls ~= nil) then
+				c.add(w .. ".reward", "a creator code gives a cosmetic and nothing else")
+			end
+		end
+		if def.expires ~= nil then
+			c.num(w .. ".expires", def.expires, 1.7e9, 4e9, true)
+		end
+		if not table.find(Codes.ORDER or {}, id) then
+			c.add(w, "is not listed in Codes.ORDER")
 		end
 	end
 end
