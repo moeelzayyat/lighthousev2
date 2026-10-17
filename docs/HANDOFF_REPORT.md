@@ -309,3 +309,21 @@ NUMBERS: Sail again → new voyage 0.78 s.
 MIRROR: 76 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (4e71147a).
 OWNER APPROVAL: auto-approved (unattended, D-010)   PUBLISHED BY OWNER: n.a. (S2 publishes at S2.8, to DEV)
 NEXT: S2.6 Controller aim.
+
+S2.4 addendum · 2026-10-17: the S2.6 regression run (same scripted player, Studio at ≥ 44 fps throughout) gave a 5th valid first beam hit: 38.2 s. Five valid runs: 37.0 · 37.6 · 37.7 · 38.1 · 38.2 s, **median 37.7 s** (≤ 45 s).
+
+CHECKPOINT: S2.6 Controller aim — 🟦 (Script Analysis unmeasured; the full controller voyage needs the owner's hands)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S2.6_before_2026-10-17 (Coach, Hud, Menus, Departure, UiKit, Main)
+BUILT:
+- `StarterPlayerScripts.Client.InputController` (new, `--!strict`): `mode()` ("keyboard" | "touch" | "gamepad"), `usingGamepad()` (any controller, not only Gamepad1/2), `stickAngle(x, y)` (the aim rule, dead zone 0.35 as before).
+- Replaced the input-mode copies in Coach, Hud, Menus, Departure (`inputKey`) and UiKit (`usingGamepad`, KeyHint mode). Main's stick aim now goes through `InputController.stickAngle`.
+- Controller layout: the right stick is the aim stick (the coach's aim hint now shows the right stick; the left stick still aims because walking is off at the lamp); Y toggles Focus, B leaves the lamp (both already existed and are unchanged); X uses prompts (unchanged).
+TESTRUNNER (DEV): 103 passed, 0 failed. New `InputControllerSpec` (4): stick directions, stick angle equals the mouse rule for the same world direction, dead zone, mode names.
+SCRIPT ANALYSIS: not measured (owner item).
+PLAY TEST (DEV, owner's account, mock store): keyboard/mouse regression with the scripted first-time player at ≥ 44 fps: boarded, sailed, refuelled, took the lamp, first beam hit 38.2 s; Coach, Hud, Menus, Departure and Results all loaded; `InputController.mode()` = keyboard; 0 client and 0 game-script errors (server console: only ProfileStore's refused Studio write, API off). Play stopped.
+NOT DONE (needs the owner's hands): "full voyage completed with a controller in Studio". Studio's VirtualInputManager has no gamepad events (`SendGamepadButtonEvent` / `SendGamepadAxisEvent` do not exist), so a controller cannot be simulated from a script. Owner check: plug in a controller (or Studio → Test → Device → Controller emulator), press Play in the DEV window, and play one voyage with the controller only: left stick walks, X uses prompts (oil, tank, lamp, wheel), right stick aims the beam, Y focuses, B leaves the lamp. Tell Claude if anything cannot be done with the controller.
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)   PUBLISHED BY OWNER: n.a. (S2 publishes at S2.8, to DEV)
+MIRROR: 78 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (07398fea).
+NEXT: S2.7 Store presence.

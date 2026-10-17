@@ -22,6 +22,7 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SoundFx"))
 local UiKit = require(script.Parent:WaitForChild("UiKit"))
+local InputController = require(script.Parent:WaitForChild("InputController")) -- S2.6
 local C, F = UiKit.Color, UiKit.Font
 local new, tween = UiKit.new, UiKit.tween
 
@@ -34,15 +35,7 @@ local LIGHTHOUSE = Vector3.new(0, 35, 0)
 local LOOK_AT = Vector3.new(0, 40, 0)
 local ECONOMY = Config.ECONOMY_ENABLED == true
 
-local function inputMode()
-	local last = UserInputService:GetLastInputType()
-	if last == Enum.UserInputType.Touch then
-		return "touch"
-	elseif UiKit.usingGamepad() then
-		return "gamepad"
-	end
-	return "keyboard"
-end
+local inputMode = InputController.mode -- S2.6: one shared answer (was a local copy)
 
 local function focus(obj)
 	if obj and UiKit.usingGamepad() then

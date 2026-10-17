@@ -17,6 +17,7 @@ local Workspace = game:GetService("Workspace")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SoundFx"))
 local UiKit = require(script.Parent:WaitForChild("UiKit"))
+local InputController = require(script.Parent:WaitForChild("InputController")) -- S2.6
 local C, F = UiKit.Color, UiKit.Font
 local new, tween = UiKit.new, UiKit.tween
 
@@ -34,15 +35,7 @@ local BIG_MONSTERS = { BarnacleBrute = true, ShipwreckHermit = true } -- Creatur
 local gui = UiKit.Screen("Coach", 7)
 local root = new("Frame", { Name = "Root", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1) }, gui)
 
-local function inputMode()
-	local last = UserInputService:GetLastInputType()
-	if last == Enum.UserInputType.Touch then
-		return "touch"
-	elseif UiKit.usingGamepad() then
-		return "gamepad"
-	end
-	return "keyboard"
-end
+local inputMode = InputController.mode -- S2.6: one shared answer (was a local copy)
 
 local function phone()
 	return UiKit.Breakpoint(root.AbsoluteSize) == "phone"
@@ -225,7 +218,7 @@ local PROMPTS = {
 		id = "aim",
 		icon = "lamp",
 		text = "Aim the light at the crabs",
-		keys = { keyboard = "Mouse", touch = "Drag", gamepad = Enum.KeyCode.Thumbstick1 }, -- batch 1: controller hint
+		keys = { keyboard = "Mouse", touch = "Drag", gamepad = Enum.KeyCode.Thumbstick2 }, -- S2.6: the right stick aims
 		when = function()
 			return isKeeper() and creaturesOut()
 		end,

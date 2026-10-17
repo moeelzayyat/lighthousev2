@@ -30,6 +30,7 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local GuiService = game:GetService("GuiService")
 local UserInputService = game:GetService("UserInputService")
+local InputController = require(script.Parent:WaitForChild("InputController")) -- S2.6: the shared input mode
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -249,8 +250,7 @@ end
 UiKit.click = click
 
 local function usingGamepad()
-	local last = UserInputService:GetLastInputType()
-	return last == Enum.UserInputType.Gamepad1 or last == Enum.UserInputType.Gamepad2
+	return InputController.usingGamepad()
 end
 UiKit.usingGamepad = usingGamepad
 
@@ -1191,13 +1191,7 @@ function UiKit.KeyHint(parent, keys, label, opts)
 		if opts.input then
 			return opts.input
 		end
-		local last = UserInputService:GetLastInputType()
-		if last == Enum.UserInputType.Touch then
-			return "touch"
-		elseif usingGamepad() then
-			return "gamepad"
-		end
-		return "keyboard"
+		return InputController.mode()
 	end
 	local function refresh()
 		local m = mode()

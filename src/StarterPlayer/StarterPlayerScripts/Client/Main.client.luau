@@ -19,6 +19,7 @@ local lampAction = remotes:WaitForChild("LampAction")
 local notifyRemote = remotes:WaitForChild("Notify")
 local attackRemote = remotes:WaitForChild("Attack")
 local lootRemote = remotes:WaitForChild("LootCollected")
+local InputController = require(script.Parent:WaitForChild("InputController")) -- S2.6: controller aim rule
 
 -- Tell the server what kind of device this is (for the playtest event log)
 do
@@ -94,7 +95,6 @@ local SEND_INTERVAL = 0.05
 local lastAim = nil -- the last angle aimed by any input
 local stickHeld = false -- a thumbstick is pushed past the dead zone
 local heldTouches = {} -- touches currently aiming (not on a button)
-local STICK_DEADZONE = 0.35
 local HOLD_RESEND = 1 -- seconds: a held finger or stick re-sends its aim so the idle timer sees the Keeper
 
 -- While at the lamp the Keeper can't walk (server sets WalkSpeed 0), so the movement controls
@@ -195,12 +195,12 @@ UserInputService.InputChanged:Connect(function(input, gameProcessed)
 	elseif input.UserInputType == Enum.UserInputType.Touch and not gameProcessed then
 		aimAt(input.Position)
 	elseif isStick(input) then
-		-- Controller (batch 1): either stick aims; walking is off at the lamp. The Keeper camera looks
-		-- toward -Z, so stick right = world +X and stick up = world -Z (same angle rule as aimAt).
-		local x, y = input.Position.X, input.Position.Y
-		if math.sqrt(x * x + y * y) >= STICK_DEADZONE then
-			pendingAngle = math.deg(math.atan2(-x, y))
-			lastAim = pendingAngle
+		-- Controller (S2.6): the right stick aims (the left one too: walking is off at the lamp); Y focuses,
+		-- B leaves. The angle rule lives in InputController.stickAngle (same rule as aimAt).
+		local angle = InputController.stickAngle(input.Position.X, input.Position.Y)
+		if angle then
+			pendingAngle = angle
+			lastAim = angle
 			stickHeld = true
 		else
 			stickHeld = false

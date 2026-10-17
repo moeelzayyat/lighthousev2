@@ -17,10 +17,10 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 
 local UiKit = require(script.Parent:WaitForChild("UiKit"))
+local InputController = require(script.Parent:WaitForChild("InputController")) -- S2.6
 
 local C, F = UiKit.Color, UiKit.Font
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
@@ -77,10 +77,10 @@ local function nearShip()
 end
 
 local function inputKey()
-	local last = UserInputService:GetLastInputType()
-	if last == Enum.UserInputType.Touch then
+	local mode = InputController.mode() -- S2.6
+	if mode == "touch" then
 		return "Tap"
-	elseif last == Enum.UserInputType.Gamepad1 or last == Enum.UserInputType.Gamepad2 then
+	elseif mode == "gamepad" then
 		return "X"
 	end
 	return "E"

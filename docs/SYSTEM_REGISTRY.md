@@ -40,7 +40,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Invites (unrewarded) | Released | S7.5 | reward |
 | Leaderboards | Planned | S7.3 | |
 | Specialties | Planned | S7.4 | |
-| Controller beam aim | Planned | S2.6 | |
+| Controller beam aim | Tested (not yet published; controller voyage pending, owner) | S2.6 | right stick aims (left too at the lamp), Y Focus, B Leave; `InputController.stickAngle` |
 
 ## Economy and progression
 | System | Status | Target | Notes |
@@ -80,7 +80,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Glass HUD | Released | S5.6 | single pass |
 | Menus / Shop / Inventory / Bench / Trader / Departure / Results / Coach | Released | S5.5 | |
 | Phone layouts | Released | S4.4 | real-phone FPS |
-| InputController (single) | Planned | S2.6 | |
+| InputController (single) | Tested (not yet published) | S2.6 | replaces the input-mode copies in Coach, Hud, Menus, Departure, UiKit |
 
 ## Live ops and monetization
 | System | Status | Target | Notes |

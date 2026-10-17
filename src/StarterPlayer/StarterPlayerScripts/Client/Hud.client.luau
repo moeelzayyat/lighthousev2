@@ -29,6 +29,7 @@ local Items = require(Shared:WaitForChild("Items"))
 local Weapons = require(Shared:WaitForChild("Weapons"))
 local SoundFx = require(Shared:WaitForChild("SoundFx"))
 local UiKit = require(script.Parent:WaitForChild("UiKit"))
+local InputController = require(script.Parent:WaitForChild("InputController")) -- S2.6
 local ItemPreview = require(script.Parent:WaitForChild("ItemPreview"))
 
 local state = ReplicatedStorage:WaitForChild("GameState")
@@ -534,15 +535,7 @@ local function formatTime(seconds)
 	return string.format("%d:%02d", math.floor(seconds / 60), seconds % 60)
 end
 
-local function inputMode()
-	local last = UserInputService:GetLastInputType()
-	if last == Enum.UserInputType.Touch then
-		return "touch"
-	elseif last == Enum.UserInputType.Gamepad1 or last == Enum.UserInputType.Gamepad2 then
-		return "gamepad"
-	end
-	return "keyboard"
-end
+local inputMode = InputController.mode -- S2.6: one shared answer (was a local copy)
 
 local function keySuffix(key, padKey)
 	local mode = inputMode()
