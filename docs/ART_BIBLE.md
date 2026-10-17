@@ -7,7 +7,7 @@
 - **World:** Studio terrain island and sea; code-built tower, pads, barrels, harbor ship, Quartermaster stall. Creature models are simple meshes; Sand Skitter = Rock Crab at 60%.
 
 ## Rules going forward
-1. **The beam is the hero of every image.** Icon, thumbnails and trailer frames show the beam cutting the storm.
+1. **The beam is the hero of every image.** Icon, thumbnails and trailer frames show the beam cutting the storm. In game (V2) it is a soft shaft with a bright core and feathered edges, never a flat wedge, and it fades out before it touches the ground; its pool of light shows where it lands.
 2. Readability on a 6-inch phone at the overhead lamp camera: creature silhouettes distinct by shape before colour; bosses two-tone.
 3. Render budget per creature ≤ 3 instances; no per-creature lights (architecture §8).
 4. No gore: creatures dissolve into sea-foam particles.

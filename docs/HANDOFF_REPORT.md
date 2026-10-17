@@ -1107,3 +1107,15 @@ SCREENSHOTS: `assets/screens/visual_v1/` (before and after, night and day).
 MIRROR: 155 scripts in DEV; GameState and Storm hashes identical to `src/` (e3423a70, 436709a3).
 OWNER: judge the screenshots; say yes or no to downloading the free CC0 Cloudy Skyboxes pack for a real storm-cloud sky.
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-038 flagged
+
+CHECKPOINT: V2 The beam (visual overhaul) — 🟦 (Script Analysis unmeasured; the owner judges the look from the screenshots)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: ServerStorage.Backups.VIS_V2_before_2026-10-17 (V2 adds one new script and touches no existing one) · restore point "VIS_V2 before"
+BUILT:
+- `Client/BeamFx` (new LocalScript, `--!strict`): the beam was one flat, fairly opaque ribbon (a white wedge with hard edges that cut into the ground). On each device it is now 4 layers that copy the server's beam every frame: a wide haze, a middle and an inner layer drawn with Roblox's built-in soft smoke texture (feathered edges), and a narrow bright core. All fade out before the end of the beam. In the storm, rain glints fall through the beam (160/s on computers, 60/s on touch devices, none with Low effects). The server's beam (angle, width, colour, on/off) and its hits are unchanged; the existing SpotLight and light pools still light the ground where it lands.
+TESTRUNNER (DEV, Play server): **249 passed, 0 failed**.
+PLAY TEST (DEV): voyage sailed with the runtime helper, the lamp kept fuelled by a runtime-only helper for the pictures; prologue storm seen from two pinned cameras; client 60 FPS in Studio; 0 client errors, 0 server errors apart from the expected refused Studio data-store calls.
+SCREENSHOTS: `assets/screens/visual_v2/`.
+MIRROR: BeamFx hash identical in DEV and `src/` (b64e4eed).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)

@@ -240,7 +240,7 @@ The owner judges every step from before/after screenshots (`assets/screens/visua
 | ID | Step | Deliverables | Passes when | Verify |
 |---|---|---|---|---|
 | V1 ✅ | Sea and sky | The sea reaches 3,072 studs out (was 800, a visible edge); an overcast day and a dark, hazy storm night; storm waves and cloud cover on the voyage crew's devices | No sea edge in view; night still dark enough for the beam; TestRunner green | Screenshots + TestRunner |
-| V2 | The beam | Layered soft beam, a SpotLight, rain glints, no ground clipping | Screenshots | Owner |
+| V2 ✅ | The beam | `Client/BeamFx`: the server's beam restyled on each device into 4 layers (soft haze with feathered edges, a bright core), fading out before it reaches the ground; rain glints falling through the beam in the storm (60/s on touch, off with Low effects). The server's angle, width and hits are unchanged | Screenshots; 0 errors; TestRunner green | Screenshots + TestRunner |
 | V3 | Storm effects | Rain sheets (capped per device), lightning over the sea, spray, foam around rocks, swaying lanterns and flags | Screenshots, FPS | Owner |
 | V4 | Island rebuild | Cliffs, tower mound, paths, keeper's hut, oil shed, dock (owner saves `backups\LighthouseKeepers_DEV_preVisual_2026-10-17.rbxl` first) | Spawns, ground grid and pads re-checked; TestRunner green | Play test |
 | V5 | One material style | Stylized terrain and props on one palette | Screenshots | Owner |
