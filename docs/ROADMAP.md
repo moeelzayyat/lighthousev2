@@ -257,6 +257,7 @@ The owner judges every step from before/after screenshots (`assets/screens/visua
 | HUI.3 ✅ | Quartermaster shop | Tab rail (Weapons, Armor, Ammo, Boosts, Cosmetics), 3-column cards (`UiKit.ShopCard`: rarity tag, item in a rarity ring, price / Robux / EQUIPPED / OWNED plate), detail panel with stat bars and +/- against what is equipped, big green BUY beside the Robux button; phone: rail + grid, tap for the detail view | Same ShopRequest/ShopResult and MarketplaceService flow; screenshots wide and phone | Play test |
 | HUI.4 ✅ | Harbor board | `Client/HarborBoard`: "HARBOR LEGENDS" face with a podium for the top 3 and rows 4–10 per board, a "your rank" strip, and a full-screen view from a prompt on the board. It reads the rows the server already writes (no new remote); the board is 16 x 9.5 studs (was 13 x 7.5) | Rows, podium and rank drawn from sample rows; 0 errors | Play test |
 | HUI.5 ✅ | Harbor HUD | Chunky bag button (same spot and size), a Pearls pill (top right) and a CODES button (opens the BAG with the code box), shown on the harbor island only | Shown in the harbor, hidden on a voyage | Play test |
+| VIS.P 🟦 | Publish the new look (owner) | Package "VISUAL + HARBOR UI + S2.5c — READY FOR OWNER TO PUBLISH" in HANDOFF_REPORT.md: V1–V8, HUI.1–HUI.5, the first-10-minutes pass, the bigger harbor island, S2.5c | Live checks in the package; the LO.5 live checks ride along | Owner |
 
 ---
 

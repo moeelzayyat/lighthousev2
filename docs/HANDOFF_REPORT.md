@@ -1268,3 +1268,22 @@ SCREENSHOTS: `assets/screens/s25c/` (00_ = the first draft before the fixes; PC 
 MIRROR: 163 scripts in DEV, digest identical to `src/` (cd53c796).
 NOT DONE / OPEN: Script Analysis count (not reachable from the tools); a real phone; the owner's look verdict. Other menus (BAG, merchant, locker) keep their current layout (S2.5c scope).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-043 flagged
+
+VISUAL + HARBOR UI + S2.5c — READY FOR OWNER TO PUBLISH (DEV experience only)
+=====================================================================
+What is in this build (since your last DEV publish, LO.5): the visual overhaul V1–V8 (a sea with no edge, a dark storm night, the layered beam, rain and lightning, the rebuilt rocky island, golden hour in the harbor, foam death bursts and hit sparks); the Bold harbor UI (HARBOR LEGENDS board, Pearls pill, CODES button); the new Quartermaster shop and workbench (S2.5c: tiles, detail pane, big buttons, a second tap to confirm a Pearl purchase); the coach and camera pointing a solo first-timer at the wheel; the harbor island 2.8× bigger. No price, stat, remote or save field changed.
+Before publishing:
+ 1. In the DEV Studio window: File → Save to File As → `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_VIS_2026-10-17.rbxl`.
+ 2. Game Settings → Security → "Enable Studio Access to API Services" stays OFF.
+Publish:
+ 3. File → Publish to Roblox (DEV experience, PlaceId 102473202766620).
+ 4. Creator Hub → Lighthouse Keepers DEV → Servers → Shut down all servers.
+Live checks (on a computer, then on your phone):
+ 5. Join: the harbor is at golden hour; the Pearls pill shows your real Pearls (not 0).
+ 6. Walk to the Quartermaster, press Trade: the new shop opens. Buy something cheap (Buy, then Confirm); the Pearls go down by the price and the item says Owned. Equip it.
+ 7. Board alone and sail (the coach's "Take the wheel to set sail" only shows for an account on its first voyage; a friend's new account will see it).
+ 8. On the island at night: the storm is dark, the beam is soft with a bright core, rain shows. Kill a crab: a foam burst.
+ 9. Open the workbench (Upgrade Bench prompt): tiles, one tap buys an upgrade.
+ 10. On your phone: the shop's buttons are easy to hit and no words are cut off; the game runs smoothly at night (this is also V8's real-phone check). Tell me the phone model and how smooth it felt.
+ 11. The LO.5 checks still to report: the crew card offers "Shipwreck Rescue"; a castaway carried to the shelter; the BAG's Codes box.
+If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.
