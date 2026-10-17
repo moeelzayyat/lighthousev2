@@ -17,10 +17,12 @@ export type VoyageDef = {
 	unlocks: string?, -- a win grants Unlocks[unlocks]
 	endless: boolean?, -- no last night: the voyage ends when the light goes out (S3.1b)
 	testOnly: boolean?, -- given only by ModeTest, never chosen on the crew card (S3.1b)
+	event: string?, -- LO.1: offered only while this live event (Definitions/LiveEvents) is on; no unlock needed
+	rescue: { castaways: number, shells: number, reward: string? }?, -- LO.2: castaways to carry from a wreck (RescueService)
 }
 
 local Voyages = {
-	ORDER = { "Standard", "Long" },
+	ORDER = { "Standard", "Long", "Rescue" },
 	DEFAULT = "Standard",
 
 	Standard = {
@@ -40,6 +42,17 @@ local Voyages = {
 		bossNights = { 4, 7, 10, 13 },
 		bossEveryNightFrom = 8,
 		unlock = "LongVoyage",
+	} :: VoyageDef,
+
+	-- LO.1: the Shipwreck Rescue event voyage (D-037): five nights, offered to every crew while the event is on
+	Rescue = {
+		id = "Rescue",
+		displayName = "Shipwreck Rescue",
+		short = "5 nights \u{00B7} event",
+		nights = 5,
+		bossNights = { 3, 5 },
+		event = "ShipwreckRescue",
+		rescue = { castaways = 8, shells = 15, reward = "FlagRescuer" }, -- LO.2/LO.3 (D-037)
 	} :: VoyageDef,
 
 	Endless = {

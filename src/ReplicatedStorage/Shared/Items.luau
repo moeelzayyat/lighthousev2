@@ -20,7 +20,7 @@ local Items = {
 		"FireShellCrate",
 		"CrabClaw", "SeaGlass", "BlackPearl",
 		"BeamAmber", "BeamSeaGlass", "BeamMoonlight", "BeamEmber", "BeamSharedLantern", "BeamKeepersGlow",
-		"HousingDriftwood", "HousingBrass", "CoatStormBlue", "CoatKelpGreen", "LanternMoth", "LanternTide", "FlagGull", "FlagKraken", "FlagFounder",
+		"HousingDriftwood", "HousingBrass", "CoatStormBlue", "CoatKelpGreen", "LanternMoth", "LanternTide", "FlagGull", "FlagKraken", "FlagFounder", "FlagRescuer",
 	},
 	SHOP_CATEGORIES = { "Weapons", "Armor", "Ammunition", "Cosmetics" }, -- loot is sold to the Trader during a voyage, for shells
 	INVENTORY_FILTERS = { "All", "Weapons", "Armor", "Ammunition", "Materials" },
@@ -298,6 +298,16 @@ local Items = {
 		tradeoffs = "Looks only: no power. The supporter item, bought with Robux",
 		reward = "supporter",
 		color = { 255, 200, 90 },
+	},
+	-- LO.3: earned once in the Shipwreck Rescue event (every castaway saved in one voyage); never sold
+	FlagRescuer = {
+		kind = "Cosmetic", category = "Cosmetics", slot = "Flag",
+		name = "Rescuer's Flag",
+		description = "Sewn from the wreck's own sail by the castaways you carried home.",
+		strengths = "Flown from the ship's mast",
+		tradeoffs = "Looks only: no power. Earned in the Shipwreck Rescue event",
+		reward = "event",
+		color = { 196, 70, 58 },
 	},
 }
 

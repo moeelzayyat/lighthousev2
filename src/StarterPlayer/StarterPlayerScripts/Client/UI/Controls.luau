@@ -1081,6 +1081,7 @@ function UiKit.ItemCard(parent, opts)
 		Text = string.upper((if opts.rarity then opts.rarity.label .. " · " else "") .. (opts.subtitle or category)),
 		Position = UDim2.new(0, 10, 1, -30),
 		Size = UDim2.new(1, -20, 0, 18),
+		TextTruncate = Enum.TextTruncate.AtEnd, -- LO.4: never runs under the price
 	}, card)
 	local priceRow, shortGlyph
 	if opts.price then
@@ -1110,6 +1111,9 @@ function UiKit.ItemCard(parent, opts)
 		lockReason.Text = state.locked or ""
 		if priceRow then
 			priceRow.frame.Visible = not state.owned and not state.locked
+			-- LO.4: the type line stops short of the price (it ran under it on narrow cards)
+			local priceWidth = if priceRow.frame.AbsoluteSize.X > 0 then priceRow.frame.AbsoluteSize.X else 64
+			typeLine.Size = if priceRow.frame.Visible then UDim2.new(1, -26 - priceWidth, 0, 18) else UDim2.new(1, -20, 0, 18)
 			priceRow.number.TextColor3 = if state.affordable then Color.TextPrimary else Color.TextSecondary
 			shortGlyph.Visible = not state.affordable
 		end

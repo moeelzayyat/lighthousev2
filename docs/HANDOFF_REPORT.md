@@ -1060,3 +1060,33 @@ OWNER CHECK: in the published DEV game (after the S7.6 publish), open the Quarte
 MIRROR: 150 scripts, digest identical to `src/`.
 
 L1.3 LIVE · 2026-10-17 16:43 UTC · the owner saved `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_L1RC_2026-10-17.rbxl`, published DEV and made a real Robux purchase: "Purchase worked". L1.3 ✅. The DEV publish also carries every earlier package (S2.8–S7.6); their live checks (leaderboard after a night, daily objective notice, invite reward, codes, phone FPS) are still to be reported.
+
+CHECKPOINT: LO.1–LO.4 First live-ops cycle (Shipwreck Rescue) — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified (new Studio session after the owner's publish; its scripts matched the mirror before any change) · API access: found ON after the purchase test; the owner turned it off before any Play (probe refused)
+BACKUP: ServerStorage.Backups.LO.1_before_2026-10-17, LO.2_before_2026-10-17, LO.4_before_2026-10-17 · restore point "LO cycle 1 passed"
+BUILT:
+- LO.1 `Shared/Definitions/LiveEvents` (new): events with a UTC window (`isOn`, `active`); `ShipwreckRescue` 2026-10-17 → 2026-11-07. `Voyages.Rescue` (5 nights, big monsters on 3 and 5, `event = "ShipwreckRescue"`). The crew card shows it to everyone while the event is on; ChooseVoyage and the departure check the window again on the server. `_Registry` checks events and event voyages both ways.
+- LO.2 `Server/RescueService` (new, `--!strict`, Encounter domain): on a Rescue voyage a wreck (planks, keel, broken mast, sail) appears on the shore with a "CASTAWAYS · SAVED" sign; "Carry a castaway" gives the player a castaway on their back (not while carrying oil; oil cannot be grabbed while carrying one); "Bring them inside" at the lit shelter by the lighthouse saves them (+15 crew Shells, a crew notice, bus event `CastawayRescued`). A carrier who falls or leaves drops theirs back at the wreck. At the end (not abandoned): 1 Pearl per 2 saved (claim `<voyage>:rescue:<userId>`) and, when all were saved, the Rescuer's Flag (claim `event:ShipwreckRescue:FlagRescuer`, once per profile). The wreck and shelter are removed at the end.
+- LO.3 `Items.FlagRescuer` (Flag cosmetic, `reward = "event"`, never sold).
+- LO.4 the shop/bag item card's type line is cut before the price (it ran under it); `Client/CodeBox` (new) is the shared code box, used in Settings and now in the BAG ("Codes" section).
+TESTRUNNER (DEV, Play server): **249 passed, 0 failed** (240 + `LiveEventsSpec` 4: window edges, registry both ways, a bad window or an event voyage with an unlock fails, wiring; `RescueSpec` 5: one per carrier and never with oil, drop returns to the wreck, rewards 1 per 2 and the flag only at 8/8, the flag is earned not sold, wiring).
+PLAY TEST (DEV, runtime-only driver for the voyage and keep-alive; prompts used through the client's real ProximityPrompts): Rescue voyage chosen and sailed; the wreck and shelter appeared; 8 castaways carried and brought in (crew Shells 120 → 240); the voyage was won on night 5; then `Grant … source=rescue pearls=4`, `Grant claim=event:ShipwreckRescue:FlagRescuer`, the usual dawn and result Pearls; the wreck was gone afterwards. Found and fixed during the test: the shelter sat inside the tower door's "Repair Tower" prompt range, so the repair prompt won; it now sits 16 studs out. 0 errors (only the expected refused Studio data-store calls).
+MIRROR: 155 scripts in DEV, digest identical to `src/` (1462302e).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-037 flagged
+
+=====================================================================
+LO.5 — READY FOR OWNER TO PUBLISH (DEV experience only)
+=====================================================================
+What is in this build (since your last DEV publish): the Shipwreck Rescue event (until 7 November): a 5-night event voyage on the crew card, a wreck with 8 castaways to carry to the lighthouse, Pearls for rescuing and the Rescuer's Flag for saving all 8; the shop's card labels no longer run under prices; codes can be redeemed from the BAG.
+Before publishing:
+ 1. In the DEV Studio window: File → Save to File As → `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_LO1_2026-10-17.rbxl`.
+ 2. Game Settings → Security → "Enable Studio Access to API Services" stays OFF.
+Publish:
+ 3. File → Publish to Roblox (DEV experience, PlaceId 102473202766620).
+ 4. Creator Hub → Lighthouse Keepers DEV → Servers → Shut down all servers.
+Live checks:
+ 5. On the ship's crew card, "Shipwreck Rescue · 5 nights · event" is offered; pick it and sail.
+ 6. Carry a castaway from the wreck on the shore to the lit shelter by the lighthouse; the crew sees "… brought a castaway to safety (1/8)".
+ 7. Open the BAG: a "Codes" box sits under "Your keeper".
+If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.

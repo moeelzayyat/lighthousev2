@@ -289,6 +289,9 @@ makeSlot(suppliesSection, 1, "Ammo", "Cannon ammo")
 
 -- loadout summary: what your gear adds up to
 local summarySection = UiKit.Section(slotsList, "Your keeper", { layoutOrder = 3, gap = 6 })
+-- LO.4: codes here too, so players who skip the title screen can use them
+local codesSection = UiKit.Section(slotsList, "Codes", { layoutOrder = 4, gap = 6 })
+require(script.Parent:WaitForChild("CodeBox")).build(codesSection, root, 1)
 local summaryRows = {}
 local function summaryRow(order, label)
 	local row = UiKit.new("Frame", { Name = "Summary_" .. order, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 22), LayoutOrder = order }, summarySection)

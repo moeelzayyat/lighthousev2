@@ -10,6 +10,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 local Weapons = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Weapons"))
 local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SoundFx"))
 local Voyages = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Voyages"))
+local LiveEvents = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("LiveEvents")) -- LO.1
 local StatPipeline = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("StatPipeline")) -- S5.7
 local EventLog = require(Server.EventLog)
 local PlayerData = require(Server.PlayerData)
@@ -24,6 +25,8 @@ local VoyageCast = require(Server.VoyageCast)
 local NetGuard = require(Server.NetGuard)
 local OilCarry = require(Server.OilCarry)
 local OrbitService = require(Server.OrbitService) -- S6.3
+local RescueService = require(Server.RescueService) -- LO.2
+local GrantService = require(Server.GrantService)
 
 local Encounter = { Name = "Encounter" }
 
@@ -36,6 +39,10 @@ local function hookOil(ctx)
 	local refs, remotes, stateFolder = ctx.refs, ctx.remotes, ctx.state
 
 	refs.oilPrompt.Triggered:Connect(function(player)
+		if player:GetAttribute("CarryingCastaway") then
+			LampService.notify(player, "Bring the castaway to the shelter first.") -- LO.2
+			return
+		end
 		if OilCarry.has(player) then
 			LampService.notify(player, "You're already carrying oil. Take it to the fuel tank by the lighthouse.")
 			return
@@ -341,6 +348,9 @@ local function hookChoices(ctx)
 		if def.unlock and player:GetAttribute("Unlock_" .. def.unlock) ~= true then
 			return
 		end
+		if def.event and not LiveEvents.isOn(def.event, os.time()) then
+			return -- LO.1: an event voyage only while its event is on
+		end
 		if stateFolder:GetAttribute("VoyageDef") ~= def.id then
 			stateFolder:SetAttribute("VoyageDef", def.id)
 			stateFolder:SetAttribute("TotalNights", def.nights)
@@ -394,6 +404,47 @@ function Encounter.Start(ctx)
 		end,
 		keeper = LampService.getKeeper,
 		damageArea = CreatureService.damageArea,
+	})
+
+	-- LO.2: the Shipwreck Rescue event voyage (a wreck on the shore, castaways carried to the shelter)
+	local refs = ctx.refs
+	local door = refs.folder:FindFirstChild("TowerDoor")
+	local center = Vector3.new(refs.lampPosition.X, 0, refs.lampPosition.Z)
+	local doorAt = if door and door:IsA("BasePart") then Vector3.new(door.Position.X, 0, door.Position.Z) else center + Vector3.new(-12, 0, 0)
+	local out = (doorAt - center).Unit
+	local groundParams = RaycastParams.new()
+	groundParams.FilterType = Enum.RaycastFilterType.Include
+	groundParams.FilterDescendantsInstances = { workspace.Terrain, refs.folder }
+	RescueService.start({
+		subscribe = EventLog.Subscribe,
+		publish = EventLog.Publish,
+		voyageDef = function()
+			return Voyages[ctx.state:GetAttribute("VoyageDef")]
+		end,
+		island = refs.folder,
+		center = center,
+		shelterAt = doorAt + out * 16 + Vector3.new(out.Z, 0, -out.X) * 4, -- clear of the tower door's repair prompt
+		shoreRadius = Config.ISLAND_RADIUS - 6,
+		groundY = function(x, z)
+			local hit = workspace:Raycast(Vector3.new(x, 250, z), Vector3.new(0, -500, 0), groundParams)
+			return if hit then hit.Position.Y else refs.lampPosition.Y - 40
+		end,
+		isCrew = function(player)
+			return player:GetAttribute("Ready") == true
+		end,
+		playerByUserId = function(userId)
+			return Players:GetPlayerByUserId(userId)
+		end,
+		carryingOil = OilCarry.has,
+		notify = LampService.notify,
+		announce = function(text)
+			VoyageCast.fire(ctx.remotes.Notify, text)
+		end,
+		addShells = UpgradeService.addShells,
+		grant = function(player, claimId, rewards, source)
+			return (GrantService.Grant(player, claimId, rewards, source))
+		end,
+		state = ctx.state,
 	})
 
 	-- The round loop runs for the life of the server; it starts once boot has finished (Network last).

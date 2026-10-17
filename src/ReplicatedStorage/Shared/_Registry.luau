@@ -27,6 +27,7 @@ function Registry.catalogs(): Catalogs
 		Specialties = require(Shared:WaitForChild("Definitions"):WaitForChild("Specialties")) :: any, -- S7.4
 		Cosmetics = require(Shared:WaitForChild("Definitions"):WaitForChild("Cosmetics")) :: any, -- B1.1
 		Codes = require(Shared:WaitForChild("Definitions"):WaitForChild("Codes")) :: any, -- L1.4
+		LiveEvents = require(Shared:WaitForChild("Definitions"):WaitForChild("LiveEvents")) :: any, -- LO.1
 		Events = require(Shared:WaitForChild("Events")) :: any,
 	}
 end
@@ -271,7 +272,7 @@ RULES.Items = function(c, Items, all)
 			c.add(w, "needs a price (or starter = true, or reward = how it is earned)")
 		end
 		if item.reward ~= nil then -- S7.5: earned, never sold
-			c.oneOf(w .. ".reward", item.reward, { "invite", "code", "supporter" })
+			c.oneOf(w .. ".reward", item.reward, { "invite", "code", "supporter", "event" })
 			if item.price ~= nil then
 				c.add(w, "is a reward, so it has no price")
 			end
@@ -390,7 +391,7 @@ RULES.Upgrades = function(c, Upgrades)
 	end
 end
 
-RULES.Voyages = function(c, Voyages)
+RULES.Voyages = function(c, Voyages, all)
 	c.order("Voyages.ORDER", Voyages.ORDER, Voyages)
 	if type(Voyages.DEFAULT) ~= "string" or type(Voyages[Voyages.DEFAULT]) ~= "table" then
 		c.add("Voyages.DEFAULT", "must name a defined voyage")
@@ -427,6 +428,29 @@ RULES.Voyages = function(c, Voyages)
 		if v.unlock ~= nil and not grants[v.unlock] then
 			c.add(w .. ".unlock", "no voyage grants " .. tostring(v.unlock))
 		end
+		if v.rescue ~= nil then -- LO.2: castaways to carry; the reward item is earned in an event, never sold
+			if type(v.rescue) ~= "table" then
+				c.add(w .. ".rescue", "must be a table")
+			else
+				c.num(w .. ".rescue.castaways", v.rescue.castaways, 1, 12, true)
+				c.num(w .. ".rescue.shells", v.rescue.shells, 0, 50, true)
+				if v.rescue.reward ~= nil then
+					local item = if type(all.Items) == "table" then all.Items[v.rescue.reward] else nil
+					if type(item) ~= "table" or item.kind ~= "Cosmetic" or item.reward ~= "event" then
+						c.add(w .. ".rescue.reward", "must be a cosmetic earned in an event (reward = \"event\")")
+					end
+				end
+			end
+		end
+		if v.event ~= nil then -- LO.1: an event voyage names its event, which names it back; no unlock
+			local ev = if type(all.LiveEvents) == "table" then all.LiveEvents[v.event] else nil
+			if type(ev) ~= "table" or ev.voyage ~= id then
+				c.add(w .. ".event", "must name a live event whose voyage is " .. id)
+			end
+			if v.unlock ~= nil then
+				c.add(w, "is an event voyage, so it needs no unlock")
+			end
+		end
 		c.bool(w .. ".endless", v.endless, true)
 		c.bool(w .. ".testOnly", v.testOnly, true)
 		if v.testOnly and table.find(Voyages.ORDER or {}, id) then
@@ -435,6 +459,33 @@ RULES.Voyages = function(c, Voyages)
 	end
 	if type(Voyages.DEFAULT) == "string" and type(Voyages[Voyages.DEFAULT]) == "table" and Voyages[Voyages.DEFAULT].unlock ~= nil then
 		c.add("Voyages.DEFAULT", "must not need an unlock")
+	end
+end
+
+-- LO.1: live events: a window in server time (start before end, whole seconds) and an optional voyage
+RULES.LiveEvents = function(c, LiveEvents, all)
+	c.order("LiveEvents.ORDER", LiveEvents.ORDER, LiveEvents)
+	for id, ev in c.defs(LiveEvents) do
+		local w = "LiveEvents." .. id
+		if ev.id ~= id then
+			c.add(w .. ".id", "must equal its key, got " .. tostring(ev.id))
+		end
+		c.str(w .. ".displayName", ev.displayName)
+		c.str(w .. ".blurb", ev.blurb)
+		c.num(w .. ".starts", ev.starts, 1.7e9, 4e9, true)
+		c.num(w .. ".ends", ev.ends, 1.7e9, 4e9, true)
+		if type(ev.starts) == "number" and type(ev.ends) == "number" and ev.ends <= ev.starts then
+			c.add(w .. ".ends", "must come after starts")
+		end
+		if ev.voyage ~= nil then
+			local v = if type(all.Voyages) == "table" then all.Voyages[ev.voyage] else nil
+			if type(v) ~= "table" or v.event ~= id then
+				c.add(w .. ".voyage", "must name a voyage whose event is " .. id)
+			end
+		end
+		if not table.find(LiveEvents.ORDER or {}, id) then
+			c.add(w, "is not listed in LiveEvents.ORDER")
+		end
 	end
 end
 

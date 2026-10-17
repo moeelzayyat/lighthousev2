@@ -226,6 +226,15 @@ Purpose: real players answer whether the loop retains, before content work.
 
 Floor: biweekly, announced. Scaling trigger for a shared harbor: `architecture.md` §4.4.
 
+### LO cycle 1 (2026-10-17, built in DEV ahead of the production relaunch, on the owner's word "keep going into the plan ahead")
+| ID | Substage | Deliverables | Passes when | Verify |
+|---|---|---|---|---|
+| LO.1 ✅ | Event windows | `Definitions/LiveEvents` (server-time windows); an event voyage offered on the crew card, by ChooseVoyage and at departure only while its event is on | Window edges tested; registry checks events and voyages both ways | TestRunner |
+| LO.2 ✅ | Shipwreck Rescue | `Rescue` voyage (5 nights, event `ShipwreckRescue`); `RescueService`: a wreck with 8 castaways, carried one at a time to a shelter; Shells per rescue; 1 Pearl per 2 saved | Count, drop and rewards tested; a full Rescue voyage played | TestRunner + play test |
+| LO.3 ✅ | Event cosmetic | Rescuer's Flag (`reward = "event"`), given once when every castaway is saved | Granted once at the end of a won voyage | Play test |
+| LO.4 ✅ | Small fixes | Shop card type line no longer runs under the price; the code box also in the BAG | Seen in Studio | Play test |
+| LO.5 🟦 | Publish (owner) | Package in HANDOFF_REPORT.md | Live check | Owner |
+
 ---
 
 ## 13. Risk register

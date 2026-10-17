@@ -15,6 +15,7 @@ local EventLog = require(script.Parent.EventLog)
 local VoyageCast = require(script.Parent.VoyageCast)
 local Forecasts = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Forecasts"))
 local Voyages = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Voyages")) -- S2.1
+local LiveEvents = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("LiveEvents")) -- LO.1
 local WaveDirector = require(script.Parent.WaveDirector) -- pure night plan (R1.2)
 local Voyage = require(script.Parent.Voyage) -- pure Pearl rules (R1.2)
 local DawnBanking = require(script.Parent.DawnBanking) -- S2.2: Pearls banked at each dawn
@@ -487,6 +488,9 @@ function GameState.run(deps)
 					if not allowed then
 						def = Voyages[Voyages.DEFAULT]
 					end
+				end
+				if def.event and not LiveEvents.isOn(def.event, os.time()) then
+					def = Voyages[Voyages.DEFAULT] -- LO.1: the event ended while the crew was choosing
 				end
 				-- S3.1b: a crew sailing the default sails Endless Storm when its tested members are all in that arm
 				if def.id == Voyages.DEFAULT then

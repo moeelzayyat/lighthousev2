@@ -221,6 +221,11 @@ end
 -- S2.1: once any crew member holds the Long Voyage unlock (a Standard win) the card offers the voyage choice;
 -- only holders can switch to the Long Voyage, everyone sees which one is picked. The server checks again.
 local Voyages = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Voyages"))
+local LiveEvents = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("LiveEvents")) -- LO.1
+-- LO.1: an event voyage is offered to everyone while its event is on (server time)
+local function eventOn(def)
+	return def.event ~= nil and LiveEvents.isOn(def.event, Workspace:GetServerTimeNow())
+end
 local voyageBox = UiKit.new("Frame", { Name = "VoyageChoice", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = 3, Visible = false }, crewBody)
 UiKit.list(voyageBox, "y", 6)
 UiKit.Label(voyageBox, "Voyage", "Eyebrow", { LayoutOrder = 0 })
@@ -245,6 +250,9 @@ local function renderVoyageChoice(crew)
 				end
 			end
 		end
+		if eventOn(def) then
+			offered = true
+		end
 	end
 	voyageBox.Visible = offered
 	if not offered then
@@ -254,6 +262,7 @@ local function renderVoyageChoice(crew)
 	for id, button in voyageButtons do
 		local def = Voyages[id]
 		local mine = def.unlock == nil or player:GetAttribute("Unlock_" .. def.unlock) == true
+		button.Visible = def.event == nil or eventOn(def) -- LO.1: an event voyage only while its event is on
 		local selected = chosen == id
 		button.BackgroundColor3 = if selected then C.AccentLighthouse else C.SurfaceElevated
 		button.TextColor3 = if selected then C.TextOnAccent elseif mine then C.TextPrimary else C.TextSecondary

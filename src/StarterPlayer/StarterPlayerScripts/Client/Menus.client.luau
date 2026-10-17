@@ -853,12 +853,7 @@ local resetButton = UiKit.Button(settingsActions, "Reset", { name = "ResetButton
 local doneButton = UiKit.Button(settingsActions, "Done", { name = "DoneButton", variant = "primary", width = 130, layoutOrder = 2 })
 
 local DEFAULTS = { SFX = 1, Ambience = 1, LowEffects = false }
-local codeReadyAt = 0 -- L1.4: the server takes one code every 10 s
-remotes:WaitForChild("CodeResult").OnClientEvent:Connect(function(ok, message)
-	if type(message) == "string" then
-		UiKit.Toast(root, message, if ok then "success" else "warning")
-	end
-end)
+local CodeBox = require(script.Parent:WaitForChild("CodeBox")) -- L1.4/LO.4: the shared code box
 local dialogOpen = false
 local firstControl
 
@@ -928,41 +923,7 @@ local function buildSettings()
 		controlWidth = controlWidth,
 		last = true,
 	})
-	UiKit.list(codeSlot, "x", 8, { VerticalAlignment = Enum.VerticalAlignment.Center })
-	local style = UiKit.Label(codeSlot, "", "Body")
-	local codeBox = new("TextBox", {
-		Name = "CodeBox",
-		BackgroundColor3 = C.SurfaceBase,
-		BorderSizePixel = 0,
-		Size = UDim2.new(1, -118, 1, 0),
-		FontFace = style.FontFace,
-		TextSize = style.TextSize,
-		TextColor3 = C.TextPrimary,
-		PlaceholderColor3 = C.TextMuted,
-		PlaceholderText = "Type a code",
-		Text = "",
-		ClearTextOnFocus = false,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		LayoutOrder = 1,
-	}, codeSlot)
-	style:Destroy()
-	UiKit.round(codeBox, 8)
-	UiKit.border(codeBox, C.BorderStructural, 1, 0.2)
-	UiKit.pad(codeBox, 0, 10, 0, 10)
-	local redeem = UiKit.Button(codeSlot, "Redeem", { name = "RedeemButton", variant = "secondary", width = 110, layoutOrder = 2 })
-	redeem.Activated:Connect(function()
-		local text = codeBox.Text
-		if string.gsub(text, "%s", "") == "" then
-			UiKit.Toast(root, "Type a code first.", "info")
-			return
-		end
-		if os.clock() < codeReadyAt then
-			UiKit.Toast(root, "One code every 10 seconds. Try again in a moment.", "info")
-			return
-		end
-		codeReadyAt = os.clock() + 10
-		remotes.CodeRedeem:FireServer(text)
-	end)
+	CodeBox.build(codeSlot, root, 1)
 end
 
 local function isDefault()

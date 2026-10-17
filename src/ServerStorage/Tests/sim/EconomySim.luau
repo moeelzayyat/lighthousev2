@@ -19,6 +19,7 @@ EconomySim.SOURCES = {
 	invite = "an item (the Shared Lantern), no Pearls",
 	code = "a promo code's Pearls, once per profile (Definitions/Codes; finite)",
 	robux = "a Robux receipt: a cosmetic item, no Pearls (L1.3)",
+	rescue = "Shipwreck Rescue event voyage: 1 Pearl per 2 castaways saved (at most 4 a voyage) and the event flag once (LO.2)",
 }
 
 export type Model = {
