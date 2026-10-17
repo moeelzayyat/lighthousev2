@@ -22,8 +22,12 @@ Every asset, package and audio ID used in the place, recorded before it ships.
 | Thumbnail 1 — Brute burn | "BURN THE BRUTE" | `thumbnails/thumb_1_brute_burn.png` | | made S2.7, not uploaded |
 | Thumbnail 2 — clutch refuel | "1% FUEL. RUN!" | `thumbnails/thumb_2_clutch_refuel.png` | | made S2.7, not uploaded |
 | Thumbnail 3 — crew of four | "KEEP THE LIGHT TOGETHER" | `thumbnails/thumb_3_crew_of_four.png` | | made S2.7, not uploaded |
+| Icon (final) | A, more contrast + vignette | `icons/icon_final_A.png` | | made L1.5 (2026-10-17), not uploaded |
+| Thumbnail 4 — seven nights | "SURVIVE 7 NIGHTS" | `thumbnails/thumb_4_seven_nights.png` | | made L1.5, not uploaded |
+| Thumbnail 5 — new monsters | "NEW MONSTERS EVERY NIGHT" | `thumbnails/thumb_5_new_monsters.png` | | made L1.5, not uploaded |
+| Trailer | 29.5 s, 1920 × 1080, no sound | `store/trailer_30s.mp4` | | made L1.5, not uploaded |
 
-All five are Studio screen captures of the DEV build (project-built island, lighthouse, characters and creatures; staged with runtime-only scripts), cropped and captioned with Windows fonts Impact and Georgia Bold rendered into the image (no font file is shipped). Owner's own work; no third-party licence. Title and description text: `store/STORE_PAGE.md`.
+L1.5: the two new thumbnails and the trailer's new shots are DEV Studio captures (night and day, staged with runtime-only scripts: a scripted camera, HUD hidden, monsters spawned with `CreatureService.spawn`); the trailer is made from those and the S2.7 captures with Python (Pillow) and ffmpeg, captions in Impact and Georgia Bold, no music. All five S2.7 files are Studio screen captures of the DEV build (project-built island, lighthouse, characters and creatures; staged with runtime-only scripts), cropped and captioned with Windows fonts Impact and Georgia Bold rendered into the image (no font file is shipped). Owner's own work; no third-party licence. Title and description text: `store/STORE_PAGE.md`.
 
 ## Rules
 - Nothing purchased without owner approval. Free Creator Store models only with the licence checked and recorded.

@@ -43,7 +43,7 @@ A stage exits when every substage is ✅ and its exit numbers are recorded. **GO
 | S6 | Content (owner's six requests) | 7 | 4–5 | Standard | 🟦 |
 | S7 | Return systems | 6 | 2 | Standard | 🟦 |
 | B1 | **Closed beta** | 6 | 3 | **GO/NO-GO** | 🟦 |
-| L1 | Relaunch | 7 | 2 | Checklist | 🟨 |
+| L1 | Relaunch | 7 | 2 | Checklist | 🟦 |
 | LO | Live operations | ongoing | — | Cadence | ⬜ |
 
 ---
@@ -208,9 +208,9 @@ Purpose: real players answer whether the loop retains, before content work.
 | L1.2 ✅ | Data audit | Migration chain on all fixtures; rollback drill | Rollback restores | TestRunner |
 | L1.3 🟦 | Monetization (owner approval) | Enable cosmetic products; supporter pack; `ProcessReceipt` idempotent | Test purchases; duplicate receipt once | Studio |
 | L1.4 🟦 | Codes | `CodeService`; creator codes with a cosmetic | Once per profile | TestRunner |
-| L1.5 | Store final | Winning icon polished; 5 thumbnails; 30-s trailer; description | Uploaded | Dashboard |
-| L1.6 | Community | Discord; support macro (inspect/grant/rollback); creator list (20+) | Written | Document |
-| L1.7 | Release checklist | Restore point `L1 RC`; rollback steps; on-call window; **owner publishes** | Signed | Owner |
+| L1.5 🟦 | Store final | Winning icon polished; 5 thumbnails; 30-s trailer; description | Uploaded | Dashboard |
+| L1.6 🟦 | Community | Discord; support macro (inspect/grant/rollback); creator list (20+) | Written | Document |
+| L1.7 🟦 | Release checklist | Restore point `L1 RC`; rollback steps; on-call window; **owner publishes** | Signed | Owner |
 
 ---
 

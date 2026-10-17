@@ -996,3 +996,35 @@ MIRROR: 148 scripts in DEV, digest identical to `src/` (a9e5eed3).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-034 flagged
 OWNER STEPS (when you want them): for each creator, ask Claude to add a row to `Definitions/Codes` with their code; announce LIGHTHOUSE with the relaunch.
 NEXT: L1.5 store final (art; uploading is the owner's), L1.6 community documents, L1.7 release checklist.
+
+CHECKPOINT: L1.5 Store final — 🟦 (uploading is the owner's)
+DATE: 2026-10-17
+BUILT: `assets/icons/icon_final_A.png` (512²); `assets/thumbnails/thumb_4_seven_nights.png` and `thumb_5_new_monsters.png` (1920 × 1080; with S2.7's three, five in all); `assets/store/trailer_30s.mp4` (29.5 s, 1920 × 1080, 30 fps, H.264, 7.6 MB, no sound; eight captioned shots, push-ins and crossfades); `assets/store/STORE_PAGE.md` (order of thumbnails, the new 876-character description). New shots were captured in a DEV play test (scripted camera, HUD hidden, monsters spawned by runtime-only scripts, all removed by Stop). D-035.
+OWNER STEPS: Creator Hub → the experience → Places/Store page: upload the icon, the five thumbnails in the STORE_PAGE order, the description; optionally the trailer (add music first if it will be a video ad).
+
+CHECKPOINT: L1.6 Community — 🟦 (Discord set-up and creator names are the owner's)
+BUILT: `docs/COMMUNITY.md`: Discord channels, roles and moderation; the pinned bug template; the support macro (inspect → decide → rollback or grant → record → reply) on the R1.8 admin channel; creator codes; who to look for and a message template for 20+ creators.
+
+=====================================================================
+L1.7 — READY FOR OWNER: RELAUNCH CHECKLIST (production; the owner publishes)
+=====================================================================
+This moves the rebuilt game from the DEV experience to production (PlaceId 132065051336560). Claude has not touched production. Do it only after the DEV build has been published and played (S7.6 package, B1.5 testers) and you are happy with it.
+Before:
+ 1. In the DEV Studio window: File → Save to File As → `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_L1RC_2026-10-17.rbxl` (the restore point "L1 RC" is set in DEV).
+ 2. Production rollback copy: Creator Hub → production experience → Places → the place → Version History: note the current version number (that version is the rollback target).
+ 3. Game Settings (DEV window) → Security → "Enable Studio Access to API Services" stays OFF.
+ 4. Decide L1.3 (Robux cosmetics). If not approved, nothing is sold; that is fine for the relaunch.
+ 5. Saves: production players start fresh on `LighthouseKeepers_PlayerData_v2` (D-012); the old `…_v1` store stays untouched as a frozen copy.
+Publish:
+ 6. In the DEV Studio window: File → Publish to Roblox As… → choose the production experience "Lighthouse Keepers" (PlaceId 132065051336560) → Overwrite. (This publishes the DEV place file into the production place.)
+ 7. Creator Hub → production experience → Servers → Shut down all servers.
+ 8. Upload the L1.5 store files to the production experience; set the title (STORE_PAGE.md, A).
+ 9. Game Settings → Places → max players 4 (one crew per server, D-001) if not already.
+Live checks (30 minutes, on-call window):
+ 10. Join production: the title screen (or the first voyage for a new account) appears; Pearls show 0 (fresh start).
+ 11. Sail a voyage to night 1, leave, rejoin: the dawn Pearl is still there.
+ 12. Redeem LIGHTHOUSE in Settings → Codes: +10 Pearls; again → "You already used that code."
+ 13. After a survived night: the harbor board shows you within a minute.
+ 14. Creator Hub → Analytics → Errors: no new error with more than a handful of hits.
+If something is wrong: Creator Hub → production place → Version History → restore the version noted in step 2 → Shut down all servers. Then tell Claude what you saw.
+After: post the changelog in Discord (#changelog), announce LIGHTHOUSE, and tell Claude "relaunched" so live ops (stage LO) can start: daily error triage for 30 days, the weekly update cadence (docs/LIVEOPS_PLAYBOOK.md).
