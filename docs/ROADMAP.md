@@ -40,7 +40,7 @@ A stage exits when every substage is ✅ and its exit numbers are recorded. **GO
 | S3 | **Public test** | 6 | 2–3 live | **GO/NO-GO** | 🟨 provisional GO (D-018); live test on DEV (D-016) not started |
 | S4 | Performance & mobile | 7 | 2 | Numeric | 🟨 |
 | S5 | Domain split & UI refactor | 8 | 2–3 | Standard | 🟦 |
-| S6 | Content (owner's six requests) | 7 | 4–5 | Standard | 🟨 |
+| S6 | Content (owner's six requests) | 7 | 4–5 | Standard | 🟦 |
 | S7 | Return systems | 6 | 2 | Standard | ⬜ |
 | B1 | **Closed beta** | 6 | 3 | **GO/NO-GO** | ⬜ |
 | L1 | Relaunch | 7 | 2 | Checklist | ⬜ |
@@ -164,7 +164,7 @@ Purpose: real players answer whether the loop retains, before content work.
 | S6.4 🟦 | Quartermaster boosts & gear | Permanent capped boosts (+15% total cap), 2 new weapons, 1 armor; new profile fields with defaults | Migration fixture; cap test | TestRunner |
 | S6.5 🟦 | New monsters ×3 | Spitter Eel, Puffer Mine, Ghost Lantern: telegraph ≥ 0.6 s, sound, loot table | Blind tester identifies each behaviour; budgets hold | Blind test |
 | S6.6 🟦 | New monsters ×2 | Tide Witch, Coral Shaman | same | Blind test |
-| S6.7 | Publish (owner) + playtest | Prototype B session | Rematch ≥ 60% maintained | Owner |
+| S6.7 🟦 | Publish (owner) + playtest | Prototype B session | Rematch ≥ 60% maintained | Owner |
 
 **S6 exit:** all six requests Implemented and Tested in the registry. → S7.1.
 

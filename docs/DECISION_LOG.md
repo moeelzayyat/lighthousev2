@@ -181,3 +181,4 @@ Taken: Tide Witch (45 HP; stops on the beach 40 studs from the tower and, every 
 ## CP — S6.4 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · boosts capped at +15% (cap test), migration fixture, 2 weapons + 1 armor; D-022 timestamp fix; TestRunner 177/177
 ## CP — S6.5 passed (🟦 blind test, Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 3 monsters with telegraphs 0.75–1.00 s measured; 45-creature mix at 9.6 KB/s, 60 FPS; TestRunner 182/182
 ## CP — S6.6 passed (🟦 blind test, Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · Tide Witch summons, Coral Shaman mends; telegraphs 0.75–1.08 s measured; 45-creature mix at 9.6 KB/s, 60 FPS; TestRunner 182/182
+## CP — S6.7 publish package written (🟦, waits for the owner's DEV publish and the Prototype B session) · 2026-10-17 · DEV only · S6 exit: all six requests Tested

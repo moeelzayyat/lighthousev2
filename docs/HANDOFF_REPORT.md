@@ -772,3 +772,25 @@ NOT TESTED HERE: the blind test; the night schedule live (unit-tested).
 MIRROR: 124 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (9f61386e).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); numbers D-024 flagged
 NEXT: S6.7 publish package (owner), then S7.1 Logbook.
+
+=====================================================================
+S6.7 — READY FOR OWNER TO PUBLISH (DEV experience only)
+=====================================================================
+What is in this build (since the S5.8 package): S6.1–S6.6, the owner's six requests. Boss nights bring one big monster per crew member; the Trader sells voyage-only items by day (boosts, heal, oil, tower shield, Orbiting Blades); the Quartermaster sells permanent boosts (capped at +15% together), the Coral Lance, Tidecaller Blades and the Kelpweave Vest; five new monsters arrive from night 2 on (Spitter Eel, Puffer Mine, Ghost Lantern, Tide Witch, Coral Shaman), each warning before its move. Also a save fix: saved timestamps no longer reset on every join (D-022). If S2.8, S4.7 or S5.8 were not published yet, this one package covers them all: publish once.
+New numbers to review (all recommendations, logged): D-019 merchant prices, D-020 Orbiting Blades, D-021 boosts and gear, D-023 and D-024 monsters.
+S6 exit: all six requests are Tested in `docs/SYSTEM_REGISTRY.md` ✓ · TestRunner 182 · Script Analysis warnings: not measured (owner item).
+Before publishing:
+ 1. In the DEV Studio window: File → Save to File As → `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_S6_2026-10-17.rbxl` (the new item models live only in the place file).
+ 2. Game Settings → Security → "Enable Studio Access to API Services" stays OFF.
+ 3. Optional, 1 minute: View → Script Analysis, tick "Show warnings", note the warning count for `ServerScriptService.Server` and `StarterPlayerScripts.Client`.
+Publish:
+ 4. File → Publish to Roblox (DEV experience, PlaceId 102473202766620; production is not touched).
+ 5. Creator Hub → Lighthouse Keepers DEV → Servers → Shut down all servers.
+Live checks (Prototype B session, about 30 minutes, with friends if you can):
+ 6. Quartermaster: the Boosts tab shows three boosts and stops at +15%; the Coral Lance, Tidecaller Blades and Kelpweave Vest are on the shelves.
+ 7. A voyage to night 4 or further: on day 1 the Trader sheet lists the island stock; buy something and see it work; from night 2 an eel's green ring shows where it will spit; from night 3 puffers swell before they burst; night 4 is a boss night (one boss per crew member) and the first Tide Witch.
+ 8. With 2–4 players: the number of bosses on a boss night matches the crew.
+ 9. Play again after Results (the S6 pass mark is rematch ≥ 60% of crews; the Results screen's "Sail again" count is in the run summaries).
+ 10. Tell Claude: anything confusing or broken, whether each new monster's move was clear without being told (that is the blind test for S6.5/S6.6), phone FPS on the busiest night, and the Script Analysis count.
+If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.
+Claude's state: S6.7 set to 🟦; work continues with S7.1 (Logbook).
