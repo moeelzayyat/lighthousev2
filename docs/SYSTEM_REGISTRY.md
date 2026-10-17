@@ -38,7 +38,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Crew feed + lamp flare | Released | — | |
 | Lamp shift | Released (untested 2+) | S3 | |
 | Invites (unrewarded) | Released | S7.5 | reward |
-| Leaderboards | Planned | S7.3 | |
+| Leaderboards | Tested in Studio (not yet published; live ordered stores untested) | S7.3 | `Definitions/Leaderboards` + `LeaderboardService` (LiveOps, bus only): best night Standard / Long, nights this week (new store each Monday 00:00 UTC); a board on the harbor island; written and re-read every 30 s; Studio uses a memory store; `LeaderboardsSpec` 4 tests |
 | Endless Storm (mode test arm) | Tested (not yet published) | S3.1b | test-only voyage; `ModeTest` 50/50 split of new accounts by UserId hash (D-017); flag `MODE_TEST_ENABLED` |
 | Specialties | Planned | S7.4 | |
 | Controller beam aim | Tested (not yet published; controller voyage pending, owner) | S2.6 | right stick aims (left too at the lamp), Y Focus, B Leave; `InputController.stickAngle` |

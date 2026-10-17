@@ -207,6 +207,47 @@ function LobbyBuilder.build(islandRefs)
 	counter.CFrame = shopFacing * CFrame.new(0, 2.5, -3)
 	counter.Parent = lobby
 
+	-- S7.3: the leaderboard board across the path from the stall, facing the path (LeaderboardService fills it)
+	local boardBase = Vector3.new(-shopXZ.X, Ground.heightAt(-shopXZ.X, shopXZ.Z), shopXZ.Z)
+	local boardCenter = boardBase + Vector3.new(0, 5.5, 0)
+	local board = makePart("LeaderboardBoard", Vector3.new(13, 7.5, 0.6), CFrame.lookAt(boardCenter, Vector3.new(0, boardCenter.Y, shopXZ.Z)), Color3.fromRGB(70, 50, 35), Enum.Material.Wood, lobby)
+	for _, side in { -1, 1 } do
+		makePart("BoardPost", Vector3.new(0.6, 9.5, 0.6), board.CFrame * CFrame.new(side * 6.2, -1, 0.5), Color3.fromRGB(90, 62, 40), Enum.Material.Wood, lobby)
+	end
+	local surface = Instance.new("SurfaceGui")
+	surface.Name = "Boards"
+	surface.Face = Enum.NormalId.Front
+	surface.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	surface.PixelsPerStud = 50
+	surface.LightInfluence = 0
+	surface.Parent = board
+	for i, id in { "BestNightStandard", "BestNightLong", "WeeklyNights" } do
+		local column = Instance.new("Frame")
+		column.Name = id
+		column.BackgroundTransparency = 1
+		column.Position = UDim2.new((i - 1) / 3, 8, 0, 8)
+		column.Size = UDim2.new(1 / 3, -16, 1, -16)
+		column.Parent = surface
+		local list = Instance.new("UIListLayout")
+		list.SortOrder = Enum.SortOrder.LayoutOrder
+		list.Padding = UDim.new(0, 2)
+		list.Parent = column
+		for row = 0, 10 do
+			local label = Instance.new("TextLabel")
+			label.Name = if row == 0 then "Title" else "Row" .. row
+			label.LayoutOrder = row
+			label.BackgroundTransparency = 1
+			label.Size = UDim2.new(1, 0, 0, if row == 0 then 40 else 28)
+			label.Font = if row == 0 then Enum.Font.FredokaOne else Enum.Font.GothamMedium
+			label.TextSize = if row == 0 then 24 else 19
+			label.TextColor3 = if row == 0 then Color3.fromRGB(255, 220, 140) else Color3.fromRGB(245, 235, 215)
+			label.TextXAlignment = Enum.TextXAlignment.Left
+			label.TextTruncate = Enum.TextTruncate.AtEnd
+			label.Text = if row == 0 then "..." else ""
+			label.Parent = column
+		end
+	end
+
 	return {
 		folder = lobby,
 		spawn = spawn,
@@ -214,6 +255,7 @@ function LobbyBuilder.build(islandRefs)
 		boardingZone = boardingZone,
 		islandArrival = arrival,
 		deckCenter = middle,
+		leaderboard = board, -- S7.3
 	}
 end
 

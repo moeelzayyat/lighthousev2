@@ -824,3 +824,19 @@ NOT BUILT: a HUD line or menu card for the objective (attributes and notices onl
 MIRROR: 130 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (8e42701f).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); pool and rewards D-026 flagged
 NEXT: S7.3 Leaderboards.
+
+CHECKPOINT: S7.3 Leaderboards — 🟦 (the live ordered data stores can only be checked after the owner publishes DEV; Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S7.3_before_2026-10-17 (LobbyBuilder, LiveOps, _Registry) · restore point "S7.3 passed"
+BUILT:
+- `Shared/Definitions/Leaderboards` (new): three boards, top 10, a 30 s flush, `weekIndex` (weeks start Monday 00:00 UTC) and `storeName` (the weekly board's store name carries the week). `_Registry` checks it.
+- `Server/LeaderboardService` (new, `--!strict`, LiveOps domain): NightSurvived raises each crew member's best night on the voyage being sailed and adds a night to their week; every 30 s it writes what is pending and re-reads every board.
+- LiveOps: ordered data stores in live servers (UpdateAsync keeps the higher night, IncrementAsync adds nights, GetSortedAsync reads the top 10, all in pcall), an in-memory store in Studio, display names cached.
+- LobbyBuilder: a wooden board with three columns across the path from the Quartermaster's stall (D-027).
+TESTRUNNER (DEV, Play server): **197 passed, 0 failed** (193 + new `LeaderboardsSpec` 4: registry clean; the weekly store name holds from Monday 00:00 to Sunday 23:59:59 and changes on the next Monday; a survived night shows only after the flush and the flush runs at least every 30 s; a lower night never lowers a best; a new week starts the weekly board empty while best nights stay; wiring).
+PLAY TEST (DEV, owner's account; Studio memory store; runtime-only TEMPTEST script): a survived night put on the bus for the player showed on the harbor board **19.7 s** later ("Best night: Standard 1. Lighthouse8282 3", "Nights this week 1. Lighthouse8282 1", Long "No one yet. Be the first!"); the board was seen in a screenshot. 0 script errors. Play stopped; 0 TEMPTEST scripts remain.
+NOT TESTED HERE: the live ordered data stores (Studio never writes them). After publishing DEV: survive a night, wait a minute, and check the board on the harbor island; on Monday 00:00 UTC the weekly column should start empty.
+MIRROR: 133 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (1a7cc08d).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-027 flagged
+NEXT: S7.4 Specialties.

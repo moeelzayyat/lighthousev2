@@ -23,6 +23,7 @@ function Registry.catalogs(): Catalogs
 		Boosts = require(Shared:WaitForChild("Definitions"):WaitForChild("Boosts")) :: any, -- S6.4
 		Logbook = require(Shared:WaitForChild("Definitions"):WaitForChild("Logbook")) :: any, -- S7.1
 		Objectives = require(Shared:WaitForChild("Definitions"):WaitForChild("Objectives")) :: any, -- S7.2
+		Leaderboards = require(Shared:WaitForChild("Definitions"):WaitForChild("Leaderboards")) :: any, -- S7.3
 		Events = require(Shared:WaitForChild("Events")) :: any,
 	}
 end
@@ -540,6 +541,25 @@ RULES.Objectives = function(c, Objectives)
 		c.num(w .. ".target", def.target, 1, 1000, true)
 		c.num(w .. ".reward", def.reward, 0, 20, true)
 		c.bool(w .. ".reach", def.reach, true)
+	end
+end
+
+-- S7.3: the harbor boards
+RULES.Leaderboards = function(c, Leaderboards)
+	c.order("Leaderboards.ORDER", Leaderboards.ORDER, Leaderboards)
+	c.num("Leaderboards.TOP", Leaderboards.TOP, 1, 10, true)
+	c.num("Leaderboards.FLUSH_SECONDS", Leaderboards.FLUSH_SECONDS, 5, 60)
+	for id, def in c.defs(Leaderboards) do
+		local w = "Leaderboards." .. id
+		if def.id ~= id then
+			c.add(w .. ".id", "must equal its key, got " .. tostring(def.id))
+		end
+		c.str(w .. ".title", def.title)
+		c.str(w .. ".store", def.store)
+		c.oneOf(w .. ".kind", def.kind, { "best", "weekly" })
+		if def.kind == "best" then
+			c.oneOf(w .. ".voyage", def.voyage, { "Standard", "Long", "Endless" })
+		end
 	end
 end
 
