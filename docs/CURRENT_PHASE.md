@@ -17,7 +17,7 @@ None for Claude until the owner acts. When the owner publishes DEV or production
 - L1.7: the relaunch checklist at the end of `docs/HANDOFF_REPORT.md` ("L1.7 — READY FOR OWNER"); save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_L1RC_2026-10-17.rbxl` first.
 - L1.5: upload the icon, five thumbnails, description (and optionally the trailer) from `assets/`.
 - L1.6: set up Discord (docs/COMMUNITY.md) and fill in the creator list.
-- L1.3 (approved; built): create the 12 developer products (list in the L1.3 record, HANDOFF_REPORT.md), send Claude the ids, and say "switch on Robux sales" (or set `ROBUX_ENABLED = true` yourself).
+- L1.3 (approved; built; selling switch on since 2026-10-17): create the 12 developer products (list in the L1.3 record, HANDOFF_REPORT.md) and send Claude the ids; nothing is on sale until they are filled in.
 - B1.4: 4-client Studio run; two phones on a night-7 swarm; the live server memory graph after publishing DEV.
 - B1.5: invite 30–100 testers after the DEV publish.
 - B1.1: create the developer products listed in the B1.1 record (HANDOFF_REPORT.md) when you want them, and send Claude the ids; nothing is enabled. D-030 to review.

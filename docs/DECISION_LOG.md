@@ -237,3 +237,4 @@ Owner (project chat, 2026-10-17 13:17 UTC): "Approve L1.3". Taken: housings, coa
 ## CP — L1.6 community written (🟦 the owner sets up Discord and fills the creator list) · 2026-10-17 · docs/COMMUNITY.md
 ## CP — L1.7 release checklist written (🟦 READY FOR OWNER: production relaunch) · 2026-10-17 · restore point "L1 RC" in DEV
 ## CP — L1.3 built and tested in DEV (🟦 product ids, the switch, a real test purchase) · 2026-10-17 · owner approved L1.3 · TestRunner 240/240
+## Robux selling switch on · 2026-10-17 16:05 UTC · owner in the thread: "switch on Robux sales" · `ROBUX_ENABLED = true` in DEV; nothing is on sale until the developer product ids are filled in · TestRunner 240/240

@@ -6,13 +6,14 @@
 -- does not exist yet, so that item is not offered for Robux. _Registry refuses anything here that is not a cosmetic
 -- and any field that is not a price or a product id. PurchaseService grants a bought item through GrantService,
 -- once per receipt. Prices: D-030, D-036.
--- ROBUX_ENABLED is the one switch for selling with Robux. It stays false until the owner sets it (or tells Claude
--- to) once the developer products exist; while it is false no purchase is prompted and no receipt is granted.
+-- ROBUX_ENABLED is the one switch for selling with Robux; while it is false no purchase is prompted and no receipt
+-- is granted. The owner switched it on in the thread on 2026-10-17 ("switch on Robux sales"); an item is still only
+-- for sale once its productId is set.
 
 export type Product = { robux: number, productId: number }
 
 local Cosmetics = {
-	ROBUX_ENABLED = false,
+	ROBUX_ENABLED = true,
 	ORDER = {
 		"BeamSeaGlass", "BeamMoonlight", "BeamEmber",
 		"HousingDriftwood", "HousingBrass", "CoatStormBlue", "CoatKelpGreen",
