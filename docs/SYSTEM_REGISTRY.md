@@ -86,7 +86,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 ## Live ops and monetization
 | System | Status | Target | Notes |
 |---|---|---|---|
-| Cosmetics for Robux (housings, coats, lanterns, flags) | Planned | B1.1 / L1.3 | owner approval |
+| Cosmetics for Robux (housings, coats, lanterns, flags) | Catalogue defined (B1.1), nothing sold or enabled | B1.1 / L1.3 | B1.1: `Shared/Definitions/Cosmetics` (9 items: 2 housings, 2 coats, 2 lanterns, 3 flags; Pearl and suggested Robux prices; product ids 0); `_Registry` refuses any stat field on a cosmetic and `ROBUX_ENABLED = true`; no script uses MarketplaceService; `CosmeticsSpec` 5 tests. Wearing housings, coats, lanterns and flags is not drawn yet; owner approval at L1.3 |
 | Supporter pack | Planned | L1.3 | |
 | Codes | Planned | L1.4 | |
 | Seasons / events (Shipwreck Rescue) | Planned | LO | |

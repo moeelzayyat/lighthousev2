@@ -172,6 +172,9 @@ Taken: Keeper (kills by the beam: 50 / 250 / 1000 → +2% beam damage per rank w
 ## D-029 — Invite reward: what the Shared Lantern is and what counts (S7.5)
 2026-10-17 · S7.5 · **Status: Accepted (unattended, recommendation)** — flagged for the owner
 Taken: the Shared Lantern is a beam colour (the only cosmetic slot the game draws today; lantern skins come with the B1.1 cosmetics), earned, never sold. It goes to both players when one joined the server from the other's invite (Roblox join data `ReferredByPlayerId`) and they are in the same voyage when it ends, having survived at least one night (so sailing and quitting at once does not count). One GrantService claim per pair (`invite:<lower>:<higher>`), so it is paid once. The invite link only lasts for the session the friend joined in. To revise: say so.
+## D-030 — Cosmetics catalogue and suggested prices (B1.1)
+2026-10-17 · B1.1 · **Status: Accepted (unattended, recommendation)** — flagged for the owner
+Taken: nine looks-only cosmetics: Driftwood and Polished Brass lamp housings, Storm Blue and Kelp Green keeper coats, Moth and Tide lanterns, Gull, Kraken and Founder's flags. Each can be earned with Pearls (30–90, about one to three good voyages) and is also offered for Robux at a suggested 39–99; the Founder's Flag (149 Robux) is the supporter item and the only Robux-only one. The five beam colours stay as they are (Pearls; the Shared Lantern is invite-only). The registry refuses a stat on any cosmetic and refuses switching Robux on, so nothing can be sold until the owner approves L1.3 and changes `ROBUX_ENABLED` himself. Wearing the new slots in game is not built (it comes with L1.3 if the owner approves). To revise names, prices or the list: say so.
 ## CP — S4.1 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 0 creature raycasts over night 1
 ## CP — S4.2 + S4.3 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 10.0 KB/s per client at 45 creatures; 60 FPS
 ## CP — S4.4 passed (🟦 Script Analysis; phone FPS pending, owner) · 2026-10-17 · auto-approved (unattended) · DEV only · 1 light in a 45-creature swarm; 0 new sound/burst parts
@@ -203,3 +206,4 @@ Taken: the Shared Lantern is a beam colour (the only cosmetic slot the game draw
 ## CP — S7.4 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · specialties from role stats only; +15% cap test; TestRunner 202/202
 ## CP — S7.5 passed (🟦 a real two-account invite, Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · Shared Lantern once per pair; TestRunner 207/207
 ## CP — S7.6 publish package written (🟦, waits for the owner's DEV publish) · 2026-10-17 · DEV only · S7 return systems complete
+## CP — B1.1 passed in Studio (🟦 owner creates the products, Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 9 cosmetics as definitions, looks only by registry; Robux off; TestRunner 212/212

@@ -890,3 +890,36 @@ Live checks (about 20 minutes):
  9. Tell Claude: anything that looks wrong, the objective you got and whether it paid, and the board after a night.
 If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.
 Claude's state: S7.6 set to 🟦; work continues with B1 (closed beta preparation): B1.1 cosmetics as definitions (nothing sold or enabled), B1.3 the anti-exploit suite, B1.4 a 1-client soak.
+
+CHECKPOINT: B1.1 Cosmetics pipeline — 🟦 (creating the developer products is the owner's step; Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.B1.1_before_2026-10-17 (_Registry) · restore point "B1.1 passed"
+BUILT:
+- `Shared/Definitions/Cosmetics` (new, `--!strict`): `ROBUX_ENABLED = false`; slots Beam (the 5 existing beam colours in `Shared/Items`), Housing, Coat, Lantern, Flag; 9 new items with a Pearl price, a suggested Robux price and `productId = 0`.
+- `_Registry`: the Cosmetics catalogue is checked at boot (81 definitions). Only look and price fields are allowed on a cosmetic, so a stat, a power or a rank fails the boot; `ROBUX_ENABLED` must be false; every beam named must be a beam colour in Items.
+- No code prompts or processes a Robux purchase (no MarketplaceService anywhere; a test checks this). Wearing the new slots is not drawn yet.
+TESTRUNNER (DEV, Play server): **212 passed, 0 failed** (207 + new `CosmeticsSpec` 5: catalogue passes the registry and covers every slot; every Robux item but the supporter flag is also earnable; a coat given damage and health fails the boot with 2 problems; `ROBUX_ENABLED = true` fails the boot; no game script uses MarketplaceService or ProcessReceipt).
+PLAY TEST (DEV): boot clean ("Definitions checked=81"; the only errors are the expected refused Studio data-store calls with API access off).
+PRODUCTS (suggested; the owner creates them, nothing is enabled):
+| Item | Slot | Pearls | Robux |
+|---|---|---|---|
+| Driftwood Housing | Housing | 40 | 49 |
+| Polished Brass Housing | Housing | 80 | 99 |
+| Storm Blue Coat | Coat | 50 | 59 |
+| Kelp Green Coat | Coat | 50 | 59 |
+| Moth Lantern | Lantern | 60 | 75 |
+| Tide Lantern | Lantern | 60 | 75 |
+| Gull Flag | Flag | 30 | 39 |
+| Kraken Flag | Flag | 90 | 99 |
+| Founder's Flag (supporter) | Flag | — | 149 |
+FAIRNESS TEST (architecture §20, re-answered):
+- Non-payers reach every goal: yes. Every Robux item is a look; every one except the Founder's Flag is also earnable with Pearls; no goal, voyage, weapon, armor, upgrade, boost or specialty can be bought.
+- No PvP: yes. Nothing a player buys touches another player.
+- Parent over the shoulder: yes. Fixed prices, no random paid crates, no timers, no paid revives, nothing pushes a purchase (nothing is even shown for sale yet).
+- Odds: not applicable (nothing random is sold).
+- Enforced by construction: `_Registry` refuses a stat field on a cosmetic and refuses `ROBUX_ENABLED = true`; `CosmeticsSpec` keeps both true.
+OWNER STEPS (when you want them; nothing is switched on): Creator Hub → Lighthouse Keepers DEV → Monetization → Developer Products → create one product per row above at the Robux price you choose, then send Claude the product ids. They stay unused until you approve L1.3.
+MIRROR: 140 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (51232cad).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-030 flagged
+NEXT: B1.2 age rating is the owner's (questionnaire in Creator Hub); B1.3 anti-exploit suite.

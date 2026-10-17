@@ -25,6 +25,7 @@ function Registry.catalogs(): Catalogs
 		Objectives = require(Shared:WaitForChild("Definitions"):WaitForChild("Objectives")) :: any, -- S7.2
 		Leaderboards = require(Shared:WaitForChild("Definitions"):WaitForChild("Leaderboards")) :: any, -- S7.3
 		Specialties = require(Shared:WaitForChild("Definitions"):WaitForChild("Specialties")) :: any, -- S7.4
+		Cosmetics = require(Shared:WaitForChild("Definitions"):WaitForChild("Cosmetics")) :: any, -- B1.1
 		Events = require(Shared:WaitForChild("Events")) :: any,
 	}
 end
@@ -594,6 +595,53 @@ RULES.Specialties = function(c, Specialties)
 				end
 				last = if type(need) == "number" then need else last
 			end
+		end
+	end
+end
+
+-- B1.1: cosmetics are looks only (the fairness test by construction): only the listed fields may appear, so a
+-- stat, a power or a rank on a cosmetic fails the boot; Robux stays off until the owner approves L1.3
+local COSMETIC_FIELDS = { "id", "displayName", "slot", "description", "pearls", "robux", "productId", "color" }
+RULES.Cosmetics = function(c, Cosmetics, all)
+	c.order("Cosmetics.ORDER", Cosmetics.ORDER, Cosmetics)
+	if Cosmetics.ROBUX_ENABLED ~= false then
+		c.add("Cosmetics.ROBUX_ENABLED", "must stay false until the owner approves L1.3")
+	end
+	local items = all.Items
+	for i, beam in Cosmetics.BEAMS or {} do
+		local item = if type(items) == "table" then items[beam] else nil
+		if type(item) ~= "table" or item.kind ~= "Cosmetic" or item.slot ~= "Beam" then
+			c.add("Cosmetics.BEAMS[" .. i .. "]", "must name a beam colour in Items, got " .. tostring(beam))
+		end
+	end
+	for id, def in c.defs(Cosmetics) do
+		local w = "Cosmetics." .. id
+		if def.id ~= id then
+			c.add(w .. ".id", "must equal its key, got " .. tostring(def.id))
+		end
+		for field in def do
+			if not table.find(COSMETIC_FIELDS, field) then
+				c.add(w .. "." .. tostring(field), "is not allowed: cosmetics are looks only")
+			end
+		end
+		c.str(w .. ".displayName", def.displayName)
+		c.str(w .. ".description", def.description)
+		c.oneOf(w .. ".slot", def.slot, { "Housing", "Coat", "Lantern", "Flag" })
+		if def.pearls == nil and def.robux == nil then
+			c.add(w, "needs a Pearl price, a Robux price or both")
+		end
+		if def.pearls ~= nil then
+			c.num(w .. ".pearls", def.pearls, 1, 1000, true)
+		end
+		if def.robux ~= nil then
+			c.num(w .. ".robux", def.robux, 1, 2000, true)
+		end
+		c.num(w .. ".productId", def.productId, 0, nil, true)
+		if typeof(def.color) ~= "Color3" then
+			c.add(w .. ".color", "must be a Color3")
+		end
+		if not table.find(Cosmetics.ORDER or {}, id) then
+			c.add(w, "is not listed in Cosmetics.ORDER")
 		end
 	end
 end
