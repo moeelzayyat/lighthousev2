@@ -293,3 +293,4 @@ Revisit: the owner's look verdict and a real phone.
 - The rifle: 12 damage a shot (a Sand Skitter, 6 HP, in one; a Rock Crab, 30 HP, in three; two in a Spring Tide), one creature per shot (the first along the line), 1 shot a second, 220 studs, aim forgiveness 2.5 studs on top of the creature's body; Ghost Lanterns are immune as with every weapon. No boost changes it yet. About 12 damage a second on one target: the wide beam's rate, on one creature.
 - Server-authoritative: the client sends only where it aims; the server checks who is up the tower, the cooldown and the rate, and traces the shot against its own creature positions.
 To revise: the place, the height, the damage (2 crab shots = 15), the fire rate, or letting creatures reach the climber.
+## DEV published by the owner · 2026-10-17 23:16 UTC · carries the S3 measures and the sniper tower (SNP.1); backup `backups/LighthouseKeepers_DEV_S3_2026-10-17.rbxl`
