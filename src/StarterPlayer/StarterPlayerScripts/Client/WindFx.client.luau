@@ -1,7 +1,8 @@
 --!strict
 -- WindFx (client, V4 visual overhaul): hanging lanterns swing and flags flutter in the wind, harder in the storm.
 -- Parts opt in with a CollectionService tag ("Sway" for lanterns, "Flutter" for flags) and a SwayPivot
--- attribute (the world point they hang from). Purely visual and local to this device.
+-- attribute (the world point they hang from). V6: a part tagged "Flicker" (the harbor campfire) has its light
+-- flicker. Purely visual and local to this device.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -52,6 +53,19 @@ local function stormy(): boolean
 	return (phase == "Night" or phase == "Prologue") and localPlayer:GetAttribute("Ready") == true
 end
 
+-- V6: flickering firelight
+local flickers: { [PointLight]: number } = {} -- light -> its steady brightness
+local function addFlicker(instance: Instance)
+	local light = instance:FindFirstChildWhichIsA("PointLight") :: PointLight?
+	if light and not flickers[light] then
+		flickers[light] = light.Brightness
+	end
+end
+for _, instance in CollectionService:GetTagged("Flicker") do
+	addFlicker(instance)
+end
+CollectionService:GetInstanceAddedSignal("Flicker"):Connect(addFlicker)
+
 local strength = 0.35
 RunService.RenderStepped:Connect(function(dt)
 	-- ease between calm and storm wind, with slow gusts on top
@@ -60,6 +74,13 @@ RunService.RenderStepped:Connect(function(dt)
 	local t = os.clock()
 	local gust = strength * (0.65 + 0.35 * math.sin(t * 0.7))
 	local eye = camera.CFrame.Position
+	for light, steady in flickers do
+		if light.Parent then
+			light.Brightness = steady * (0.8 + 0.3 * math.noise(t * 7, steady * 13.1))
+		else
+			flickers[light] = nil
+		end
+	end
 	for part, item in items do
 		if (item.pivot - eye).Magnitude < NEAR then
 			local rotation

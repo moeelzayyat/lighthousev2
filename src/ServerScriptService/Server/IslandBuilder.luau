@@ -331,7 +331,7 @@ function IslandBuilder.build()
 	local plate = Instance.new("BillboardGui")
 	plate.Name = "Nameplate"
 	plate.Size = UDim2.fromOffset(200, 50)
-	plate.StudsOffset = Vector3.new(0, quartermaster.Size.Y / 2 + 1.6, 0)
+	plate.StudsOffset = Vector3.new(0, quartermaster.Size.Y / 2 + 6.2, 0) -- V6: above the stall's awning (the shelves hid it)
 	plate.MaxDistance = 90
 	plate.Parent = quartermaster
 	local plateName = Instance.new("TextLabel")

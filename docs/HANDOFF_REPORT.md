@@ -1164,3 +1164,18 @@ PLAY TEST (DEV): the harbor seen from the player's own camera; 0 client and 0 se
 SCREENSHOTS: `assets/screens/visual_v5/` (the palette pair is Studio's bright edit view, for colour only).
 MIRROR: no script changed.
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-039 flagged
+
+CHECKPOINT: V6 Harbor at dusk (visual overhaul) — 🟦 (Script Analysis unmeasured; the owner judges the look)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: ServerStorage.Backups.VIS_V6_before_2026-10-17 (LobbyIslandDecor and IslandBuilder as they were) · restore points "VIS_V6 before", "V6 harbor props"
+BUILT:
+- `HarborLight` (new LocalScript, `--!strict`): one Lighting serves the whole place, so the harbor's golden hour is applied on each device while the player stands within 260 studs of the harbor spawn (ClockTime 17.7, warm ambients and haze). It remembers every value the server sends meanwhile and hands the server's lighting back the moment the player leaves; checked: after sailing, the client on the island had exactly the server's storm-night values.
+- `LobbyIslandDecor` (place content): the 8 lanterns were white glowing cubes; now amber glass with iron caps and bases and amber light. The campfire was a grey block and four crossed sticks; now a ring of 9 stones, a teepee of 5 logs, flames, embers and smoke (Roblox's built-in particle textures) and a light that flickers (`WindFx`, tag `Flicker`); the 4 seat logs stay. 10 more palms (copies of the place's own palm) at the island's edges. Two iron bollards and a rope coil on the pier landing.
+- `IslandBuilder`: the Quartermaster's sign sits above the stall's awning (the shelves hid half of it).
+- `WindFx`: flickering firelight for parts tagged `Flicker`.
+TESTRUNNER (DEV, Play server): **249 passed, 0 failed**.
+PLAY TEST (DEV): the harbor at dusk from the player's own camera and at the campfire; a voyage sailed with the runtime helper: on the island the client's lighting matched the server's (ClockTime 23.2, Brightness 1.3, atmosphere 0.34); 0 client and 0 server errors (apart from the expected refused Studio data-store calls); client 60 FPS in Studio.
+SCREENSHOTS: `assets/screens/visual_v6/`.
+MIRROR: HarborLight b65d106c, WindFx 5077ac63, IslandBuilder cdf59062, identical in DEV and `src/`. Harbor dressing is place content; it reaches players with the owner's next DEV publish.
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
