@@ -1179,3 +1179,17 @@ PLAY TEST (DEV): the harbor at dusk from the player's own camera and at the camp
 SCREENSHOTS: `assets/screens/visual_v6/`.
 MIRROR: HarborLight b65d106c, WindFx 5077ac63, IslandBuilder cdf59062, identical in DEV and `src/`. Harbor dressing is place content; it reaches players with the owner's next DEV publish.
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+
+CHECKPOINT: V7 Hit and death feel (visual overhaul) — 🟦 (Script Analysis unmeasured; the owner judges the feel)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: ServerStorage.Backups.VIS_V7_before_2026-10-17 (CreatureView, BeamFx) · restore point "VIS_V7 before"
+BUILT (all on the client; no gameplay value changed):
+- `CreatureView`: a creature now dies in a burst of sea foam (ART_BIBLE): a pale foam ball plus 14 foam puffs and 10 droplets from one shared emitter part (was an orange ball). When a hit lands, 5 white sparks fly (the white body flash was already there). Still no instances per creature.
+- `HitFx` (new LocalScript, `--!strict`): a small camera shake when a cannon fires within 70 studs of the camera, scaled by distance, and when this player loses 8 or more health in one hit; it fades in about 0.4 s and is off with Low effects.
+- `BeamFx`: under 15% oil the lamp's light and beam stutter (occasional dips); the fuel itself is untouched.
+TESTRUNNER (DEV, Play server): **249 passed, 0 failed**.
+PLAY TEST (DEV): voyage sailed with the runtime helper; a runtime-only helper damaged the nearest creatures: the shared effect part moved to 8 hit spots and 3 foam bursts were drawn in 20 s; the player hurt by 20 health by the helper: the camera turned up to 0.23° between frames while the player stood still (a steady camera turns 0°); the lamp held at 9% oil by the helper: its light ranged 0.75–2.78 against a steady 3; 0 client and 0 server errors (apart from the expected refused Studio data-store calls).
+SCREENSHOT: `assets/screens/visual_v7/after_foam_burst_staged.jpg` is staged: the same foam emitter fired several times in a row so the screenshot catches it (one real death is a single, shorter puff).
+MIRROR: HitFx e875eb19, CreatureView a79702a8, BeamFx caab8fb4, identical in DEV and `src/`.
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)

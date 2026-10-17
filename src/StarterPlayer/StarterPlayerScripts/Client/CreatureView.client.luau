@@ -38,6 +38,65 @@ local pool = {} -- kind -> { model }
 local BURST_POOL = 6
 local bursts = {} -- reused kill-burst balls
 local nextBurst = 0
+-- V7: a creature dies in a burst of sea foam (ART_BIBLE), and a hit throws a few white sparks; one shared
+-- emitter part each, moved to the spot and emitted once, so this costs no instances per creature
+local FOAM_COLOR = Color3.fromRGB(226, 246, 242)
+local SOFT_TEXTURE = "rbxasset://textures/particles/smoke_main.dds"
+local fxPart = Instance.new("Part")
+fxPart.Name = "CreatureFx"
+fxPart.Anchored = true
+fxPart.CanCollide = false
+fxPart.CanQuery = false
+fxPart.CanTouch = false
+fxPart.Transparency = 1
+fxPart.Size = Vector3.new(2, 2, 2)
+fxPart.Parent = Workspace -- not the creature folder: the coach counts what is in there
+local function fxEmitter(name, props)
+	local emitter = Instance.new("ParticleEmitter")
+	emitter.Name = name
+	emitter.Rate = 0
+	for key, value in props do
+		emitter[key] = value
+	end
+	emitter.Parent = fxPart
+	return emitter
+end
+local foam = fxEmitter("Foam", {
+	Texture = SOFT_TEXTURE,
+	Color = ColorSequence.new(FOAM_COLOR),
+	LightEmission = 0.4,
+	Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 2), NumberSequenceKeypoint.new(1, 6) }),
+	Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(1, 1) }),
+	Lifetime = NumberRange.new(0.8, 1.2),
+	Speed = NumberRange.new(8, 14),
+	SpreadAngle = Vector2.new(180, 180),
+	Drag = 4,
+	Acceleration = Vector3.new(0, -10, 0),
+	Rotation = NumberRange.new(0, 360),
+})
+local drops = fxEmitter("Drops", {
+	Color = ColorSequence.new(FOAM_COLOR),
+	LightEmission = 0.6,
+	Size = NumberSequence.new(0.3),
+	Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0), NumberSequenceKeypoint.new(1, 1) }),
+	Lifetime = NumberRange.new(0.5, 0.7),
+	Speed = NumberRange.new(14, 22),
+	SpreadAngle = Vector2.new(60, 60),
+	Acceleration = Vector3.new(0, -60, 0),
+})
+local sparks = fxEmitter("Sparks", {
+	Color = ColorSequence.new(Color3.fromRGB(255, 255, 255)),
+	LightEmission = 1,
+	LightInfluence = 0,
+	Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.35), NumberSequenceKeypoint.new(1, 0) }),
+	Lifetime = NumberRange.new(0.15, 0.25),
+	Speed = NumberRange.new(12, 20),
+	SpreadAngle = Vector2.new(180, 180),
+})
+local function emitAt(position, emitter, count)
+	fxPart.CFrame = CFrame.new(position)
+	emitter:Emit(count)
+end
 
 local function has(state, bit)
 	return state // bit % 2 == 1
@@ -111,14 +170,16 @@ local function burst(position)
 		puff.CanQuery = false
 		puff.CanTouch = false
 		puff.Material = Enum.Material.Neon
-		puff.Color = BURN_COLOR
+		puff.Color = FOAM_COLOR -- V7: sea foam (was the burn orange)
 		puff.Parent = Workspace -- not the creature folder: the coach counts what is in there
 		bursts[nextBurst] = puff
 	end
 	puff.Size = Vector3.new(2, 2, 2)
-	puff.Transparency = 0
+	puff.Transparency = 0.2
 	puff.CFrame = CFrame.new(position)
-	TweenService:Create(puff, TweenInfo.new(0.35), { Size = Vector3.new(7, 7, 7), Transparency = 1 }):Play()
+	TweenService:Create(puff, TweenInfo.new(0.3), { Size = Vector3.new(6, 6, 6), Transparency = 1 }):Play()
+	emitAt(position, foam, 14)
+	emitAt(position, drops, 10)
 end
 
 local function release(view)
@@ -206,6 +267,12 @@ RunService.RenderStepped:Connect(function()
 		elseif not tell then
 			view.tellSince = nil
 		end
+		-- V7: a few white sparks the moment a hit lands
+		local hit = has(state, Snap.HIT)
+		if hit and not view.wasHit then
+			emitAt(view.body.Position, sparks, 5)
+		end
+		view.wasHit = hit
 		local color = if has(state, Snap.HIT) then HIT_COLOR
 			elseif tell then (if math.sin(now * 25) > 0 then TELL_COLOR else view.baseColor)
 			elseif has(state, Snap.BURNING) then BURN_COLOR

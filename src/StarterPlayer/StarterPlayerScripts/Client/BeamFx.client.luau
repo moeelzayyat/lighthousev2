@@ -45,6 +45,9 @@ end
 local island = Workspace:WaitForChild("Island")
 local emitter = island:WaitForChild("BeamEmitter") :: BasePart
 local main = emitter:WaitForChild("LightBeam") :: Beam
+local lampCore = island:WaitForChild("LampCore") :: BasePart
+local lampLight = lampCore:FindFirstChildWhichIsA("PointLight") :: PointLight?
+local lampBrightness = if lampLight then lampLight.Brightness else 0
 
 -- The server's beam is only read from here (its width, brightness, colour and on/off); this device draws the
 -- layers instead, so it can dim them when the camera is right beside the beam without fighting the server.
@@ -110,6 +113,18 @@ RunService.Heartbeat:Connect(function()
 	local lit = main.Enabled
 	-- right beside the beam the stacked layers would fill the screen; dim them there (never below a third)
 	local near = math.clamp((cameraDistance() - 6) / 40, 0.35, 1)
+	-- V7: when the oil is nearly gone the lamp stutters (the server's fuel numbers are unchanged; this is only light)
+	local fuel = state:GetAttribute("Fuel") or 0
+	local maxFuel = state:GetAttribute("MaxFuel") or 100
+	local flicker = 1
+	if lit and fuel > 0 and fuel / math.max(maxFuel, 1) < 0.15 then
+		local n = math.noise(os.clock() * 9, 3.7)
+		flicker = if n < -0.25 then 0.25 else 0.85 + 0.15 * n
+	end
+	if lampLight then
+		lampLight.Brightness = lampBrightness * flicker
+	end
+	near *= flicker
 	for _, entry in layers do
 		local beam, layer = entry.beam, entry.layer
 		beam.Enabled = lit
