@@ -42,8 +42,8 @@ A stage exits when every substage is ✅ and its exit numbers are recorded. **GO
 | S5 | Domain split & UI refactor | 8 | 2–3 | Standard | 🟦 |
 | S6 | Content (owner's six requests) | 7 | 4–5 | Standard | 🟦 |
 | S7 | Return systems | 6 | 2 | Standard | 🟦 |
-| B1 | **Closed beta** | 6 | 3 | **GO/NO-GO** | 🟨 |
-| L1 | Relaunch | 7 | 2 | Checklist | ⬜ |
+| B1 | **Closed beta** | 6 | 3 | **GO/NO-GO** | 🟦 |
+| L1 | Relaunch | 7 | 2 | Checklist | 🟨 |
 | LO | Live operations | ongoing | — | Cadence | ⬜ |
 
 ---
@@ -192,9 +192,9 @@ Purpose: real players answer whether the loop retains, before content work.
 | B1.1 🟦 | Cosmetics pipeline | Beam colours (existing), lamp housings, keeper coats, lantern skins, ship flags as definitions; Robux products created but **not enabled** | Products listed; fairness test re-answered in writing | Owner |
 | B1.2 🟦 | Age rating & compliance | Questionnaire; Creator Hub policy check | Rating approved | Dashboard |
 | B1.3 🟦 | Anti-exploit suite | §24 security tests automated | All green | TestRunner |
-| B1.4 | Soak | 4-client, 2-hour, all modes; 2 real phones | Budgets met | Profiler, devices |
-| B1.5 | Cohort | 30–100 invited testers; feedback form; bug tracker | ≥ 30 active; bugs triaged daily | Tracker |
-| B1.6 | Go/no-go | | Logged | Owner |
+| B1.4 🟦 | Soak | 4-client, 2-hour, all modes; 2 real phones | Budgets met | Profiler, devices |
+| B1.5 🟦 | Cohort | 30–100 invited testers; feedback form; bug tracker | ≥ 30 active; bugs triaged daily | Tracker |
+| B1.6 🟦 | Go/no-go | | Logged | Owner |
 
 **GO (to L1) when:** 0 blocking bugs; D1 play days and co-play share recorded as baseline; rematch ≥ 60%; Night-1 survival ≥ 50%. **NO-GO:** blocking bugs or retention below S3 numbers.
 
@@ -204,9 +204,9 @@ Purpose: real players answer whether the loop retains, before content work.
 
 | ID | Substage | Deliverables | Passes when | Verify |
 |---|---|---|---|---|
-| L1.1 | Economy balance | From beta data; `pearlsFor`, prices, merchant; 10,000-voyage simulation | No unbounded inflow | `execute_luau` sim |
-| L1.2 | Data audit | Migration chain on all fixtures; rollback drill | Rollback restores | TestRunner |
-| L1.3 | Monetization (owner approval) | Enable cosmetic products; supporter pack; `ProcessReceipt` idempotent | Test purchases; duplicate receipt once | Studio |
+| L1.1 🟦 | Economy balance | From beta data; `pearlsFor`, prices, merchant; 10,000-voyage simulation | No unbounded inflow | `execute_luau` sim |
+| L1.2 ✅ | Data audit | Migration chain on all fixtures; rollback drill | Rollback restores | TestRunner |
+| L1.3 🟦 | Monetization (owner approval) | Enable cosmetic products; supporter pack; `ProcessReceipt` idempotent | Test purchases; duplicate receipt once | Studio |
 | L1.4 | Codes | `CodeService`; creator codes with a cosmetic | Once per profile | TestRunner |
 | L1.5 | Store final | Winning icon polished; 5 thumbnails; 30-s trailer; description | Uploaded | Dashboard |
 | L1.6 | Community | Discord; support macro (inspect/grant/rollback); creator list (20+) | Written | Document |

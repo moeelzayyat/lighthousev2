@@ -943,3 +943,38 @@ PLAY TEST (DEV): boot clean, 0 errors (only the expected refused Studio data-sto
 MIRROR: 141 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (06b583ca).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-031 logged
 NEXT: B1.4 soak (1 client in Studio; 4 clients and 2 real phones are the owner's).
+
+CHECKPOINT: B1.4 Soak — 🟦 (1 client in Studio; the 4-client run, 2 real phones and a live server's memory graph are the owner's; Script Analysis unmeasured)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before every Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.B1.4_before_2026-10-17 (CreatureView) · restore point "B1.4 passed"
+RUN 1 (runtime-only TEMPTEST driver: keep-alive lamp and tower, Sail again on Results, Long Voyage chosen for voyages 2 and 4): **5 voyages, all won (Standard 7, Long 13, Standard 7, Long 13, Standard 7), 102.3 min, 22 big monsters, up to 50 creature slots, 0 server errors, 0 client errors.** Studio's client was not drawing (the screen had gone to sleep: 0 RenderStepped frames), and the run exposed a bug: **CreatureView removed gone creatures only on RenderStepped, so a client that is not drawing (a minimised window, a phone app in the background) kept every creature model of the voyage (+3,132 client instances in one voyage; 2,348 models left in the folder after 5 voyages).** They would all be removed at once when drawing resumed (checked: 0 orphans), but memory grew meanwhile.
+FIX: `CreatureView.client` also removes gone creatures on Heartbeat (drawing stays on RenderStepped). No number changed.
+RUN 2 (same driver, display kept awake, client drawing at 60 FPS, with the fix): **5 voyages, all won, 102.3 min, 22 big monsters, up to 50 slots, 0 server errors, 0 client errors**; creature folder empty between voyages; client instances 8,294 at the end (run 1: 31,969).
+MEASURED (run 2; Studio runs Edit, server and client in one process, so memory is whole-Studio):
+- Total process memory 3340 → 3488 MB: +87 MB/h overall; +65 MB/h after a 33 MB step at minute 12; +48 MB/h over the last 30 minutes. Lua heap 952 → 925 MB (−27). Server instances flat (4,547 → 4,550 over a further voyage). The growth is in the engine's `Internal` memory, which Studio does not split by data model, so the budget (< 50 MB/h on a server) cannot be confirmed in Studio: it stays 🟦 for a live server's memory graph.
+- Server send (`Stats.DataSendKbps`, all traffic, 1 client): 7–16 KB/s per-minute averages, 56.7 peak (budget ≤ 30 per player is for snapshot bytes; S6.5 measured 9.6 at the cap).
+- `Stats.HeartbeatTimeMs` max 0.55 ms; server physics 60 FPS throughout.
+TESTRUNNER (DEV, Play server): **226 passed, 0 failed** (218 + `EconomySimSpec` 5 + `DataAuditSpec` 3; see L1.1/L1.2).
+OWNER CHECKS: (1) Studio → Test → Clients and Servers → 4 players, sail one voyage, note errors; (2) two phones in the published DEV game, read FPS on a night-7 swarm (Settings → Performance Stats); (3) after publishing DEV: Creator Hub → Lighthouse Keepers DEV → Analytics → Performance → Server memory over a 2-hour session with players.
+MIRROR: 145 scripts in DEV, digest identical to `src/` (02d33a36; includes L1.1/L1.2).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+
+CHECKPOINT: B1.5 Cohort — 🟦 (owner's step)
+OWNER STEPS: after publishing DEV (S7.6 package), invite 30–100 testers (friends, a Discord, a Roblox group); collect feedback with a short form (what was confusing, what was fun, any bug); Claude triages the bug list daily once it exists.
+
+CHECKPOINT: B1.6 GO/NO-GO — taken provisionally (D-032), per the owner's standing instruction to keep going through gates. No beta data. Known blocking bugs: none.
+
+CHECKPOINT: L1.1 Economy balance — passed in Studio (🟦 real beta data)
+BUILT: `ServerStorage/Tests/sim/EconomySim` (pure model reading the live Config, Voyages, Items, Boosts, Logbook and Objectives) and `EconomySimSpec` (5 tests: every GrantService source in the game is known to the model; no Material sells for Pearls and nothing pays per kill; nothing pays per kill (checked separately); one voyage's bound is nights + victory bonus + one max boss drop per boss (Standard solo 20, Long with 4 crew 146); 2,000 simulated voyages never pass their bound; boost ranks stop at the +15 % cap).
+MODEL ASSUMPTIONS (no beta data yet): crew of 1/2/3/4 at 40/30/20/10 %; the light goes out on night n with chance 0.04 + 0.015·n (about 1 Standard voyage in 3 is won); once the Long Voyage is unlocked, half the voyages are Long; 3 voyages a day; the daily objective done 80 % of days.
+10,000 VOYAGES (execute_luau, three seeds): **mean 10.7–10.9 Pearls a voyage, median 9–10, p95 27–28, highest 50 (bound 146), 0 voyages over their bound**; logbook one-time Pearls 40; objectives about 0.85 a voyage. Live catalogue: 538 Pearls (gear and beam colours) + 320 (boost ranks to the cap) = 858, affordable after **62–83 voyages** (about 3–4 weeks at 3 a day); a crew that never loses: mean 22.4, after 33 voyages; solo: mean 10.8, after 79.
+DECISION: D-033, no change before beta data.
+
+CHECKPOINT: L1.2 Data audit — passed
+BUILT: fixture `profiles/v2_full_B1` (every field at B1, made-up values) and `DataAuditSpec` (3 tests: all 6 fixture saves (4 v1 shapes: full, missing fields, string Pearls, unknown fields; v2 before S6.4; v2 full at B1) load to a valid profile with every current field, load again with no fix, and survive a JSON round trip; the full B1 profile loads with no fixes and keeps Boosts, Roles, Unlocks and Equipped; older saves keep Pearls, items and stats). Rollback drill: `AdminDataSpec` online and offline rollback restore the snapshot (green in the same run).
+TESTRUNNER: 226 passed, 0 failed.
+
+CHECKPOINT: L1.3 Monetization — 🟦 WAITS FOR THE OWNER (nothing enabled)
+What is ready: the cosmetics list with suggested Robux prices (B1.1 record); the registry refuses a stat on any cosmetic and refuses `ROBUX_ENABLED = true`; no code prompts or processes a purchase.
+What L1.3 would build once you approve: `PurchaseService` with an idempotent `ProcessReceipt` (each receipt id granted once through GrantService), the cosmetic products and a supporter pack wired to your product ids, wearing the new cosmetic slots, test purchases in Studio. Say "approve L1.3" (and send the product ids) to start it.

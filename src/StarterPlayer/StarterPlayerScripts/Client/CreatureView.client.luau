@@ -173,6 +173,17 @@ remote.OnClientEvent:Connect(function(payload)
 	end
 end)
 
+-- B1.4: gone creatures are also removed on Heartbeat, so a client that is not rendering (a minimised window, a
+-- phone app in the background) does not pile up models; drawing stays on RenderStepped
+RunService.Heartbeat:Connect(function()
+	local now = os.clock()
+	for _, view in views do
+		if now - view.lastSeen > GONE_AFTER then
+			release(view)
+		end
+	end
+end)
+
 RunService.RenderStepped:Connect(function()
 	local now = os.clock()
 	local renderT = Workspace:GetServerTimeNow() - INTERP_DELAY

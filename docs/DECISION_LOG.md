@@ -178,6 +178,12 @@ Taken: nine looks-only cosmetics: Driftwood and Polished Brass lamp housings, St
 ## D-031 — How the security suite reaches the live handlers (B1.3)
 2026-10-17 · B1.3 · **Status: Accepted (unattended, recommendation)**
 Taken: every client→server handler now connects through `NetGuard.connect`, which in Studio (only) also exposes the handler as a BindableFunction under `ServerStorage.NetHooks`, so TestRunner can call exactly what a client's FireServer reaches, as the real harbor player or a fake non-owner, and compare the profile before and after. No guard, rate or rule changed; live servers never create the hooks (`RunService:IsStudio()`), and ServerStorage is never visible to clients. The alternative (a client-side bot firing remotes) cannot run inside TestRunner. To revise: say so.
+## D-032 — B1 GO/NO-GO taken provisionally: GO to L1, with no beta data
+2026-10-17 · B1.6 · **Status: Accepted (unattended, provisional — no beta data)** — flagged for the owner
+Owner (project chat, 2026-10-17): keep going through the GO/NO-GO gates while he is away ("keep going even in s3 go/no go gate, keep going don't wait on my input"). The B1 GO needs a closed-beta cohort (B1.5: 30–100 testers, D1 play days, co-play share, rematch ≥ 60 %, Night-1 survival ≥ 50 %), which has not run because nothing since S2.8 is published. Known blocking bugs: none (the soak found one client clean-up bug and it is fixed). Decision: take GO provisionally and build the L1 pieces that do not need the live build (economy simulation, data audit, codes, store and community documents, the release checklist). L1.3 (switching on Robux products) is NOT done: it needs the owner's approval. When beta data arrives, the owner reads this gate for real; a NO-GO keeps the L1 work and goes back to fix what the beta found.
+## D-033 — Economy: no price or reward change before beta data (L1.1)
+2026-10-17 · L1.1 · **Status: Accepted (unattended, recommendation)**
+A 10,000-voyage model of the live numbers (assumed crews and survival, stated in the L1.1 record) gives about 11 Pearls a voyage (p95 28, highest 50; the hard bound for one voyage is 146), the whole live catalogue (538 Pearls of gear and beam colours plus 320 Pearls of boost ranks to the +15 % cap) after about 62–83 voyages, or 33 for a crew that never loses. Every Pearl source is per night, per voyage, once per category or once a day: nothing pays per kill, per minute or per repeat, so inflow cannot run away. Decision: change nothing now; tune `pearlsFor`, prices and the merchant from the beta's real numbers. To revise: say so.
 ## CP — S4.1 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 0 creature raycasts over night 1
 ## CP — S4.2 + S4.3 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 10.0 KB/s per client at 45 creatures; 60 FPS
 ## CP — S4.4 passed (🟦 Script Analysis; phone FPS pending, owner) · 2026-10-17 · auto-approved (unattended) · DEV only · 1 light in a 45-creature swarm; 0 new sound/burst parts
@@ -211,3 +217,9 @@ Taken: every client→server handler now connects through `NetGuard.connect`, wh
 ## CP — S7.6 publish package written (🟦, waits for the owner's DEV publish) · 2026-10-17 · DEV only · S7 return systems complete
 ## CP — B1.1 passed in Studio (🟦 owner creates the products, Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 9 cosmetics as definitions, looks only by registry; Robux off; TestRunner 212/212
 ## CP — B1.3 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · §24 security tests automated against the live handlers; TestRunner 218/218
+## CP — B1.4 soak passed in Studio (🟦 4 clients, 2 phones, live memory graph) · 2026-10-17 · auto-approved (unattended) · DEV only · 102 min, 5 voyages, 0 errors; client clean-up bug fixed
+## CP — B1.5 cohort 🟦 (owner: invite 30–100 testers after the DEV publish) · 2026-10-17
+## CP — B1.6 GO/NO-GO taken provisionally (D-032) · 2026-10-17 · owner's standing instruction · no beta data
+## CP — L1.1 passed (🟦 beta data) · 2026-10-17 · auto-approved (unattended) · DEV only · 10,000-voyage model, inflow bounded; no number changed (D-033); TestRunner 226/226
+## CP — L1.2 passed · 2026-10-17 · auto-approved (unattended) · DEV only · migration chain on 6 fixture saves, idempotent, JSON round trip; rollback drill green (AdminDataSpec); TestRunner 226/226
+## CP — L1.3 waits for the owner's approval (🟦; nothing enabled) · 2026-10-17
