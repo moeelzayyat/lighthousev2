@@ -1287,3 +1287,4 @@ Live checks (on a computer, then on your phone):
  10. On your phone: the shop's buttons are easy to hit and no words are cut off; the game runs smoothly at night (this is also V8's real-phone check). Tell me the phone model and how smooth it felt.
  11. The LO.5 checks still to report: the crew card offers "Shipwreck Rescue"; a castaway carried to the shelter; the BAG's Codes box.
 If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.
+VIS.P step 1 done · 2026-10-17 22:19 UTC · the owner saved `backups/LighthouseKeepers_DEV_VIS_2026-10-17.rbxl` (1.1 MB, checked on disk). Publish and live checks still to come.
