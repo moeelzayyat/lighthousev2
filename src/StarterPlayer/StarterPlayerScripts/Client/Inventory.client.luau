@@ -55,8 +55,17 @@ end
 local function owns(itemId)
 	return profile ~= nil and (profile.owned[itemId] == true or count(itemId) > 0)
 end
+local EQUIPPED_FIELDS = { "equippedWeapon", "equippedArmor", "equippedBeam", "equippedHousing", "equippedCoat", "equippedLantern", "equippedFlag" }
 local function isEquipped(itemId)
-	return profile ~= nil and (profile.equippedWeapon == itemId or profile.equippedArmor == itemId)
+	if not profile then
+		return false
+	end
+	for _, field in EQUIPPED_FIELDS do
+		if profile[field] == itemId then
+			return true
+		end
+	end
+	return false
 end
 local function dps(weaponId)
 	local w = StatPipeline.weapon(weaponId)
@@ -66,7 +75,11 @@ local function equippedFor(slot)
 	if not profile then
 		return nil
 	end
-	return if slot == "Primary" then profile.equippedWeapon elseif slot == "Armor" then profile.equippedArmor elseif slot == "Beam" then (profile.equippedBeam or "BeamAmber") else nil
+	return if slot == "Primary" then profile.equippedWeapon
+		elseif slot == "Armor" then profile.equippedArmor
+		elseif slot == "Beam" then (profile.equippedBeam or "BeamAmber")
+		elseif slot == "Housing" or slot == "Coat" or slot == "Lantern" or slot == "Flag" then profile["equipped" .. slot] -- L1.3
+		else nil
 end
 local function typeLabel(item)
 	if item.kind == "Weapon" then
@@ -78,7 +91,8 @@ local function typeLabel(item)
 	elseif item.kind == "Material" then
 		return "Voyage loot"
 	elseif item.kind == "Cosmetic" then
-		return "Beam colour \u{00B7} looks only"
+		local labels = { Beam = "Beam colour", Housing = "Lamp housing", Coat = "Keeper coat", Lantern = "Lantern", Flag = "Ship flag" }
+		return (labels[item.slot] or "Cosmetic") .. " \u{00B7} looks only"
 	end
 	return item.category
 end
@@ -264,6 +278,10 @@ end
 makeSlot(slotsSection, 1, "Primary", "Primary weapon")
 makeSlot(slotsSection, 2, "Armor", "Armor")
 makeSlot(slotsSection, 3, "Beam", "Lamp beam colour") -- launch R15: looks only
+makeSlot(slotsSection, 4, "Housing", "Lamp housing") -- L1.3: looks only
+makeSlot(slotsSection, 5, "Coat", "Keeper coat")
+makeSlot(slotsSection, 6, "Lantern", "Lantern")
+makeSlot(slotsSection, 7, "Flag", "Ship flag")
 
 -- supplies: Fire Shell crates are used automatically by cannons (not an equip slot)
 local suppliesSection = UiKit.Section(slotsList, "Supplies", { layoutOrder = 2, gap = 8 })
@@ -459,7 +477,7 @@ local function renderSlots()
 		return
 	end
 	for key, w in slotWidgets do
-		local itemId = if key == "Primary" then profile.equippedWeapon elseif key == "Armor" then profile.equippedArmor elseif key == "Beam" then (profile.equippedBeam or "BeamAmber") else nil
+		local itemId = if key == "Ammo" then nil else equippedFor(key)
 		if key == "Ammo" then
 			local crates = count("FireShellCrate")
 			if crates > 0 then
@@ -474,7 +492,7 @@ local function renderSlots()
 			itemId = if crates > 0 then "FireShellCrate" else nil
 		else
 			w.icon:setItem(itemId)
-			w.name.Text = if itemId and Items[itemId] then Items[itemId].name else "Empty"
+			w.name.Text = if itemId and Items[itemId] then Items[itemId].name else "None"
 			w.name.TextColor3 = C.TextPrimary
 		end
 		local selected = itemId ~= nil and itemId == selectedId
@@ -587,7 +605,7 @@ renderDetail = function()
 	elseif equipped then
 		label("UNEQUIP")
 		UiKit.SetDisabled(actionButton, false)
-		statusText.Text = "Unequipping switches back to your " .. Items[STARTERS[item.slot]].name .. "."
+		statusText.Text = if STARTERS[item.slot] then "Unequipping switches back to your " .. Items[STARTERS[item.slot]].name .. "." else "Unequipping takes it off."
 	else
 		label("EQUIP")
 		UiKit.SetDisabled(actionButton, false)

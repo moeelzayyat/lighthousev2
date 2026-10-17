@@ -2,7 +2,7 @@
 --
 --   kind       "Weapon" (stats in Shared/Weapons), "Armor", "Ammo" (cannon ammo crates), "Material" (loot)
 --   category   which Quartermaster shop tab / inventory filter it appears under
---   slot       loadout slot for equippable items: "Primary" or "Armor"
+--   slot       loadout slot for equippable items: "Primary", "Armor", "Beam", or (L1.3) "Housing", "Coat", "Lantern", "Flag"
 --   model      name of the 3D model in ReplicatedStorage.ItemModels (used for icons and previews)
 --   price      Pearls to buy from the Quartermaster (nil = not sold)
 --   sell       Pearls the Quartermaster pays for one (materials only)
@@ -20,6 +20,7 @@ local Items = {
 		"FireShellCrate",
 		"CrabClaw", "SeaGlass", "BlackPearl",
 		"BeamAmber", "BeamSeaGlass", "BeamMoonlight", "BeamEmber", "BeamSharedLantern", "BeamKeepersGlow",
+		"HousingDriftwood", "HousingBrass", "CoatStormBlue", "CoatKelpGreen", "LanternMoth", "LanternTide", "FlagGull", "FlagKraken", "FlagFounder",
 	},
 	SHOP_CATEGORIES = { "Weapons", "Armor", "Ammunition", "Cosmetics" }, -- loot is sold to the Trader during a voyage, for shells
 	INVENTORY_FILTERS = { "All", "Weapons", "Armor", "Ammunition", "Materials" },
@@ -212,6 +213,91 @@ local Items = {
 		tradeoffs = "Looks only: no power. Earned with a creator code",
 		reward = "code",
 		beamColor = { 140, 235, 200 },
+	},
+	-- L1.3: lamp housings, keeper coats, lanterns and ship flags. LOOKS ONLY. Bought with Pearls here; most can also
+	-- be bought with Robux (Definitions/Cosmetics). `color` tints the housing round the lamp while you hold it, the
+	-- armor you wear (coats), the lantern at your hip, or the ship's flag (the first keeper in the server with one).
+	HousingDriftwood = {
+		kind = "Cosmetic", category = "Cosmetics", slot = "Housing",
+		name = "Driftwood Housing",
+		description = "A lamp housing pieced together from the beach.",
+		strengths = "Shown round the lamp while you hold it",
+		tradeoffs = "Looks only: no power",
+		price = 40,
+		color = { 150, 115, 80 },
+	},
+	HousingBrass = {
+		kind = "Cosmetic", category = "Cosmetics", slot = "Housing",
+		name = "Polished Brass Housing",
+		description = "Brass that catches the beam on the darkest night.",
+		strengths = "Shown round the lamp while you hold it",
+		tradeoffs = "Looks only: no power",
+		price = 80,
+		color = { 205, 165, 80 },
+	},
+	CoatStormBlue = {
+		kind = "Cosmetic", category = "Cosmetics", slot = "Coat",
+		name = "Storm Blue Coat",
+		description = "A keeper's coat dyed the colour of the storm.",
+		strengths = "Worn over your armor",
+		tradeoffs = "Looks only: no power. Your armor's protection is unchanged",
+		price = 50,
+		color = { 60, 90, 150 },
+	},
+	CoatKelpGreen = {
+		kind = "Cosmetic", category = "Cosmetics", slot = "Coat",
+		name = "Kelp Green Coat",
+		description = "Sea-green wool, smelling faintly of the tide.",
+		strengths = "Worn over your armor",
+		tradeoffs = "Looks only: no power. Your armor's protection is unchanged",
+		price = 50,
+		color = { 70, 125, 85 },
+	},
+	LanternMoth = {
+		kind = "Cosmetic", category = "Cosmetics", slot = "Lantern",
+		name = "Moth Lantern",
+		description = "A hand lantern with a warm, papery glow.",
+		strengths = "Carried at your hip",
+		tradeoffs = "Looks only: no power, and it lights nothing",
+		price = 60,
+		color = { 240, 220, 170 },
+	},
+	LanternTide = {
+		kind = "Cosmetic", category = "Cosmetics", slot = "Lantern",
+		name = "Tide Lantern",
+		description = "Blue glass that glows like the sea at night.",
+		strengths = "Carried at your hip",
+		tradeoffs = "Looks only: no power, and it lights nothing",
+		price = 60,
+		color = { 110, 180, 230 },
+	},
+	FlagGull = {
+		kind = "Cosmetic", category = "Cosmetics", slot = "Flag",
+		name = "Gull Flag",
+		description = "Harbour white, for the ship's mast.",
+		strengths = "Flown from the ship's mast",
+		tradeoffs = "Looks only: no power. The ship flies the flag of the first keeper in the server who has one",
+		price = 30,
+		color = { 230, 235, 245 },
+	},
+	FlagKraken = {
+		kind = "Cosmetic", category = "Cosmetics", slot = "Flag",
+		name = "Kraken Flag",
+		description = "Black as the deep: for crews who have seen it.",
+		strengths = "Flown from the ship's mast",
+		tradeoffs = "Looks only: no power. The ship flies the flag of the first keeper in the server who has one",
+		price = 90,
+		color = { 40, 40, 55 },
+	},
+	-- the supporter item: Robux only (a cosmetic, so allowed); listed in Definitions/Cosmetics
+	FlagFounder = {
+		kind = "Cosmetic", category = "Cosmetics", slot = "Flag",
+		name = "Founder's Flag",
+		description = "Gold on the mast, for the keepers who helped relight the lighthouse.",
+		strengths = "Flown from the ship's mast",
+		tradeoffs = "Looks only: no power. The supporter item, bought with Robux",
+		reward = "supporter",
+		color = { 255, 200, 90 },
 	},
 }
 

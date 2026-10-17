@@ -271,7 +271,7 @@ RULES.Items = function(c, Items, all)
 			c.add(w, "needs a price (or starter = true, or reward = how it is earned)")
 		end
 		if item.reward ~= nil then -- S7.5: earned, never sold
-			c.oneOf(w .. ".reward", item.reward, { "invite", "code" })
+			c.oneOf(w .. ".reward", item.reward, { "invite", "code", "supporter" })
 			if item.price ~= nil then
 				c.add(w, "is a reward, so it has no price")
 			end
@@ -303,13 +303,14 @@ RULES.Items = function(c, Items, all)
 			c.pos(w .. ".shellValue", item.shellValue)
 			c.num(w .. ".maxStack", item.maxStack, 1, nil, true)
 		elseif item.kind == "Cosmetic" then
-			c.oneOf(w .. ".slot", item.slot, { "Beam" })
-			local col = item.beamColor
+			c.oneOf(w .. ".slot", item.slot, { "Beam", "Housing", "Coat", "Lantern", "Flag" })
+			local field = if item.slot == "Beam" then "beamColor" else "color" -- L1.3
+			local col = item[field]
 			if type(col) ~= "table" or #col ~= 3 then
-				c.add(w .. ".beamColor", "must be { r, g, b }")
+				c.add(w .. "." .. field, "must be { r, g, b }")
 			else
 				for i = 1, 3 do
-					c.num(w .. ".beamColor[" .. i .. "]", col[i], 0, 255, true)
+					c.num(w .. "." .. field .. "[" .. i .. "]", col[i], 0, 255, true)
 				end
 			end
 		end
@@ -600,49 +601,47 @@ RULES.Specialties = function(c, Specialties)
 	end
 end
 
--- B1.1: cosmetics are looks only (the fairness test by construction): only the listed fields may appear, so a
--- stat, a power or a rank on a cosmetic fails the boot; Robux stays off until the owner approves L1.3
-local COSMETIC_FIELDS = { "id", "displayName", "slot", "description", "pearls", "robux", "productId", "color" }
+-- B1.1/L1.3: the Robux catalogue. Only cosmetics can be listed, and only a price and a product id, so a stat, a
+-- power or a rank on anything sold for Robux fails the boot (the fairness test by construction)
+local PRODUCT_FIELDS = { "robux", "productId" }
 RULES.Cosmetics = function(c, Cosmetics, all)
 	c.order("Cosmetics.ORDER", Cosmetics.ORDER, Cosmetics)
-	if Cosmetics.ROBUX_ENABLED ~= false then
-		c.add("Cosmetics.ROBUX_ENABLED", "must stay false until the owner approves L1.3")
+	if type(Cosmetics.ROBUX_ENABLED) ~= "boolean" then
+		c.add("Cosmetics.ROBUX_ENABLED", "must be true or false")
 	end
 	local items = all.Items
-	for i, beam in Cosmetics.BEAMS or {} do
-		local item = if type(items) == "table" then items[beam] else nil
-		if type(item) ~= "table" or item.kind ~= "Cosmetic" or item.slot ~= "Beam" then
-			c.add("Cosmetics.BEAMS[" .. i .. "]", "must name a beam colour in Items, got " .. tostring(beam))
-		end
-	end
+	local seen = {}
 	for id, def in c.defs(Cosmetics) do
 		local w = "Cosmetics." .. id
-		if def.id ~= id then
-			c.add(w .. ".id", "must equal its key, got " .. tostring(def.id))
+		local item = if type(items) == "table" then items[id] else nil
+		if type(item) ~= "table" or item.kind ~= "Cosmetic" then
+			c.add(w, "is not a cosmetic in Items: only cosmetics are sold for Robux")
+		elseif item.reward ~= nil and item.reward ~= "supporter" then
+			c.add(w, "is earned (" .. tostring(item.reward) .. "), so it is never sold")
 		end
 		for field in def do
-			if not table.find(COSMETIC_FIELDS, field) then
-				c.add(w .. "." .. tostring(field), "is not allowed: cosmetics are looks only")
+			if not table.find(PRODUCT_FIELDS, field) then
+				c.add(w .. "." .. tostring(field), "is not allowed: the Robux catalogue holds a price and a product id only")
 			end
 		end
-		c.str(w .. ".displayName", def.displayName)
-		c.str(w .. ".description", def.description)
-		c.oneOf(w .. ".slot", def.slot, { "Housing", "Coat", "Lantern", "Flag" })
-		if def.pearls == nil and def.robux == nil then
-			c.add(w, "needs a Pearl price, a Robux price or both")
-		end
-		if def.pearls ~= nil then
-			c.num(w .. ".pearls", def.pearls, 1, 1000, true)
-		end
-		if def.robux ~= nil then
-			c.num(w .. ".robux", def.robux, 1, 2000, true)
-		end
+		c.num(w .. ".robux", def.robux, 1, 2000, true)
 		c.num(w .. ".productId", def.productId, 0, nil, true)
-		if typeof(def.color) ~= "Color3" then
-			c.add(w .. ".color", "must be a Color3")
+		if type(def.productId) == "number" and def.productId > 0 then
+			if seen[def.productId] then
+				c.add(w .. ".productId", "is used twice")
+			end
+			seen[def.productId] = true
 		end
 		if not table.find(Cosmetics.ORDER or {}, id) then
 			c.add(w, "is not listed in Cosmetics.ORDER")
+		end
+	end
+	-- a supporter item exists only to be bought with Robux, so it must be listed
+	if type(items) == "table" then
+		for id, item in items do
+			if type(item) == "table" and item.reward == "supporter" and type(Cosmetics[id]) ~= "table" then
+				c.add("Items." .. tostring(id), "is a supporter item missing from the Robux catalogue")
+			end
 		end
 	end
 end

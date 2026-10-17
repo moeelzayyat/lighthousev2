@@ -66,3 +66,9 @@ Server → client only (17): `AdminResult`, `Notify`, `LootCollected`, `OpenUpgr
 | Encounter | `Voyage.Start(def)/End`, `Wave.NightPlan`, `Creatures.*`, `Lamp.*`, `Tower.*`, `Defense.*`, `Loot.*`, `Upgrades.*`, `Forecast.*`, `Results.Compute` |
 | Crew | `Crew.*` (sole writer of `Ready`), `Route.Choose`, `Coach.*`, `Feed.Say`, `LampShift.*`, `Leaderboard.Submit/Read` |
 | LiveOps | `Objectives.*`, `Logbook.Discover`, `Cosmetics.*`, `Purchases.Process`, `Codes.Redeem`, `Season.Current` |
+
+### Roblox callbacks (L1.3)
+| Callback | Owner | Guard |
+|---|---|---|
+| `MarketplaceService.ProcessReceipt` | Economy domain → `PurchaseService.process` (the only assignment in the game; `CosmeticsSpec` checks) | Robux switch on; product id listed in `Definitions/Cosmetics` (cosmetics only, by `_Registry`); buyer in the server with a loaded save, else `NotProcessedYet`; grant through GrantService with claim `receipt:<PurchaseId>` (a repeated receipt answers `PurchaseGranted` without a second grant) |
+| `MarketplaceService:PromptProductPurchase` (client) | `Shop.client` Robux button | only for an item `Cosmetics.productFor` returns (switch on, product id set, not owned) |

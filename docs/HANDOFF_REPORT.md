@@ -1028,3 +1028,25 @@ Live checks (30 minutes, on-call window):
  14. Creator Hub → Analytics → Errors: no new error with more than a handful of hits.
 If something is wrong: Creator Hub → production place → Version History → restore the version noted in step 2 → Shut down all servers. Then tell Claude what you saw.
 After: post the changelog in Discord (#changelog), announce LIGHTHOUSE, and tell Claude "relaunched" so live ops (stage LO) can start: daily error triage for 30 days, the weekly update cadence (docs/LIVEOPS_PLAYBOOK.md).
+
+CHECKPOINT: L1.3 Monetization — 🟦 (built and tested with the selling switch off; waits for the owner's product ids and the switch)
+DATE: 2026-10-17
+OWNER APPROVAL: "Approve L1.3" (project chat, 2026-10-17 13:17 UTC)
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.L1.3_before_2026-10-17 (Items, Cosmetics, _Registry, ProfileSchema, PlayerData, LoadoutService, Economy, LampService, Shop, Inventory, ItemPreview, CosmeticsSpec, EconomySim) · restore point "L1.3 built (Robux off)"
+BUILT:
+- `Shared/Items`: 9 cosmetics (2 lamp housings, 2 keeper coats, 2 lanterns, 3 ship flags) with slots and colours; all but the Founder's Flag sold for Pearls (30–90). `_Registry` checks the new slots and colours.
+- Profile: optional `Equipped.Housing/Coat/Lantern/Flag` (`ProfileSchema` validates: owned and the right slot, else it comes off); `PlayerData` view and `setEquipped`; `LoadoutService` equips and takes them off (no starter).
+- Wearing (server, Economy domain and LampService): housing = 8 bars round the lantern room in the Keeper's colour (measured on the tower); coat = the worn armor recoloured; lantern = a small glass lantern at the hip (no light, S4.4 budget); flag = a flag at the ship's mast top, from the first player in the server who has one.
+- `Definitions/Cosmetics` is now the Robux catalogue (12 products: 3 beam colours, 2 housings, 2 coats, 2 lanterns, 3 flags incl. the supporter Founder's Flag), each `{ robux, productId = 0 }`; `_Registry` allows only cosmetics and only those two fields; `ROBUX_ENABLED = false`.
+- `Server/PurchaseService` (new): answers `ProcessReceipt` (wired in the Economy domain, the game's only one): grant once per receipt (`receipt:<PurchaseId>`), `NotProcessedYet` when the buyer is away or not loaded, nothing for unknown products or with the switch off.
+- Shop: the Cosmetics tab lists them with labels per slot; a Robux button ("R$ 59") beside the Pearl price, or alone for the Founder's Flag, shown only when `Cosmetics.productFor` says it is on sale. BAG: four new equipped slots. Item previews: small drawings in each item's colour.
+TESTRUNNER (DEV, Play server): **240 passed, 0 failed** (234 − old `CosmeticsSpec` 5 + new `CosmeticsSpec` 7 + `PurchaseSpec` 4: one receipt granted once however often it arrives; an absent buyer or unloaded save waits and is granted later; unknown products, switch off and malformed receipts grant nothing; two receipts are two purchases; a stat, a weapon or an earned item on the Robux list fails the boot; only the Economy domain answers receipts and only the shop prompts; equipped cosmetics must be owned and fit).
+PLAY TEST (DEV; items given by a runtime-only script on the mock profile, removed after): equipped through the live LoadoutRequest handler; the coat showed on the armor, the Tide lantern at the hip, 8 brass bars round the lantern room while holding the lamp, the Kraken flag at the main mast top; the BAG shows the four new slots; the Quartermaster's Cosmetics tab lists all of them with Pearl prices. 0 server and 0 client errors.
+MIRROR: 150 scripts in DEV, digest identical to `src/` (98ec9d18).
+OWNER STEPS (to start selling):
+ 1. Creator Hub → Lighthouse Keepers DEV → Monetization → Developer Products → create one product per row (name, price in Robux; an icon is optional):
+    Sea Glass Beam 29 · Moonlight Beam 39 · Ember Beam 59 · Driftwood Housing 49 · Polished Brass Housing 99 · Storm Blue Coat 59 · Kelp Green Coat 59 · Moth Lantern 75 · Tide Lantern 75 · Gull Flag 39 · Kraken Flag 99 · Founder's Flag 149.
+ 2. Send Claude the 12 product ids (name → id).
+ 3. Reply "switch on Robux sales" in the thread (or set `ROBUX_ENABLED = true` in `ReplicatedStorage.Shared.Definitions.Cosmetics` yourself). Claude then fills in the ids, runs TestRunner, and makes a Studio test purchase (Studio purchases are free test purchases) to check the item arrives once.
+ 4. Publish DEV, buy one cheap item for real, check it arrives once; then the same in production at the relaunch (production needs its own products: L1.7).

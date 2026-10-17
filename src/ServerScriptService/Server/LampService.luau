@@ -23,6 +23,7 @@ LampService.darkSeconds = 0 -- how long the lamp has been out during the current
 
 local LIT_COLOR = Color3.fromRGB(255, 226, 150)
 local litColor = LIT_COLOR -- the current Keeper's beam colour (launch R15: looks only)
+local housing = {} -- L1.3: the bars round the lantern room in the Keeper's housing colour
 local DARK_COLOR = Color3.fromRGB(70, 60, 50)
 local PUSH_INTERVAL = 0.2 -- how often fuel numbers are sent to clients
 
@@ -173,6 +174,14 @@ function LampService.setKeeper(player, reason)
 			refs.lampCore.Color = litColor
 		end
 	end
+	-- L1.3: the Keeper's lamp housing (hidden when they have none); looks only
+	local housingColor = player and player:GetAttribute("HousingColor")
+	for _, band in housing do
+		band.Transparency = if typeof(housingColor) == "Color3" then 0 else 1
+		if typeof(housingColor) == "Color3" then
+			band.Color = housingColor
+		end
+	end
 	targetAngle = angle
 	setMode("wide")
 	state:SetAttribute("KeeperUserId", if player then player.UserId else 0)
@@ -320,6 +329,38 @@ function LampService.init(islandRefs, stateFolder, remoteFolder)
 	refs = islandRefs
 	state = stateFolder
 	remotes = remoteFolder
+	-- L1.3: the lamp housing: eight bars round the outside of the lantern room's glass, shown in the Keeper's
+	-- housing colour. The glass radius is measured on the tower at the lamp's height (6 if it cannot be).
+	local radius = 6
+	local tower = refs.folder:FindFirstChild("LighthouseTower")
+	if tower and tower:IsA("BasePart") then
+		local couldQuery = tower.CanQuery
+		tower.CanQuery = true
+		local params = RaycastParams.new()
+		params.FilterType = Enum.RaycastFilterType.Include
+		params.FilterDescendantsInstances = { tower }
+		local from = refs.lampPosition + Vector3.new(30, 0, 0)
+		local hit = workspace:Raycast(from, Vector3.new(-30, 0, 0), params)
+		tower.CanQuery = couldQuery
+		if hit then
+			radius = (Vector3.new(hit.Position.X, 0, hit.Position.Z) - Vector3.new(refs.lampPosition.X, 0, refs.lampPosition.Z)).Magnitude
+		end
+	end
+	for i = 1, 8 do
+		local angle = math.rad(i * 45 + 22.5)
+		local bar = Instance.new("Part")
+		bar.Name = "LampHousing" .. i
+		bar.Size = Vector3.new(0.4, 3.4, 0.4)
+		bar.CFrame = CFrame.new(refs.lampPosition + Vector3.new(math.cos(angle) * (radius + 0.25), 0, math.sin(angle) * (radius + 0.25)))
+		bar.Anchored = true
+		bar.CanCollide = false
+		bar.CanQuery = false
+		bar.CanTouch = false
+		bar.Material = Enum.Material.Metal
+		bar.Transparency = 1
+		bar.Parent = refs.folder
+		table.insert(housing, bar)
+	end
 
 	applyBeam()
 	setLit(true)

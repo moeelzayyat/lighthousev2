@@ -86,8 +86,8 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 ## Live ops and monetization
 | System | Status | Target | Notes |
 |---|---|---|---|
-| Cosmetics for Robux (housings, coats, lanterns, flags) | Catalogue defined (B1.1), nothing sold or enabled | B1.1 / L1.3 | B1.1: `Shared/Definitions/Cosmetics` (9 items: 2 housings, 2 coats, 2 lanterns, 3 flags; Pearl and suggested Robux prices; product ids 0); `_Registry` refuses any stat field on a cosmetic and `ROBUX_ENABLED = true`; no script uses MarketplaceService; `CosmeticsSpec` 5 tests. Wearing housings, coats, lanterns and flags is not drawn yet; owner approval at L1.3 |
-| Supporter pack | Planned | L1.3 | |
+| Cosmetics for Robux (housings, coats, lanterns, flags) | Built and tested in DEV (L1.3); Robux switch off until the owner's product ids exist | B1.1 / L1.3 | L1.3: housings, coats, lanterns and flags are items (`Shared/Items`, Pearls) with slots and optional `Equipped` fields; worn in game (housing bars round the lantern room while you hold the lamp, coat colour on your armor, a lantern at your hip, the ship's flag); BAG slots and shop tab; `Definitions/Cosmetics` is the Robux catalogue (12 products, ids 0); `PurchaseService` answers `ProcessReceipt` once per receipt; shop Robux button; `ROBUX_ENABLED = false`. `CosmeticsSpec` 7, `PurchaseSpec` 4 |
+| Supporter pack | Built (L1.3): the Founder's Flag, Robux only | L1.3 | a cosmetic flag (`reward = "supporter"`), listed in the Robux catalogue; on sale once its product id exists and the switch is on |
 | Codes | Tested (not yet published) | L1.4 | `Definitions/Codes` (LIGHTHOUSE: 10 Pearls; KEEPER: creator template giving the Keeper's Glow beam colour), `CodeService` (once per profile via `RedeemedCodes` + GrantService claim), remote `CodeRedeem`/`CodeResult`, Settings → Codes box; `_Registry` refuses a creator code giving anything but a cosmetic and Pearls over 25; `CodesSpec` 8 tests |
 | Seasons / events (Shipwreck Rescue) | Planned | LO | |
 | Store assets (title, icon, thumbnails, trailer) | Planned | R0.6, S2.7, L1.5 | |

@@ -32,7 +32,10 @@ local function process(player, action, itemId)
 	if not playerData.owns(player, itemId) then
 		return false, "You don't own " .. item.name .. "."
 	end
-	local current = if item.slot == "Primary" then profile.equippedWeapon elseif item.slot == "Beam" then profile.equippedBeam else profile.equippedArmor
+	local current = if item.slot == "Primary" then profile.equippedWeapon
+		elseif item.slot == "Beam" then profile.equippedBeam
+		elseif item.slot == "Armor" then profile.equippedArmor
+		else profile["equipped" .. item.slot] -- L1.3: cosmetic slots have no starter; unequipping leaves them empty
 
 	if action == "equip" then
 		if current == itemId then

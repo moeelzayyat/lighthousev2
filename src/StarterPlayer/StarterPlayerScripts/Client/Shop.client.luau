@@ -24,6 +24,8 @@ local Ammo = require(Shared:WaitForChild("Ammo"))
 local SoundFx = require(Shared:WaitForChild("SoundFx"))
 local StatPipeline = require(Shared:WaitForChild("StatPipeline")) -- S5.7: the values previews and voyages share
 local Boosts = require(Shared:WaitForChild("Definitions"):WaitForChild("Boosts")) -- S6.4: permanent boosts tab
+local Cosmetics = require(Shared:WaitForChild("Definitions"):WaitForChild("Cosmetics")) -- L1.3: the Robux catalogue
+local MarketplaceService = game:GetService("MarketplaceService")
 local UiKit = require(script.Parent:WaitForChild("UiKit"))
 local ItemPreview = require(script.Parent:WaitForChild("ItemPreview"))
 
@@ -55,8 +57,17 @@ end
 local function owns(itemId)
 	return profile ~= nil and profile.owned[itemId] == true
 end
+local EQUIPPED_FIELDS = { "equippedWeapon", "equippedArmor", "equippedBeam", "equippedHousing", "equippedCoat", "equippedLantern", "equippedFlag" }
 local function isEquipped(itemId)
-	return profile ~= nil and (profile.equippedWeapon == itemId or profile.equippedArmor == itemId)
+	if not profile then
+		return false
+	end
+	for _, field in EQUIPPED_FIELDS do
+		if profile[field] == itemId then
+			return true
+		end
+	end
+	return false
 end
 local function pearls()
 	return if profile then profile.pearls or 0 else 0
@@ -65,14 +76,15 @@ local function dps(weaponId)
 	local w = StatPipeline.weapon(weaponId)
 	return w.damage / w.cooldown
 end
+local COSMETIC_LABELS = { Beam = "Beam colour", Housing = "Lamp housing", Coat = "Keeper coat", Lantern = "Lantern", Flag = "Ship flag" }
 local function typeLabel(item)
-	return if item.kind == "Weapon" then "Primary weapon" elseif item.kind == "Armor" then "Armor" elseif item.kind == "Ammo" then "Cannon ammo" elseif item.kind == "Cosmetic" then "Beam colour \u{00B7} looks only" else item.category
+	return if item.kind == "Weapon" then "Primary weapon" elseif item.kind == "Armor" then "Armor" elseif item.kind == "Ammo" then "Cannon ammo" elseif item.kind == "Cosmetic" then (COSMETIC_LABELS[item.slot] or "Cosmetic") .. " \u{00B7} looks only" else item.category
 end
 local function itemsIn(cat)
 	local list = {}
 	for _, itemId in Items.SHOP_ORDER do
 		local item = Items[itemId]
-		if item.category == cat and (item.price or owns(itemId)) then
+		if item.category == cat and (item.price or owns(itemId) or Cosmetics.productFor(itemId)) then
 			table.insert(list, itemId)
 		end
 	end
@@ -275,6 +287,12 @@ local affordText = UiKit.Label(buyArea, "", "Micro", { Name = "Affordability", S
 local buyButton = UiKit.Button(buyArea, "Buy", { name = "BuyButton", variant = "primary", size = "md", fill = true })
 buyButton.AnchorPoint = Vector2.new(0, 1)
 buyButton.Position = UDim2.fromScale(0, 1)
+local BUY_SIZE = buyButton.Size
+-- L1.3: a cosmetic with a Robux product also gets a Robux button (shares the row; alone for a Robux-only item)
+local robuxButton = UiKit.Button(buyArea, "Robux", { name = "RobuxButton", variant = "secondary", size = "md", fill = true })
+robuxButton.AnchorPoint = Vector2.new(1, 1)
+robuxButton.Position = UDim2.fromScale(1, 1)
+robuxButton.Visible = false
 
 local detailEmpty = UiKit.StateView(detail, "empty", { title = "Pick something from the counter", body = "Select an item to see it up close, compare it and buy it." })
 detailEmpty.Visible = false
@@ -462,7 +480,11 @@ renderDetail = function()
 	end
 	dDesc.Text = item.description or ""
 	renderStats(statRows(selectedId))
-	local current = if item.kind == "Weapon" then profile.equippedWeapon elseif item.kind == "Armor" then profile.equippedArmor elseif item.kind == "Cosmetic" then (profile.equippedBeam or "BeamAmber") else nil
+	local current = if item.kind == "Weapon" then profile.equippedWeapon
+		elseif item.kind == "Armor" then profile.equippedArmor
+		elseif item.kind == "Cosmetic" and item.slot == "Beam" then (profile.equippedBeam or "BeamAmber")
+		elseif item.kind == "Cosmetic" then profile["equipped" .. item.slot]
+		else nil
 	compareCaption.Visible = current ~= nil and current ~= selectedId
 	compareCaption.Text = if current then ("Compared with your equipped " .. Items[current].name .. ".") else ""
 	strengthRow.Visible = item.strengths ~= nil
@@ -507,14 +529,17 @@ renderDetail = function()
 			setBuy(string.format("Buy %d for %d Pearls", quantity, total), pendingId == nil)
 		end
 	else
-		local starter = (item.price or 0) <= 0
-		priceLabel.Text = if starter then "STARTER GEAR" else "PRICE"
-		priceHolder.Visible = not starter
+		local starter = (item.price or 0) <= 0 and item.reward == nil
+		priceLabel.Text = if starter then "STARTER GEAR" elseif item.reward == "supporter" then "SUPPORTER ITEM" elseif item.reward then "EARNED" else "PRICE"
+		priceHolder.Visible = (item.price or 0) > 0
 		priceDisplay.set(item.price or 0)
 		if owns(selectedId) then
 			affordText.Text = if isEquipped(selectedId) then "You own this and have it equipped." else "You own this. Equip it from your BAG."
 			affordText.TextColor3 = C.StateSuccess
 			setBuy(if isEquipped(selectedId) then "Equipped" else "Owned", false, "You already own this. Find it in your BAG.")
+		elseif item.price == nil then
+			affordText.Text = if item.reward == "supporter" then "Bought with Robux. Thank you for keeping the light on!" else "Earned in play, never sold."
+			setBuy("Not sold for Pearls", false, "This one isn't sold for Pearls.")
 		elseif balance < (item.price or 0) then
 			affordText.Text = string.format("You have %d Pearls. You need %d more.", balance, item.price - balance)
 			affordText.TextColor3 = C.StateDanger
@@ -525,6 +550,35 @@ renderDetail = function()
 		end
 	end
 end
+
+-- L1.3: the Robux button next to (or instead of) the Pearl price
+local function renderRobux()
+	local item = selectedId and Items[selectedId]
+	local product = if item and item.kind == "Cosmetic" and profile then Cosmetics.productFor(selectedId) else nil
+	local show = product ~= nil and not owns(selectedId)
+	robuxButton.Visible = show
+	buyButton.Visible = not show or (item ~= nil and item.price ~= nil)
+	local half = UDim2.new(0.5, -5, BUY_SIZE.Y.Scale, BUY_SIZE.Y.Offset)
+	buyButton.Size = if show then half else BUY_SIZE
+	robuxButton.Size = if buyButton.Visible then half else BUY_SIZE
+	if show and product then
+		robuxButton.Text = string.format("R$ %d", product.robux)
+		robuxButton:SetAttribute("BaseText", robuxButton.Text)
+	end
+end
+
+local renderDetailBase = renderDetail
+renderDetail = function()
+	renderDetailBase()
+	renderRobux()
+end
+
+robuxButton.Activated:Connect(function()
+	local product = selectedId and Cosmetics.productFor(selectedId)
+	if product and not owns(selectedId) then
+		MarketplaceService:PromptProductPurchase(player, product.productId)
+	end
+end)
 
 local function cellSize(gridWidth)
 	local minCard = if mode == "phone" then 132 else 156

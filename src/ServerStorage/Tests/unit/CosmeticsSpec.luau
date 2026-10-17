@@ -1,17 +1,20 @@
 --!strict
--- B1.1: the cosmetics catalogue is looks only and nothing can be bought with Robux yet. The fairness test by
--- construction: _Registry refuses any field on a cosmetic that is not a look or a price, and refuses
--- ROBUX_ENABLED = true, so a power-for-Robux item cannot reach a boot.
+-- B1.1, L1.3: cosmetics are looks only. Housings, coats, lanterns and flags are items with their own slots; the Robux
+-- catalogue (Definitions/Cosmetics) can list only cosmetics, and only a price and a product id, so a power-for-Robux
+-- item cannot reach a boot (the fairness test by construction). Only PurchaseService answers receipts and only the
+-- shop prompts a purchase, through Cosmetics.productFor.
 return function(T: any)
 	local Cosmetics = T.require(game.ReplicatedStorage.Shared.Definitions.Cosmetics)
+	local Items = T.require(game.ReplicatedStorage.Shared.Items)
 	local Registry = T.require(game.ReplicatedStorage.Shared._Registry)
+	local ProfileSchema = T.require(game.ServerScriptService.Server.ProfileSchema)
 
 	local function problemsWith(cosmetics: any): { string }
 		local all = table.clone(Registry.catalogs())
 		all.Cosmetics = cosmetics
 		local out = {}
 		for _, p in Registry.check(all) do
-			if string.sub(p, 1, 10) == "Cosmetics." then
+			if string.sub(p, 1, 10) == "Cosmetics." or string.sub(p, 1, 6) == "Items." then
 				table.insert(out, p)
 			end
 		end
@@ -19,24 +22,26 @@ return function(T: any)
 	end
 
 	T.describe("the catalogue", function()
-		T.it("passes the registry and covers every slot the roadmap names", function()
+		T.it("passes the registry and every new slot has items", function()
 			T.expect(problemsWith(Cosmetics)).toEqual({})
 			local perSlot: { [string]: number } = {}
-			for _, id in Cosmetics.ORDER do
-				local slot = Cosmetics[id].slot
-				perSlot[slot] = (perSlot[slot] or 0) + 1
+			for _, id in Items.SHOP_ORDER do
+				local item = Items[id]
+				if item.kind == "Cosmetic" then
+					perSlot[item.slot] = (perSlot[item.slot] or 0) + 1
+				end
 			end
-			for _, slot in { "Housing", "Coat", "Lantern", "Flag" } do
+			for _, slot in { "Beam", "Housing", "Coat", "Lantern", "Flag" } do
 				T.expect((perSlot[slot] or 0) >= 2).toBe(true)
 			end
-			T.expect(#Cosmetics.BEAMS >= 4).toBe(true) -- beam colours already in Items
 		end)
 
-		T.it("every Robux item except the supporter flag can also be earned with Pearls", function()
+		T.it("everything sold for Robux is a cosmetic, and all but the supporter flag can be earned with Pearls", function()
 			local robuxOnly = {}
 			for _, id in Cosmetics.ORDER do
-				local def = Cosmetics[id]
-				if def.robux ~= nil and def.pearls == nil then
+				local item = Items[id]
+				T.expect(item.kind).toBe("Cosmetic")
+				if item.price == nil then
 					table.insert(robuxOnly, id)
 				end
 			end
@@ -45,37 +50,77 @@ return function(T: any)
 	end)
 
 	T.describe("fairness", function()
-		T.it("a cosmetic carrying a stat fails the boot", function()
+		T.it("a stat on a Robux product, a weapon for Robux or an earned item for Robux fails the boot", function()
 			local bad = table.clone(Cosmetics)
-			local coat = table.clone(Cosmetics.CoatStormBlue) :: any
-			coat.damage = 5
-			coat.maxHealth = 20
-			bad.CoatStormBlue = coat
-			local problems = problemsWith(bad)
-			T.expect(#problems).toBe(2)
-			T.expect(problems[1]).toContain("looks only")
+			bad.CoatStormBlue = { robux = 59, productId = 0, damage = 5 }
+			bad.StormHarpoon = { robux = 99, productId = 0 }
+			bad.BeamSharedLantern = { robux = 49, productId = 0 }
+			bad.ORDER = table.clone(Cosmetics.ORDER)
+			table.insert(bad.ORDER, "StormHarpoon")
+			table.insert(bad.ORDER, "BeamSharedLantern")
+			local found = table.concat(problemsWith(bad), "\n")
+			T.expect(found).toContain("Cosmetics.CoatStormBlue.damage")
+			T.expect(found).toContain("Cosmetics.StormHarpoon: is not a cosmetic")
+			T.expect(found).toContain("Cosmetics.BeamSharedLantern: is earned")
 		end)
 
-		T.it("Robux cannot be switched on before the owner approves L1.3", function()
-			T.expect(Cosmetics.ROBUX_ENABLED).toBe(false)
-			local bad = table.clone(Cosmetics)
-			bad.ROBUX_ENABLED = true
-			T.expect(problemsWith(bad)[1]).toContain("ROBUX_ENABLED")
+		T.it("nothing is for sale while the switch is off or the product does not exist", function()
+			-- this spec's own copy of the module, changed and put back
+			local savedSwitch, savedId = Cosmetics.ROBUX_ENABLED, Cosmetics.HousingBrass.productId
+			Cosmetics.ROBUX_ENABLED = true
+			Cosmetics.HousingBrass.productId = 0
+			T.expect(Cosmetics.productFor("HousingBrass")).toBe(nil) -- no product yet
+			Cosmetics.HousingBrass.productId = 123456
+			T.expect(Cosmetics.productFor("HousingBrass").robux).toBe(99)
+			T.expect(Cosmetics.itemFor(123456)).toBe("HousingBrass")
+			Cosmetics.ROBUX_ENABLED = false
+			T.expect(Cosmetics.productFor("HousingBrass")).toBe(nil) -- switch off
+			T.expect(Cosmetics.productFor("StormHarpoon")).toBe(nil) -- never listed
+			Cosmetics.ROBUX_ENABLED, Cosmetics.HousingBrass.productId = savedSwitch, savedId
 		end)
 
-		T.it("no game script prompts or processes a Robux purchase", function()
-			local found = {}
+		T.it("only PurchaseService answers receipts and only the shop prompts a purchase", function()
+			local receipts, prompts = {}, {}
 			for _, root in { game.ServerScriptService, game.ReplicatedStorage, game.StarterPlayer, game.StarterGui, game.Workspace } do
 				for _, inst in root:GetDescendants() do
 					if inst:IsA("LuaSourceContainer") then
 						local src = (inst :: any).Source :: string
-						if string.find(src, "MarketplaceService", 1, true) or string.find(src, "ProcessReceipt", 1, true) then
-							table.insert(found, inst:GetFullName())
+						if string.find(src, "ProcessReceipt =", 1, true) then
+							table.insert(receipts, inst.Name)
+						end
+						if string.find(src, ":Prompt", 1, true) and string.find(src, "Purchase", 1, true) then
+							table.insert(prompts, inst.Name)
 						end
 					end
 				end
 			end
-			T.expect(found).toEqual({})
+			T.expect(receipts).toEqual({ "Economy" }) -- the Economy domain hands receipts to PurchaseService
+			T.expect(prompts).toEqual({ "Shop" })
+			local shop = (game.StarterPlayer.StarterPlayerScripts.Client.Shop :: any).Source :: string
+			T.expect(shop).toContain("Cosmetics.productFor(selectedId)")
+		end)
+	end)
+
+	T.describe("wearing", function()
+		T.it("an equipped cosmetic must be owned and fit its slot, or it comes off at load", function()
+			local data = ProfileSchema.template()
+			data.Owned.CoatStormBlue = true
+			data.Equipped.Coat = "CoatStormBlue"
+			data.Equipped.Flag = "FlagKraken" -- not owned
+			data.Equipped.Lantern = "CoatStormBlue" -- owned, wrong slot
+			local fixed, fixes = ProfileSchema.validate(data)
+			T.expect(fixed.Equipped.Coat).toBe("CoatStormBlue")
+			T.expect(fixed.Equipped.Flag).toBe(nil)
+			T.expect(fixed.Equipped.Lantern).toBe(nil)
+			T.expect(#fixes).toBe(2)
+		end)
+
+		T.it("the server dresses coats, lanterns, the lamp housing and the ship flag from colour attributes", function()
+			local economy = (game.ServerScriptService.Server.Domains.Economy :: any).Source :: string
+			local lamp = (game.ServerScriptService.Server.LampService :: any).Source :: string
+			T.expect(economy).toContain("dressCosmetics(character, player)")
+			T.expect(economy).toContain("refreshShipFlag()")
+			T.expect(lamp).toContain("HousingColor")
 		end)
 	end)
 end

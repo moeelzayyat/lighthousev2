@@ -18,7 +18,7 @@ export type Profile = {
 	Pearls: number,
 	Owned: { [string]: boolean },
 	Counts: { [string]: number },
-	Equipped: { Weapon: string, Armor: string, Beam: string, Lantern: string?, Coat: string?, Flag: string? },
+	Equipped: { Weapon: string, Armor: string, Beam: string, Housing: string?, Lantern: string?, Coat: string?, Flag: string? },
 	Stats: { Runs: number, Victories: number, BestNight: number, BestNightLong: number, NightsSurvived: number, PlayDays: number },
 	Logbook: { [string]: boolean },
 	Objectives: { DayKey: string, Progress: { [string]: number }, Claimed: { [string]: boolean } },
@@ -125,6 +125,17 @@ function ProfileSchema.validate(data: any): (Profile, { string })
 		local id = data.Equipped[slot]
 		if type(id) ~= "string" or not data.Owned[id] then
 			data.Equipped[slot] = fix("Equipped." .. slot, "missing or not owned", default)
+		end
+	end
+	-- L1.3: cosmetic slots are optional (nil = none); the item must be owned and fit the slot
+	for _, slot in { "Housing", "Coat", "Lantern", "Flag" } do
+		local id = data.Equipped[slot]
+		if id ~= nil then
+			local item = type(id) == "string" and data.Owned[id] and Items[id]
+			if not item or item.slot ~= slot then
+				data.Equipped[slot] = nil
+				fix("Equipped." .. slot, "not owned or not a " .. slot, nil)
+			end
 		end
 	end
 	-- Stats

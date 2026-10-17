@@ -334,6 +334,53 @@ function ItemPreview:setItem(itemId)
 		self.placeholder = swatch
 		return
 	end
+	-- L1.3: housings, coats, lanterns and flags have no model: a small drawing in the item's colour
+	if item and item.color then
+		self:setModel(nil)
+		local color = Color3.fromRGB(item.color[1], item.color[2], item.color[3])
+		local holder = Instance.new("Frame")
+		holder.Name = "Placeholder"
+		holder.BackgroundTransparency = 1
+		holder.Size = UDim2.fromScale(1, 1)
+		holder.ZIndex = 3
+		holder.Parent = self.holder
+		local function box(x, y, w, h, c, round)
+			local f = Instance.new("Frame")
+			f.BorderSizePixel = 0
+			f.BackgroundColor3 = c
+			f.AnchorPoint = Vector2.new(0.5, 0.5)
+			f.Position = UDim2.fromScale(x, y)
+			f.Size = UDim2.fromScale(w, h)
+			f.ZIndex = 4
+			f.Parent = holder
+			if round then
+				local corner = Instance.new("UICorner")
+				corner.CornerRadius = UDim.new(round, 0)
+				corner.Parent = f
+			end
+			return f
+		end
+		local dark = Color3.fromRGB(58, 48, 38)
+		if item.slot == "Housing" then -- the lamp between two bands
+			box(0.5, 0.5, 0.22, 0.22, Color3.fromRGB(255, 226, 150), 1)
+			box(0.5, 0.32, 0.5, 0.08, color, 0.5)
+			box(0.5, 0.68, 0.5, 0.08, color, 0.5)
+		elseif item.slot == "Coat" then -- a coat: body and two sleeves
+			box(0.5, 0.55, 0.34, 0.5, color, 0.15)
+			box(0.3, 0.5, 0.12, 0.42, color, 0.4)
+			box(0.7, 0.5, 0.12, 0.42, color, 0.4)
+			box(0.5, 0.33, 0.14, 0.06, dark, 0.5)
+		elseif item.slot == "Lantern" then -- glass between a cap and a base
+			box(0.5, 0.52, 0.22, 0.3, color, 0.2)
+			box(0.5, 0.34, 0.3, 0.07, dark, 0.3)
+			box(0.5, 0.7, 0.3, 0.07, dark, 0.3)
+		else -- a flag on a pole
+			box(0.34, 0.5, 0.03, 0.62, dark)
+			box(0.53, 0.36, 0.36, 0.24, color, 0.08)
+		end
+		self.placeholder = holder
+		return
+	end
 	if not model then
 		self:setModel(nil)
 		local placeholder = Instance.new("Frame")

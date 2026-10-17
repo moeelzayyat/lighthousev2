@@ -18,6 +18,7 @@ EconomySim.SOURCES = {
 	admin = "owner-only support grant (not income)",
 	invite = "an item (the Shared Lantern), no Pearls",
 	code = "a promo code's Pearls, once per profile (Definitions/Codes; finite)",
+	robux = "a Robux receipt: a cosmetic item, no Pearls (L1.3)",
 }
 
 export type Model = {

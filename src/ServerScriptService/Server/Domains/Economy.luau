@@ -5,6 +5,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
+local MarketplaceService = game:GetService("MarketplaceService") -- L1.3: ProcessReceipt (PurchaseService)
+local Workspace = game:GetService("Workspace")
 
 local Server = script.Parent.Parent
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
@@ -26,6 +28,7 @@ local MerchantService = require(Server.MerchantService) -- S6.2
 local Merchant = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Merchant"))
 local Boosts = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Boosts")) -- S6.4
 local Specialties = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Specialties")) -- S7.4
+local PurchaseService = require(Server.PurchaseService) -- L1.3
 
 local Economy = { Name = "Economy" }
 
@@ -138,6 +141,150 @@ local function wearArmor(character, itemId)
 	worn.Parent = character
 end
 
+-- L1.3: cosmetics the character wears ---------------------------------------
+local COSMETIC_SLOTS = { "Housing", "Coat", "Lantern", "Flag" }
+
+-- A small lantern at the hip: glass in the lantern's colour between a cap and a base (no light: S4.4 budget)
+local function buildLantern(character)
+	local hip = character:FindFirstChild("LowerTorso") or character:FindFirstChild("Torso")
+	if not hip then
+		return nil
+	end
+	local model = Instance.new("Model")
+	model.Name = "KeeperLantern"
+	local at = hip.CFrame * CFrame.new(hip.Size.X / 2 + 0.3, -0.15, 0)
+	local parts = {}
+	for _, spec in { { "Glass", Vector3.new(0.36, 0.5, 0.36), 0, Enum.Material.Neon }, { "Cap", Vector3.new(0.48, 0.12, 0.48), 0.31, Enum.Material.Metal }, { "Base", Vector3.new(0.48, 0.12, 0.48), -0.31, Enum.Material.Metal } } do
+		local part = Instance.new("Part")
+		part.Name = spec[1]
+		part.Size = spec[2]
+		part.Material = spec[4]
+		part.Color = Color3.fromRGB(70, 58, 44)
+		part.CanCollide = false
+		part.CanQuery = false
+		part.CanTouch = false
+		part.Massless = true
+		part.CFrame = at * CFrame.new(0, spec[3], 0)
+		local weld = Instance.new("WeldConstraint")
+		weld.Part0 = hip
+		weld.Part1 = part
+		weld.Parent = part
+		part.Parent = model
+		parts[spec[1]] = part
+	end
+	model.PrimaryPart = parts.Glass
+	model.Parent = character
+	return model
+end
+
+-- Coat (the worn armor in the coat's colour) and lantern on the character, from the player's colour attributes
+local function dressCosmetics(character, player)
+	local coat = player:GetAttribute("CoatColor")
+	local coatKey = if typeof(coat) == "Color3" then coat:ToHex() else ""
+	if character:GetAttribute("WornCoat") ~= coatKey then
+		character:SetAttribute("WornCoat", coatKey)
+		local armorId = character:GetAttribute("WornArmorId")
+		if armorId then
+			wearArmor(character, armorId) -- a fresh copy, so taking the coat off brings back the armor's own look
+		end
+		local worn = character:FindFirstChild("WornArmor")
+		if worn and typeof(coat) == "Color3" then
+			for _, part in worn:GetDescendants() do
+				if part:IsA("MeshPart") then
+					part.TextureID = ""
+				end
+				if part:IsA("BasePart") then
+					part.Color = coat
+				end
+			end
+		end
+	end
+	local lanternColor = player:GetAttribute("LanternColor")
+	local lantern = character:FindFirstChild("KeeperLantern")
+	if typeof(lanternColor) ~= "Color3" then
+		if lantern then
+			lantern:Destroy()
+		end
+	else
+		lantern = lantern or buildLantern(character)
+		if lantern then
+			lantern.Glass.Color = lanternColor
+		end
+	end
+end
+
+-- The highest point of the ship's mesh (the mast top), found once by looking straight down at it
+local function mastTop(ship)
+	local visual = ship:FindFirstChild("ShipVisual")
+	if not (visual and visual:IsA("BasePart")) then
+		return nil
+	end
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { visual }
+	local best = nil
+	local half = visual.Size / 2
+	local couldQuery = visual.CanQuery
+	visual.CanQuery = true -- the ship mesh is not queryable in play; only for these rays
+	for i = 0, 24 do
+		for j = 0, 24 do
+			local local0 = Vector3.new(-half.X + visual.Size.X * i / 24, half.Y + 2, -half.Z + visual.Size.Z * j / 24)
+			local origin = visual.CFrame:PointToWorldSpace(local0)
+			local hit = Workspace:Raycast(origin, Vector3.new(0, -visual.Size.Y - 4, 0), params)
+			if hit and (not best or hit.Position.Y > best.Y) then
+				best = hit.Position
+			end
+		end
+	end
+	visual.CanQuery = couldQuery
+	return best, visual
+end
+
+-- The ship flies the flag of the first player in the server who has one equipped (none: no flag)
+local function refreshShipFlag()
+	local lobby = Workspace:FindFirstChild("Lobby")
+	local ship = lobby and lobby:FindFirstChild("PirateShip")
+	if not ship then
+		return
+	end
+	local color = nil
+	for _, player in Players:GetPlayers() do
+		local c = player:GetAttribute("FlagColor")
+		if typeof(c) == "Color3" then
+			color = c
+			break
+		end
+	end
+	local flag = ship:FindFirstChild("CosmeticFlag")
+	if not color then
+		if flag then
+			flag:Destroy()
+		end
+		return
+	end
+	if not flag then
+		local top, visual = mastTop(ship)
+		if not top then
+			return
+		end
+		-- hang it along the ship's length, just under the mast top
+		local along = if visual.Size.Z >= visual.Size.X then visual.CFrame.LookVector else visual.CFrame.RightVector
+		along = Vector3.new(along.X, 0, along.Z).Unit
+		local center = top + Vector3.new(0, -2.2, 0) + along * 3.1
+		flag = Instance.new("Part")
+		flag.Name = "CosmeticFlag"
+		flag.Size = Vector3.new(0.15, 3.6, 6)
+		flag.CFrame = CFrame.lookAt(center, center + along)
+		flag.Anchored = true
+		flag.CanCollide = false
+		flag.CanQuery = false
+		flag.CanTouch = false
+		flag.Material = Enum.Material.Fabric
+		flag.Parent = ship
+	end
+	flag.Color = color
+end
+
 local function humanoidOf(player)
 	local character = player.Character
 	return character and character:FindFirstChildOfClass("Humanoid")
@@ -186,6 +333,12 @@ local function syncGear(player)
 	local profile = PlayerData.get(player)
 	local beam = profile and Items[profile.equippedBeam]
 	player:SetAttribute("BeamColor", if beam and beam.beamColor then Color3.fromRGB(beam.beamColor[1], beam.beamColor[2], beam.beamColor[3]) else nil)
+	-- L1.3: the other cosmetics as colours the lamp, the ship and the character read
+	for _, slot in COSMETIC_SLOTS do
+		local cosmetic = profile and Items[profile["equipped" .. slot]]
+		player:SetAttribute(slot .. "Color", if cosmetic and cosmetic.color then Color3.fromRGB(cosmetic.color[1], cosmetic.color[2], cosmetic.color[3]) else nil)
+	end
+	refreshShipFlag()
 
 	local character = player.Character
 	local backpack = player:FindFirstChildOfClass("Backpack")
@@ -238,7 +391,11 @@ local function syncGear(player)
 		if character:GetAttribute("WornArmorId") ~= profile.equippedArmor then
 			character:SetAttribute("WornArmorId", profile.equippedArmor)
 			wearArmor(character, profile.equippedArmor)
+			character:SetAttribute("WornCoat", nil) -- L1.3: the new armor takes the coat's colour again
 		end
+	end
+	if character then
+		dressCosmetics(character, player) -- L1.3
 	end
 	applyBoosts(player) -- S6.4: permanent boosts and an equipped Orbit weapon follow the profile
 end
@@ -294,6 +451,34 @@ function Economy.Init(ctx)
 	})
 
 	LoadoutService.init(remotes, PlayerData)
+	-- L1.3: Robux purchases of cosmetics (the game's only ProcessReceipt; nothing is granted while
+	-- Definitions/Cosmetics.ROBUX_ENABLED is off)
+	local purchaseDeps = {
+		playerByUserId = function(userId)
+			return Players:GetPlayerByUserId(userId)
+		end,
+		loaded = function(player)
+			return PlayerData.data(player) ~= nil
+		end,
+		grant = function(player, claimId, rewards, source)
+			return (GrantService.Grant(player, claimId, rewards, source))
+		end,
+		log = EventLog.log,
+		notify = LampService.notify,
+		nameOf = function(itemId)
+			return if Items[itemId] then Items[itemId].name else itemId
+		end,
+	}
+	MarketplaceService.ProcessReceipt = function(receipt)
+		local ok, result = pcall(PurchaseService.process, receipt, purchaseDeps)
+		if ok and result == "granted" then
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+		return Enum.ProductPurchaseDecision.NotProcessedYet
+	end
+	Players.PlayerRemoving:Connect(function()
+		task.defer(refreshShipFlag) -- L1.3: the flag passes to the next keeper who has one
+	end)
 	-- S5.3: tools, armor and beam colour follow the profile (was PlayerData.onChanged)
 	EventLog.Subscribe("ProfileChanged", function(e)
 		local player = Players:GetPlayerByUserId(e.UserId)

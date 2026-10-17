@@ -45,6 +45,10 @@ local function view(data: any): any
 		equippedArmor = data.Equipped.Armor,
 		equippedWeapon = data.Equipped.Weapon,
 		equippedBeam = data.Equipped.Beam,
+		equippedHousing = data.Equipped.Housing, -- L1.3: cosmetic slots (nil = none)
+		equippedCoat = data.Equipped.Coat,
+		equippedLantern = data.Equipped.Lantern,
+		equippedFlag = data.Equipped.Flag,
 		stats = { runs = data.Stats.Runs, victories = data.Stats.Victories, bestNight = data.Stats.BestNight },
 		boosts = data.Boosts, -- S6.4: Quartermaster boost ranks
 	}
@@ -262,8 +266,8 @@ function PlayerData.spendPearls(player: Player, amount: number, itemId: string?)
 	return true
 end
 
--- slot is "Primary", "Armor" or "Beam"
-function PlayerData.setEquipped(player: Player, slot: string, itemId: string)
+-- slot is "Primary", "Armor", "Beam", or a cosmetic slot ("Housing", "Coat", "Lantern", "Flag"; nil takes it off)
+function PlayerData.setEquipped(player: Player, slot: string, itemId: string?)
 	local data = dataOf(player)
 	if not data then
 		return
@@ -274,6 +278,8 @@ function PlayerData.setEquipped(player: Player, slot: string, itemId: string)
 		data.Equipped.Armor = itemId
 	elseif slot == "Beam" then
 		data.Equipped.Beam = itemId
+	elseif slot == "Housing" or slot == "Coat" or slot == "Lantern" or slot == "Flag" then
+		data.Equipped[slot] = itemId -- L1.3
 	end
 	changed(player)
 end
