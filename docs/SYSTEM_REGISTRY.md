@@ -26,6 +26,10 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Orbiting Blades | Planned | S6.3 | |
 | Results (cause, Moment, your part, rewards, next goal) | Released | S2.5 | Sail again |
 | Dawn Pearl banking | Planned | S2.2 | D-004 |
+| Damage numbers + hit feedback | Planned | S2.5b | D-011 |
+| Seagull airstrike (3/voyage) | Planned | S4.9 | D-011 |
+| Upgrade rebalance + repair limit | Planned | S4.10 | D-011 |
+| Tester bug fixes (wall clipping, text overflow, floating shops) | Planned | R1.10 | D-011 |
 
 ## Crew and social
 | System | Status | Target | Notes |
