@@ -263,8 +263,9 @@ function EventLog.first(milestone)
 end
 
 -- A candidate for the run's "Moment of the storm" (launch R12). priority 1 is the best.
-function EventLog.moment(priority, text)
-	table.insert(stats.moments, { priority = priority, text = text, at = stamp() })
+-- kind (S3.5 role check): "beam" (the keeper's), "oil", "weapon", "cannon" or "crew" (no one player)
+function EventLog.moment(priority, text, kind)
+	table.insert(stats.moments, { priority = priority, text = text, kind = kind or "crew", at = stamp() })
 	EventLog.log("Moment", { priority = priority, text = text })
 end
 
@@ -412,6 +413,7 @@ function EventLog.endRun(result, reason)
 	-- Everything the results screen needs
 	return {
 		moment = best and best.text or nil,
+		momentKind = best and best.kind or nil, -- S3.5
 		forecast = stats.forecast,
 		clutchSaves = stats.clutchSaves,
 		shellsSpent = stats.shellsSpent,

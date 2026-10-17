@@ -24,14 +24,14 @@ Module: `EventLog` (Telemetry domain) exposes `Publish(name, payload)` / `Subscr
 | `TowerRepaired` | `{VoyageId, UserId, Amount, IntegrityBefore}` | Encounter (Tower) | Feed, Results, Objectives | S5.3 ✅ |
 | `CannonBuilt` / `CannonReloaded` / `CannonDestroyed` | `{VoyageId, UserId?, Pad, Level}` (no `UserId` on Destroyed) | Encounter (Defense) | Feed, Objectives, Analytics | S5.3 ✅ |
 | `CreatureSpawned` | `{VoyageId, CreatureId, DefId, Big: boolean}` | Encounter (CreatureService) | Analytics (sampled) | S5.3 ✅ |
-| `CreatureKilled` | `{VoyageId, CreatureId, DefId, Source, KillerId?, X, Y, Z, Big: boolean}` (`Source` is the damage tag as recorded: `WideBeam`, `FocusedBeam`, `Cannon`, `Weapon:<id>`; X/Y/Z where it fell) | Encounter (CreatureService) | **Loot (drops, S5.3 ✅)**, Results, Logbook, Objectives, Analytics | S5.3 ✅ |
+| `CreatureKilled` | `{VoyageId, CreatureId, DefId, Source, KillerId?, X, Y, Z, Big: boolean}` (`Source` is the damage tag as recorded: `WideBeam`, `FocusedBeam`, `Cannon`, `Weapon:<id>`; X/Y/Z where it fell) | Encounter (CreatureService) | **Loot (drops, S5.3 ✅)**, Results, Logbook, Objectives, Analytics (S3: beam modes per player, sent as `BeamModes` at the voyage's end) | S5.3 ✅ |
 | `BossWarning` / `BossDefeated` | `{VoyageId, DefId, Night}` / `{VoyageId, DefId, FinalBlow?}` | Encounter (GameState / CreatureService) | HUD, Results, Logbook | S5.3 ✅ |
 | `LootCollected` | `{VoyageId, UserId, ItemId, Qty}` | Encounter (Loot) | Objectives, Analytics | S5.3 ✅ |
 | `ShellsChanged` | `{VoyageId, Delta, Reason}` (`loot`, `tide`, `waveBonus`, `trader`, `upgrade`, `merchant`) | Encounter (UpgradeService holds the crew pool today) | Analytics | S5.3 ✅ |
 | `UpgradeBought` / `EvolutionUnlocked` | `{VoyageId, UserId, Id, Rank}` / `{VoyageId, Id}` | Encounter (bench / UpgradeService) | Results, Logbook, Objectives | S5.3 ✅ |
 | `NightSurvived` | `{VoyageId, Night, Crew}` | Encounter | **Grant (dawn Pearl, `DawnBanking`, S2.2 ✅)**, Analytics (`Night1Survived`), Leaderboard | R1.6 ✅ |
 | `DawnLootWindow` | `{VoyageId, Seconds}` | Encounter (GameState) | **Economy (auto-sell, launch R10 switch, S5.3 ✅)**, HUD | S5.3 ✅ |
-| `VoyageEnded` | `{VoyageId, Outcome: "Victory"\|"Defeat", Cause, NightReached, Crew, PerPlayer, Voyage?}` (S3.1b: `Voyage` = the definition sailed) | Encounter | Results, Grant (victory bonus), Leaderboard, Objectives, Analytics | R1.6 ✅ |
+| `VoyageEnded` | `{VoyageId, Outcome: "Victory"\|"Defeat", Cause, NightReached, Crew, PerPlayer, Voyage?, MomentKind?}` (S3.1b: `Voyage` = the definition sailed; S3.5: `MomentKind` = who made the moment of the storm: `beam` (the Keeper), `oil`, `weapon`, `cannon` or `crew`) | Encounter | Results, Grant (victory bonus), Leaderboard, Objectives, Analytics | R1.6 ✅ |
 | `RematchVoted` / `SailAgain` | `{VoyageId, UserId}` | Crew | Analytics | R1.6 ✅ |
 | `ModeAssigned` | `{UserId, Arm}` | Data (PlayerData, from `ModeTest`) | Analytics (custom `ModeArm`) | S3.1b ✅ |
 | `PearlsGranted` | `{UserId, ClaimId, Amount, Balance, Source}` | Economy (GrantService) | Analytics (economy source; Source `"dawn"` → funnel `DawnPearl` once per player, S2.2) | R1.6 ✅ |

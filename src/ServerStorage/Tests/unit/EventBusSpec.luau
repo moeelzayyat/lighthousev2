@@ -201,6 +201,39 @@ return function(T: any)
 			})
 		end)
 
+		T.it("S3: the moment's kind and each player's beam modes reach analytics at the end of a voyage", function()
+			local bus = quietBus()
+			local sink, calls = recordingSink()
+			Analytics.start(bus, sink)
+			local function kill(killer: number?, source: string)
+				bus.Publish("CreatureKilled", { VoyageId = "v", CreatureId = 1, DefId = "Crab", Source = source, KillerId = killer, X = 0, Y = 0, Z = 0, Big = false })
+			end
+			kill(1, "WideBeam")
+			kill(1, "FocusedBeam")
+			kill(2, "FocusedBeam")
+			kill(3, "Cannon")
+			kill(nil, "WideBeam")
+			kill(4, "WideBeam")
+			bus.Publish("VoyageEnded", { VoyageId = "v", Outcome = "Victory", Cause = "", NightReached = 7, Crew = { 1, 2, 3 }, MomentKind = "oil" })
+			bus.Publish("VoyageEnded", { VoyageId = "v", Outcome = "Victory", Cause = "", NightReached = 7, Crew = { 1 } })
+			T.expect(calls).toEqual({
+				"funnel 1 8 VoyageEnded",
+				"custom 1 VoyageEnded 7 Victory:",
+				"custom 1 MomentKind nil oil",
+				"custom 1 BeamModes nil both",
+				"funnel 2 8 VoyageEnded",
+				"custom 2 VoyageEnded 7 Victory:",
+				"custom 2 MomentKind nil oil",
+				"custom 2 BeamModes nil focused",
+				"funnel 3 8 VoyageEnded",
+				"custom 3 VoyageEnded 7 Victory:",
+				"custom 3 MomentKind nil oil",
+				-- the same voyage id again: its kills were already counted and cleared
+				"funnel 1 8 VoyageEnded",
+				"custom 1 VoyageEnded 7 Victory:",
+			})
+		end)
+
 		T.it("funnel step names are the fixed dashboard names", function()
 			T.expect(Analytics.STEPS).toEqual({
 				Joined = 1,

@@ -683,6 +683,7 @@ function GameState.run(deps)
 					NightReached = results.nightReached,
 					Crew = userIds(departing),
 					Voyage = def.id, -- S3.1b: which mode the crew sailed
+					MomentKind = results.momentKind, -- S3.5: who made the moment of the storm (role check)
 				})
 				results.shellsLeft = upgrades.getShells()
 				results.economy = Config.ECONOMY_ENABLED

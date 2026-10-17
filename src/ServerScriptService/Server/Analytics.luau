@@ -4,6 +4,9 @@
 --     FirstBeamHit, Night1Survived, DawnPearl (a player's first dawn-banked Pearl, S2.2), VoyageEnded, SailAgain
 --   * "Left" and "VoyageEnded" as custom events with their phase / outcome
 --   * Pearl sources and sinks as economy events with the ending balance
+--   * S3 gate measures, per crew member at the end of a voyage: "MomentKind" (who made the moment of the storm:
+--     beam / oil / weapon / cannon / crew) and "BeamModes" (which beam modes the player killed with: wide /
+--     focused / both; only for players with a beam kill)
 -- The sink is swappable so tests can record calls without touching AnalyticsService.
 
 local Players = game:GetService("Players")
@@ -128,12 +131,32 @@ function Analytics.start(bus: Bus, sink: Sink): { () -> () }
 			end
 		end
 	end)
+	-- S3 gate ("both beam modes used"): the beam modes each player killed with, per voyage
+	local beamKills: { [string]: { [number]: { [string]: boolean } } } = {}
+	on("CreatureKilled", function(e)
+		if e.KillerId and (e.Source == "WideBeam" or e.Source == "FocusedBeam") then
+			local voyage = beamKills[e.VoyageId] or {}
+			beamKills[e.VoyageId] = voyage
+			local modes = voyage[e.KillerId] or {}
+			voyage[e.KillerId] = modes
+			modes[e.Source] = true
+		end
+	end)
 	on("VoyageEnded", function(e)
+		local voyageKills = beamKills[e.VoyageId] or {}
+		beamKills[e.VoyageId] = nil
 		for _, userId in e.Crew do
 			step(userId, "VoyageEnded")
 			sink.custom(userId, "VoyageEnded", e.NightReached, e.Outcome .. ":" .. e.Cause)
 			if e.Voyage then
 				sink.custom(userId, "VoyageMode", e.NightReached, e.Voyage) -- S3.1b: nights reached per mode
+			end
+			if e.MomentKind then
+				sink.custom(userId, "MomentKind", nil, e.MomentKind) -- S3.5 role check
+			end
+			local modes = voyageKills[userId]
+			if modes then
+				sink.custom(userId, "BeamModes", nil, if modes.WideBeam and modes.FocusedBeam then "both" elseif modes.FocusedBeam then "focused" else "wide")
 			end
 		end
 	end)

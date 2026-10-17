@@ -348,12 +348,15 @@ local function removeAt(index, reason)
 			EventLog.log("BigMonsterKilled", { kind = crab.kind, by = crab.lastSource })
 			local monster = string.gsub(tostring(crab.kind), "(%l)(%u)", "%1 %2") -- "BarnacleBrute" -> "Barnacle Brute"
 			local attacker = if typeof(crab.lastAttacker) == "Instance" then crab.lastAttacker else nil
+			-- S3.5: the moment's kind says which role made it (beam = the keeper)
+			local source = tostring(crab.lastSource)
+			local kind = if string.find(source, "Beam", 1, true) then "beam" elseif source == "Cannon" then "cannon" else "weapon"
 			if attacker and crab.lastSource == "FocusedBeam" then
-				EventLog.moment(2, attacker.DisplayName .. " burned down the " .. monster .. " with the focused beam")
+				EventLog.moment(2, attacker.DisplayName .. " burned down the " .. monster .. " with the focused beam", "beam")
 			elseif attacker then
-				EventLog.moment(2, attacker.DisplayName .. " landed the final blow on the " .. monster)
+				EventLog.moment(2, attacker.DisplayName .. " landed the final blow on the " .. monster, kind)
 			else
-				EventLog.moment(2, "The crew brought down the " .. monster)
+				EventLog.moment(2, "The crew brought down the " .. monster, "crew")
 			end
 		end
 		-- S5.3: loot (and later results, the logbook and objectives) react to the kill on the bus

@@ -111,10 +111,10 @@ Purpose: real players answer whether the loop retains, before content work.
 |---|---|---|---|---|
 | S3.1 🟦 | Diagnostic traffic | Small sponsored campaign (ads = diagnostics, not ranking); flags for icon A/B and title A/B/C ("13 Nights at the Lighthouse 🔦") | Playthrough visible per variant after 48 h | Creator analytics |
 | S3.1b 🟦 | Mode test | Feature flag: half of new accounts get the 7-night Standard Voyage, half get Endless Storm (Best Night score, same difficulty curve) | Rematch rate and D1 play days per arm after 7 days; the winner becomes the default; if Endless wins, S4 adds a day-phase work pass (scavenging, building) | Telemetry |
-| S3.2 🟦 | Prototype A sessions | 5+ sessions, 2–4 players, ≥ 1 real phone each, one with no verbal help; `PLAYTEST_KIT.md` thresholds | Observer sheets filled; run summaries pasted | Owner |
+| S3.2 🟦 | Prototype A sessions | 5+ sessions, 2–4 players, ≥ 1 real phone each, one with no verbal help; `PLAYTEST_KIT.md` thresholds (kit rewritten 2026-10-17) | Observer sheets filled; run summaries pasted | Owner |
 | S3.3 🟦 | Weekly iteration ×2 | Two data-driven passes (FTUE, difficulty, oil role, vote clarity); hypothesis + result logged | Shipped within the week each | `DECISION_LOG.md` |
 | S3.4 🟦 | Signal read | First-play bounce (<60 s, 61–180 s), D1 play days, co-play days, qualified sessions; funnel conversion per step | Written review | Document |
-| S3.5 🟦 | Role check | Per-role contribution from "your part": share of voyages where a non-Keeper had the Moment of the storm | ≥ 30% | Telemetry |
+| S3.5 🟦 | Role check | Per-role contribution from "your part": share of voyages where a non-Keeper had the Moment of the storm | ≥ 30% | Telemetry (custom event `MomentKind`, built 2026-10-17) |
 | S3.6 🟨 | Go/no-go | Written decision | Logged | Owner |
 
 **GO (to S4) when, over the final 7 days:** Night-1 survival (unassisted new accounts) ≥ 50% · Sail again / rematch ≥ 60% of finished voyages · both beam modes used on purpose ≥ 70% (observer sheets) · first-play bounce lower in week 2 than week 1 · at least one tester describes an oil/cannon moment as the highlight.
@@ -234,7 +234,7 @@ Floor: biweekly, announced. Scaling trigger for a shared harbor: `architecture.m
 | LO.2 ✅ | Shipwreck Rescue | `Rescue` voyage (5 nights, event `ShipwreckRescue`); `RescueService`: a wreck with 8 castaways, carried one at a time to a shelter; Shells per rescue; 1 Pearl per 2 saved | Count, drop and rewards tested; a full Rescue voyage played | TestRunner + play test |
 | LO.3 ✅ | Event cosmetic | Rescuer's Flag (`reward = "event"`), given once when every castaway is saved | Granted once at the end of a won voyage | Play test |
 | LO.4 ✅ | Small fixes | Shop card type line no longer runs under the price; the code box also in the BAG | Seen in Studio | Play test |
-| LO.5 🟦 | Publish (owner) | Package in HANDOFF_REPORT.md; published 2026-10-17 | Live check (pending) | Owner |
+| LO.5 ✅ | Publish (owner) | Package in HANDOFF_REPORT.md; published 2026-10-17 | Live check (owner: all good, 2026-10-17) | Owner |
 
 ### Visual overhaul (2026-10-17, ahead of the relaunch; the owner rejected the current look; plan: project file `research/visual_overhaul_plan.md`)
 The owner judges every step from before/after screenshots (`assets/screens/visual_<step>/`) and can keep or veto it.
@@ -257,7 +257,7 @@ The owner judges every step from before/after screenshots (`assets/screens/visua
 | HUI.3 ✅ | Quartermaster shop | Tab rail (Weapons, Armor, Ammo, Boosts, Cosmetics), 3-column cards (`UiKit.ShopCard`: rarity tag, item in a rarity ring, price / Robux / EQUIPPED / OWNED plate), detail panel with stat bars and +/- against what is equipped, big green BUY beside the Robux button; phone: rail + grid, tap for the detail view | Same ShopRequest/ShopResult and MarketplaceService flow; screenshots wide and phone | Play test |
 | HUI.4 ✅ | Harbor board | `Client/HarborBoard`: "HARBOR LEGENDS" face with a podium for the top 3 and rows 4–10 per board, a "your rank" strip, and a full-screen view from a prompt on the board. It reads the rows the server already writes (no new remote); the board is 16 x 9.5 studs (was 13 x 7.5) | Rows, podium and rank drawn from sample rows; 0 errors | Play test |
 | HUI.5 ✅ | Harbor HUD | Chunky bag button (same spot and size), a Pearls pill (top right) and a CODES button (opens the BAG with the code box), shown on the harbor island only | Shown in the harbor, hidden on a voyage | Play test |
-| VIS.P 🟦 | Publish the new look (owner) | Package "VISUAL + HARBOR UI + S2.5c — READY FOR OWNER TO PUBLISH" in HANDOFF_REPORT.md: V1–V8, HUI.1–HUI.5, the first-10-minutes pass, the bigger harbor island, S2.5c | Live checks in the package; the LO.5 live checks ride along | Owner |
+| VIS.P ✅ | Publish the new look (owner) | Package "VISUAL + HARBOR UI + S2.5c — READY FOR OWNER TO PUBLISH" in HANDOFF_REPORT.md: V1–V8, HUI.1–HUI.5, the first-10-minutes pass, the bigger harbor island, S2.5c | Live checks in the package; the LO.5 live checks ride along | Owner |
 
 ---
 

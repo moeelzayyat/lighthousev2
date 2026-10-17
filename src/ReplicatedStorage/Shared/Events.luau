@@ -21,7 +21,7 @@ local Events: { [string]: Schema } = {
 	FirstAction = { VoyageId = "string?", UserId = "number", Kind = "string" },
 	BeamHit = { VoyageId = "string?", KeeperId = "number", First = "boolean", CreatureId = "number?", Mode = "string?" },
 	NightSurvived = { VoyageId = "string", Night = "number", Crew = "table" },
-	VoyageEnded = { VoyageId = "string", Outcome = "string", Cause = "string", NightReached = "number", Crew = "table", Voyage = "string?" },
+	VoyageEnded = { VoyageId = "string", Outcome = "string", Cause = "string", NightReached = "number", Crew = "table", Voyage = "string?", MomentKind = "string?" },
 	-- S5.3: voyage events that had no publisher, and the kill that loot used to hear through a callback
 	Refuelled = { VoyageId = "string", UserId = "number", Amount = "number", FuelBefore = "number", Night = "boolean" },
 	ReserveUsed = { VoyageId = "string", Reason = "string" },

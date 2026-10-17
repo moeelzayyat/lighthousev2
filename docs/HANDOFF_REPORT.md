@@ -1288,3 +1288,30 @@ Live checks (on a computer, then on your phone):
  11. The LO.5 checks still to report: the crew card offers "Shipwreck Rescue"; a castaway carried to the shelter; the BAG's Codes box.
 If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.
 VIS.P step 1 done · 2026-10-17 22:19 UTC · the owner saved `backups/LighthouseKeepers_DEV_VIS_2026-10-17.rbxl` (1.1 MB, checked on disk). Publish and live checks still to come.
+
+VIS.P PUBLISHED · 2026-10-17 · the owner published DEV with the new look and reports "All going good" for the live checks (the LO.5 checks were in the same list). Not reported: the phone model and how smooth it felt (V8 stays 🟦 for that).
+
+CHECKPOINT: S3 measures for the public test — 🟦 (Script Analysis unmeasured; the numbers need live players)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S3TEL_before_2026-10-17 (Events, EventLog, CreatureService, Encounter, GameState, Analytics, EventBusSpec) · restore points "S3TEL before", "S3TEL passed"
+WHY: two S3 gate numbers had no source. The S3.5 role check ("a non-Keeper made the moment of the storm in ≥ 30% of voyages") was not sent anywhere, and "both beam modes used" relied on observer sheets alone.
+BUILT (telemetry only; no gameplay, price, remote or save change):
+- `EventLog.moment(priority, text, kind)`: each moment of the storm now says who made it (`beam` = the Keeper, `oil`, `weapon`, `cannon`, `crew`). The boss kill takes its kind from the killing blow's damage tag; "saved the light" is `oil`; the tower and evolutions are `crew`. `VoyageEnded` carries `MomentKind` (catalog and `EVENTS.md` updated).
+- `Analytics`: at the end of a voyage, each crew member gets the custom event `MomentKind`. Each player with a beam kill gets `BeamModes` (`wide`, `focused` or `both`, from `CreatureKilled` damage tags).
+- `docs/PLAYTEST_KIT.md` (new): S3.2 session checklist, an observer sheet per player, the S3 gate table with where each number is read in Creator Hub, the real-phone checklist. The old repo's kit was never brought over.
+TESTRUNNER (DEV, Play server): **251 passed, 0 failed** (1 new: kinds and beam modes reach analytics; repeated end events don't double-count).
+PLAY TEST (DEV): sailed, killed creatures with both beam tags as the player (runtime helper), added a moment, left the voyage. Console: `[ANL] custom MomentKind oil` and `[ANL] custom BeamModes both`, and the run summary listed `FocusedBeam 3, WideBeam 3`. No errors from game scripts (one error came from my first helper script, which used a wrong call; the game itself was not involved).
+STRICT: EventLog, CreatureService, Encounter and GameState are older modules without `--!strict`. They were left as they were, as in earlier substages; the edits are one-line arguments.
+MIRROR: 163 scripts in DEV, digest identical to `src/` (3c3c2715).
+OWNER: to start S3, see "S3 — START THE PUBLIC TEST" below.
+
+S3 — START THE PUBLIC TEST (owner; DEV experience only; production stays untouched)
+=====================================================================
+D-016: the public test runs on DEV, made public. Testers' DEV progress does not carry over to production at the relaunch.
+ 1. Make Lighthouse Keepers DEV **Public**: in the DEV Studio window, Game Settings → Permissions → Public (or the experience's Public/Private switch in Creator Hub).
+ 2. The store page on DEV: icon and thumbnails from `assets/` (L1.5 files), description and title A from `assets/store/STORE_PAGE.md`.
+ 3. Creator Hub → DEV → Ads Manager: a small sponsored campaign of your choosing. Run it for at least 48 hours, as a diagnostic, not for ranking. If thumbnail or icon testing is offered, use icon A and icon B from `assets/icons/`.
+ 4. Run the S3.2 sessions with `docs/PLAYTEST_KIT.md`: 5 or more, a real phone in each, one with no verbal help.
+ 5. After 48 hours and then weekly: send Claude the Creator Hub numbers listed in the kit's §3 and the observer sheets. Claude makes the weekly change (S3.3) and writes the review (S3.4). The GO/NO-GO (S3.6) is yours.
+To end the test: set DEV back to Private, and turn the mode test off (`Config.MODE_TEST_ENABLED = false`, ask Claude).

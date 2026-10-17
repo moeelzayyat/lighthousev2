@@ -83,7 +83,7 @@ local function hookOil(ctx)
 		if clutch then
 			EventLog.count("clutchSaves", 1, player)
 			EventLog.log("SavedTheLight", { player = player.Name, fuelBefore = math.floor(fuelBefore) })
-			EventLog.moment(1, string.format("%s saved the light at %d%% fuel", player.DisplayName, math.max(0, math.floor(fuelBefore / LampService.getMaxFuel() * 100))))
+			EventLog.moment(1, string.format("%s saved the light at %d%% fuel", player.DisplayName, math.max(0, math.floor(fuelBefore / LampService.getMaxFuel() * 100))), "oil")
 		end
 		if Config.CREW_FEED_ENABLED then
 			local gained = math.floor((LampService.getFuel() - fuelBefore) / LampService.getMaxFuel() * 100 + 0.5)
