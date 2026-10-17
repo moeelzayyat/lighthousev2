@@ -34,7 +34,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Crew roster / ready / departure rules | Released | R1.7 | 4-player servers |
 | Boarding (walk aboard), BoardingZone | Released | — | |
 | First-voyage fast path | Released | — | |
-| Coach prompts | Released | S2.3 | |
+| Coach prompts | Released; S2.3 forced oil prompt and S2.4 aim marker Tested (not yet published) | S2.3, S2.4 | S2.4: aim marker on the nearest creature from 30 s; prologue first crab comes out with the light |
 | Crew feed + lamp flare | Released | — | |
 | Lamp shift | Released (untested 2+) | S3 | |
 | Invites (unrewarded) | Released | S7.5 | reward |

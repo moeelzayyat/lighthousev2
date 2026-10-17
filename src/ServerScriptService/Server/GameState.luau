@@ -252,6 +252,10 @@ function GameState.run(deps)
 		else
 			EventLog.log("Tutorial", { step = "refuel", result = "done", seconds = elapsed() })
 		end
+		-- S2.4: the first crab climbs out as soon as the light is back, just ahead of the sweep, so a new keeper has
+		-- a target the moment they take the lamp (first beam hit within 45 s). The other opening crabs follow as before.
+		creatures.spawnCrab(lamp.getBeam().angle + 40)
+		EventLog.log("Tutorial", { step = "firstCrab", seconds = elapsed() })
 
 		notifyAll("The light is back! Use the LAMP console at the tower door and sweep the rocks.")
 		if not waitUntil(function()
@@ -266,7 +270,7 @@ function GameState.run(deps)
 		notifyAll("...something enormous is out there.")
 		task.wait(5)
 
-		for _ = 1, Config.PROLOGUE_CRABS do
+		for _ = 2, Config.PROLOGUE_CRABS do -- the first one came out with the light (S2.4)
 			creatures.spawnCrab()
 			task.wait(1.5)
 		end

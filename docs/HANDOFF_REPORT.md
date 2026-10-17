@@ -269,3 +269,25 @@ NUMBERS: fuel at Night-1 start for a never-oil first voyager = 0 (both runs); wi
 MIRROR: 74 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (e7014ef0).
 OWNER APPROVAL: auto-approved (unattended, D-010)   PUBLISHED BY OWNER: n.a. (S2 publishes at S2.8, to DEV)
 NEXT: S2.4 First beam hit ≤ 45 s.
+
+CHECKPOINT: S2.4 First beam hit ≤ 45 s — 🟦 (Script Analysis unmeasured; 4 valid runs of 5, see below)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S2.4_before_2026-10-16 (GameState, Coach)
+BUILT:
+- Prologue: the first opening crab now climbs out as soon as the light is back (after the refuel step, or the 30 s reserve), 40° ahead of the sweep, so a new keeper has a target the moment they take the lamp. The other opening crabs follow as before (total still `PROLOGUE_CRABS` = 3). Logged as `Tutorial step=firstCrab`.
+- Coach: from 30 s after the client starts, the "Aim the light at the crabs" prompt also puts the coach marker on the creature nearest the tower, and moves it on when that creature is gone.
+- No new gameplay numbers (30 s is the roadmap's own value).
+MEASUREMENT: `tests/first_beam_hit_bot.luau`, a scripted first-time player (no shortcuts): it walks onto the ship, uses the wheel, then follows the coach order (oil, tank, lamp, aim at the nearest creature) with a 1 s pause per step and pathfinding around the tower. Times are seconds since the script took control (about 1 s after the join on the fast path; the Studio tool call itself delays the start, so raw `sinceJoin` is corrected by the offset `PlayerReady.sinceJoin − BOT_Ready`).
+- Before (same script, old prologue): first beam hit 44.5 s.
+- After, valid runs (Studio drawing at 60 fps): 38.1 · 37.0 · 37.7 · 37.6 s. First crab in the beam's path at 33.8 · 32.8 · 33.4 · 33.2 s (target ≤ 35 s). Landing about 22 s after control (boarding + wheel + 10 s countdown).
+- Void runs (not counted): one where the script's character got stuck on scenery; three where Studio was not the focused window (0 or 15 fps), and ProximityPrompts do not respond at that rate. A run now counts only when the frame rate stays ≥ 40.
+- Median: 4 valid runs, median 37.65 s. A 5th valid run could not be made because Studio kept dropping to 15 fps, but even a total miss as the 5th run leaves the median of 5 at 37.7 s, so the ≤ 45 s check is met.
+- Aim marker checked directly in Play: with the player at the lamp after 30 s, `PlayerGui.Coach.CoachMarker` was adorned to `Island.Creatures.RockCrab.Body` and the "Aim the light at the crabs" chip was shown.
+TESTRUNNER (DEV): 96 passed, 0 failed (no new pure logic in this substage).
+SCRIPT ANALYSIS: not measured (owner item).
+PLAY TEST: every run above was a DEV Play on the owner's account with the mock store. Console: ProfileStore's refused Studio write (API off) and Roblox CorePackages UIBlox warnings only; 0 game-script errors. Play stopped; 0 TEMPTEST scripts remain.
+MIRROR: 74 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (53f856fb).
+OWNER APPROVAL: auto-approved (unattended, D-010)   PUBLISHED BY OWNER: n.a. (S2 publishes at S2.8, to DEV)
+NOTES / DEBT: the measurement is a script, not a person; the S3 public test's funnel (`FirstBeamHit` step) gives the real number. Keep the DEV window focused during scripted runs.
+NEXT: S2.5 Results and replay.

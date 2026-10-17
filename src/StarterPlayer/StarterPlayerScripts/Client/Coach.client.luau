@@ -166,6 +166,29 @@ local function bigMonsterOut()
 	return state:GetAttribute("BigWarning") == true
 end
 
+-- S2.4: the aim marker. From AIM_MARKER_AFTER seconds after this client started (about the join), the "aim"
+-- prompt also marks the creature nearest the tower.
+local sessionStart = os.clock()
+local AIM_MARKER_AFTER = 30
+local function nearestCreaturePart()
+	local folder = island:FindFirstChild("Creatures")
+	local tower = partOf(findTarget("LighthouseTower"))
+	if not folder or not tower then
+		return nil
+	end
+	local best, bestDistance = nil, math.huge
+	for _, creature in folder:GetChildren() do
+		local part = partOf(creature)
+		if part then
+			local distance = (part.Position - tower.Position).Magnitude
+			if distance < bestDistance then
+				best, bestDistance = part, distance
+			end
+		end
+	end
+	return best
+end
+
 local X = Enum.KeyCode.ButtonX
 -- priority = order. keys: keyboard / touch / gamepad (nil = no hint on that input)
 local PROMPTS = {
@@ -205,6 +228,12 @@ local PROMPTS = {
 		keys = { keyboard = "Mouse", touch = "Drag", gamepad = Enum.KeyCode.Thumbstick1 }, -- batch 1: controller hint
 		when = function()
 			return isKeeper() and creaturesOut()
+		end,
+		targetFn = function()
+			if os.clock() - sessionStart < AIM_MARKER_AFTER then
+				return nil
+			end
+			return nearestCreaturePart()
 		end,
 	},
 	{
@@ -283,7 +312,7 @@ local function show(prompt)
 	chip:SetAttribute("RestPosition", chip.Position) -- the chip moves with the HUD; open from where it is now
 	chip.Visible = true
 	UiKit.Open(chip)
-	local part = prompt.target and partOf(findTarget(prompt.target))
+	local part = if prompt.targetFn then prompt.targetFn() elseif prompt.target then partOf(findTarget(prompt.target)) else nil
 	marker.Adornee = part
 	marker.Enabled = part ~= nil
 	shownCount[prompt.id] = (shownCount[prompt.id] or 0) + 1
@@ -398,6 +427,12 @@ task.spawn(function()
 			if want then
 				show(want)
 			end
+		end
+		-- S2.4: a moving target (the aim marker) is placed once its time comes, and moves on when its creature is gone
+		if current and current.targetFn and not (marker.Enabled and marker.Adornee and marker.Adornee:IsDescendantOf(Workspace)) then
+			local part = current.targetFn()
+			marker.Adornee = part
+			marker.Enabled = part ~= nil
 		end
 		-- stay above the bottom HUD row
 		local floorY = hudFloor()
