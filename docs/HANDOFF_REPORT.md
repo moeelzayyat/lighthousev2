@@ -1193,3 +1193,20 @@ PLAY TEST (DEV): voyage sailed with the runtime helper; a runtime-only helper da
 SCREENSHOT: `assets/screens/visual_v7/after_foam_burst_staged.jpg` is staged: the same foam emitter fired several times in a row so the screenshot catches it (one real death is a single, shorter puff).
 MIRROR: HitFx e875eb19, CreatureView a79702a8, BeamFx caab8fb4, identical in DEV and `src/`.
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+
+CHECKPOINT: V8 Phone check (visual overhaul) — 🟦 (a real-phone check is the owner's; Studio's device emulator was not reachable from the tools)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+DONE:
+- Screenshots of the island storm night at Studio's lowest graphics quality (Level 1) and at Automatic: `assets/screens/visual_v8/`. The beam, lanterns, hut and shed all still read at Level 1.
+- Studio frame times (this PC, capped at 60): Automatic 60.2 FPS / 16.7 ms avg / 17.8 ms p95; Level 1 60.0 FPS / 16.7 ms / 17.9 ms. The quality setting was put back to Automatic afterwards.
+- The per-device budget of everything V1–V7 added, in `docs/PERFORMANCE_BUDGETS.md` ("Visual overhaul"): touch devices get a third of the rain, no rain sheets, fewer glints, 40 instead of 90 shore points and half the spray; Low effects turns all particle extras off.
+NOT DONE: an FPS number on a phone or in the emulator. Nothing here is a phone measurement.
+OWNER (when you next publish DEV): on a phone, sail a voyage and watch the first storm night; say whether it stays smooth. If not, the first things to cut are the shore foam points and the rain sheets (already off on phones).
+TESTRUNNER (DEV, Play server): **249 passed, 0 failed**. 0 client errors.
+
+=====================================================================
+VISUAL OVERHAUL V1–V8 — summary for the owner
+=====================================================================
+V1 sea and sky · V2 the beam · V3 storm effects · V4 island rebuild · V5 one palette · V6 harbor at dusk · V7 hit and death feel · V8 phone check (🟦). Decisions D-038 (lighting) and D-039 (palette) are flagged for you. Every step has a backup in `ServerStorage.Backups.VIS_<step>_before_2026-10-17` and before/after screenshots in `assets/screens/visual_<step>/`. Scripts are mirrored in `src/`; the terrain, the island props and the harbor dressing are place content and reach players with your next DEV publish.
+Still asked of you: save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_preVisual_2026-10-17.rbxl` (a copy of the place as it is now is also useful: `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_visual_2026-10-17.rbxl`); say yes or no to the free storm-sky download; judge the look.

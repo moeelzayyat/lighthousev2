@@ -37,3 +37,21 @@ Targets from `architecture.md` §23. Measured cells hold real numbers only. Base
 | Date | Measurement | Decision |
 |---|---|---|
 | 2026-10-12 | ~50 KB/s/player with swarm, solo | "near the comfortable limit; fix = client-side movement" (legacy) → S4.2/S4.3 |
+
+## Visual overhaul (V1–V8, 2026-10-17)
+What the overhaul adds on each device, from the code (rates and caps are set in code; none of this is a phone measurement). Everything below is client-side; the server sends nothing new.
+
+| Effect | Computer | Touch device | Low effects on | Script |
+|---|---|---|---|---|
+| Rain drops (storm, on the island) | 900/s | 300/s (S4.4 cap) | 0 | `Storm` |
+| Rain sheets (4 boxes around the camera) | 4 × 70/s | 0 | 0 | `Storm` |
+| Rain glints in the beam (storm, lamp lit) | 160/s | 60/s | 0 | `BeamFx` |
+| Shore foam (points found once on the island) | 90 points × 0.8/s storm, 0.25/s calm | 40 points × 0.8/s | 0 | `ShoreFx` |
+| Wave spray (storm) | 2 bursts × 6 every 0.35 s | 1 burst × 6 every 0.35 s | 0 | `ShoreFx` |
+| Beam layers | 4 Beams (were 1) | 4 | 4 | `BeamFx` |
+| Lightning bolt | 9 Neon parts, shown ~0.3 s per strike (every 7–16 s) | same | not shown (flash only) | `Storm` |
+| Creature death / hit | 14 foam + 10 drops per death, 5 sparks per hit, from 1 shared part | same | same | `CreatureView` |
+| Swaying / fluttering parts | 8 lanterns + 1 flag within 250 studs, moved every frame | same | same | `WindFx` |
+| Static lights added | island: 9 PointLights (hut window, shed, 7 lanterns), no shadows; harbor: campfire (shadows) | same | same | place content |
+
+Measured in Studio on this PC (DEV, 2026-10-17, prologue storm on the island, pinned camera): Automatic quality 60.2 FPS, 16.7 ms average, 17.8 ms p95; lowest quality (Level 1) 60.0 FPS, 16.7 ms, 17.9 ms p95. Studio is capped at 60 FPS here, so these show no regression on this PC and say nothing about phones. The client's workspace held 341 parts, 23 lights, 192 particle emitters (most idle at rate 0) and 5 beams at that moment. **Phone FPS: not measured** (no emulator or real phone reachable); the owner's real-phone check stands.
