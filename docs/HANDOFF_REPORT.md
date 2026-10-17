@@ -1119,3 +1119,18 @@ PLAY TEST (DEV): voyage sailed with the runtime helper, the lamp kept fuelled by
 SCREENSHOTS: `assets/screens/visual_v2/`.
 MIRROR: BeamFx hash identical in DEV and `src/` (b64e4eed).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+
+CHECKPOINT: V3 Storm effects (visual overhaul) — 🟦 (Script Analysis unmeasured; phone FPS is V8; the owner judges the look)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: ServerStorage.Backups.VIS_V3_before_2026-10-17 (Storm, and a note) · restore point "VIS_V3 before"
+BUILT:
+- `Storm.client`: the rain was nearly invisible because a positive squash flattened every drop into a faint horizontal dash; drops are now vertical streaks, bigger and brighter (phones keep the lower drop rate). New rain sheets: long faint streaks in four boxes 170 studs around the camera so the storm shows across the sea (computers only). Lightning now also strikes: a 9-segment bolt into the sea 180–450 studs away, flickering twice, and a cold flash over the whole scene through this device's own colour correction (the bolt is skipped with Low effects).
+- `ShoreFx` (new LocalScript, `--!strict`): finds the shoreline from the terrain (water next to land, every 11 studs) the first time the player is on the island; slow foam puffs churn there (stronger in the storm) and storm waves throw spray at random points. 90 points on computers, 40 on touch devices, none with Low effects.
+- `BeamFx` (V2) adjusted: the layers are lighter (the beam was a solid white wall when the camera stood beside it) and dim further when the camera is next to the beam; the server's beam is now only read, and all four layers are drawn locally. Rain glints in the beam fixed the same way as the rain.
+- Not done: lanterns and flags swaying. The voyage island has none yet; this moves to V4, when the hut, path lanterns and flags are built.
+TESTRUNNER (DEV, Play server): **249 passed, 0 failed**.
+PLAY TEST (DEV): voyage sailed with the runtime helper, lamp kept fuelled by a runtime-only helper; the prologue storm seen from pinned cameras; 90 shoreline points found; 0 client errors, 0 server errors apart from the expected refused Studio data-store calls; client 60 FPS in Studio. The lightning picture is one frame held still by a runtime-only helper (the real flash lasts about a third of a second). After the play test the bolt distance was shortened from 350–800 to 180–450 studs (farther bolts were lost in the haze); that change was parse-checked, not play-tested.
+SCREENSHOTS: `assets/screens/visual_v3/`.
+MIRROR: Storm 455fe39f, BeamFx ac09e486, ShoreFx 9f0eff9c, identical in DEV and `src/`.
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)

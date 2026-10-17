@@ -251,3 +251,4 @@ The owner (2026-10-17) rejected the current visuals ("looks like garbage"; "I'm 
 ## LO.5 published by the owner · 2026-10-17 17:19 UTC · DEV only · backup `backups/LighthouseKeepers_DEV_LO1_2026-10-17.rbxl` (1.0 MB) · live checks pending
 ## CP — V1 sea and sky passed (🟦 Script Analysis; the owner judges the look) · 2026-10-17 · auto-approved (unattended) · DEV only · sea edge gone, storm night and overcast day; TestRunner 249/249
 ## CP — V2 the beam passed (🟦 Script Analysis; the owner judges the look) · 2026-10-17 · auto-approved (unattended) · DEV only · soft layered beam and rain glints, client only; TestRunner 249/249; 0 errors
+## CP — V3 storm effects passed (🟦 Script Analysis; the owner judges the look) · 2026-10-17 · auto-approved (unattended) · DEV only · rain fixed and heavier, rain sheets, lightning bolt and flash, shore foam and spray; beam dimmed beside the camera; TestRunner 249/249; 0 errors; 60 FPS
