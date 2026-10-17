@@ -105,6 +105,7 @@ UiKit.Gauge = UiKit.ResourceGauge
 -- damage, a brass marker at 25% shows where "critical" begins.
 function UiKit.HealthGauge(parent, opts)
 	opts = opts or {}
+	local P = UiKit.palette() -- S5.6: glass HUD keeps navy surfaces when the gauge recolours
 	local max = opts.max or 100
 	local frame = new("Frame", {
 		Name = "HealthGauge",
@@ -169,7 +170,7 @@ function UiKit.HealthGauge(parent, opts)
 		end
 		readout.Text = string.format("%d / %d", math.ceil(v), max)
 		local critical = alpha <= 0.25
-		cap.BackgroundColor3 = if critical then Color.StateDanger else Color.SurfaceInset
+		cap.BackgroundColor3 = if critical then Color.StateDanger else P.SurfaceInset
 		UiKit.SetGlyphColor(heart, if critical then Color.TextOnAccent else Color.StateDanger)
 		label.Text = self.note or (if critical then "HEALTH · CRITICAL" else "HEALTH")
 		label.TextColor3 = if critical or self.note then Color.StateDanger else Color.TextSecondary
@@ -196,6 +197,7 @@ end
 -- the reservoir, quarter marks, and four stages: steady, LOW, CRITICAL, BLACKOUT.
 function UiKit.FuelGauge(parent, opts)
 	opts = opts or {}
+	local P = UiKit.palette()
 	local frame = new("Frame", {
 		Name = "FuelGauge",
 		BackgroundTransparency = 1,
@@ -254,7 +256,7 @@ function UiKit.FuelGauge(parent, opts)
 		fill.Size = UDim2.fromScale(v, 1)
 		percent.Text = string.format("%d%%", math.floor(v * 100 + 0.5))
 		fill.Visible = v > 0
-		track.BackgroundColor3 = if v <= 0 then Color.Scrim else Color.SurfaceInset
+		track.BackgroundColor3 = if v <= 0 then Color.Scrim else P.SurfaceInset
 		local stage
 		if v <= 0 then
 			stage = "blackout"
@@ -273,7 +275,7 @@ function UiKit.FuelGauge(parent, opts)
 		end
 		stateTag.Visible = stage ~= "steady"
 		UiKit.SetGlyphColor(lamp, if stage == "blackout" then Color.TextMuted else Color.AccentLighthouse)
-		cap.BackgroundColor3 = if stage == "blackout" then Color.SurfaceBase else Color.SurfaceInset
+		cap.BackgroundColor3 = if stage == "blackout" then P.SurfaceBase else P.SurfaceInset
 		label.TextColor3 = if stage == "blackout" or stage == "critical" then Color.StateDanger else Color.TextPrimary
 		self.stage = stage
 	end
@@ -285,6 +287,7 @@ end
 -- broke flashes coral once.
 function UiKit.TowerGauge(parent, opts)
 	opts = opts or {}
+	local P = UiKit.palette()
 	local segments = opts.segments or 10
 	local frame = new("Frame", {
 		Name = "TowerGauge",
@@ -352,7 +355,7 @@ function UiKit.TowerGauge(parent, opts)
 			b.crack.Visible = amount == 0
 			if justBroke then
 				b.frame.BackgroundColor3 = Color.StateDanger
-				tween(b.frame, 0.45, { BackgroundColor3 = Color.SurfaceInset })
+				tween(b.frame, 0.45, { BackgroundColor3 = P.SurfaceInset })
 			end
 		end
 		initialized = true

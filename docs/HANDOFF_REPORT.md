@@ -586,3 +586,24 @@ SCRIPT ANALYSIS: not measured (owner item).
 MIRROR: 106 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (1f7647b1).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
 NEXT: S5.6 HUD single pass.
+
+CHECKPOINT: S5.6 HUD single pass — 🟦 (Script Analysis unmeasured; the real phone look is part of the owner's S4.7 check)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S5.6_before_2026-10-17 (Hud, UiSkin, UI.Tokens, UI.Primitives, UI.Controls, UI.Gauges)
+BUILT:
+- Glass is now a UiKit build variant, not a repaint. Between `UiKit.beginGlass()`/`endGlass()` (or inside `UiKit.Glass(fn)`) every element is created as night-navy glass: surfaces the wood skin warmed get their navy originals (kept as `K.BaseColor` before the skin remaps the tokens), brass outlines get the blue glow, buttons get glass bodies, and the wood art is never attached (`UiSkin` wrappers skip glass builds). `UiKit.palette()` gives builders the glass tokens for later recolours (the gauges use it); `UiKit.glassPanel` styles a HUD panel at build time; `UiKit.GLASS` holds the glass colours.
+- The HUD's `glassTree`/`restyle`/`deskin`/`glassStroke` pass (and its DescendantAdded hooks on four screens and the BAG button) is deleted. Boss bars, notices and pickups are built inside `UiKit.Glass`.
+- `Hud.client`: 2,044 → **711 lines**. New `Client/HudParts/`: `Build` (every element, already glass), `Prompts` (prompt cards and their logic), `Bosses` (boss bars), `Layout` (sizes, places, phones, slim gauges), `Simulator` (Studio only).
+VERIFIED "HUD identical" (DEV Play, owner's account, mock store; TEMPTEST scripts held fuel, tower and health still, runtime only):
+- A recorder hashed every element of the HUD screens (GameHUD, Prompts, HudTopBar, InventoryButton: position, size, absolute size and position, colours, transparency, text, fonts, strokes, corners, padding, gradients) in 7 states inside one prologue (deck, crew, prologue, carrying oil, keeper with focused beam, boss bar, blackout alarm) at 4 sizes (the real window and the HUD simulator's small phone 667×375, tablet 1180×820 and laptop 1366×768): 84 snapshots, each stable across two samples; the old HUD reproduced its own hashes in a second run.
+- New HUD vs old: **84 of 84 identical** once the two intended changes below are mapped back (exact hash match). A/B runs of the old code in the same Studio located every difference.
+- Intended changes (visible, small):
+  1. The health and lamp-fuel gauge caps and the fuel track stay navy glass. The old repaint ran once, so the first time a gauge recoloured (any health or fuel change) these went back to the wood skin's brown (34,24,17).
+  2. The keeper's FOCUS/WIDE BEAM button draws its own label. The old one hid its text under a mirrored skin label drawn 2 px higher; that label had also widened the button to 190 px, so the new button keeps `minWidth = 190` and the keeper row is unchanged.
+- 0 client errors; server only ProfileStore's refused Studio write (API off). Play stopped; 0 TEMPTEST scripts remain.
+TESTRUNNER (DEV): 140 passed, 0 failed (no new pure logic).
+SCRIPT ANALYSIS: not measured (owner item).
+MIRROR: 111 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (3fd957e4).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+NEXT: S5.7 Stat pipeline.

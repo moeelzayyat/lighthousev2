@@ -151,3 +151,5 @@ The roadmap's GO thresholds (Night-1 survival ≥ 50 %, rematch ≥ 60 %, beam m
 ## CP — S5.4 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 35 definitions checked at boot; a broken price stops the boot with a clear message; TestRunner 140/140
 - Accepted (unattended, recommendation): catalogs stay in `Shared/` (no move under `Definitions/`); `_Registry` sits at `Shared/_Registry` as the architecture names it. To revise: say so.
 ## CP — S5.5 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · UiKit 3,115 → 40 lines + 5 parts; 20/20 screens and 10/10 guide pages unchanged; v1 API and Gear.client deleted
+## CP — S5.6 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · glass built natively (repaint pass deleted); Hud.client 2,044 → 711 lines; 84/84 HUD snapshots identical apart from 2 intended changes
+- Accepted (unattended, recommendation): gauge caps and the fuel track stay navy in the glass HUD (the old repaint let them turn brown after the first update), and the keeper beam button draws its own label (keeps its 190 px width). To revise: say so.

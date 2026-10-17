@@ -16,6 +16,98 @@ local Fonts = K.Fonts
 local Type = K.Type
 
 ---------------------------------------------------------------------
+-- GLASS VARIANT (S5.6): the in-game HUD's night-navy glass, drawn when an element is built. Between
+-- UiKit.beginGlass() and UiKit.endGlass(), or inside UiKit.Glass(fn), surfaces the art skin warmed go back
+-- to their navy originals, brass outlines become the blue glow, and buttons get glass bodies instead of
+-- the wood art. Builders that recolour later read UiKit.palette(), captured when they were built.
+---------------------------------------------------------------------
+
+local GLASS = {
+	bg = rgb(12, 20, 40),
+	bgT = 0.18,
+	glow = rgb(104, 156, 255),
+	glowT = 0.45,
+	text = rgb(240, 244, 255),
+	hover = rgb(30, 48, 88),
+	heart = rgb(255, 76, 110),
+	danger = rgb(255, 70, 104),
+	dangerBg = rgb(58, 12, 30),
+	chip = rgb(26, 52, 110),
+	radius = 14,
+}
+UiKit.GLASS = GLASS
+
+local function colorKey(c)
+	return string.format("%d,%d,%d", math.floor(c.R * 255 + 0.5), math.floor(c.G * 255 + 0.5), math.floor(c.B * 255 + 0.5))
+end
+local NAVY = {} -- warm skin colour -> its navy original
+local GlassColor = setmetatable({}, { __index = Color })
+for _, token in { "SurfaceBase", "SurfacePrimary", "SurfaceSecondary", "SurfaceElevated", "SurfaceHover", "SurfaceInset", "BorderSubtle", "StateDisabled" } do
+	NAVY[colorKey(Color[token])] = K.BaseColor[token]
+	GlassColor[token] = K.BaseColor[token]
+end
+local BRASS = colorKey(Color.BorderStructural)
+
+local glassDepth = 0
+function UiKit.beginGlass()
+	glassDepth += 1
+end
+function UiKit.endGlass()
+	glassDepth = math.max(0, glassDepth - 1)
+end
+function UiKit.isGlass()
+	return glassDepth > 0
+end
+-- Builds inside fn in the glass variant; returns what fn returns
+function UiKit.Glass(fn)
+	glassDepth += 1
+	local results = table.pack(pcall(fn))
+	glassDepth -= 1
+	if not results[1] then
+		error(results[2], 0)
+	end
+	return table.unpack(results, 2, results.n)
+end
+-- The colour tokens a builder should use now (the glass palette inside a glass build)
+function UiKit.palette()
+	return if glassDepth > 0 then GlassColor else Color
+end
+
+local function glassify(inst)
+	if inst:IsA("GuiObject") then
+		local navy = NAVY[colorKey(inst.BackgroundColor3)]
+		if navy then
+			inst.BackgroundColor3 = navy
+		end
+	elseif inst:IsA("UIStroke") and colorKey(inst.Color) == BRASS then
+		inst.Color = GLASS.glow
+	end
+end
+
+-- A HUD panel in glass: navy body, rounder corners, the glow outline (keepStroke: leave the outline as is)
+-- and a soft top-lit sheen
+function UiKit.glassPanel(frame, keepStroke)
+	frame.BackgroundColor3 = GLASS.bg
+	frame.BackgroundTransparency = GLASS.bgT
+	local corner = frame:FindFirstChildOfClass("UICorner") or UiKit.round(frame, GLASS.radius)
+	corner.CornerRadius = UDim.new(0, GLASS.radius)
+	local stroke = frame:FindFirstChildOfClass("UIStroke")
+	if stroke and not keepStroke then
+		stroke.Color = GLASS.glow
+		stroke.Transparency = GLASS.glowT
+		stroke.Thickness = 1.5
+	end
+	if not frame:FindFirstChild("GlassSheen") then
+		UiKit.new("UIGradient", {
+			Name = "GlassSheen",
+			Rotation = 90,
+			Color = ColorSequence.new(Color3.new(1, 1, 1), rgb(150, 164, 196)),
+		}, frame)
+	end
+	return frame
+end
+
+---------------------------------------------------------------------
 -- BASIC HELPERS
 ---------------------------------------------------------------------
 
@@ -25,6 +117,9 @@ local function new(className, props, parent)
 		for key, value in props do
 			inst[key] = value
 		end
+	end
+	if glassDepth > 0 then
+		glassify(inst)
 	end
 	if parent then
 		inst.Parent = parent
@@ -38,6 +133,9 @@ local function apply(inst, props)
 		for key, value in props do
 			inst[key] = value
 		end
+	end
+	if glassDepth > 0 then
+		glassify(inst)
 	end
 	return inst
 end

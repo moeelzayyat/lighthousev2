@@ -75,6 +75,7 @@ UiKit.Font = Fonts
 
 -- Optional art skin (Config.UI_SKIN): warms the colour tokens before anything is built
 local UiSkin = require(script.Parent.Parent:WaitForChild("UiSkin"))
+K.BaseColor = table.clone(Color) -- S5.6: the navy originals, kept for the glass variant (Primitives)
 UiSkin.remap(Color, Fonts)
 UiKit.Skin = UiSkin
 

@@ -261,9 +261,13 @@ function UiSkin.install(UiKit)
 	end
 	local Color = UiKit.Color
 
+	-- S5.6: nothing built in the glass variant (the HUD) gets the wood art
 	local Panel = UiKit.Panel
 	UiKit.Panel = function(parent, opts)
 		local panel, content, header = Panel(parent, opts)
+		if UiKit.isGlass() then
+			return panel, content, header
+		end
 		local kind = panel:GetAttribute("PanelKind")
 		if kind == "plain" then
 			UiSkin.attach(panel, "slot", rgb(176, 176, 176))
@@ -281,13 +285,18 @@ function UiSkin.install(UiKit)
 	local Button = UiKit.Button
 	UiKit.Button = function(parent, text, opts)
 		local b = Button(parent, text, opts)
-		UiSkin.skinButton(b, Color)
+		if not UiKit.isGlass() then
+			UiSkin.skinButton(b, Color)
+		end
 		return b
 	end
 
 	local IconButton = UiKit.IconButton
 	UiKit.IconButton = function(parent, glyph, opts)
 		local b = IconButton(parent, glyph, opts)
+		if UiKit.isGlass() then
+			return b
+		end
 		if glyph == "close" then
 			local img = UiSkin.attach(b, "round", rgb(220, 220, 220))
 			if img then
@@ -305,7 +314,7 @@ function UiSkin.install(UiKit)
 	UiKit.ItemCard = function(parent, opts)
 		local self = ItemCard(parent, opts)
 		local card = type(self) == "table" and self.frame
-		if typeof(card) == "Instance" then
+		if typeof(card) == "Instance" and not UiKit.isGlass() then
 			card:SetAttribute("SkinKeepStroke", true) -- selection outline
 			UiSkin.attach(card, "slot", rgb(214, 214, 214))
 			local well = card:FindFirstChild("Well")

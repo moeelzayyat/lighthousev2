@@ -117,6 +117,26 @@ function UiKit.Button(parent, text, opts)
 	if v.transparent then
 		b:SetAttribute("GhostButton", true)
 	end
+	if UiKit.isGlass() then
+		-- S5.6: glass body for every variant (the HUD's keeper buttons)
+		local G = UiKit.GLASS
+		b.BackgroundColor3 = G.bg
+		b.BackgroundTransparency = G.bgT
+		b.TextColor3 = G.text
+		b:SetAttribute("BaseColor", G.bg)
+		b:SetAttribute("HoverColor", G.hover)
+		b:SetAttribute("BaseTextColor", G.text)
+		b:SetAttribute("GhostButton", nil)
+		b:FindFirstChildOfClass("UICorner").CornerRadius = UDim.new(0, 12)
+		local s = b:FindFirstChildOfClass("UIStroke") or UiKit.border(b, G.glow, 1.5, G.glowT)
+		s.Enabled = true
+		s.Color = G.glow
+		s.Transparency = G.glowT
+		s.Thickness = 1.5
+		if v.stroke then
+			b:SetAttribute("BaseStrokeColor", G.glow)
+		end
+	end
 	UiKit.focusable(b)
 	attachFeedback(b)
 	wireClick(b, opts)
