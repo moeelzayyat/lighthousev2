@@ -21,6 +21,7 @@ function Registry.catalogs(): Catalogs
 		Voyages = require(Shared:WaitForChild("Definitions"):WaitForChild("Voyages")) :: any,
 		Merchant = require(Shared:WaitForChild("Definitions"):WaitForChild("Merchant")) :: any, -- S6.2
 		Boosts = require(Shared:WaitForChild("Definitions"):WaitForChild("Boosts")) :: any, -- S6.4
+		Logbook = require(Shared:WaitForChild("Definitions"):WaitForChild("Logbook")) :: any, -- S7.1
 		Events = require(Shared:WaitForChild("Events")) :: any,
 	}
 end
@@ -507,6 +508,21 @@ RULES.Boosts = function(c, Boosts)
 		if not table.find(Boosts.ORDER or {}, id) then
 			c.add(w, "is not listed in Boosts.ORDER")
 		end
+	end
+end
+
+-- S7.1: the logbook's categories (their entries come from the other catalogs)
+RULES.Logbook = function(c, Logbook)
+	c.order("Logbook.ORDER", Logbook.ORDER, Logbook)
+	for id, def in c.defs(Logbook) do
+		local w = "Logbook." .. id
+		if def.id ~= id then
+			c.add(w .. ".id", "must equal its key, got " .. tostring(def.id))
+		end
+		c.oneOf(w .. ".id", id, { "Creatures", "Bosses", "Evolutions", "Forecasts" })
+		c.str(w .. ".displayName", def.displayName)
+		c.str(w .. ".how", def.how)
+		c.num(w .. ".reward", def.reward, 0, 100, true)
 	end
 end
 

@@ -53,7 +53,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Trader (sell loot) | Released; merchant role tested (not yet published) | S6.2 | sells the merchant's stock by day |
 | Beam colours (Pearls) | Released | — | |
 | Quartermaster permanent boosts + gear | Tested (not yet published) | S6.4 | `Definitions/Boosts` (Shell Pouch, Sea Boots, Sharpened Steel; +15% total cap), `ShopService` action `boost`, Boosts tab; profile field `Boosts` (default {}); gear: Coral Lance, Tidecaller Blades (permanent Orbit), Kelpweave Vest; `BoostsSpec` 9 tests |
-| Logbook | Planned | S7.1 | |
+| Logbook | Tested (not yet published) | S7.1 | `Definitions/Logbook` + `LogbookService` (LiveOps domain, bus only): creatures, big monsters, evolutions, forecasts; Pearls once per finished category; profile field `Logbook`; notices only, no logbook page yet; `LogbookSpec` 5 tests |
 | Daily objective | Planned | S7.2 | |
 
 ## Platform and data

@@ -794,3 +794,18 @@ Live checks (Prototype B session, about 30 minutes, with friends if you can):
  10. Tell Claude: anything confusing or broken, whether each new monster's move was clear without being told (that is the blind test for S6.5/S6.6), phone FPS on the busiest night, and the Script Analysis count.
 If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.
 Claude's state: S6.7 set to 🟦; work continues with S7.1 (Logbook).
+
+CHECKPOINT: S7.1 Logbook — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S7.1_before_2026-10-17 (Events, _Registry, LiveOps) · restore point "S7.1 passed"
+BUILT:
+- `Shared/Definitions/Logbook` (new): four categories (Creatures, Big monsters, Evolutions, Forecasts) and their Pearls (D-025); the entries come from the creature, upgrade and forecast catalogs, so new monsters join automatically (7 creatures, 2 big monsters, 2 evolutions, 3 forecasts today). `_Registry` checks it (59 definitions at boot).
+- `Server/LogbookService` (new, `--!strict`, LiveOps domain): hears CreatureKilled, BossDefeated, EvolutionUnlocked and NightSurvived on the bus; marks the profile's `Logbook`; publishes `LogbookDiscovered`; tells the player "New in your logbook: …"; pays a finished category once through GrantService.
+- The LiveOps domain now starts it (its first job).
+TESTRUNNER (DEV, Play server): **187 passed, 0 failed** (182 + new `LogbookSpec` 5: entries from the catalogs, registry clean; discover once and the last one finishes the category; kills fill both crew members' logbooks and the category pays once each even when the kills repeat; a big monster's kill is a boss entry, not a creature; evolutions and survived forecasts; wiring).
+PLAY TEST (DEV, owner's account, mock store; runtime-only TEMPTEST scripts): during a voyage, one of each small creature was killed (the Ghost Lantern's kill put on the bus as the beam would, since weapons pass through it): the logbook held all 7 creature entries and Pearls went 0 → 15 (`Grant claim=logbook:Creatures:7 pearls=15`); two more Rock Crab kills changed nothing (7 entries, 15 Pearls). 0 script errors. Play stopped; 0 TEMPTEST scripts remain.
+NOT BUILT: a logbook page to browse the entries (notices only for now; flagged in D-025).
+MIRROR: 127 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (856025b8).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); rewards D-025 flagged
+NEXT: S7.2 Daily objective.

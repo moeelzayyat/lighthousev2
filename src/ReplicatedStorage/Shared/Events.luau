@@ -50,6 +50,9 @@ local Events: { [string]: Schema } = {
 	PearlsSpent = { UserId = "number", Amount = "number", Balance = "number", ItemId = "string?" },
 	ShopPurchase = { UserId = "number", ItemId = "string", Price = "number", Currency = "string" },
 	MerchantPurchase = { VoyageId = "string?", UserId = "number", ItemId = "string", Price = "number", Currency = "string" }, -- S6.2
+
+	-- LiveOps
+	LogbookDiscovered = { UserId = "number", EntryId = "string" }, -- S7.1
 }
 
 return Events
