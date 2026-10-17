@@ -1149,3 +1149,18 @@ PLAY TEST (DEV): voyage sailed with the runtime helper; prologue crabs (9) and N
 SCREENSHOTS: `assets/screens/visual_v4/`.
 MIRROR: WindFx f04ac3c5 identical in DEV and `src/`. Terrain and props are place content (not in the mirror); they reach players with the owner's next DEV publish.
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+
+CHECKPOINT: V5 One material style (visual overhaul) — 🟦 (Script Analysis unmeasured; the owner judges the look)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: ServerStorage.Backups.VIS_V5_before_2026-10-17 (every terrain material colour as it was, and the old `GlassPop`) · restore points "VIS_V5 before", "V5 palette"
+BUILT (place settings, no scripts; D-039):
+- Terrain material colours on one cold palette (both islands): mossy greens instead of bright lawn green, wet blue-grey rock, dark earth and mud, muted sand.
+- `GlassPop` colour correction: saturation +0.12 → 0, contrast +0.06 → +0.1, a slight cool tint.
+- Surveyed every visible part in play: V4 props are wood, slate, cobble and metal; the remaining Plastic/SmoothPlastic parts are textured meshes (tower, barrels, crates, palms, ship, trader, bench), left alone.
+- Not possible from a script: switching Roblox's material set; it stays as the owner set it.
+TESTRUNNER (DEV, Play server): **249 passed, 0 failed**.
+PLAY TEST (DEV): the harbor seen from the player's own camera; 0 client and 0 server errors (apart from the expected refused Studio data-store calls).
+SCREENSHOTS: `assets/screens/visual_v5/` (the palette pair is Studio's bright edit view, for colour only).
+MIRROR: no script changed.
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-039 flagged
