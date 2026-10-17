@@ -24,13 +24,13 @@ local INTERP_DELAY = 2 / 12 -- draw two snapshots behind, so there is almost alw
 local GONE_AFTER = 0.4 -- seconds without a snapshot before a creature is removed
 local HISTORY = 6
 
-local CRAB_COLOR = Color3.fromRGB(176, 64, 44)
 local BURN_COLOR = Color3.fromRGB(255, 170, 60)
 local HIT_COLOR = Color3.fromRGB(255, 255, 255)
 local LIT_TINT = Color3.fromRGB(235, 150, 95)
 local EYE_TOWER = Color3.fromRGB(255, 240, 120)
 local EYE_CANNON = Color3.fromRGB(255, 150, 60)
 local EYE_PLAYER = Color3.fromRGB(255, 60, 50)
+local TELL_COLOR = Color3.fromRGB(255, 250, 220) -- S6.5: a monster about to use its move pulses this colour
 
 local kinds = Snap.kinds(Creatures)
 local views = {} -- id -> view
@@ -87,6 +87,10 @@ local function newView(id, kindIndex)
 		color = nil,
 		eyeColor = nil,
 		shownHp = -1,
+		baseColor = template.PrimaryPart.Color, -- S6.5: each kind keeps its own colour (was always the crab's)
+		inflates = stats ~= nil and stats.behaviour == "mine",
+		scale = 1,
+		tellSince = nil,
 	}
 	if bar then
 		bar.Enabled = false
@@ -123,6 +127,9 @@ local function release(view)
 		burst(view.body.Position)
 	end
 	view.model.Parent = nil
+	if view.scale ~= 1 then
+		view.model:ScaleTo(1) -- S6.5: a swollen Puffer Mine goes back to the pool at its normal size
+	end
 	if view.feedback then
 		view.feedback.Enabled = false
 	end
@@ -181,19 +188,33 @@ RunService.RenderStepped:Connect(function()
 		end
 		view.model:PivotTo(CFrame.new(x, y, z) * CFrame.Angles(0, math.rad(yaw), 0))
 
+		-- S6.5: the telegraph: the body pulses, the eyes go pale, a Puffer Mine swells over its fuse
+		local tell = Snap.isTelegraph(state)
+		if tell and not view.tellSince then
+			view.tellSince = now
+		elseif not tell then
+			view.tellSince = nil
+		end
 		local color = if has(state, Snap.HIT) then HIT_COLOR
+			elseif tell then (if math.sin(now * 25) > 0 then TELL_COLOR else view.baseColor)
 			elseif has(state, Snap.BURNING) then BURN_COLOR
 			elseif has(state, Snap.LIT) then LIT_TINT
-			else CRAB_COLOR
+			else view.baseColor
 		if color ~= view.color then
 			view.color = color
 			view.body.Color = color
 			if view.feedback then
-				view.feedback.Enabled = color ~= CRAB_COLOR
+				view.feedback.Enabled = color ~= view.baseColor
 				view.feedback.Color = color
 			end
 		end
+		local swell = if tell and view.inflates then 1 + math.min(1, now - view.tellSince) * 0.6 else 1
+		if math.abs(swell - view.scale) > 0.02 then
+			view.scale = swell
+			view.model:ScaleTo(swell)
+		end
 		local eyeColor = if has(state, Snap.HIT) then HIT_COLOR
+			elseif tell then TELL_COLOR
 			elseif has(state, Snap.BURNING) then BURN_COLOR
 			elseif has(state, Snap.TARGET_PLAYER) then EYE_PLAYER
 			elseif has(state, Snap.TARGET_CANNON) then EYE_CANNON

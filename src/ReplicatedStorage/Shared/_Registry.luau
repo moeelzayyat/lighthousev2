@@ -167,6 +167,52 @@ RULES.Creatures = function(c, Creatures)
 		c.bool(w .. ".big", d.big)
 		c.bool(w .. ".pushable", d.pushable, true)
 		c.bool(w .. ".swarm", d.swarm, true)
+		-- S6.5: a monster with its own move warns for at least 0.6 s (architecture §14)
+		if d.behaviour ~= nil then
+			c.oneOf(w .. ".behaviour", d.behaviour, { "spitter", "mine", "ghost" })
+			c.num(w .. ".telegraph", d.telegraph, 0.6, 5)
+			c.str(w .. ".telegraphSound", d.telegraphSound)
+			c.str(w .. ".releaseSound", d.releaseSound)
+			if d.behaviour == "spitter" then
+				c.pos(w .. ".splashRadius", d.splashRadius)
+				c.num(w .. ".towerRange", d.towerRange, 0)
+			elseif d.behaviour == "mine" then
+				c.pos(w .. ".triggerRadius", d.triggerRadius)
+				c.pos(w .. ".blastRadius", d.blastRadius)
+			elseif d.behaviour == "ghost" then
+				c.num(w .. ".fuelDrain", d.fuelDrain, 0, 50)
+			end
+		end
+		c.bool(w .. ".weaponImmune", d.weaponImmune, true)
+		if d.shape ~= nil then
+			c.oneOf(w .. ".shape", d.shape, { "eel", "puffer", "lantern" })
+			c.color(w .. ".color", d.color)
+		end
+		if d.appears ~= nil then
+			local a = d.appears
+			if type(a) ~= "table" then
+				c.add(w .. ".appears", "must be { from, base, every, max }")
+			else
+				c.num(w .. ".appears.from", a.from, 1, nil, true)
+				c.num(w .. ".appears.base", a.base, 0, nil, true)
+				c.num(w .. ".appears.every", a.every, 1, nil, true)
+				c.num(w .. ".appears.max", a.max, 1, 20, true)
+			end
+		end
+		if d.loot ~= nil and type(d.loot) == "table" then
+			for i, row in d.loot do
+				if type(row) == "table" and type(row.drops) == "table" then
+					for j, drop in row.drops do
+						local where = w .. ".loot[" .. i .. "].drops[" .. j .. "]"
+						c.oneOf(where .. "[1]", type(drop) == "table" and drop[1] or nil, { "Shells", "CrabClaw", "SeaGlass", "BlackPearl" })
+						c.num(where .. "[2]", type(drop) == "table" and drop[2] or nil, 1, nil, true)
+						c.num(where .. "[3]", type(drop) == "table" and drop[3] or nil, type(drop) == "table" and drop[2] or 1, nil, true)
+					end
+				else
+					c.add(w .. ".loot[" .. i .. "]", "needs drops = { { kind, min, max } }")
+				end
+			end
+		end
 	end
 	c.order("Creatures.BIG_POOL", Creatures.BIG_POOL, Creatures)
 	for _, id in Creatures.BIG_POOL or {} do

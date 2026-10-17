@@ -6,7 +6,8 @@ Targets from `architecture.md` §23. Measured cells hold real numbers only. Base
 | Metric | Target | Baseline (solo) | S4.2 | S4.6 | S6.1 | B1.4 |
 |---|---|---|---|---|---|---|
 | Game work per frame (ms) at 4 players, 45 creatures | ≤ 2 avg | 0.11 (swarm, solo) | | | | |
-| Send per player (KB/s) at 45 creatures | ≤ 30 | ~50 (per-frame PivotTo) | 10.0 avg, 10.7 max snapshot bytes (45 creatures, 10 s, 1 client; the same packet goes to every client); `Stats.DataSendKbps` peak 16.7 (all server traffic) | | | |
+| Send per player (KB/s) at 45 creatures | ≤ 30 | ~50 (per-frame PivotTo) | 10.0 avg, 10.7 max snapshot bytes (45 creatures, 10 s, 1 client; the same packet goes to every client); `Stats.DataSendKbps` peak 16.7 (all server traffic) | | 6.26 avg, 6.75 max (4 bosses + 25 small = 45 slots, 29 creatures; 59.9 FPS) | |
+| Send per player (KB/s), S6.5 mix at the cap | ≤ 30 | — | 4 eels + 5 puffers + 3 lanterns + 33 crabs/skitters (45 creatures): **9.59 avg, 10.41 max**; 59.9 FPS, lowest 1 s 60 (1 client, Studio PC) | | | |
 | Runtime creature raycasts per frame | 0 | ~90 (2 per creature) | 0 (S4.1: 0 raycasts across prologue, day 1 and night 1, up to 31 creatures) | | | |
 | Memory growth (MB/h, 3 voyages, 4 clients) | < 50 | not measured | | 1 client, 3 voyages, 47 min, whole Studio process: +46 MB overall (59 MB/h), of which +7 MB in minutes 21–47 (16 MB/h); Lua heap −41.6 MB; 0 errors. 4 clients pending (owner) | | |
 | Save failures (unresolved) | 0 | unknown | | | | |

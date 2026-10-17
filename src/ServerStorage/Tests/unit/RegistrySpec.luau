@@ -55,7 +55,8 @@ return function(T: any)
 
 		T.it("a loot table must sum to 1", function()
 			local all = fresh()
-			all.Creatures.RockCrab.loot = { { item = "CrabClaw", chance = 0.5 }, { item = "Shells", chance = 0.4 } }
+			-- S6.5: creature loot rows name their drops ({ kind, min, max })
+			all.Creatures.RockCrab.loot = { { chance = 0.5, drops = { { "CrabClaw", 1, 1 } } }, { chance = 0.4, drops = { { "Shells", 3, 5 } } } }
 			T.expect(hasProblem(Registry.check(all), "Creatures.RockCrab.loot: chances must sum to 1, got 0.9000")).toBe(true)
 			all.Creatures.RockCrab.loot[2].chance = 0.5
 			T.expect(Registry.check(all)).toEqual({})

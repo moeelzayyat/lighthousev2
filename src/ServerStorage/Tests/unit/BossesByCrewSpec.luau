@@ -35,12 +35,12 @@ return function(T: any)
 			T.expect(Config.MAX_CREATURES - WaveDirector.slotsUsed(0, 4, Config)).toBe(25)
 		end)
 
-		T.it("the spawn cap and the wave and swarm waits use the slot count", function()
+		T.it("the spawn cap and every spawn stream's wait use the slot count", function()
 			local Server = game.ServerScriptService.Server
 			T.expect(source(Server.CreatureService)).toContain("not stats.big and CreatureService.load() >= Config.MAX_CREATURES")
 			T.expect(source(Server.CreatureService)).toContain("bosses * ((Config.BOSS_SLOTS or 1) - 1)")
 			local _, waits = string.gsub(source(Server.GameState), "creatures%.load%(%) >= Config%.MAX_CREATURES", "")
-			T.expect(waits).toBe(2)
+			T.expect(waits).toBe(3) -- the wave, the swarm and (S6.5) the special monsters
 			T.expect(string.find(source(Server.GameState), "creatures.count() >= Config.MAX_CREATURES", 1, true)).toBe(nil)
 		end)
 

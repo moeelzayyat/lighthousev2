@@ -122,6 +122,19 @@ function WaveDirector.nightPlan(night: number, crewSize: number, forecast: Forec
 	return { crabs = crabs, skitters = skitters, boss = boss }
 end
 
+-- S6.5: the special monsters joining a night: each creature with an `appears` rule ({ from, base, every, max })
+-- sends base on night `from`, one more every `every` nights, at most `max`.
+function WaveDirector.specials(night: number, catalog: { [string]: any }): { [string]: number }
+	local out: { [string]: number } = {}
+	for kind, def in catalog do
+		local a = if type(def) == "table" then def.appears else nil
+		if type(a) == "table" and night >= a.from then
+			out[kind] = math.min(a.max, a.base + math.floor((night - a.from) / a.every))
+		end
+	end
+	return out
+end
+
 -- S6.1: the bearings of a boss night's big monsters, one per crew member (1..4), evenly spread around the
 -- tower starting at `offset` degrees.
 function WaveDirector.bossBearings(crewSize: number, offset: number): { number }

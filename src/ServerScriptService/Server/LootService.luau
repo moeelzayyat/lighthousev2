@@ -118,6 +118,20 @@ function LootService.dropFrom(position, kind)
 		return
 	end
 	local stats = kind and Creatures[kind]
+	-- S6.5: a creature with its own loot table rolls one row of it
+	if stats and stats.loot then
+		local roll, sum = math.random(), 0
+		for _, row in stats.loot do
+			sum += row.chance
+			if roll <= sum then
+				for _, d in row.drops do
+					spawnDrop(d[1], math.random(d[2], d[3]), position)
+				end
+				break
+			end
+		end
+		return
+	end
 	if stats and stats.swarm then
 		-- swarm crabs: a Shell now and then, no rare loot (keeps the economy where it was)
 		if math.random() < (Config.SWARM_SHELL_CHANCE or 0.2) then

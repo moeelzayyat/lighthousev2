@@ -20,6 +20,12 @@ CreatureSnapshot.IN_WATER = 16
 CreatureSnapshot.TARGET_CANNON = 32 -- eye colour: orange
 CreatureSnapshot.TARGET_PLAYER = 64 -- eye colour: red (neither = the tower, yellow)
 CreatureSnapshot.DYING = 128 -- killed: the client plays the burst and removes it
+-- S6.5: both target bits together (never a real target) = the creature is telegraphing its move
+CreatureSnapshot.TELEGRAPH = CreatureSnapshot.TARGET_CANNON + CreatureSnapshot.TARGET_PLAYER
+
+function CreatureSnapshot.isTelegraph(state: number): boolean
+	return state // CreatureSnapshot.TARGET_CANNON % 4 == 3
+end
 
 export type Entry = { id: number, kind: number, x: number, y: number, z: number, yaw: number, state: number, hp: number }
 export type Sample = { t: number, x: number, y: number, z: number, yaw: number }

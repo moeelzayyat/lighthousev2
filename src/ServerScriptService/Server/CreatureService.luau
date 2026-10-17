@@ -119,11 +119,26 @@ local function buildTemplate(kind)
 			feedback.Parent = body
 		end
 	else
-		-- Fallback: simple parts (scaled for big monsters)
+		-- Fallback: simple parts (scaled for big monsters); S6.5: the new monsters' own shapes
 		local s = stats.bodyRadius
-		body = makeModelPart(model, "Body", Vector3.new(3.2, 1.4, 2.6) * s, Vector3.new(0, 0, 0), CRAB_COLOR)
-		makeModelPart(model, "ClawL", Vector3.new(0.9, 0.9, 1.2) * s, Vector3.new(-1.3, 0.1, -1.7) * s, CLAW_COLOR)
-		makeModelPart(model, "ClawR", Vector3.new(0.9, 0.9, 1.2) * s, Vector3.new(1.3, 0.1, -1.7) * s, CLAW_COLOR)
+		if stats.shape == "eel" then
+			body = makeModelPart(model, "Body", Vector3.new(1.1, 1.1, 4.6) * s, Vector3.zero, stats.color)
+			makeModelPart(model, "Head", Vector3.new(1.5, 1.3, 1.4) * s, Vector3.new(0, 0.35, -2.6) * s, stats.color)
+		elseif stats.shape == "puffer" then
+			body = makeModelPart(model, "Body", Vector3.new(2.4, 2.4, 2.4) * s, Vector3.zero, stats.color)
+			body.Shape = Enum.PartType.Ball
+			local spikes = makeModelPart(model, "Spikes", Vector3.new(2.9, 2.9, 2.9) * s, Vector3.zero, stats.color, Enum.Material.ForceField)
+			spikes.Shape = Enum.PartType.Ball
+		elseif stats.shape == "lantern" then
+			body = makeModelPart(model, "Body", Vector3.new(1.6, 1.6, 1.6) * s, Vector3.zero, stats.color, Enum.Material.Neon)
+			body.Shape = Enum.PartType.Ball
+			body.Transparency = 0.25
+			makeModelPart(model, "Cage", Vector3.new(0.4, 0.6, 0.4) * s, Vector3.new(0, 1.2, 0) * s, Color3.fromRGB(60, 60, 70), Enum.Material.Metal)
+		else
+			body = makeModelPart(model, "Body", Vector3.new(3.2, 1.4, 2.6) * s, Vector3.new(0, 0, 0), CRAB_COLOR)
+			makeModelPart(model, "ClawL", Vector3.new(0.9, 0.9, 1.2) * s, Vector3.new(-1.3, 0.1, -1.7) * s, CLAW_COLOR)
+			makeModelPart(model, "ClawR", Vector3.new(0.9, 0.9, 1.2) * s, Vector3.new(1.3, 0.1, -1.7) * s, CLAW_COLOR)
+		end
 	end
 	model.PrimaryPart = body
 	local height = body.Size.Y
@@ -184,7 +199,7 @@ end
 local function place(crab)
 	local surface, inWater = Ground.heightAt(crab.pos.X, crab.pos.Z)
 	crab.inWater = inWater
-	local heightOffset = if inWater then -0.5 else 0.7 -- half-submerged while still in the sea
+	local heightOffset = (if inWater then -0.5 else 0.7) + (crab.stats.hover or 0) -- half-submerged in the sea; S6.5: a Ghost Lantern floats
 	crab.worldPos = Vector3.new(crab.pos.X, surface + heightOffset, crab.pos.Z)
 	local face = crab.facing or Vector3.new(center.X, 0, center.Z)
 	local dx, dz = face.X - crab.pos.X, face.Z - crab.pos.Z
@@ -280,7 +295,7 @@ end
 -- One snapshot entry for a live creature
 local function entryFor(crab, now)
 	local p = crab.worldPos
-	local state = crab.targetBits or 0
+	local state = if crab.telegraphUntil then CreatureSnapshot.TELEGRAPH else (crab.targetBits or 0) -- S6.5
 	if crab.moving then
 		state += CreatureSnapshot.MOVING
 	end
@@ -376,6 +391,87 @@ local function removeAt(index, reason)
 	end
 end
 
+---------------------------------------------------------------------
+-- S6.5: telegraphed moves (Spitter Eel, Puffer Mine, Ghost Lantern). Each one shows itself for at least 0.6 s
+-- (the snapshot's TELEGRAPH state and a sound; a spit also marks where it will land) before it goes off.
+---------------------------------------------------------------------
+
+local function markSpot(spot, radius, seconds)
+	local mark = Instance.new("Part")
+	mark.Name = "SpitMark"
+	mark.Shape = Enum.PartType.Cylinder
+	mark.Size = Vector3.new(0.2, radius * 2, radius * 2)
+	mark.CFrame = CFrame.new(spot.X, Ground.heightAt(spot.X, spot.Z) + 0.15, spot.Z) * CFrame.Angles(0, 0, math.rad(90))
+	mark.Anchored = true
+	mark.CanCollide = false
+	mark.CanQuery = false
+	mark.CanTouch = false
+	mark.CastShadow = false
+	mark.Material = Enum.Material.Neon
+	mark.Color = Color3.fromRGB(150, 230, 90)
+	mark.Transparency = 0.45
+	mark.Parent = workspace
+	task.delay(seconds, function()
+		mark:Destroy()
+	end)
+end
+
+local function startMove(crab, target, now)
+	local stats = crab.stats
+	crab.telegraphUntil = now + stats.telegraph
+	crab.moveTarget = target
+	if stats.behaviour == "spitter" then
+		local towerCenter = Vector3.new(center.X, 0, center.Z)
+		local spot = targetPosition(target) or towerCenter
+		if target == "tower" then
+			-- the near side of the tower, facing the eel
+			local away = flat(crab.pos) - towerCenter
+			spot = towerCenter + (if away.Magnitude > 0.01 then away.Unit else Vector3.new(0, 0, 1)) * Config.TOWER_ATTACK_RADIUS
+		end
+		crab.moveSpot = spot
+		markSpot(spot, stats.splashRadius, stats.telegraph)
+	end
+	SoundFx.playAt(stats.telegraphSound, crab.worldPos)
+end
+
+-- The move goes off. Returns true when the creature is used up (a Puffer Mine bursts).
+local function releaseMove(crab, players)
+	local stats = crab.stats
+	local target = crab.moveTarget
+	if stats.behaviour == "spitter" then
+		local spot = crab.moveSpot
+		for _, entry in players do
+			if entry.pos and spot and (entry.pos - spot).Magnitude <= stats.splashRadius then
+				bitePlayer(entry.player, crab.worldPos, stats.playerDamage, stats.displayName)
+			end
+		end
+		if target == "tower" then
+			tower.damage(stats.towerHit or 0)
+		elseif type(target) == "table" and defense then
+			defense.damageCannon(target, stats.cannonHit or 0)
+		end
+	elseif stats.behaviour == "mine" then
+		for _, entry in players do
+			if entry.pos and (entry.pos - crab.pos).Magnitude <= stats.blastRadius then
+				bitePlayer(entry.player, crab.worldPos, stats.playerDamage, stats.displayName)
+			end
+		end
+		if crab.radius <= Config.TOWER_ATTACK_RADIUS + stats.blastRadius then
+			tower.damage(stats.towerHit or 0)
+		end
+		if type(target) == "table" and defense then
+			defense.damageCannon(target, stats.cannonHit or 0)
+		end
+		EventLog.log("PufferBurst", { radius = math.floor(crab.radius) })
+		burst(crab)
+	elseif stats.behaviour == "ghost" then
+		lamp.setFuel(math.max(0, lamp.getFuel() - (stats.fuelDrain or 0)))
+	end
+	SoundFx.playAt(stats.releaseSound, crab.worldPos)
+	crab.moveSpot, crab.moveTarget = nil, nil
+	return stats.behaviour == "mine"
+end
+
 -- Spawns a creature of the given type (see Shared/Creatures) climbing out of the sea
 function CreatureService.spawn(kind, bearing)
 	local stats = Creatures[kind]
@@ -443,6 +539,9 @@ end
 function CreatureService.damageArea(position, radius, amount, maxTargets, source, attacker)
 	local candidates = {}
 	for index, crab in creatures do
+		if crab.stats.weaponImmune then
+			continue -- S6.5: a Ghost Lantern only feels the lamp's beam
+		end
 		local offset = crab.worldPos - position
 		local distance = Vector3.new(offset.X, 0, offset.Z).Magnitude
 		if distance <= radius + crab.stats.bodyRadius then
@@ -592,8 +691,12 @@ local function step(dt)
 			end
 		end
 		crab.threat.tower = math.max(Config.THREAT_BASE_TOWER, crab.threat.tower * decay)
+		local sight = if stats.behaviour == "spitter" then stats.attackRange else 10 + stats.bodyRadius
 		for _, entry in players do
-			if entry.pos and (entry.pos - crab.pos).Magnitude < 10 + stats.bodyRadius then
+			if entry.pos and (entry.pos - crab.pos).Magnitude < sight and stats.behaviour == "spitter" then
+				-- S6.5: an eel prefers a player in spitting range over the tower (enough to switch, and it outlasts the fade)
+				crab.threat[entry.player] = math.max(crab.threat[entry.player] or 0, Config.THREAT_BASE_TOWER * Config.THREAT_SWITCH_RATIO * 1.2)
+			elseif entry.pos and (entry.pos - crab.pos).Magnitude < sight then
 				addThreat(crab, entry.player, Config.THREAT_PROXIMITY * dt)
 			end
 		end
@@ -648,13 +751,42 @@ local function step(dt)
 			continue
 		end
 
-		-- Choose a target and move toward it / attack it
-		local target = chooseTarget(crab)
+		-- S6.5: a telegraphing monster stands still until its move goes off
+		if crab.telegraphUntil then
+			crab.moving = false
+			if now >= crab.telegraphUntil then
+				crab.telegraphUntil = nil
+				if releaseMove(crab, players) then
+					removeAt(index, "exploded")
+					continue
+				end
+			end
+			place(crab)
+			continue
+		end
+
+		-- Choose a target and move toward it / attack it (S6.5: a Ghost Lantern only ever wants the lamp)
+		local target = if stats.behaviour == "ghost" then "tower" else chooseTarget(crab)
 		crab.target = target
 		setEyes(crab, target)
 		local goal = targetPosition(target) or towerCenter
 		crab.facing = goal
 		crab.moving = false
+
+		-- S6.5: a Puffer Mine lights its fuse when a player comes close or it reaches the tower
+		if stats.behaviour == "mine" then
+			local near = crab.radius <= Config.TOWER_ATTACK_RADIUS + 1
+			for _, entry in players do
+				if entry.pos and (entry.pos - crab.pos).Magnitude <= stats.triggerRadius then
+					near = true
+				end
+			end
+			if near then
+				startMove(crab, target, now)
+				place(crab)
+				continue
+			end
+		end
 
 		if pushed then
 			-- wide beam shoves it straight away from the lighthouse
@@ -666,7 +798,7 @@ local function step(dt)
 			local distance = toGoal.Magnitude
 			local reached
 			if target == "tower" then
-				reached = crab.radius <= Config.TOWER_ATTACK_RADIUS
+				reached = crab.radius <= Config.TOWER_ATTACK_RADIUS + (stats.towerRange or 0) -- S6.5: an eel spits from range
 			else
 				reached = distance <= stats.attackRange
 			end
@@ -677,6 +809,12 @@ local function step(dt)
 					crab.pos += toGoal.Unit * step
 				end
 				crab.moving = step > 0
+			elseif stats.behaviour then
+				-- S6.5: its own move, telegraphed first
+				if now >= crab.nextBite then
+					crab.nextBite = now + stats.attackInterval
+					startMove(crab, target, now)
+				end
 			else
 				-- Attack
 				if target == "tower" then

@@ -730,3 +730,26 @@ MIRROR: 123 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (d69
 OWNER: please save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_S6-4_2026-10-17.rbxl` from the DEV window when convenient (the item models are only in the place file). Optional: add `Boosts` to architecture §6.1.
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); numbers and the profile field D-021, bug fix D-022 flagged
 NEXT: S6.5 new monsters ×3 (Spitter Eel, Puffer Mine, Ghost Lantern).
+
+CHECKPOINT: S6.5 New monsters ×3 — 🟦 (the blind test is the owner's/a tester's; Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S6.5_before_2026-10-17 (Creatures, _Registry, CreatureSnapshot, SoundFx, WaveDirector, GameState, LootService, CreatureService, BossesByCrewSpec, RegistrySpec, CreatureView) · restore point "S6.5 passed"
+BUILT:
+- `Shared/Creatures`: Spitter Eel, Puffer Mine, Ghost Lantern with a `behaviour`, a telegraph, two sounds each, a loot table and an `appears` schedule (D-023). `_Registry` checks them (telegraph at least 0.6 s, the move's numbers, schedule, loot rows); 53 definitions at boot.
+- `CreatureService`: telegraphed moves: an eel marks the spot (a green ring) and spits 0.8 s later; a puffer lights a 1 s fuse near a player or the tower and bursts; a lantern drains the lamp at the tower after a 0.9 s glow and ignores weapons and cannons. While telegraphing a monster stands still and the snapshot sends TELEGRAPH (both target bits; no protocol change).
+- `CreatureView`: the telegraph is drawn (the body pulses pale, the eyes go pale, a puffer swells over its fuse); each kind keeps its own colour.
+- `WaveDirector.specials` + `GameState`: the special monsters join their nights on the schedule, inside the 45-slot cap; `LootService` rolls each monster's loot table.
+TESTRUNNER (DEV, Play server): **182 passed, 0 failed** (177 + new `MonstersSpec` 6: registry clean; telegraph ≥ 0.6 s with its own sounds; loot sums to 1; the night schedule (night 1 none … night 13 eels 4, puffers 5, lanterns 3); TELEGRAPH round trip; wiring) + `BossesByCrewSpec` (3 spawn streams) and `RegistrySpec` (loot rows now name their drops).
+PLAY TEST (DEV, owner's account, mock store; runtime-only TEMPTEST scripts):
+- Spitter Eel vs a player standing still: 6 rings, all on the player; 5 spits landed, 60 damage (12 each). Stepping 9 studs away when a ring appeared: 5 rings, 1 hit (likely a spit already in flight from the standing phase).
+- Puffer Mine reaching a standing player: burst after the fuse, player 100 → 70; a puffer shot before it got close dropped a loot orb.
+- Ghost Lantern: a weapon hit at it hit nothing (it stayed); at the tower it drank the lamp 60 → 54.
+- Telegraphs measured on the client from snapshots (1/12 s steps): eel 0.75–0.92 s (11), puffer 1.00 s (1), lantern 0.83–1.00 s (8); all ≥ 0.6.
+- Budget: 4 eels + 5 puffers + 3 lanterns + 33 small creatures (45): **9.59 KB/s average, 10.41 max**, **59.9 FPS, lowest 1 s 60** (S4: 10.0 KB/s, 60 FPS). Screenshot checked (lanterns glowing, eel, puffer, a spit ring).
+- First runs found the eels only ever spat at the tower; fixed (an eel picks on a player within its range). Noticed, not changed (D-023): crab proximity threat never builds up, so crabs only chase players who hit them.
+- 0 script errors (server only ProfileStore's refused Studio write, API off; Roblox's own UIBlox warnings). Play stopped; 0 TEMPTEST scripts remain.
+NOT TESTED HERE: the blind test (a tester names each monster's behaviour); a beam kill of a Ghost Lantern (the beam path is unchanged and applies double damage by `beamDamageMult`); the night schedule live (unit-tested; the test voyages stayed on day 1).
+MIRROR: 124 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (f0ccde62).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); numbers D-023 flagged
+NEXT: S6.6 new monsters ×2 (Tide Witch, Coral Shaman).

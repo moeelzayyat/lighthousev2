@@ -224,6 +224,41 @@ function GameState.run(deps)
 		end
 	end
 
+	-- S6.5: the night's special monsters (WaveDirector.specials), one at a time, shuffled, across `window`
+	local function startSpecials(counts, window)
+		local queue = {}
+		for kind, n in counts do
+			for _ = 1, n do
+				table.insert(queue, kind)
+			end
+		end
+		local active = true
+		if #queue == 0 then
+			return function() end
+		end
+		for i = #queue, 2, -1 do
+			local j = math.random(1, i)
+			queue[i], queue[j] = queue[j], queue[i]
+		end
+		task.spawn(function()
+			local interval = window / (#queue + 1)
+			task.wait(interval)
+			for _, kind in queue do
+				while active and creatures.load() >= Config.MAX_CREATURES do
+					task.wait(0.5)
+				end
+				if not active then
+					return
+				end
+				creatures.spawn(kind)
+				task.wait(interval)
+			end
+		end)
+		return function()
+			active = false
+		end
+	end
+
 	-- The opening incident: the lamp is failing, a storm hits, something huge is out there.
 	-- It can't be lost; it teaches fuel, the lamp, and the beam by doing.
 	local function runPrologue()
@@ -524,7 +559,9 @@ function GameState.run(deps)
 						local plan = WaveDirector.nightPlan(night, #readyPlayers(), { crabMult = state:GetAttribute("ForecastCrabMult") }, voyageConfig, def)
 						local stopWave = startWave(plan.crabs, Config.NIGHT_SECONDS * Config.SPAWN_WINDOW)
 						local stopSwarm = startSwarm(plan.skitters, Config.NIGHT_SECONDS * (Config.SWARM_WINDOW or 0.85))
-						EventLog.log("NightSpawns", { night = night, crabs = plan.crabs, skitters = plan.skitters })
+						local specials = WaveDirector.specials(night, Creatures) -- S6.5
+						local stopSpecials = startSpecials(specials, Config.NIGHT_SECONDS * Config.SPAWN_WINDOW)
+						EventLog.log("NightSpawns", { night = night, crabs = plan.crabs, skitters = plan.skitters, eels = specials.SpitterEel or 0, puffers = specials.PufferMine or 0, lanterns = specials.GhostLantern or 0 })
 
 						-- Big sea monsters arrive partway through this night: one per crew member (S6.1)
 						local bigKind = bigNights[night]
@@ -581,6 +618,7 @@ function GameState.run(deps)
 
 						stopWave()
 						stopSwarm()
+						stopSpecials()
 						local wentDark = lamp.darkSeconds >= Config.DARK_GRACE_SECONDS
 						lamp.setDraining(false)
 						creatures.clearAll() -- at dawn, the survivors retreat into the sea
