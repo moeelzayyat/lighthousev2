@@ -25,6 +25,7 @@ local StatPipeline = require(Shared:WaitForChild("StatPipeline")) :: any -- S5.7
 local SoundFx = require(Shared:WaitForChild("SoundFx")) :: any
 local UiKit = require(script.Parent:WaitForChild("UiKit")) :: any
 local Tiles = require(script.Parent:WaitForChild("UI"):WaitForChild("Tiles")) :: any
+local Vitals = require(script.Parent:WaitForChild("Vitals")) :: any -- the lamp, tower and health while it is open
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local state = ReplicatedStorage:WaitForChild("GameState")
@@ -297,6 +298,7 @@ local function openBench()
 	end
 	UiKit.pushModal("Bench")
 	menu:open()
+	menu:setAlerts(Vitals.criticalChips())
 	render()
 	ContextActionService:BindAction("CloseBench", function(_, inputState)
 		if inputState == Enum.UserInputState.Begin then
@@ -355,5 +357,7 @@ RunService.Heartbeat:Connect(function()
 	local bench = island and island:FindFirstChild("UpgradeBench") :: BasePart?
 	if not rootPart or not humanoid or humanoid.Health <= 0 or not bench or (rootPart.Position - bench.Position).Magnitude > WALK_AWAY then
 		closeBench()
+		return
 	end
+	menu:setAlerts(Vitals.criticalChips())
 end)

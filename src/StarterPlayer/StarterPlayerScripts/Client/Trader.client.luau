@@ -1,15 +1,16 @@
+--!strict
 -- Trader (client): the salvage buyer on the lighthouse island.
 --
--- Loot (crab claws, sea glass, black pearls) only lasts one voyage. The Trader turns it into
--- Shells for the whole crew. This is NOT a shop: no Pearls, no permanent items.
--- S6.2: by day the sheet also lists the merchant's voyage-only stock (Definitions/Merchant), bought
--- with the crew's Shells (MerchantRequest -> MerchantResult); the server checks and applies everything.
--- The server opens it (TraderOpen, from the Trader's prompt) and does the selling
--- (TraderRequest -> TraderResult); shell values come from Shared/Items unchanged.
+-- Loot (crab claws, sea glass, black pearls) only lasts one voyage. The Trader turns it into Shells for the whole
+-- crew. This is NOT a shop: no Pearls, no permanent items. S6.2: by day the Trader also sells the merchant's
+-- voyage-only stock (Definitions/Merchant) for the crew's Shells (MerchantRequest -> MerchantResult).
+-- The server opens it (TraderOpen, from the Trader's prompt) and does the selling (TraderRequest -> TraderResult,
+-- "sellAll" only); it checks and applies everything. Shell values come from Shared/Items unchanged.
 --
--- Built on UiKit v2.1 (Stage 5 of the UI redesign). Looks like a scavenger's tally sheet,
--- not the Quartermaster's counter: perforated receipt edge, sea-green salvage accents.
--- Studio only: player attribute HudSimulate draws it inside a simulated screen size.
+-- Built on the menu pattern (UI/Tiles, D-041/D-042, like the Quartermaster and the bench): two tabs, SALVAGE (one
+-- tile per kind of loot carried, SELL ALL in the detail pane) and ISLAND STOCK (the merchant's tiles, dimmed under
+-- "The Trader sells by day" at night). Critical lamp, tower and health states show as alerts while it is open.
+-- Walking away (or dying) closes it.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -20,451 +21,327 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
-local Items = require(Shared:WaitForChild("Items"))
-local Merchant = require(Shared:WaitForChild("Definitions"):WaitForChild("Merchant")) -- S6.2
-local SoundFx = require(Shared:WaitForChild("SoundFx"))
-local UiKit = require(script.Parent:WaitForChild("UiKit"))
-local ItemPreview = require(script.Parent:WaitForChild("ItemPreview"))
-local Vitals = require(script.Parent:WaitForChild("Vitals"))
+local Items = require(Shared:WaitForChild("Items")) :: any
+local Merchant = require(Shared:WaitForChild("Definitions"):WaitForChild("Merchant")) :: any -- S6.2
+local SoundFx = require(Shared:WaitForChild("SoundFx")) :: any
+local UiKit = require(script.Parent:WaitForChild("UiKit")) :: any
+local Tiles = require(script.Parent:WaitForChild("UI"):WaitForChild("Tiles")) :: any
+local Vitals = require(script.Parent:WaitForChild("Vitals")) :: any
 
-local C, F = UiKit.Color, UiKit.Font
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local state = ReplicatedStorage:WaitForChild("GameState")
 local player = Players.LocalPlayer
 
 local REQUEST_TIMEOUT = 8
 local WALK_AWAY = 16
-local ACCENT = C.CatMaterials
+local RULE = "Loot only lasts this voyage. Sell it here for Shells the whole crew can spend; anything unsold is gone when the run ends."
 
-local LOOT = {}
+local LOOT: { string } = {}
 for _, itemId in Items.SHOP_ORDER do
 	if type(Items[itemId]) == "table" and Items[itemId].runScoped then
 		table.insert(LOOT, itemId)
 	end
 end
 
-local profile = nil
-local isOpen = false
-local mode = "desktop"
-local view = "list" -- "list" | "sold"
-local soldFor = 0
-local pendingId = nil
-local errorText = nil
-local awaitingCheck = nil -- after a timeout: the sack's value before, while we re-check the server
-local layout, closeTrader, render -- forward declarations
-local pendingBuy = {} -- S6.2: itemId -> requestId while a purchase is in flight
-local STOCK_ROW_H = 64
+-- the merchant's stock, drawn as glyphs (the stock has no 3D models)
+local STOCK_GLYPH: { [string]: { string | Color3 } } = {
+	OrbitingBlades = { "diamond", Color3.fromRGB(176, 113, 255) },
+	DamageBoost = { "plus", Color3.fromRGB(255, 140, 60) },
+	SpeedBoost = { "next", Color3.fromRGB(80, 210, 200) },
+	Heal = { "heart", Color3.fromRGB(240, 80, 90) },
+	OilBundle = { "lamp", Color3.fromRGB(255, 200, 80) },
+	TowerShield = { "tower", Color3.fromRGB(110, 170, 255) },
+	Salvage = { "info", Color3.fromRGB(80, 210, 200) }, -- the empty sack
+}
 
-local function merchantOpen()
+local profile: any = nil
+local tab = "Salvage"
+local selectedId: string? = nil
+local pendingSell: string? = nil
+local awaitingCheck: number? = nil -- after a timeout: the sack's value before, while we re-check the server
+local pendingBuy: { [string]: string } = {} -- itemId -> requestId while a purchase is in flight
+
+local function merchantOpen(): boolean
 	return state:GetAttribute("Phase") == "Day"
 end
-
--- while a sale is in flight the sheet keeps showing what was being sold (the server's new,
--- empty sack can arrive before its reply); the live counts decide everything else
-local frozen = nil
-local function liveCount(itemId)
+local function shells(): number
+	return state:GetAttribute("Shells") or 0
+end
+local function count(itemId: string): number
 	return if profile then (profile.counts[itemId] or 0) else 0
 end
-local function count(itemId)
-	if frozen then
-		return frozen[itemId] or 0
-	end
-	return liveCount(itemId)
-end
-local function totalValue(live)
+local function totalValue(): number
 	local total = 0
 	for _, itemId in LOOT do
-		total += (if live then liveCount(itemId) else count(itemId)) * (Items[itemId].shellValue or 0)
+		total += count(itemId) * (Items[itemId].shellValue or 0)
 	end
 	return total
 end
 
----------------------------------------------------------------------
--- SCREEN
----------------------------------------------------------------------
-
-local gui = UiKit.Screen("SalvageTrader", 18)
-gui.Enabled = false
-local root = UiKit.new("Frame", { Name = "Root", BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1) }, gui)
-local rootOutline = UiKit.border(root, C.BorderFocus, 1, 0.4)
-rootOutline.Enabled = false
-
-local panel = UiKit.Panel(root, { name = "TallySheet", kind = "plain", variant = "secondary", padding = 0, anchor = Vector2.new(0.5, 0.5), position = UDim2.fromScale(0.5, 0.5) })
-UiKit.border(panel, ACCENT, 1, 0.5)
-
--- perforated receipt edge along the top
-local perforation = UiKit.new("Frame", { Name = "Perforation", BackgroundTransparency = 1, Position = UDim2.fromOffset(10, 6), Size = UDim2.new(1, -20, 0, 2), ClipsDescendants = true }, panel)
-for i = 0, 70 do
-	UiKit.new("Frame", { BackgroundColor3 = ACCENT, BackgroundTransparency = 0.35, BorderSizePixel = 0, Position = UDim2.fromOffset(i * 9, 0), Size = UDim2.fromOffset(5, 2) }, perforation)
-end
-
--- header ------------------------------------------------------------
-local header = UiKit.new("Frame", { Name = "Header", BackgroundTransparency = 1 }, panel)
-local titleBlock = UiKit.new("Frame", { Name = "TitleBlock", BackgroundTransparency = 1, Size = UDim2.new(0.6, 0, 1, 0) }, header)
-UiKit.list(titleBlock, "y", 0, { VerticalAlignment = Enum.VerticalAlignment.Center })
-local eyebrow = UiKit.Label(titleBlock, "Salvage trader", "Eyebrow", { LayoutOrder = 1, TextColor3 = ACCENT, Size = UDim2.new(1, 0, 0, 18), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false })
-local title = UiKit.Label(titleBlock, "The Trader", "H2", { LayoutOrder = 2, Size = UDim2.new(1, 0, 0, 28), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false })
-local greeting = UiKit.Label(titleBlock, "\u{201C}Claws, glass, pearls. I'll take the lot.\u{201D}", "BodySmall", {
-	LayoutOrder = 3,
-	Size = UDim2.new(1, 0, 0, 20),
-	AutomaticSize = Enum.AutomaticSize.None,
-	TextWrapped = false,
-	TextTruncate = Enum.TextTruncate.AtEnd,
-	FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Regular, Enum.FontStyle.Italic),
+local closeTrader: () -> () -- forward
+local renderAll: () -> () -- forward
+local menu = Tiles.Menu({
+	name = "SalvageTrader",
+	displayOrder = 18,
+	title = "Trader",
+	onClose = function()
+		closeTrader()
+	end,
 })
 
-local purse = UiKit.Currency(header, "Shells", 0, { size = "lg" })
-purse.frame.AnchorPoint = Vector2.new(1, 0.5)
-purse.frame.Position = UDim2.new(1, -50, 0.5, 0)
-UiKit.Tooltip(purse.frame, "The crew's Shells. Selling adds to them for everyone.")
-
-local closeButton = UiKit.IconButton(header, "close", { name = "Close", quiet = true, tip = "Walk away", onClick = function()
-	closeTrader()
-end })
-closeButton.AnchorPoint = Vector2.new(1, 0.5)
-closeButton.Position = UDim2.new(1, 6, 0.5, 0)
-
--- critical HUD states surface here while the sheet is open (the storm doesn't pause):
--- low/critical fuel, lamp dark, critical health, breaching tower. Hidden when all is well.
-local vitalsRow = UiKit.new("Frame", { Name = "Vitals", BackgroundTransparency = 1, Visible = false }, panel)
-UiKit.list(vitalsRow, "x", 6, { VerticalAlignment = Enum.VerticalAlignment.Center, Wraps = true })
-local vitalTags = {}
-for i = 1, 3 do
-	vitalTags[i] = UiKit.Tag(vitalsRow, "", "StateDanger", { name = "Vital" .. i, layoutOrder = i })
-end
-local vitalChips = {}
-
--- body: the tally ---------------------------------------------------
-local body = UiKit.Scroll(panel, { Name = "Body", ScrollBarThickness = 4 })
-UiKit.list(body, "y", 10)
-UiKit.pad(body, 2, 6, 4, 0)
-
-local ledger = UiKit.Section(body, "Your salvage", { layoutOrder = 1, gap = 0 })
-ledger.Name = "Ledger"
-local ledgerRows = {}
-local previews = {}
-
-local totalRow = UiKit.new("Frame", { Name = "Total", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 44), LayoutOrder = 2 }, body)
-UiKit.new("Frame", { Name = "Rule", BackgroundColor3 = ACCENT, BackgroundTransparency = 0.5, BorderSizePixel = 0, Size = UDim2.new(1, 0, 0, 1) }, totalRow)
-UiKit.Label(totalRow, "Trader pays", "Label", { Position = UDim2.fromOffset(0, 6), Size = UDim2.new(0.5, 0, 0, 36), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false, TextYAlignment = Enum.TextYAlignment.Center })
-local totalHolder = UiKit.new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0), Position = UDim2.new(1, 0, 0, 6), Size = UDim2.fromOffset(0, 36), AutomaticSize = Enum.AutomaticSize.X }, totalRow)
-UiKit.list(totalHolder, "x", 6, { HorizontalAlignment = Enum.HorizontalAlignment.Right, VerticalAlignment = Enum.VerticalAlignment.Center })
-local totalDisplay = UiKit.Currency(totalHolder, "Shells", 0, { plain = true, textSize = 22 })
-
--- the rule every player has to understand
-local note = UiKit.Inset(body, { Name = "LootRule", LayoutOrder = 3, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y })
-UiKit.pad(note, 10, 12, 10, 12)
-local noteGlyph = UiKit.Glyph(note, "info", C.AccentSea, 16)
-noteGlyph.Position = UDim2.fromOffset(0, 2)
-local noteText = UiKit.Label(note, "", "BodySmall", { Name = "Text", Position = UDim2.fromOffset(26, 0), Size = UDim2.new(1, -26, 0, 0), TextColor3 = C.TextPrimary })
-noteText.Text = "<b>Loot only lasts this voyage.</b> Sell it here for Shells the whole crew can spend at the upgrade bench. Anything you don't sell is gone when the run ends."
-
--- S6.2: the merchant's day stock ------------------------------------
-local stock = UiKit.Section(body, "Island stock: by day, for the crew's Shells", { layoutOrder = 4, gap = 0 })
-stock.Name = "Stock"
-local stockRows = {}
-local buyItem -- forward declaration
-for order, id in Merchant.ORDER do
-	local def = Merchant[id]
-	local row = UiKit.new("Frame", { Name = "Stock_" .. id, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, STOCK_ROW_H), LayoutOrder = order }, stock)
-	if order > 1 then
-		UiKit.new("Frame", { Name = "Hairline", BackgroundColor3 = C.BorderSubtle, BorderSizePixel = 0, Size = UDim2.new(1, 0, 0, 1) }, row)
-	end
-	local nameLabel = UiKit.Label(row, def.displayName, "H3", { Name = "ItemName", Position = UDim2.fromOffset(0, 8), Size = UDim2.new(1, -132, 0, 22), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false, TextTruncate = Enum.TextTruncate.AtEnd, TextSize = 16 })
-	UiKit.Label(row, def.description, "Micro", { Name = "Description", Position = UDim2.fromOffset(0, 30), Size = UDim2.new(1, -132, 0, 28), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = true })
-	local button = UiKit.Button(row, string.format("BUY %d", def.price), {
-		name = "Buy",
-		variant = "secondary",
-		size = "sm",
-		width = 120,
-		onClick = function()
-			buyItem(id)
-		end,
-		onDisabledClick = function(reason)
-			SoundFx.play2D("denied")
-			if reason then
-				errorText = reason
-				layout()
-				render()
-			end
-		end,
-	})
-	button.AnchorPoint = Vector2.new(1, 0.5)
-	button.Position = UDim2.new(1, 0, 0.5, 0)
-	stockRows[id] = { frame = row, button = button, name = nameLabel }
-end
-
-local emptyView = UiKit.StateView(panel, "empty", { title = "Nothing to sell yet", body = "Creatures drop crab claws, sea glass and black pearls. Bring them here before the voyage ends." })
-emptyView.Visible = false
-local loadingView = UiKit.StateView(panel, "loading", { title = "Counting your salvage" })
-loadingView.Visible = false
-local soldView = UiKit.StateView(panel, "success", { title = "Sold", body = "" })
-soldView.Visible = false
-local function soldTexts()
-	local labels = {}
-	for _, d in soldView:GetDescendants() do
-		if d:IsA("TextLabel") then
-			table.insert(labels, d)
-		end
-	end
-	return labels
-end
-
--- phones: the loot rule as one line right above the button, always in view
-local ruleLine = UiKit.Label(panel, "Loot lasts this voyage only. Unsold loot is lost when the run ends.", "Micro", { Name = "RuleLine", TextColor3 = C.AccentSea, AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false, TextTruncate = Enum.TextTruncate.AtEnd, TextYAlignment = Enum.TextYAlignment.Center, Visible = false })
-local errorLabel = UiKit.Label(panel, "", "Micro", { Name = "Error", TextColor3 = C.StateDanger, AutomaticSize = Enum.AutomaticSize.None, TextWrapped = true, TextYAlignment = Enum.TextYAlignment.Center })
-local actionButton = UiKit.Button(panel, "Sell all", { name = "SellAll", variant = "primary", size = "md" })
-
-local function makeLedgerRow(order, itemId)
-	local item = Items[itemId]
-	local row = UiKit.new("Frame", { Name = "Row_" .. itemId, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 58), LayoutOrder = order }, ledger)
-	if order > 1 then
-		UiKit.new("Frame", { Name = "Hairline", BackgroundColor3 = C.BorderSubtle, BorderSizePixel = 0, Size = UDim2.new(1, 0, 0, 1) }, row)
-	end
-	local well = UiKit.Inset(row, { Name = "Icon", AnchorPoint = Vector2.new(0, 0.5), Position = UDim2.new(0, 0, 0.5, 0), Size = UDim2.fromOffset(46, 46), ClipsDescendants = true })
-	local preview = ItemPreview.new(well, { backdrop = false })
-	preview:setItem(itemId)
-	table.insert(previews, preview)
-	local nameLabel = UiKit.Label(row, item.name, "H3", { Name = "ItemName", Position = UDim2.fromOffset(58, 9), Size = UDim2.new(1, -170, 0, 22), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false, TextTruncate = Enum.TextTruncate.AtEnd, TextSize = 16 })
-	UiKit.Label(row, string.format("%d Shells each", item.shellValue or 0), "Micro", { Name = "Each", Position = UDim2.fromOffset(58, 31), Size = UDim2.new(1, -170, 0, 16), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false })
-	local qty = UiKit.new("TextLabel", {
-		Name = "Quantity",
-		BackgroundTransparency = 1,
-		FontFace = F.Numeric,
-		TextSize = 17,
-		TextColor3 = C.TextSecondary,
-		TextXAlignment = Enum.TextXAlignment.Right,
-		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -86, 0.5, 0),
-		Size = UDim2.fromOffset(50, 24),
-	}, row)
-	local subHolder = UiKit.new("Frame", { BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0.5), Position = UDim2.new(1, 0, 0.5, 0), Size = UDim2.fromOffset(0, 24), AutomaticSize = Enum.AutomaticSize.X }, row)
-	UiKit.list(subHolder, "x", 4, { HorizontalAlignment = Enum.HorizontalAlignment.Right, VerticalAlignment = Enum.VerticalAlignment.Center })
-	local subtotal = UiKit.Currency(subHolder, "Shells", 0, { plain = true, showWord = false, textSize = 17 })
-	ledgerRows[itemId] = { frame = row, qty = qty, subtotal = subtotal, name = nameLabel }
-end
-
----------------------------------------------------------------------
--- RENDER
----------------------------------------------------------------------
-
-function render()
-	purse.set(state:GetAttribute("Shells") or 0)
-	local total = totalValue()
-	local loading = profile == nil
-	local empty = not loading and total <= 0 and view ~= "sold"
-	local showList = not loading and not empty and view == "list"
-
-	loadingView.Visible = loading
-	emptyView.Visible = empty
-	soldView.Visible = view == "sold"
-	body.Visible = showList or empty
-	ledger.Visible = showList
-	totalRow.Visible = showList
-
-	local order = 0
-	for _, itemId in LOOT do
-		local n = count(itemId)
-		local r = ledgerRows[itemId]
-		if r then
-			r.frame.Visible = n > 0
-			if n > 0 then
-				order += 1
-				r.frame.LayoutOrder = order
-				r.qty.Text = "\u{00D7}" .. n
-				r.subtotal.set(n * (Items[itemId].shellValue or 0))
-				local hairline = r.frame:FindFirstChild("Hairline")
-				if hairline then
-					hairline.Visible = order > 1
-				end
-			end
-		end
-	end
-	totalDisplay.set(total)
-
-	-- S6.2: the merchant's stock, by day (the server has the final word on every purchase)
-	local showStock = merchantOpen() and not loading and view == "list"
-	stock.Visible = showStock
-	if showStock then
-		local shells = state:GetAttribute("Shells") or 0
-		for id, r in stockRows do
-			local def = Merchant[id]
-			local owned = player:GetAttribute("Merchant_" .. id) or 0
-			r.name.Text = if def.limit then string.format("%s  (%d/%d)", def.displayName, owned, def.limit) else def.displayName
-			if pendingBuy[id] then
-				UiKit.SetBusy(r.button, true, "...")
-			else
-				UiKit.SetBusy(r.button, false)
-				r.button.Text = string.format("BUY %d", def.price)
-				if def.limit and owned >= def.limit then
-					r.button.Text = "BOUGHT"
-					UiKit.SetDisabled(r.button, true, "That's all the Trader has for you this voyage.")
-				elseif def.effect == "shield" and state:GetAttribute("TowerShield") then
-					r.button.Text = "ACTIVE"
-					UiKit.SetDisabled(r.button, true, "The tower is already shielded until dawn.")
-				elseif shells < def.price then
-					UiKit.SetDisabled(r.button, true, string.format("Need %d Shells (the crew has %d).", def.price, shells))
-				else
-					UiKit.SetDisabled(r.button, false)
-				end
-				r.button:SetAttribute("BaseText", r.button.Text)
-			end
-		end
-	end
-
-	errorLabel.Text = errorText or ""
-	errorLabel.Visible = errorText ~= nil
-
-	if view == "sold" then
-		local labels = soldTexts()
-		if labels[1] then
-			labels[1].Text = string.format("Sold for %s Shells", UiKit.formatNumber(soldFor))
-		end
-		if labels[2] then
-			labels[2].Text = "The crew can spend them at the upgrade bench right now."
-		end
-		UiKit.SetBusy(actionButton, false)
-		actionButton.Text = "DONE"
-		UiKit.SetDisabled(actionButton, false)
-	elseif pendingId then
-		UiKit.SetBusy(actionButton, true, "Selling...")
-	else
-		UiKit.SetBusy(actionButton, false)
-		if loading then
-			actionButton.Text = "SELL ALL"
-			UiKit.SetDisabled(actionButton, true, "Counting your salvage...")
-		elseif empty then
-			actionButton.Text = "NOTHING TO SELL"
-			UiKit.SetDisabled(actionButton, true, "You aren't carrying any loot.")
-		else
-			actionButton.Text = string.format("SELL ALL FOR %s SHELLS", UiKit.formatNumber(total))
-			UiKit.SetDisabled(actionButton, false)
-		end
-	end
-	if not pendingId then
-		actionButton:SetAttribute("BaseText", actionButton.Text)
+local function glyphIcon(id: string): (Instance) -> ()
+	local spec = STOCK_GLYPH[id] or { "plus", UiKit.Color.AccentLighthouse }
+	return function(holder: Instance)
+		Tiles.glyph(holder, spec[1] :: string, spec[2] :: Color3)
 	end
 end
 
 ---------------------------------------------------------------------
--- SELLING
+-- SELLING (everything at once; the server decides)
 ---------------------------------------------------------------------
 
 local function sellAll()
-	if pendingId or view == "sold" or totalValue() <= 0 then
+	if pendingSell or totalValue() <= 0 then
 		return
 	end
 	local requestId = HttpService:GenerateGUID(false)
-	local valueBefore = totalValue()
-	frozen = table.clone(profile.counts)
-	pendingId = requestId
-	errorText = nil
+	pendingSell = requestId
 	awaitingCheck = nil
-	layout()
-	render()
+	renderAll()
 	remotes.TraderRequest:FireServer(requestId, "sellAll")
+	local valueBefore = totalValue()
 	task.delay(REQUEST_TIMEOUT, function()
-		if pendingId == requestId then
+		if pendingSell == requestId then
 			-- no reply: ask the server what really happened (a late reply is ignored)
-			pendingId = nil
+			pendingSell = nil
 			awaitingCheck = valueBefore
-			errorText = "The Trader didn't answer. Checking your sack..."
+			menu.toast("The Trader didn't answer. Checking your sack...")
 			remotes.GearAction:FireServer("sync")
-			if isOpen then
-				layout()
-				render()
-			end
+			renderAll()
 		end
 	end)
 end
 
-actionButton.Activated:Connect(function()
-	if actionButton:GetAttribute("Disabled") then
-		SoundFx.play2D("denied")
-		return
-	end
-	if view == "sold" then
-		closeTrader()
-	else
-		sellAll()
-	end
-end)
+local function sold(amount: number)
+	SoundFx.play2D("lantern")
+	UiKit.Toast(menu.root, string.format("Sold for %s Shells. The crew can spend them at the bench.", UiKit.formatNumber(amount)), "success")
+end
 
--- S6.2: buying from the merchant's stock
-function buyItem(id)
-	if pendingBuy[id] or not merchantOpen() then
+---------------------------------------------------------------------
+-- BUYING from the island stock (by day, the crew's Shells)
+---------------------------------------------------------------------
+
+local function stockReason(id: string): string?
+	local def = Merchant[id]
+	local owned = player:GetAttribute("Merchant_" .. id) or 0
+	if not merchantOpen() then
+		return "The Trader sells by day."
+	elseif def.limit and owned >= def.limit then
+		return "That's all the Trader has for you this voyage."
+	elseif def.effect == "shield" and state:GetAttribute("TowerShield") then
+		return "The tower is already shielded until dawn."
+	elseif shells() < def.price then
+		return string.format("The crew needs %d more Shells.", def.price - shells())
+	elseif pendingBuy[id] then
+		return "Buying..."
+	end
+	return nil
+end
+
+local function buyItem(id: string)
+	if pendingBuy[id] or stockReason(id) then
+		SoundFx.play2D("denied")
 		return
 	end
 	local requestId = HttpService:GenerateGUID(false)
 	pendingBuy[id] = requestId
-	errorText = nil
-	render()
+	renderAll()
 	remotes.MerchantRequest:FireServer(requestId, "buy", id, 1)
 	task.delay(REQUEST_TIMEOUT, function()
 		if pendingBuy[id] == requestId then
-			pendingBuy[id] = nil -- the counts on the sheet are the server's, so they show what really happened
-			errorText = "The Trader didn't answer. Check the sheet and try again."
-			if isOpen then
-				layout()
-				render()
-			end
+			pendingBuy[id] = nil -- the counts shown are the server's, so they show what really happened
+			menu.toast("The Trader didn't answer. Check the stock and try again.")
+			renderAll()
 		end
 	end)
 end
+
+---------------------------------------------------------------------
+-- TILES AND DETAIL
+---------------------------------------------------------------------
+
+local function salvageTiles(): { any }
+	local list = {}
+	for _, itemId in LOOT do
+		local n = count(itemId)
+		if n > 0 then
+			table.insert(list, {
+				id = itemId,
+				name = Items[itemId].name,
+				icon = itemId,
+				cost = { kind = "Shells", amount = n * (Items[itemId].shellValue or 0) },
+				affordable = true,
+				qty = n,
+			})
+		end
+	end
+	return list
+end
+
+local function stockTiles(): { any }
+	local list = {}
+	for _, id in Merchant.ORDER do
+		local def = Merchant[id]
+		local owned = player:GetAttribute("Merchant_" .. id) or 0
+		local soldOut = def.limit ~= nil and owned >= def.limit
+		table.insert(list, {
+			id = id,
+			name = def.displayName,
+			icon = glyphIcon(id),
+			cost = if soldOut then nil else { kind = "Shells", amount = def.price },
+			affordable = shells() >= def.price,
+			owned = soldOut,
+			ownedText = "Bought",
+			qty = if owned > 0 then owned else nil,
+			locked = if merchantOpen() then nil else "The Trader sells by day",
+		})
+	end
+	return list
+end
+
+local function salvageDetail(itemId: string?): any
+	local total = totalValue()
+	local action = {
+		text = if pendingSell then "Selling..." else (if total > 0 then "Sell all" else "Nothing to sell"),
+		enabled = total > 0 and pendingSell == nil,
+		reason = if total <= 0 then "You aren't carrying any loot. Creatures drop crab claws, sea glass and black pearls." else "Selling...",
+		onPress = sellAll,
+	}
+	if not itemId or not Items[itemId] then
+		return {
+			icon = glyphIcon("Salvage"),
+			name = "Nothing to sell yet",
+			description = RULE,
+			stats = { { label = "Trader pays", value = string.format("%d Shells", total) } },
+			action = action,
+		}
+	end
+	local item = Items[itemId]
+	local n = count(itemId)
+	return {
+		icon = itemId,
+		name = item.name,
+		description = RULE,
+		stats = {
+			{ label = "You carry", value = "\u{00D7}" .. n },
+			{ label = "Each", value = string.format("%d Shells", item.shellValue or 0) },
+			{ label = "All your salvage", value = string.format("%d Shells", total) },
+		},
+		cost = { kind = "Shells", amount = total, affordable = true },
+		action = action,
+	}
+end
+
+local function stockDetail(id: string): any
+	local def = Merchant[id]
+	local owned = player:GetAttribute("Merchant_" .. id) or 0
+	local stats: { any } = {
+		{ label = "For", value = if def.scope == "crew" then "the whole crew" else "you" },
+		{ label = "Lasts", value = if def.effect == "shield" then "until dawn" elseif def.effect == "heal" or def.effect == "oil" then "right away" else "this voyage" },
+	}
+	if def.limit then
+		table.insert(stats, { label = "Bought", value = string.format("%d / %d", owned, def.limit) })
+	end
+	local why = stockReason(id)
+	return {
+		icon = glyphIcon(id),
+		name = def.displayName,
+		description = def.description .. ".",
+		stats = stats,
+		cost = { kind = "Shells", amount = def.price, affordable = shells() >= def.price },
+		action = {
+			text = if pendingBuy[id] then "Buying..." else "Buy",
+			enabled = why == nil,
+			reason = why,
+			onPress = function()
+				buyItem(id)
+			end,
+		},
+	}
+end
+
+local function renderDetail()
+	if tab == "Salvage" then
+		menu:setDetail(salvageDetail(selectedId))
+	elseif selectedId and Merchant[selectedId] then
+		menu:setDetail(stockDetail(selectedId))
+	else
+		menu:setDetail(nil)
+	end
+end
+
+renderAll = function()
+	if not menu.isOpen then
+		return
+	end
+	menu:setResources({ { kind = "Shells", amount = shells() } })
+	menu.subtitle.Text = if tab == "Salvage" then "\u{201C}Claws, glass, pearls. I'll take the lot.\u{201D}" else (if merchantOpen() then "Island stock, by day, for the crew's Shells" else "The Trader sells by day")
+	if not profile then
+		menu:setTiles({}, nil)
+		menu:setDetail({ name = "Counting your salvage", description = RULE })
+		return
+	end
+	local list = if tab == "Salvage" then salvageTiles() else stockTiles()
+	local stillThere = false
+	for _, t in list do
+		if t.id == selectedId then
+			stillThere = true
+		end
+	end
+	if not stillThere then
+		selectedId = list[1] and list[1].id
+	end
+	menu:setTiles(list, selectedId)
+	renderDetail()
+end
+
+menu.onSelect = function(id: string)
+	selectedId = id
+	renderDetail()
+end
+
+---------------------------------------------------------------------
+-- SERVER ANSWERS
+---------------------------------------------------------------------
+
+remotes:WaitForChild("TraderResult").OnClientEvent:Connect(function(requestId, ok, message, total)
+	if requestId ~= pendingSell then
+		return
+	end
+	pendingSell = nil
+	if ok then
+		sold(tonumber(total) or 0)
+	else
+		SoundFx.play2D("denied")
+		menu.toast(message or "That didn't work. Nothing was sold.")
+	end
+	renderAll()
+end)
 
 remotes:WaitForChild("MerchantResult").OnClientEvent:Connect(function(requestId, ok, message)
 	for id, pending in pendingBuy do
 		if pending == requestId then
 			pendingBuy[id] = nil
 			if ok then
-				errorText = nil
+				SoundFx.play2D("lantern")
+				renderAll()
+				menu:pop(id)
 			else
 				SoundFx.play2D("denied")
-				errorText = message or "That didn't work. No Shells were spent."
-			end
-			if isOpen then
-				layout()
-				render()
+				menu.toast(message or "That didn't work. No Shells were spent.")
+				renderAll()
 			end
 			return
-		end
-	end
-end)
-
-for _, name in { "Phase", "TowerShield" } do
-	state:GetAttributeChangedSignal(name):Connect(function()
-		if isOpen then
-			layout()
-			render()
-		end
-	end)
-end
-player.AttributeChanged:Connect(function(name)
-	if isOpen and string.sub(name, 1, 9) == "Merchant_" then
-		render()
-	end
-end)
-
-remotes:WaitForChild("TraderResult").OnClientEvent:Connect(function(requestId, ok, message, total)
-	if requestId ~= pendingId then
-		return
-	end
-	pendingId = nil
-	frozen = nil
-	if ok then
-		view = "sold"
-		soldFor = tonumber(total) or 0
-		errorText = nil
-		purse.set(state:GetAttribute("Shells") or 0, true)
-	else
-		SoundFx.play2D("denied")
-		errorText = message or "That didn't work. Nothing was sold."
-	end
-	if isOpen then
-		layout()
-		render()
-		if ok and UiKit.usingGamepad() then
-			GuiService.SelectedObject = actionButton
 		end
 	end
 end)
@@ -473,165 +350,59 @@ remotes:WaitForChild("GearData").OnClientEvent:Connect(function(data)
 	profile = data
 	if awaitingCheck then
 		-- the server's own data decides: the sack is empty -> the sale went through
-		frozen = nil
-		if totalValue(true) <= 0 then
-			view = "sold"
-			soldFor = awaitingCheck
-			errorText = nil
+		if totalValue() <= 0 then
+			sold(awaitingCheck)
 		else
-			errorText = "The Trader didn't answer. Nothing was sold. Try again."
+			menu.toast("The Trader didn't answer. Nothing was sold. Try again.")
 		end
 		awaitingCheck = nil
 	end
-	if isOpen then
-		layout()
-		render()
-	end
+	renderAll()
 end)
 
-state:GetAttributeChangedSignal("Shells"):Connect(function()
-	if isOpen then
-		purse.set(state:GetAttribute("Shells") or 0)
-		render() -- S6.2: what the crew can afford at the merchant
-	end
-end)
-
----------------------------------------------------------------------
--- LAYOUT
----------------------------------------------------------------------
-
-function layout()
-	local size = root.AbsoluteSize
-	if size.X <= 0 then
-		return
-	end
-	local W, H = size.X, size.Y
-	mode = UiKit.Breakpoint(size)
-	local phone = mode == "phone"
-	local pw = if phone then math.min(500, W - 12) else math.min(500, W - 32)
-	local pad = if phone then 12 else 20
-	local headerH = if phone then 46 else 74
-	local buttonH = 48
-	local errorH = if errorText then 30 else 0
-	local listH = 0
-	for _, itemId in LOOT do
-		if count(itemId) > 0 then
-			listH += 58
-		end
-	end
-	local bodyWanted = 24 + listH + 54 + 92
-	if profile and listH == 0 and view == "list" then
-		bodyWanted = 150 + 104 -- empty state + the loot rule
-	end
-	if profile and view == "list" and merchantOpen() then
-		bodyWanted += 34 + #Merchant.ORDER * STOCK_ROW_H -- S6.2: the merchant's stock
-	end
-	local wanted = 12 + headerH + 8 + bodyWanted + errorH + buttonH + pad + 8 + (if #vitalChips > 0 then 28 else 0)
-	local ph = math.min(math.max(wanted, 330), H - (if phone then 12 else 48))
-	panel.Size = UDim2.fromOffset(pw, ph)
-	panel.Position = UDim2.fromScale(0.5, 0.5)
-	panel:SetAttribute("RestPosition", panel.Position)
-
-	header.Position = UDim2.fromOffset(pad, 12)
-	header.Size = UDim2.new(1, -pad * 2, 0, headerH)
-	eyebrow.Visible = not phone
-	greeting.Visible = not phone
-	title.TextSize = if phone then 20 else 23
-
-	local vitalsH = if #vitalChips > 0 then 28 else 0
-	vitalsRow.Visible = vitalsH > 0
-	vitalsRow.Position = UDim2.fromOffset(pad, 12 + headerH + 4)
-	vitalsRow.Size = UDim2.new(1, -pad * 2, 0, 22)
-	Vitals.paint(UiKit, vitalTags, vitalChips)
-	local bodyTop = 12 + headerH + 8 + vitalsH
-	local ruleH = if phone then 20 else 0
-	local bottom = pad + buttonH + 8 + errorH + ruleH
-	note.Visible = not phone
-	ruleLine.Visible = phone and view == "list"
-	ruleLine.Position = UDim2.new(0, pad, 1, -pad - buttonH - 4 - errorH - ruleH)
-	ruleLine.Size = UDim2.new(1, -pad * 2, 0, ruleH)
-	body.Position = UDim2.fromOffset(pad, bodyTop)
-	body.Size = UDim2.new(1, -pad * 2 + 6, 0, ph - bodyTop - bottom)
-	for _, v in { emptyView, loadingView, soldView } do
-		v.Position = UDim2.fromOffset(pad, bodyTop)
-		v.Size = UDim2.new(1, -pad * 2, 0, if v == emptyView then 150 else ph - bodyTop - bottom)
-	end
-	-- the empty state keeps the loot rule visible underneath
-	if profile and totalValue() <= 0 and view == "list" then
-		body.Position = UDim2.fromOffset(pad, bodyTop + 150)
-		body.Size = UDim2.new(1, -pad * 2 + 6, 0, math.max(60, ph - bodyTop - 150 - bottom))
-	end
-	errorLabel.Position = UDim2.new(0, pad, 1, -pad - buttonH - 4 - errorH)
-	errorLabel.Size = UDim2.new(1, -pad * 2, 0, errorH)
-	actionButton.AutomaticSize = Enum.AutomaticSize.None
-	actionButton.AnchorPoint = Vector2.new(0, 1)
-	actionButton.Position = UDim2.new(0, pad, 1, -pad)
-	actionButton.Size = UDim2.new(1, -pad * 2, 0, buttonH)
-	root:SetAttribute("NoticeTop", 12)
+for _, name in { "Phase", "TowerShield", "Shells" } do
+	state:GetAttributeChangedSignal(name):Connect(renderAll)
 end
-root:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
-	if isOpen then
-		layout()
-		render()
+player.AttributeChanged:Connect(function(name)
+	if string.sub(name, 1, 9) == "Merchant_" then
+		renderAll()
 	end
 end)
-
-local function refresh()
-	layout()
-	render()
-end
 
 ---------------------------------------------------------------------
 -- OPEN / CLOSE
 ---------------------------------------------------------------------
 
-local function clearRows()
-	for _, p in previews do
-		p:destroy()
-	end
-	table.clear(previews)
-	for _, r in ledgerRows do
-		r.frame:Destroy()
-	end
-	table.clear(ledgerRows)
-end
+local TABS = { { id = "Salvage", label = "Salvage" }, { id = "Stock", label = "Island stock" } }
 
-function closeTrader()
-	if not isOpen then
+closeTrader = function()
+	if not menu.isOpen then
 		return
 	end
-	isOpen = false
+	menu:close()
 	ContextActionService:UnbindAction("CloseTrader")
 	GuiService.SelectedObject = nil
 	UiKit.popModal("Trader")
-	UiKit.Close(panel, function()
-		if not isOpen then
-			gui.Enabled = false
-			clearRows() -- 3D icons exist only while the Trader is open
-		end
-	end)
 end
 
 local function openTrader()
-	if isOpen then
+	if menu.isOpen then
 		return
 	end
-	isOpen = true
-	view = "list"
-	errorText = nil
 	table.clear(pendingBuy)
-	awaitingCheck = nil
-	frozen = nil
-	soldFor = 0
-	clearRows()
-	for order, itemId in LOOT do
-		makeLedgerRow(order, itemId)
-	end
-	vitalChips = Vitals.criticalChips()
-	gui.Enabled = true
+	pendingSell, awaitingCheck = nil, nil
+	-- by day with nothing to sell, the stock is what the player came for
+	tab = if merchantOpen() and totalValue() <= 0 then "Stock" else "Salvage"
+	selectedId = nil
 	UiKit.pushModal("Trader")
-	refresh()
-	UiKit.Open(panel)
+	menu:open()
+	menu:setTabs(TABS, tab, function(id)
+		tab = id
+		selectedId = nil
+		renderAll()
+	end)
+	menu:setAlerts(Vitals.criticalChips())
+	renderAll()
 	remotes.GearAction:FireServer("sync")
 	ContextActionService:BindAction("CloseTrader", function(_, inputState)
 		if inputState == Enum.UserInputState.Begin then
@@ -640,18 +411,18 @@ local function openTrader()
 		return Enum.ContextActionResult.Sink
 	end, false, Enum.KeyCode.ButtonB, Enum.KeyCode.Backspace)
 	task.defer(function()
-		if UiKit.usingGamepad() then
-			GuiService.SelectedObject = if actionButton:GetAttribute("Disabled") then closeButton else actionButton
+		if UiKit.usingGamepad() and selectedId and menu.tiles[selectedId] then
+			GuiService.SelectedObject = menu.tiles[selectedId].tile
 		end
 	end)
 end
 
 remotes:WaitForChild("TraderOpen").OnClientEvent:Connect(openTrader)
 
--- walking away (or dying) closes it
+-- walking away (or dying) closes it; critical states show as alerts while it is open
 local lastTick = 0
 RunService.Heartbeat:Connect(function()
-	if not isOpen then
+	if not menu.isOpen then
 		return
 	end
 	local now = os.clock()
@@ -660,56 +431,15 @@ RunService.Heartbeat:Connect(function()
 	end
 	lastTick = now
 	local character = player.Character
-	local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+	local rootPart = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
 	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 	local island = Workspace:FindFirstChild("Island")
-	local trader = island and island:FindFirstChild("Trader")
+	local trader = island and island:FindFirstChild("Trader") :: BasePart?
 	if not rootPart or not humanoid or humanoid.Health <= 0 or not trader or (rootPart.Position - trader.Position).Magnitude > WALK_AWAY then
 		closeTrader()
 		return
 	end
-	-- live critical chips (re-fit the sheet only when they appear or disappear)
-	local chips = Vitals.criticalChips()
-	local changed = (#chips > 0) ~= (#vitalChips > 0)
-	vitalChips = chips
-	if changed then
-		layout()
-	else
-		Vitals.paint(UiKit, vitalTags, vitalChips)
-	end
+	menu:setAlerts(Vitals.criticalChips())
 end)
-
----------------------------------------------------------------------
--- STUDIO ONLY: draw the sheet inside a simulated screen (HudSimulate attribute)
----------------------------------------------------------------------
-
-if RunService:IsStudio() then
-	local SIZES = {
-		smallPhone = Vector2.new(667, 375),
-		largePhone = Vector2.new(932, 430),
-		tablet = Vector2.new(1180, 820),
-		laptop = Vector2.new(1366, 768),
-	}
-	local function applySimulation()
-		local spec = SIZES[player:GetAttribute("HudSimulate") or ""]
-		rootOutline.Enabled = spec ~= nil
-		if spec then
-			root.AnchorPoint = Vector2.new(0.5, 0.5)
-			root.Position = UDim2.fromScale(0.5, 0.5)
-			root.Size = UDim2.fromOffset(spec.X, spec.Y)
-		else
-			root.AnchorPoint = Vector2.zero
-			root.Position = UDim2.new()
-			root.Size = UDim2.fromScale(1, 1)
-		end
-		task.defer(function()
-			if isOpen then
-				refresh()
-			end
-		end)
-	end
-	player:GetAttributeChangedSignal("HudSimulate"):Connect(applySimulation)
-	applySimulation()
-end
 
 remotes.GearAction:FireServer("sync")

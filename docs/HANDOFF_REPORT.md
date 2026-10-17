@@ -1333,3 +1333,19 @@ NOT DONE: screenshots (Studio's 3D view was blank white for captures); a phone a
 OWNER: in the next DEV publish (the S3 step 0 package now also carries the sniper tower), climb the tower on the island's west side and tell me if the numbers feel right.
 S3 step 0 save done · 2026-10-17 22:47 UTC · the owner saved `backups/LighthouseKeepers_DEV_S3_2026-10-17.rbxl` (1.1 MB, checked on disk). The owner uploaded a thumbnail and icon to DEV; the store page still showed the default image at 22:47 (likely image review pending). Publish not yet reported.
 S3 step 0 PUBLISHED · 2026-10-17 23:16 UTC · the owner published DEV (project chat: "DEV published"); the S3 measures (MomentKind, BeamModes) and the sniper tower (SNP.1) are live on DEV. The owner reports the DEV icon and thumbnails now show. Next: S3 steps 1–5 (owner) and the owner's live check of the sniper tower.
+
+CHECKPOINT: MP.2 Trader on the menu pattern — ✅ in DEV (Script Analysis unmeasured; the loot tiles' 3D icons were not visible in Studio captures because Studio's 3D view drew white; the owner judges the look)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: ServerStorage.Backups.TRADER_before_2026-10-17 (Trader, Bench, Tiles) · restore points "TRADER before", "TRADER passed"
+WHY: the roadmap waits on the public test; the owner liked the new shop, and the Trader was the next menu every voyage opens (the S2.5c record left it on the old layout).
+BUILT:
+- `Trader.client` rewritten on `UI/Tiles` (--!strict): SALVAGE tab (a tile per kind of loot carried with its count and value; the detail pane shows the loot rule, what each pays and the total; one SELL ALL button: the server only sells everything) and ISLAND STOCK tab (the merchant's six items as glyph tiles with their Shell price, how many bought, for you or the whole crew, how long it lasts; dimmed under "The Trader sells by day" at night; one tap buys, Shells being the crew's voyage pool like the bench). A sale shows "Sold for N Shells"; by day with nothing to sell it opens on the stock.
+- `UI/Tiles`: `menu:setAlerts` draws critical states (lamp dark or low fuel, tower breaching, health critical; `Vitals.criticalChips`) as pills under the header. The new workbench had lost the old bench's vitals row in S2.5c: it now shows them too.
+- No server script, remote, price or save field changed (TraderRequest "sellAll", MerchantRequest "buy" as before).
+TESTRUNNER (DEV, Play server): **258 passed, 0 failed**.
+PLAY TEST (DEV, one player, runtime helpers to sail and to give loot in the Studio memory store): opened the Trader with E; 5 crab claws, 2 sea glass, 1 black pearl shown (20, 66, 130 Shells); SELL ALL: crew Shells 120 → 336 (+216), the sack empty; at night the stock was dimmed under its divider; by day bought the Oil Bundle: Shells 336 → 306, lamp fuel 0 → 40. The FUEL 4% · CRITICAL and LAMP DARK alerts showed while it was open. 0 errors from game scripts.
+SIZES: PC window 2004×985: smallest tap 58.4 px; simulated 926×428 and 667×375: smallest tap 56.1 px; no text overflowing at any size.
+SCREENSHOTS: `assets/screens/trader_menu/`.
+MIRROR: 166 scripts in DEV, digest identical to `src/` (9c75663d).
+OWNER: it reaches players with the next DEV publish.

@@ -288,6 +288,42 @@ function Tiles.Menu(opts: any): any
 	end
 	menu.toast = toast
 
+	---------------------------------------------------------------- alerts
+	-- What is critical right now (the storm doesn't pause while a menu is open): pills under the header,
+	-- red for danger, amber for a warning. { { text, level } }; an empty list hides the row.
+	local alertsRow = new("Frame", { Name = "Alerts", BackgroundTransparency = 1, Visible = false }, panel)
+	new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder, VerticalAlignment = Enum.VerticalAlignment.Center }, alertsRow)
+	local alertKey = ""
+	function menu:setAlerts(list: { any }?)
+		local items = list or {}
+		local parts = {}
+		for _, a in items do
+			table.insert(parts, tostring(a.level) .. ":" .. tostring(a.text))
+		end
+		local key = table.concat(parts, "|")
+		if key == alertKey then
+			return
+		end
+		local relayout = (key == "") ~= (alertKey == "")
+		alertKey = key
+		for _, c in alertsRow:GetChildren() do
+			if c:IsA("GuiObject") then
+				c:Destroy()
+			end
+		end
+		for i, a in items do
+			local danger = a.level == "danger"
+			local pill = label(alertsRow, { Name = "Alert" .. i, Text = string.upper(tostring(a.text)), FontFace = F.Display, TextSize = 26, TextColor3 = if danger then Color3.new(1, 1, 1) else Color3.fromRGB(42, 21, 0), BackgroundTransparency = 0, BackgroundColor3 = if danger then Color3.fromRGB(220, 40, 40) else Color3.fromRGB(255, 194, 61), Size = UDim2.fromOffset(0, 40), AutomaticSize = Enum.AutomaticSize.X, LayoutOrder = i })
+			corner(pill, 14)
+			stroke(pill, 3)
+			new("UIPadding", { PaddingLeft = UDim.new(0, 14), PaddingRight = UDim.new(0, 14) }, pill)
+		end
+		alertsRow.Visible = #items > 0
+		if relayout then
+			menu:layout()
+		end
+	end
+
 	---------------------------------------------------------------- resources
 	local resourceWidgets: { any } = {}
 	function menu:setResources(list: { any })
@@ -647,7 +683,10 @@ function Tiles.Menu(opts: any): any
 		title.Size = UDim2.new(if phone then 0.3 else 0.34, 0, 1, 0)
 
 		local pad = 24
-		local bodyTop = headerH + 20
+		local alertsH = if alertsRow.Visible then 52 else 0
+		alertsRow.Position = UDim2.fromOffset(pad, headerH + 12)
+		alertsRow.Size = UDim2.new(1, -pad * 2, 0, 40)
+		local bodyTop = headerH + 20 + alertsH
 		local bodyH = ph - bodyTop - pad
 		local paneW = math.floor(pw * (if phone then 0.36 else 0.38))
 		local leftW = pw - paneW - pad * 3
