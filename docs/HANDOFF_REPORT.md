@@ -1134,3 +1134,18 @@ PLAY TEST (DEV): voyage sailed with the runtime helper, lamp kept fuelled by a r
 SCREENSHOTS: `assets/screens/visual_v3/`.
 MIRROR: Storm 455fe39f, BeamFx ac09e486, ShoreFx 9f0eff9c, identical in DEV and `src/`.
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+
+CHECKPOINT: V4 Island rebuild (visual overhaul) — 🟦 (Script Analysis unmeasured; the owner judges the look; the owner's file save below is outstanding)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: ServerStorage.Backups.VIS_V4_before_2026-10-17 (a TerrainRegion copy of the whole island and the Decor folder) · restore points "VIS_V4 before", "V4 terrain repaint 2", "V4 props". OWNER: in the DEV Studio window, File → Save to File As → `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_preVisual_2026-10-17.rbxl` (asked in the thread; V4 went ahead on the in-Studio terrain copy, per unattended mode).
+BUILT (details and exact rules in `assets/world/v4_island_build.md`):
+- Terrain: the lawn-green plateau is now moss, earth and rock patches with worn mud paths (spawn → tower door, → oil, → bench, → trader, → hut, and up from the south cove). Heights where play happens (radius under 74 studs) are unchanged. The sand ring became a craggy rock rim up to 7 studs high, with three sand coves (south toward the harbor, and at the two wreck props).
+- Props (`Workspace.IslandProps`, edit-time parts, 9 small lights): keeper's hut with a lit window and a flag, an oil shed over the barrels, a dock with a rowboat at the south cove, 6 path lanterns.
+- `WindFx` (new LocalScript, `--!strict`): tagged lanterns swing and the flag flutters, harder in the storm; only within 250 studs of the camera.
+- Not done: a raised tower mound (the tower and lamp are placed at a fixed height, so raising the ground under them would bury the base; left for a later code change if wanted).
+TESTRUNNER (DEV, Play server): **249 passed, 0 failed**.
+PLAY TEST (DEV): voyage sailed with the runtime helper; prologue crabs (9) and Night 1 creatures (17) climbed over the new rim and reached the tower; a creature's ground-grid height matched a terrain raycast within 0.03 studs; GroundGrid 445,474 samples in 3.2 s (was 398,974 in 3.1 s); the "Grab Oil" prompt under the shed worked (CarryingOil = true); the flag moved; 0 client and 0 server errors (apart from the expected refused Studio data-store calls and one error from my own monitoring helper, fixed and rerun); client 60 FPS in Studio.
+SCREENSHOTS: `assets/screens/visual_v4/`.
+MIRROR: WindFx f04ac3c5 identical in DEV and `src/`. Terrain and props are place content (not in the mirror); they reach players with the owner's next DEV publish.
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
