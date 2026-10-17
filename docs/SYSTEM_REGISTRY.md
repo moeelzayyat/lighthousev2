@@ -67,7 +67,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Analytics funnel | Implemented (live dashboard check pending, R1.9) | R1.6 | `Analytics` bus consumer → AnalyticsService; 4 tests; every step fired in Studio (DawnPearl from S2.2) |
 | Feature flags / remote config | Planned | S5.1 | |
 | Definitions registry | Tested (not yet published) | S5.4 | `Shared/_Registry` checks 8 catalogs (35 definitions) in the Definitions domain at boot; a bad definition stops the boot with every problem listed; `RegistrySpec` 8 tests |
-| StatPipeline | Planned | S5.7 | |
+| StatPipeline | Tested (not yet published) | S5.7 | `Shared/StatPipeline`: weapons, armor and bench upgrades; used by Attack, gear, UpgradeService and the shop, bag, bench and HUD previews; `StatPipelineSpec` 7 tests |
 | Domain lifecycle | Tested (not yet published) | S5.1–S5.2 | `Server/Bootstrap` (asserted order, Inits then Starts, Boot log) + 10 `Server/Domains`; `Main` 14 lines; remotes exposed last; `BootstrapSpec` 8 tests |
 | TestRunner | Implemented | R1.1 | `ServerStorage.Tests.TestRunner`; specs named `<Name>Spec` |
 | Creature 20 Hz step + snapshots + interpolation | Tested (not yet published) | S4.2–S4.3 | `CreatureService` tables at 20 Hz; `Shared/CreatureSnapshot` 12 Hz; `Client/CreatureView` pooled models; 10.0 KB/s per client at 45 creatures |
@@ -78,7 +78,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 |---|---|---|---|
 | UiKit v2.1 (3.1k lines) | Released; split tested (not yet published) | S5.5 | S5.5: `Client/UiKit` (40-line facade) + `Client/UI/{Kit,Tokens,Primitives,Controls,Gauges,Dialogs}`; v1 API and the old `Gear.client` screen deleted (in `Backups.S5.5_before_2026-10-17`) |
 | Pirate skin (UiSkin, Kenney atlas) | Released | — | |
-| Glass HUD | Released | S5.6 | single pass |
+| Glass HUD | Released; single pass tested (not yet published) | S5.6 | S5.6: glass built by UiKit at creation (`UiKit.beginGlass`/`Glass`), repaint pass deleted; `Hud.client` 711 lines + `HudParts/` |
 | Menus / Shop / Inventory / Bench / Trader / Departure / Results / Coach | Released | S5.5 | |
 | Phone layouts | Released | S4.4 | real-phone FPS |
 | InputController (single) | Tested (not yet published) | S2.6 | replaces the input-mode copies in Coach, Hud, Menus, Departure, UiKit |

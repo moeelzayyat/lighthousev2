@@ -22,6 +22,7 @@ local Items = require(Shared:WaitForChild("Items"))
 local Weapons = require(Shared:WaitForChild("Weapons"))
 local Ammo = require(Shared:WaitForChild("Ammo"))
 local SoundFx = require(Shared:WaitForChild("SoundFx"))
+local StatPipeline = require(Shared:WaitForChild("StatPipeline")) -- S5.7: the values previews and voyages share
 local UiKit = require(script.Parent:WaitForChild("UiKit"))
 local ItemPreview = require(script.Parent:WaitForChild("ItemPreview"))
 
@@ -60,7 +61,7 @@ local function pearls()
 	return if profile then profile.pearls or 0 else 0
 end
 local function dps(weaponId)
-	local w = Weapons[weaponId]
+	local w = StatPipeline.weapon(weaponId)
 	return w.damage / w.cooldown
 end
 local function typeLabel(item)
@@ -98,18 +99,19 @@ local function statRows(itemId)
 		table.insert(rows, { label = label, value = value, delta = delta, better = better, fmt = fmt })
 	end
 	if item.kind == "Weapon" then
-		local w = Weapons[itemId]
+		local w = StatPipeline.weapon(itemId)
 		local current = profile and profile.equippedWeapon
-		local cw = current and current ~= itemId and Weapons[current] or nil
+		local cw = current and current ~= itemId and Weapons[current] and StatPipeline.weapon(current) or nil
 		add("Damage per hit", tostring(w.damage), w.damage, cw and cw.damage, true, "%+d")
 		add("Reload", string.format("%.1f s", w.cooldown), w.cooldown, cw and cw.cooldown, false, "%+.1f s")
 		add("Targets per throw", if w.maxTargets > 1 then ("up to " .. w.maxTargets) else "1", w.maxTargets, cw and cw.maxTargets, true, "%+d")
 		add("Damage per second", tostring(math.floor(dps(itemId) + 0.5)), math.floor(dps(itemId) + 0.5), cw and math.floor(dps(current) + 0.5), true, "%+d")
 	elseif item.kind == "Armor" then
 		local current = profile and profile.equippedArmor
-		local ca = current and current ~= itemId and Items[current] or nil
-		add("Health", tostring(item.maxHealth), item.maxHealth, ca and ca.maxHealth, true, "%+d")
-		local red = math.floor(item.damageReduction * 100 + 0.5)
+		local ca = current and current ~= itemId and Items[current] and StatPipeline.armor(current) or nil
+		local a = StatPipeline.armor(itemId)
+		add("Health", tostring(a.maxHealth), a.maxHealth, ca and ca.maxHealth, true, "%+d")
+		local red = math.floor(a.damageReduction * 100 + 0.5)
 		add("Damage blocked", red .. "%", red, ca and math.floor(ca.damageReduction * 100 + 0.5), true, "%+d%%")
 	elseif item.kind == "Ammo" then
 		local a = Ammo[item.ammoType]

@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local Upgrades = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Upgrades"))
+local StatPipeline = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("StatPipeline")) -- S5.7
 local EventLog = require(script.Parent.EventLog)
 
 local UpgradeService = {}
@@ -65,12 +66,13 @@ function UpgradeService.getLevel(id)
 end
 
 -- The upgrade's current effect, or `base` if it hasn't been bought
+-- S5.7: the bench preview reads the same StatPipeline.upgrade(id, rank)
 function UpgradeService.value(id, base)
 	local level = levels[id] or 0
 	if level == 0 then
 		return base
 	end
-	return Upgrades[id].values[level]
+	return StatPipeline.upgrade(id, level)
 end
 
 -- Spends crew shells if there are enough. Returns true if spent.

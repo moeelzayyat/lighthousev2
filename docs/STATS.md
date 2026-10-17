@@ -5,22 +5,28 @@ Final = clamp((Base + ΣFlat) × (1 + ΣAdditivePct) × ΠMultipliers, Min, Max)
 ```
 `StatPipeline` (S5.7) is the single place these are computed: shop previews, bench previews, merchant boosts and in-voyage values all use it. Current values are the owner-approved numbers from `Config` and `Shared/Weapons`, `Armor`, `Upgrades`.
 
+**S5.7 status:** `ReplicatedStorage/Shared/StatPipeline` implements the rows marked ✅ (the others get their code with their features: speed, cannons, Shell gain, loot magnet, creature multipliers). It returns today's numbers unchanged (`StatPipelineSpec`). Bench ranks enter as a Flat layer (Fuel Tank, Reinforced Walls, Clockwork Sweep: the rank value minus the base) or a Multiplier (Lens Power); the rank values stay in `Shared/Upgrades`.
+
 | StatId | Unit | Base | Layers allowed | Min | Max | Sources |
 |---|---|---|---|---|---|---|
-| `PlayerMaxHealth` | HP | 100 | Flat, AdditivePct | 50 | 300 | armor, specialties |
-| `PlayerArmor` | % damage reduction | armor def | Flat | 0 | 60% | armor |
+| `PlayerMaxHealth` ✅ | HP | armor def (100 / 140 / 190) | Flat, AdditivePct | 50 | 300 | armor, specialties |
+| `PlayerArmor` ✅ | % damage reduction | armor def | Flat | 0 | 60% | armor |
 | `PlayerSpeed` | studs/s | 16 | AdditivePct | 12 | 22 | merchant speed boost (voyage), Quartermaster boost (cap +5%) |
-| `WeaponDamage` | per hit | weapon def | AdditivePct, Multiplier | 1 | 200 | Quartermaster damage boost (cap +5%), merchant boost (voyage) |
-| `WeaponCooldown` | s | weapon def | AdditivePct (reduction) | 0.2 | 5 | — |
-| `WeaponRange` | studs | weapon def | AdditivePct | 4 | 40 | — |
+| `WeaponDamage` ✅ | per hit | weapon def | AdditivePct, Multiplier | 1 | 200 | Quartermaster damage boost (cap +5%), merchant boost (voyage) |
+| `WeaponCooldown` ✅ | s | weapon def | AdditivePct (reduction) | 0.2 | 5 | — |
+| `WeaponRange` ✅ | studs | weapon def (50–70) | AdditivePct | 4 | 100 (S5.7: was 40, below every weapon's approved range) | — |
+| `WeaponHitRadius` ✅ | studs | weapon def | AdditivePct | 1 | 20 | — |
+| `WeaponMaxTargets` ✅ | creatures | weapon def | Flat | 1 | 10 | — |
+| `BeamDamageMult` ✅ | × | 1 | Multiplier | 1 | 3 | Lens Power (1.25 / 1.5 / 1.75) |
+| `AutoSweepDps` ✅ | DPS | 0 | Flat | 0 | 30 | Clockwork Sweep (4 / 8 / 12) |
 | `BeamWideDps` | DPS | 12 | AdditivePct, Multiplier | 6 | 40 | Lens Power (bench), Fog bank forecast (−30% wide) |
 | `BeamFocusDps` | DPS | 35 | AdditivePct, Multiplier | 15 | 100 | Lens Power |
 | `BeamWideHalfAngle` | deg | 18 | Flat | 10 | 30 | — |
 | `FuelDrain` | fuel/s | 1.2 × crewMult | AdditivePct, Multiplier | 0.5 | 4 | Leaky stores (+25%), Fuel Tank (bench), Overcharged Beam (focus −25%) |
-| `MaxFuel` | fuel | 100 | Flat, AdditivePct | 60 | 200 | Fuel Tank |
+| `MaxFuel` ✅ | fuel | 100 | Flat, AdditivePct | 60 | 200 | Fuel Tank (130 / 160 / 190) |
 | `FocusFuelMult` | × | 2.5 | Multiplier | 1.2 | 2.5 | Overcharged Beam |
 | `RepairAmount` | integrity | 20 | AdditivePct, Multiplier | 10 | 60 | Reinforced Walls, Clockwork Bastion (+50%) |
-| `MaxIntegrity` | integrity | 100 | Flat, AdditivePct | 60 | 250 | Reinforced Walls |
+| `MaxIntegrity` ✅ | integrity | 100 | Flat, AdditivePct | 60 | 250 | Reinforced Walls (150 / 200 / 250) |
 | `AutoSweepSpeed` | deg/s | 25 | AdditivePct | 10 | 60 | Clockwork Sweep |
 | `CannonDamage` | per shot | level table | AdditivePct | 5 | 60 | — |
 | `CannonRange` | studs | level table | AdditivePct | 25 | 60 | — |

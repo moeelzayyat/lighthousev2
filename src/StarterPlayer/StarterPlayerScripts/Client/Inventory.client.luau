@@ -23,6 +23,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Items = require(Shared:WaitForChild("Items"))
 local Weapons = require(Shared:WaitForChild("Weapons"))
 local Ammo = require(Shared:WaitForChild("Ammo"))
+local StatPipeline = require(Shared:WaitForChild("StatPipeline")) -- S5.7: the values previews and voyages share
 local UiKit = require(script.Parent:WaitForChild("UiKit"))
 local ItemPreview = require(script.Parent:WaitForChild("ItemPreview"))
 
@@ -58,7 +59,7 @@ local function isEquipped(itemId)
 	return profile ~= nil and (profile.equippedWeapon == itemId or profile.equippedArmor == itemId)
 end
 local function dps(weaponId)
-	local w = Weapons[weaponId]
+	local w = StatPipeline.weapon(weaponId)
 	return w.damage / w.cooldown
 end
 local function equippedFor(slot)
@@ -88,9 +89,9 @@ local function statRows(itemId)
 	local item = Items[itemId]
 	local rows = {}
 	if item.kind == "Weapon" then
-		local w = Weapons[itemId]
+		local w = StatPipeline.weapon(itemId)
 		local current = profile and profile.equippedWeapon
-		local cw = current and current ~= itemId and Weapons[current]
+		local cw = current and current ~= itemId and Weapons[current] and StatPipeline.weapon(current)
 		local function add(label, value, a, b, higherIsBetter, fmt)
 			local delta, better
 			if cw and a ~= b then
@@ -105,7 +106,8 @@ local function statRows(itemId)
 		add("Damage per second", tostring(math.floor(dps(itemId) + 0.5)), math.floor(dps(itemId) + 0.5), cw and math.floor(dps(current) + 0.5), true, "%+d")
 	elseif item.kind == "Armor" then
 		local current = profile and profile.equippedArmor
-		local ca = current and current ~= itemId and Items[current]
+		local ca = current and current ~= itemId and Items[current] and StatPipeline.armor(current)
+		local mine = StatPipeline.armor(itemId)
 		local function add(label, value, a, b, fmt)
 			local delta, better
 			if ca and a ~= b then
@@ -114,8 +116,8 @@ local function statRows(itemId)
 			end
 			table.insert(rows, { label = label, value = value, delta = delta, better = better, fmt = fmt })
 		end
-		add("Health", tostring(item.maxHealth), item.maxHealth, ca and ca.maxHealth, "%+d")
-		local red = math.floor(item.damageReduction * 100 + 0.5)
+		add("Health", tostring(mine.maxHealth), mine.maxHealth, ca and ca.maxHealth, "%+d")
+		local red = math.floor(mine.damageReduction * 100 + 0.5)
 		add("Damage blocked", red .. "%", red, ca and math.floor(ca.damageReduction * 100 + 0.5), "%+d%%")
 	elseif item.kind == "Ammo" then
 		local a = Ammo[item.ammoType]
@@ -479,7 +481,7 @@ local function renderSlots()
 		w.stroke.Color = if selected then C.BorderSelected else C.BorderSubtle
 		w.stroke.Transparency = if selected then 0 else 0.2
 	end
-	local armor = Items[profile.equippedArmor]
+	local armor = Items[profile.equippedArmor] and StatPipeline.armor(profile.equippedArmor)
 	summaryRows[1].Text = tostring(armor and armor.maxHealth or 100)
 	summaryRows[2].Text = (if armor then math.floor(armor.damageReduction * 100 + 0.5) else 0) .. "%"
 	summaryRows[3].Text = if Weapons[profile.equippedWeapon] then tostring(math.floor(dps(profile.equippedWeapon) + 0.5)) else "-"

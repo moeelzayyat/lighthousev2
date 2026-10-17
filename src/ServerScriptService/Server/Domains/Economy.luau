@@ -9,6 +9,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 local Weapons = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Weapons"))
 local Items = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Items"))
 local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SoundFx"))
+local StatPipeline = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("StatPipeline")) -- S5.7
 local EventLog = require(Server.EventLog)
 local PlayerData = require(Server.PlayerData)
 local GrantService = require(Server.GrantService)
@@ -175,13 +176,14 @@ local function syncGear(player)
 	end
 
 	-- Armor: max health + damage reduction, and the visible model on the character
-	local armor = profile and Items[profile.equippedArmor]
-	if humanoid and armor then
+	local armorItem = profile and Items[profile.equippedArmor]
+	if humanoid and armorItem then
+		local armor = StatPipeline.armor(profile.equippedArmor) -- S5.7: the numbers the shop shows
 		local ratio = if humanoid.MaxHealth > 0 then humanoid.Health / humanoid.MaxHealth else 1
 		humanoid.MaxHealth = armor.maxHealth
 		humanoid.Health = math.max(1, armor.maxHealth * ratio)
 		player:SetAttribute("DamageReduction", armor.damageReduction)
-		player:SetAttribute("ArmorName", armor.name)
+		player:SetAttribute("ArmorName", armorItem.name)
 		if character:GetAttribute("WornArmorId") ~= profile.equippedArmor then
 			character:SetAttribute("WornArmorId", profile.equippedArmor)
 			wearArmor(character, profile.equippedArmor)

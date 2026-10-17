@@ -25,6 +25,7 @@ local Config = require(Shared:WaitForChild("Config"))
 local Items = require(Shared:WaitForChild("Items"))
 local Weapons = require(Shared:WaitForChild("Weapons"))
 local SoundFx = require(Shared:WaitForChild("SoundFx"))
+local StatPipeline = require(Shared:WaitForChild("StatPipeline")) -- S5.7
 local UiKit = require(script.Parent:WaitForChild("UiKit"))
 local InputController = require(script.Parent:WaitForChild("InputController")) -- S2.6
 local Parts = script.Parent:WaitForChild("HudParts")
@@ -309,7 +310,7 @@ local function findWeapon(container)
 end
 
 local function startCooldown(id)
-	local stats = Weapons[id]
+	local stats = Weapons[id] and StatPipeline.weapon(id)
 	if not stats or not stats.cooldown or stats.cooldown <= 0 then
 		return
 	end

@@ -21,6 +21,7 @@ local Workspace = game:GetService("Workspace")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Upgrades = require(Shared:WaitForChild("Upgrades"))
+local StatPipeline = require(Shared:WaitForChild("StatPipeline")) -- S5.7: the values previews and voyages share
 local SoundFx = require(Shared:WaitForChild("SoundFx"))
 local UiKit = require(script.Parent:WaitForChild("UiKit"))
 local Vitals = require(script.Parent:WaitForChild("Vitals"))
@@ -35,10 +36,10 @@ local WALK_AWAY = 16
 
 -- What each upgrade does right now, in the player's words (presentation only)
 local BENEFIT = {
-	LensPower = { label = "Beam damage", base = 1, fmt = function(v) return math.floor(v * 100 + 0.5) .. "%" end },
-	FuelTank = { label = "Max fuel", base = Config.MAX_FUEL, fmt = tostring, extra = "refills 30" },
-	Walls = { label = "Tower strength", base = Config.MAX_INTEGRITY, fmt = tostring, extra = "repairs 50" },
-	ClockworkSweep = { label = "Auto-sweep damage", base = 0, fmt = function(v) return v .. "/s" end },
+	LensPower = { label = "Beam damage", fmt = function(v) return math.floor(v * 100 + 0.5) .. "%" end },
+	FuelTank = { label = "Max fuel", fmt = tostring, extra = "refills 30" },
+	Walls = { label = "Tower strength", fmt = tostring, extra = "repairs 50" },
+	ClockworkSweep = { label = "Auto-sweep damage", fmt = function(v) return v .. "/s" end },
 }
 
 local isOpen = false
@@ -269,11 +270,11 @@ local function benefitText(id, level)
 	if not b then
 		return upgrade.description
 	end
-	local now = if level == 0 then b.base else upgrade.values[level]
+	local now = StatPipeline.upgrade(id, level) -- S5.7: the value the voyage uses at this rank
 	if level >= maxLevel then
 		return string.format("%s %s · fully upgraded", b.label, b.fmt(now))
 	end
-	local nextValue = upgrade.values[level + 1]
+	local nextValue = StatPipeline.upgrade(id, level + 1)
 	local text = string.format("%s %s \u{2192} <font color=\"%s\"><b>%s</b></font>", b.label, b.fmt(now), hex(C.StateSuccess), b.fmt(nextValue))
 	return text
 end

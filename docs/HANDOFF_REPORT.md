@@ -607,3 +607,39 @@ SCRIPT ANALYSIS: not measured (owner item).
 MIRROR: 111 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (3fd957e4).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
 NEXT: S5.7 Stat pipeline.
+
+CHECKPOINT: S5.7 Stat pipeline — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S5.7_before_2026-10-17 (UpgradeService, Domains.Encounter, Domains.Economy, Hud, Shop, Inventory, Bench)
+BUILT:
+- `ReplicatedStorage/Shared/StatPipeline` (new, `--!strict`): `compute(stat, base, {flat, add, mult})` = clamp((Base + ΣFlat) × (1 + ΣAdditivePct) × ΠMultipliers, Min, Max), refusing unknown stats and layers a stat does not take; `weapon(id)`, `armor(id)`, `upgrade(id, rank)`. Stat rows and caps from `docs/STATS.md` (11 stats today).
+- In the voyage: the server's Attack uses `StatPipeline.weapon` (cooldown, range, hit radius, damage, targets); gear uses `StatPipeline.armor` (max health, damage reduction); `UpgradeService.value` uses `StatPipeline.upgrade` (lens, fuel tank, walls, clockwork sweep).
+- Previews: the shop and the bag compare weapons and armor through the same functions; the bench shows now → next with `StatPipeline.upgrade`; the HUD's reload bar reads the weapon's cooldown from it.
+- No number changed. `STATS.md`: `WeaponRange` max raised from 40 to 100 (the table's cap was below every approved weapon range, 50–70; clamping would have shortened every weapon); new rows `WeaponHitRadius`, `WeaponMaxTargets`, `BeamDamageMult`, `AutoSweepDps`.
+TESTRUNNER (DEV): **147 passed, 0 failed** (140 + new `StatPipelineSpec` 7: the formula and clamps; unknown stat and wrong layer refused; every weapon, armor and bench rank equals today's catalog value; the bench preview equals what UpgradeService applies at every rank of every upgrade; the shop, bag, bench, HUD and voyage code all read StatPipeline).
+PLAY TEST (DEV, owner's account, mock store; runtime-only client steps): the bench showed "Beam damage 100% → 125% · Max fuel 100 → 130 · Tower strength 100 → 150 · Auto-sweep damage 0/s → 4/s" (the catalog values); a harpoon strike on the first crab registered (`step=strike`); armor applied (Oilskin Coat, 100 HP, 0% reduction). 0 client errors; server only ProfileStore's refused Studio write (API off). Play stopped; 0 TEMPTEST scripts remain.
+SCRIPT ANALYSIS: not measured (owner item).
+MIRROR: 113 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (f174838b).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+NEXT: S5.8 publish package (owner), then S6.1.
+
+=====================================================================
+S5.8 — READY FOR OWNER TO PUBLISH (DEV experience only)
+=====================================================================
+What is in this build (since the S4.7 package): S5.1–S5.7, the domain split. The server now starts ten domains in a checked order (Main is 15 lines), services react to each other through the event bus, every catalog is checked at boot, UiKit is split into five parts, the glass HUD is built natively (the HUD looks the same: the health and fuel gauge caps now stay navy instead of turning brown, and the keeper's beam button draws its own label), and one stat pipeline feeds the shop, bag and bench previews and the voyage. No gameplay number changed. If S2.8 or S4.7 were not published yet, this one package covers them: publish once.
+S5 exit: TestRunner 147 tests (≥ 120) ✓ · Main 15 lines (≤ 80) ✓ · Script Analysis warnings: not measured (owner item, see below).
+Before publishing:
+ 1. In the DEV Studio window: File → Save to File As → `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_S5_2026-10-17.rbxl`.
+ 2. Game Settings → Security → "Enable Studio Access to API Services" stays OFF.
+ 3. Optional, 1 minute: View → Script Analysis, tick "Show warnings", and note the number of warnings for `ServerScriptService.Server` and `StarterPlayerScripts.Client` (tell Claude the two numbers).
+Publish:
+ 4. File → Publish to Roblox (DEV experience, PlaceId 102473202766620; production is not touched).
+ 5. Creator Hub → Lighthouse Keepers DEV → Servers → Shut down all servers.
+Live checks (about 20 minutes, on a phone if you can):
+ 6. Join: the title, the ship and the HUD look as before; the bag and shop show weapon and armor numbers; the bench shows "now → next".
+ 7. Play a voyage to night 2 or further: notices, pickups and the boss bar look as before; a harpoon strike damages a crab; Pearls bank at dawn.
+ 8. Phone (from S4.7): the lowest FPS you see during a big swarm, and the phone model.
+ 9. Tell Claude: anything that looks different from before, the phone FPS, the Script Analysis numbers.
+If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.
+Claude's state: S5.8 set to 🟦; work continues with S6.1.

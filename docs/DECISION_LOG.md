@@ -153,3 +153,6 @@ The roadmap's GO thresholds (Night-1 survival ≥ 50 %, rematch ≥ 60 %, beam m
 ## CP — S5.5 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · UiKit 3,115 → 40 lines + 5 parts; 20/20 screens and 10/10 guide pages unchanged; v1 API and Gear.client deleted
 ## CP — S5.6 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · glass built natively (repaint pass deleted); Hud.client 2,044 → 711 lines; 84/84 HUD snapshots identical apart from 2 intended changes
 - Accepted (unattended, recommendation): gauge caps and the fuel track stay navy in the glass HUD (the old repaint let them turn brown after the first update), and the keeper beam button draws its own label (keeps its 190 px width). To revise: say so.
+## CP — S5.7 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · StatPipeline for weapons, armor and bench upgrades; previews == voyage values; no number changed; TestRunner 147/147
+- Accepted (unattended, recommendation): STATS.md cap for WeaponRange raised 40 → 100 so the pipeline keeps today's approved ranges (50–70). To revise: say so.
+## CP — S5.8 publish package written (🟦, waits for the owner's DEV publish) · 2026-10-17 · DEV only · S5 exit: 147 tests, Main 15 lines; warnings unmeasured

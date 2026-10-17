@@ -10,6 +10,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 local Weapons = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Weapons"))
 local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SoundFx"))
 local Voyages = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Voyages"))
+local StatPipeline = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("StatPipeline")) -- S5.7
 local EventLog = require(Server.EventLog)
 local PlayerData = require(Server.PlayerData)
 local LampService = require(Server.LampService)
@@ -259,20 +260,21 @@ local function hookAttack(ctx)
 		if not weapon then
 			return
 		end
+		local stats = StatPipeline.weapon(weaponId) -- S5.7: the numbers the shop shows
 
 		local now = os.clock()
-		if (lastAttack[player] or 0) + weapon.cooldown > now then
+		if (lastAttack[player] or 0) + stats.cooldown > now then
 			return
 		end
 		lastAttack[player] = now
 
 		-- Clamp to the weapon's range
 		local offset = target - root.Position
-		if offset.Magnitude > weapon.range then
-			target = root.Position + offset.Unit * weapon.range
+		if offset.Magnitude > stats.range then
+			target = root.Position + offset.Unit * stats.range
 		end
 
-		local hits = CreatureService.damageArea(target, weapon.hitRadius, weapon.damage, weapon.maxTargets, "Weapon:" .. weaponId, player)
+		local hits = CreatureService.damageArea(target, stats.hitRadius, stats.damage, stats.maxTargets, "Weapon:" .. weaponId, player)
 		EventLog.count("attacks")
 		EventLog.first("harpoon attack")
 		EventLog.mark(player, "firstAction")
