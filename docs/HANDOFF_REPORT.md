@@ -855,3 +855,38 @@ PLAY TEST (DEV, owner's account, mock store; runtime-only TEMPTEST script): 50 k
 MIRROR: 136 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (d7de9898).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-028 flagged
 NEXT: S7.5 Invite reward.
+
+CHECKPOINT: S7.5 Invite reward — 🟦 (a real invite needs two accounts and the published DEV; Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S7.5_before_2026-10-17 (Items, _Registry, LiveOps) · restore point "S7.5 passed"
+BUILT:
+- `Shared/Items`: Shared Lantern beam colour (`BeamSharedLantern`, `reward = "invite"`, no price); `_Registry` allows earned items without a price and refuses a price on them (72 definitions at boot).
+- `Server/InviteService` (new, `--!strict`, LiveOps domain): at the end of a voyage that reached night 1, each crew member who joined from another crew member's invite and that inviter get the Shared Lantern through GrantService, claim `invite:<lower>:<higher>`, with a notice.
+- LiveOps reads each joining player's `ReferredByPlayerId` from the join data.
+TESTRUNNER (DEV, Play server): **207 passed, 0 failed** (202 + new `InviteSpec` 5: the item is earned, never sold, registry clean; three shared voyages give both players the item once and two notices in total (the claim is idempotent; the third crew member gets nothing); the inviter must be in the crew and the voyage must reach night 1; the claim id is the same for either order; wiring).
+PLAY TEST (DEV): boot clean with the new item and service ("Definitions checked=72"; the only errors are the expected refused Studio data-store calls with API access off). A real invite cannot be made in Studio.
+OWNER CHECK (after publishing DEV): invite a friend from the crew card or Results, sail together past night 1, and both of you should see the notice and find "Shared Lantern" under Cosmetics in the BAG.
+MIRROR: 138 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (36f9ca1b).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-029 flagged
+NEXT: S7.6 publish package.
+
+=====================================================================
+S7.6 — READY FOR OWNER TO PUBLISH (DEV experience only)
+=====================================================================
+What is in this build (since the S6.7 package): S7.1–S7.5, the return systems. A logbook fills itself as you defeat monsters, bring down big monsters, forge evolutions and survive forecasts (Pearls for each finished category); one daily objective per player (a few Pearls, no streaks); a leaderboard board on the harbor island (best night Standard and Long, nights this week); specialties earned by playing a role (Keeper, Harpooner, Oiler, Engineer; small bonuses, +15% together at most); the Shared Lantern beam colour for you and a friend you invited after a voyage together. If S2.8, S4.7, S5.8 or S6.7 were not published yet, this one package covers them all: publish once.
+New numbers to review (recommendations, logged): D-025 logbook rewards, D-026 daily objectives, D-027 leaderboards, D-028 specialties, D-029 invite reward.
+Before publishing:
+ 1. In the DEV Studio window: File → Save to File As → `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_S7_2026-10-17.rbxl`.
+ 2. Game Settings → Security → "Enable Studio Access to API Services" stays OFF. (Live servers use data stores without that setting.)
+ 3. Optional: View → Script Analysis, note the warning counts for `ServerScriptService.Server` and `StarterPlayerScripts.Client`.
+Publish:
+ 4. File → Publish to Roblox (DEV experience, PlaceId 102473202766620; production is not touched).
+ 5. Creator Hub → Lighthouse Keepers DEV → Servers → Shut down all servers.
+Live checks (about 20 minutes):
+ 6. Join: a notice tells you today's objective; the harbor board stands across the path from the Quartermaster.
+ 7. Sail and survive a night: within a minute the board shows your best night and your nights this week; you hear "New in your logbook: …" for new monsters.
+ 8. With a friend: send an invite, sail together past night 1, both get the Shared Lantern.
+ 9. Tell Claude: anything that looks wrong, the objective you got and whether it paid, and the board after a night.
+If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.
+Claude's state: S7.6 set to 🟦; work continues with B1 (closed beta preparation): B1.1 cosmetics as definitions (nothing sold or enabled), B1.3 the anti-exploit suite, B1.4 a 1-client soak.

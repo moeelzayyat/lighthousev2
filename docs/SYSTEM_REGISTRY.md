@@ -37,7 +37,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Coach prompts | Released; S2.3 forced oil prompt and S2.4 aim marker Tested (not yet published) | S2.3, S2.4 | S2.4: aim marker on the nearest creature from 30 s; prologue first crab comes out with the light |
 | Crew feed + lamp flare | Released | — | |
 | Lamp shift | Released (untested 2+) | S3 | |
-| Invites (unrewarded) | Released | S7.5 | reward |
+| Invites (unrewarded) | Released; invite reward tested (not yet published) | S7.5 | S7.5: `InviteService` (LiveOps): a player who joined from an invite (join data `ReferredByPlayerId`) and their inviter both get the Shared Lantern beam colour after surviving a night in the same voyage; one GrantService claim per pair; `InviteSpec` 5 tests |
 | Leaderboards | Tested in Studio (not yet published; live ordered stores untested) | S7.3 | `Definitions/Leaderboards` + `LeaderboardService` (LiveOps, bus only): best night Standard / Long, nights this week (new store each Monday 00:00 UTC); a board on the harbor island; written and re-read every 30 s; Studio uses a memory store; `LeaderboardsSpec` 4 tests |
 | Endless Storm (mode test arm) | Tested (not yet published) | S3.1b | test-only voyage; `ModeTest` 50/50 split of new accounts by UserId hash (D-017); flag `MODE_TEST_ENABLED` |
 | Specialties | Tested (not yet published) | S7.4 | `Definitions/Specialties` + `SpecialtyService` (LiveOps, bus only): Keeper (beam kills), Harpooner (weapon kills), Oiler (oil delivered), Engineer (repairs + cannons); 3 ranks of +2% each, all together capped at +15%; profile field `Roles` (default {}), ranks in `Unlocks.Specialties`; `SpecialtiesSpec` 5 tests |

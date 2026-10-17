@@ -14,6 +14,7 @@ local LogbookService = require(Server.LogbookService) -- S7.1
 local ObjectiveService = require(Server.ObjectiveService) -- S7.2
 local LeaderboardService = require(Server.LeaderboardService) -- S7.3
 local SpecialtyService = require(Server.SpecialtyService) -- S7.4
+local InviteService = require(Server.InviteService) -- S7.5
 
 local LiveOps = { Name = "LiveOps" }
 
@@ -167,6 +168,45 @@ function LiveOps.Init(ctx)
 			return PlayerData.mutate(player, fn)
 		end,
 		notify = LampService.notify,
+	})
+	-- S7.5: who joined from whose invite (Roblox join data), and the Shared Lantern for a voyage together
+	local referrers = {}
+	local function readJoin(player)
+		local ok, joinData = pcall(function()
+			return player:GetJoinData()
+		end)
+		local ref = if ok and type(joinData) == "table" then joinData.ReferredByPlayerId else nil
+		if type(ref) == "number" and ref > 0 then
+			referrers[player.UserId] = ref
+			EventLog.log("InvitedJoin", { player = player.Name, by = ref })
+		end
+	end
+	Players.PlayerAdded:Connect(readJoin)
+	for _, player in Players:GetPlayers() do
+		readJoin(player)
+	end
+	InviteService.start({
+		subscribe = EventLog.Subscribe,
+		referrerOf = function(userId)
+			return referrers[userId]
+		end,
+		byUserIds = function(ids)
+			local list = {}
+			for _, id in ids do
+				local player = Players:GetPlayerByUserId(id)
+				if player then
+					table.insert(list, player)
+				end
+			end
+			return list
+		end,
+		grant = function(player, claimId, rewards, source)
+			return (GrantService.Grant(player, claimId, rewards, source))
+		end,
+		notify = LampService.notify,
+		nameOf = function(player)
+			return player.DisplayName
+		end,
 	})
 	-- S7.3: the harbor boards (best night per voyage, nights this week), written and re-read every 30 s
 	local board = ctx.lobbyRefs and ctx.lobbyRefs.leaderboard

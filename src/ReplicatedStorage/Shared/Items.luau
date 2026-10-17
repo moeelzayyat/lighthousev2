@@ -19,7 +19,7 @@ local Items = {
 		"OilskinCoat", "KeepersCoat", "KelpweaveVest", "IronclawPlate",
 		"FireShellCrate",
 		"CrabClaw", "SeaGlass", "BlackPearl",
-		"BeamAmber", "BeamSeaGlass", "BeamMoonlight", "BeamEmber",
+		"BeamAmber", "BeamSeaGlass", "BeamMoonlight", "BeamEmber", "BeamSharedLantern",
 	},
 	SHOP_CATEGORIES = { "Weapons", "Armor", "Ammunition", "Cosmetics" }, -- loot is sold to the Trader during a voyage, for shells
 	INVENTORY_FILTERS = { "All", "Weapons", "Armor", "Ammunition", "Materials" },
@@ -192,6 +192,16 @@ local Items = {
 		tradeoffs = "Looks only: no power",
 		price = 60,
 		beamColor = { 255, 152, 92 },
+	},
+	-- S7.5: never sold; given to both players when someone they invited shares a voyage with them (InviteService)
+	BeamSharedLantern = {
+		kind = "Cosmetic", category = "Cosmetics", slot = "Beam",
+		name = "Shared Lantern",
+		description = "A warm two-tone light, kept by keepers who brought a friend aboard.",
+		strengths = "Shown to the crew while you hold the lamp",
+		tradeoffs = "Looks only: no power. Earned by sailing with a friend you invited",
+		reward = "invite",
+		beamColor = { 255, 200, 120 },
 	},
 }
 

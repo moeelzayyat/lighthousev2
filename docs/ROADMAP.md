@@ -41,7 +41,7 @@ A stage exits when every substage is ✅ and its exit numbers are recorded. **GO
 | S4 | Performance & mobile | 7 | 2 | Numeric | 🟨 |
 | S5 | Domain split & UI refactor | 8 | 2–3 | Standard | 🟦 |
 | S6 | Content (owner's six requests) | 7 | 4–5 | Standard | 🟦 |
-| S7 | Return systems | 6 | 2 | Standard | 🟨 |
+| S7 | Return systems | 6 | 2 | Standard | 🟦 |
 | B1 | **Closed beta** | 6 | 3 | **GO/NO-GO** | ⬜ |
 | L1 | Relaunch | 7 | 2 | Checklist | ⬜ |
 | LO | Live operations | ongoing | — | Cadence | ⬜ |
@@ -178,8 +178,8 @@ Purpose: real players answer whether the loop retains, before content work.
 | S7.2 🟦 | Daily objective | Pool in `Definitions/Objectives`; one per day; no streak | Missing a day changes nothing (test with advanced clock) | TestRunner |
 | S7.3 🟦 | Leaderboards | Best Night (Standard/Long), weekly nights survived | Updates within 60 s; reset on schedule | Play test |
 | S7.4 🟦 | Specialties | Keeper/Oiler/Engineer/Harpooner earned by role stats; capped bonuses | Cap test; unlock from stats only | TestRunner |
-| S7.5 | Invite reward | Shared Lantern cosmetic after first shared voyage, once per pair | Idempotent | TestRunner |
-| S7.6 | Publish (owner) | | Live check | Owner |
+| S7.5 🟦 | Invite reward | Shared Lantern cosmetic after first shared voyage, once per pair | Idempotent | TestRunner |
+| S7.6 🟦 | Publish (owner) | | Live check | Owner |
 
 → B1.1.
 

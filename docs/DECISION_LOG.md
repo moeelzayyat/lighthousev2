@@ -169,6 +169,9 @@ Taken: three boards on one stand across the path from the Quartermaster: best ni
 ## D-028 — Specialties: what earns them, their bonuses, and the profile field `Roles` (S7.4)
 2026-10-17 · S7.4 · **Status: Accepted (unattended, recommendation)** — flagged for the owner
 Taken: Keeper (kills by the beam: 50 / 250 / 1000 → +2% beam damage per rank while keeping), Harpooner (weapon kills: 50 / 250 / 1000 → +2% weapon damage), Oiler (oil delivered: 25 / 100 / 300 → +2% walk speed), Engineer (repairs and cannons built: 20 / 80 / 250 → +2% repair). All together capped at +15% (architecture §7.2), so a player who masters everything still gets at most +15% in all. Earned only by play: the counters live in a new profile field `Roles` (default {}, added silently like `Boosts`), the ranks in the existing `Unlocks.Specialties`. Nothing is sold (rule 8). To revise: say so.
+## D-029 — Invite reward: what the Shared Lantern is and what counts (S7.5)
+2026-10-17 · S7.5 · **Status: Accepted (unattended, recommendation)** — flagged for the owner
+Taken: the Shared Lantern is a beam colour (the only cosmetic slot the game draws today; lantern skins come with the B1.1 cosmetics), earned, never sold. It goes to both players when one joined the server from the other's invite (Roblox join data `ReferredByPlayerId`) and they are in the same voyage when it ends, having survived at least one night (so sailing and quitting at once does not count). One GrantService claim per pair (`invite:<lower>:<higher>`), so it is paid once. The invite link only lasts for the session the friend joined in. To revise: say so.
 ## CP — S4.1 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 0 creature raycasts over night 1
 ## CP — S4.2 + S4.3 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 10.0 KB/s per client at 45 creatures; 60 FPS
 ## CP — S4.4 passed (🟦 Script Analysis; phone FPS pending, owner) · 2026-10-17 · auto-approved (unattended) · DEV only · 1 light in a 45-creature swarm; 0 new sound/burst parts
@@ -198,3 +201,5 @@ Taken: Keeper (kills by the beam: 50 / 250 / 1000 → +2% beam damage per rank w
 ## CP — S7.2 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · daily objective, paid once, a missed day changes nothing (advanced-clock test); TestRunner 193/193
 ## CP — S7.3 passed in Studio (🟦 live ordered stores, Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · board shows a survived night 19.7 s later; weekly reset by store name; TestRunner 197/197
 ## CP — S7.4 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · specialties from role stats only; +15% cap test; TestRunner 202/202
+## CP — S7.5 passed (🟦 a real two-account invite, Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · Shared Lantern once per pair; TestRunner 207/207
+## CP — S7.6 publish package written (🟦, waits for the owner's DEV publish) · 2026-10-17 · DEV only · S7 return systems complete

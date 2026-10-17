@@ -265,8 +265,14 @@ RULES.Items = function(c, Items, all)
 		if item.price ~= nil then
 			c.pos(w .. ".price", item.price)
 		end
-		if item.kind ~= "Material" and item.price == nil and item.starter ~= true then
-			c.add(w, "needs a price (or starter = true)")
+		if item.kind ~= "Material" and item.price == nil and item.starter ~= true and item.reward == nil then
+			c.add(w, "needs a price (or starter = true, or reward = how it is earned)")
+		end
+		if item.reward ~= nil then -- S7.5: earned, never sold
+			c.oneOf(w .. ".reward", item.reward, { "invite" })
+			if item.price ~= nil then
+				c.add(w, "is a reward, so it has no price")
+			end
 		end
 		if item.starter == true and item.slot then
 			if starters[item.slot] then
