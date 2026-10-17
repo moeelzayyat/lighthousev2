@@ -1241,3 +1241,12 @@ WHAT A FIRST-TIMER MEETS (fresh profile, Studio memory store, keyboard):
 TESTRUNNER (DEV, Play server): **250 passed, 0 failed**. 0 client and 0 server errors.
 MIRROR: Coach c8b43d2c identical in DEV and `src/`.
 OWNER: a real first session (a friend who has never played) is still the test that counts; this pass only removes what a script can find.
+
+CHECKPOINT: Harbor island enlargement — ✅ in DEV (owner's ask; the owner judges the look)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: ServerStorage.Backups.HARBOR_before_2026-10-17 · restore points "HARBOR before", "HARBOR grown", "HARBOR dressed"
+BUILT: the harbor island grew from 16,912 to 48,096 studs² of land (2.8×), mostly to the south, east and west; the pier side is unchanged; 22 palms and 7 rocks around the new edge; the middle of the new south half is open for NPCs. Details: `assets/world/harbor_island_size.md`.
+TESTRUNNER (DEV, Play server): **250 passed, 0 failed**. PLAY TEST: spawn, walk to the far south edge (golden-hour lighting holds), 0 errors.
+SCREENSHOTS: `assets/screens/harbor_size/`.
+NO SCRIPT CHANGED: place content only; it reaches players with the owner's next DEV publish.
