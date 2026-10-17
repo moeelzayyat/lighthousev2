@@ -14,11 +14,13 @@ Every asset, package and audio ID used in the place, recorded before it ships.
 ## Store assets
 | Asset | Variant | File | Uploaded ID | Status |
 |---|---|---|---|---|
-| Icon | A (amber/navy) | `icons/icon_A.png` | | not made |
-| Icon | B (white/teal) | `icons/icon_B.png` | | not made |
-| Thumbnail 1 — clutch refuel | — | `thumbnails/t1_refuel.png` | | not made |
-| Thumbnail 2 — Brute burn | — | `thumbnails/t2_brute.png` | | not made |
-| Thumbnail 3 — crew deck | — | `thumbnails/t3_crew.png` | | not made |
+| Icon | A (beam vs Brute, no text) | `icons/icon_A_beam_vs_brute.png` | | made S2.7 (2026-10-17), not uploaded |
+| Icon | B (same art, "KEEP THE LIGHT") | `icons/icon_B_keep_the_light.png` | | made S2.7, not uploaded (S3 icon test) |
+| Thumbnail 1 — Brute burn | "BURN THE BRUTE" | `thumbnails/thumb_1_brute_burn.png` | | made S2.7, not uploaded |
+| Thumbnail 2 — clutch refuel | "1% FUEL. RUN!" | `thumbnails/thumb_2_clutch_refuel.png` | | made S2.7, not uploaded |
+| Thumbnail 3 — crew of four | "KEEP THE LIGHT TOGETHER" | `thumbnails/thumb_3_crew_of_four.png` | | made S2.7, not uploaded |
+
+All five are Studio screen captures of the DEV build (project-built island, lighthouse, characters and creatures; staged with runtime-only scripts), cropped and captioned with Windows fonts Impact and Georgia Bold rendered into the image (no font file is shipped). Owner's own work; no third-party licence. Title and description text: `store/STORE_PAGE.md`.
 
 ## Rules
 - Nothing purchased without owner approval. Free Creator Store models only with the licence checked and recorded.

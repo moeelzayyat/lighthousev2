@@ -95,8 +95,8 @@ Purpose: protect production saves, close the validation gaps, add the test harne
 | S2.4 🟦 | First beam hit ≤ 45 s | Prologue tightened: first crab reaches the beam arc by 35 s; coach aim marker at 30 s if no hit | 5 fresh-account runs, unassisted script: median first beam hit ≤ 45 s | Console timestamps |
 | S2.5 🟦 | Results and replay | One-tap **Sail again** (same crew, same server) and **Back to deck**; "your part" tile enlarged; run card text for sharing | Sail again starts a new voyage in ≤ 3 s | Play test |
 | S2.6 🟦 | Controller aim | Right-stick beam aim; Focus/Leave on buttons; `InputController` replaces the four `inputMode()` copies | Full voyage completed with a controller in Studio | Play test |
-| S2.7 | Store presence | Real title published (owner); icon A and B exported; 3 thumbnails 16:9; description updated | Files in `assets/`; owner uploaded | Owner |
-| S2.8 | Publish (owner) | Owner publishes S2; restart servers | Live check: fast path, Night-1 safety, dawn banking seen on the owner's account | Owner |
+| S2.7 🟦 | Store presence | Real title published (owner); icon A and B exported; 3 thumbnails 16:9; description updated | Files in `assets/`; owner uploaded | Owner |
+| S2.8 🟦 | Publish (owner) | Owner publishes S2; restart servers | Live check: fast path, Night-1 safety, dawn banking seen on the owner's account | Owner |
 
 **S2 exit numbers:** first beam hit ≤ 45 s median; Night-1 survival for a 0-run unassisted script = 100% (by construction); dawn grant idempotency test green. → S3.1.
 

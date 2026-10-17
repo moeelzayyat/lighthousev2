@@ -118,3 +118,9 @@ Owner (project chat, 2026-10-17 02:52 UTC): "I want a full unattended experience
 Decision: no thread waits on a question. Every decision that comes up is taken on the recommendation, logged here as "Accepted (unattended, recommendation)" and listed in the next result for the owner to revise. Only steps that need the owner's hands stop the run (publishing, saving a `.rbxl`, keeping the DEV Studio window focused for play tests). Publishing stays the owner's step (CLAUDE.md hard rule 1).
 ## CP — S2.5 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · Sail again → new voyage 0.78 s
 ## CP — S2.6 passed (🟦 Script Analysis; controller voyage is an owner check) · 2026-10-17 · auto-approved (unattended) · DEV only
+## CP — S2.7 files made (🟦 owner upload) · 2026-10-17 · auto-approved (unattended) · icons A/B, 3 thumbnails, description in assets/
+## S2.8 — READY FOR OWNER TO PUBLISH (DEV) · 2026-10-17 · package in HANDOFF_REPORT.md · waiting on the owner's publish and live checks
+## D-016 — S3 public test runs on the DEV experience, made public
+2026-10-17 · S3 · **Status: Accepted (unattended, recommendation)** — flagged for the owner
+S3 needs real players for 2–3 weeks, but D-013 keeps production untouched until the rebuild is finished. Options: (1) make the DEV experience public for the test; (2) publish the rebuild to production early; (3) skip S3 and go to S4.
+Decision (recommended): (1). The owner sets Lighthouse Keepers DEV to Public for S3 (Game Settings → Permissions), applies the S2.7 store page there, and points the S3.1 diagnostic ads at it. Production stays untouched (D-013 holds), and S3's real-player data still gates S4 as the roadmap requires. DEV saves are the DEV experience's own (`LighthouseKeepers_PlayerData_v2` in DEV), so testers' progress does not carry to production at relaunch (consistent with D-012's fresh start). To revise: choose (2) or (3).

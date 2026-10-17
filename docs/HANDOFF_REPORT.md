@@ -327,3 +327,34 @@ NOT DONE (needs the owner's hands): "full voyage completed with a controller in 
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)   PUBLISHED BY OWNER: n.a. (S2 publishes at S2.8, to DEV)
 MIRROR: 78 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (07398fea).
 NEXT: S2.7 Store presence.
+
+CHECKPOINT: S2.7 Store presence — 🟦 (files made; the owner uploads them)
+DATE: 2026-10-17
+MADE (all in `assets/`):
+- Icons 512 × 512: `icons/icon_A_beam_vs_brute.png` (no text) and `icons/icon_B_keep_the_light.png` (same art, "KEEP THE LIGHT").
+- Thumbnails 1920 × 1080 (16:9): `thumbnails/thumb_1_brute_burn.png`, `thumb_2_clutch_refuel.png`, `thumb_3_crew_of_four.png` (the three shots architecture §27 names).
+- Title options and the description: `store/STORE_PAGE.md` (title A "Lighthouse Keepers 🌊 Keep the Light" first; description 788 characters, no anxiety wording).
+- How: staged in a DEV Play session with runtime-only TEMPTEST scripts (sail, keeper at the lamp, a Barnacle Brute in a focused beam, fuel held at 1–2 %, three copies of the player's character as the crew), captured with the Studio screen-capture tool, cropped and captioned with PIL. Recorded in `assets/ART_SOURCES.md` (own work). Play stopped; 0 TEMPTEST scripts remain.
+- No game script changed in S2.7 (mirror unchanged).
+OWNER STEPS (DEV experience, part of the S2.8 package below): Creator Hub → Lighthouse Keepers DEV → Configure: upload icon A; upload the three thumbnails in order; set the description from `STORE_PAGE.md`; title "Lighthouse Keepers DEV" can stay for DEV (D-013: the real title goes on production at L1.5).
+NEXT: S2.8 publish package.
+
+=====================================================================
+S2.8 — READY FOR OWNER TO PUBLISH (DEV experience only)
+=====================================================================
+What is in this build (since the R1.9 DEV publish): S2.1 7-night Standard voyage + Long voyage unlock · S2.2 Pearls banked at every dawn · S2.3 Night-1 reserve for first voyages (D-014: refills to full) · S2.4 first crab comes with the light + aim marker · S2.5 Sail again leaves at once, Back to deck, share line · S2.6 InputController, right-stick aim. TestRunner in DEV: 103 passed, 0 failed. Every substage play-tested in DEV (records above).
+Before publishing:
+ 1. In the DEV Studio window: File → Save to File As → `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_S2_2026-10-17.rbxl` (restore point for this publish).
+ 2. Home → Game Settings → Security → "Enable Studio Access to API Services" stays OFF.
+Publish:
+ 3. File → Publish to Roblox (this is the DEV experience, PlaceId 102473202766620; production is not touched).
+ 4. Creator Hub → Lighthouse Keepers DEV → Servers → Shut down all servers.
+ 5. (S2.7) Configure: icon A, the three thumbnails, the description (see above).
+Live checks (about 20 minutes, owner's account in the normal Roblox player):
+ 6. Dawn banking: note your Pearl count, then play a voyage past night 2: each dawn shows "+1 Pearl banked" with a chime. Leave during night 3 and rejoin: your Pearls are 2 higher than before the voyage.
+ 7. Sail again: finish a voyage (win or lose); tap Sail again; the next voyage starts at once.
+ 8. Fast path and Night-1 safety only show for an account with 0 finished voyages in DEV. The owner's account already has voyages, so use a second (alt) account if available: it lands on the crew at once; if it never carries oil, the lamp is refilled once in Night 1 ("The reserve saved the light — carry oil!") and it reaches dawn 1. Skip this step if there is no alt account; it is covered by the Studio tests in the S2.3 record.
+ 9. (S2.6, optional) With a controller: right stick aims, Y focuses, B leaves the lamp, X uses prompts.
+ 10. Tell Claude: the Pearl counts in step 6, anything odd, and whether step 8/9 were done.
+If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.
+Claude's state: S2.8 set to 🟦; work continues on the next substage that does not need the live build.
