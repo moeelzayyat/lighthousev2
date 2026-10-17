@@ -24,7 +24,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Bench upgrades (4) + evolutions (2) | Released | S5.7 | StatPipeline |
 | Forecasts (3) + vote | Released | — | |
 | Island merchant (voyage-only Shell items) | Tested (not yet published) | S6.2 | `Definitions/Merchant` (5 items, checked at boot), `MerchantService`, `MerchantRequest`/`MerchantResult`, Trader panel "Island stock" by day; wiped at Results; `MerchantSpec` 10 tests |
-| Orbiting Blades | Planned | S6.3 | |
+| Orbiting Blades | Tested (not yet published) | S6.3 | `Orbit` archetype in `Shared/Weapons` (voyage-only); `Server/OrbitService` cuts every 0.5 s through `StatPipeline.weapon`; `Client/OrbitView` draws 3 blades; sold once a voyage by the island merchant (80 Shells, D-020); `OrbitSpec` 7 tests |
 | Results (cause, Moment, your part, rewards, next goal) | Released; S2.5 Tested (not yet published) | S2.5 | Sail again leaves at once (0.78 s measured); Back to deck; larger "your part"; `RunCard` share line |
 | Dawn Pearl banking | Tested (not yet published) | S2.2 | D-004; `DawnBanking` bus consumer of NightSurvived → GrantService claim `voyageId:night<n>:userId`; Results pays the remainder (`Voyage.resultPearls`); play-tested in DEV (7 banked + 5 = 12) |
 

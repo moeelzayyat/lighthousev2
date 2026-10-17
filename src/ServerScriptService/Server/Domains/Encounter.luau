@@ -23,6 +23,7 @@ local DefenseService = require(Server.DefenseService)
 local VoyageCast = require(Server.VoyageCast)
 local NetGuard = require(Server.NetGuard)
 local OilCarry = require(Server.OilCarry)
+local OrbitService = require(Server.OrbitService) -- S6.3
 
 local Encounter = { Name = "Encounter" }
 
@@ -385,6 +386,15 @@ function Encounter.Start(ctx)
 			OilCarry.remove(player)
 		end
 	end
+
+	-- S6.3: Orbiting Blades cut the creatures around whoever carries them
+	OrbitService.start({
+		players = function()
+			return Players:GetPlayers()
+		end,
+		keeper = LampService.getKeeper,
+		damageArea = CreatureService.damageArea,
+	})
 
 	-- The round loop runs for the life of the server; it starts once boot has finished (Network last).
 	task.defer(GameState.run, {

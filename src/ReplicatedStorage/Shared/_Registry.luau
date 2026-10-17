@@ -261,10 +261,17 @@ RULES.Weapons = function(c, Weapons, all)
 		c.pos(w .. ".range", wpn.range)
 		c.pos(w .. ".hitRadius", wpn.hitRadius)
 		c.num(w .. ".maxTargets", wpn.maxTargets, 1, nil, true)
-		c.oneOf(w .. ".projectile", wpn.projectile, { "spear", "flare" })
+		c.oneOf(w .. ".archetype", wpn.archetype, { "Thrown", "Orbit" }) -- S6.3
+		if wpn.archetype == "Orbit" then
+			c.num(w .. ".blades", wpn.blades, 1, 6, true)
+			c.pos(w .. ".spin", wpn.spin)
+		else
+			c.oneOf(w .. ".projectile", wpn.projectile, { "spear", "flare" })
+		end
 		c.color(w .. ".color", wpn.color)
+		c.bool(w .. ".voyageOnly", wpn.voyageOnly, true)
 		local item = type(all.Items) == "table" and all.Items[id]
-		if type(all.Items) == "table" and (type(item) ~= "table" or item.kind ~= "Weapon") then
+		if not wpn.voyageOnly and type(all.Items) == "table" and (type(item) ~= "table" or item.kind ~= "Weapon") then
 			c.add(w, "has no Items." .. id .. " entry of kind Weapon")
 		end
 	end
@@ -363,7 +370,7 @@ end
 
 -- S6.2: the island merchant's stock (boosts name a stat the pipeline knows and stay under the voyage cap)
 local MERCHANT_STATS = { "WeaponDamage", "PlayerSpeed" }
-RULES.Merchant = function(c, Merchant)
+RULES.Merchant = function(c, Merchant, all)
 	c.order("Merchant.ORDER", Merchant.ORDER, Merchant)
 	if type(Merchant.BOOST_CAP) ~= "table" then
 		c.add("Merchant.BOOST_CAP", "must map a stat to its voyage cap")
@@ -384,7 +391,7 @@ RULES.Merchant = function(c, Merchant)
 		c.str(w .. ".description", def.description)
 		c.num(w .. ".price", def.price, 1, 10000, true)
 		c.oneOf(w .. ".scope", def.scope, { "player", "crew" })
-		c.oneOf(w .. ".effect", def.effect, { "boost", "heal", "shield", "oil" })
+		c.oneOf(w .. ".effect", def.effect, { "boost", "heal", "shield", "oil", "weapon" })
 		if def.limit ~= nil then
 			c.num(w .. ".limit", def.limit, 1, 10, true)
 		end
@@ -400,6 +407,14 @@ RULES.Merchant = function(c, Merchant)
 			c.num(w .. ".mult", def.mult, 0, 0.99)
 		elseif def.effect == "oil" then
 			c.num(w .. ".amount", def.amount, 1, 200)
+		elseif def.effect == "weapon" then -- S6.3: a voyage-only Orbit weapon, bought once
+			local wpn = type(all.Weapons) == "table" and all.Weapons[def.weapon]
+			if type(wpn) ~= "table" or wpn.archetype ~= "Orbit" or not wpn.voyageOnly then
+				c.add(w .. ".weapon", "must name a voyage-only Orbit weapon, got " .. tostring(def.weapon))
+			end
+			if def.limit ~= 1 then
+				c.add(w .. ".limit", "a weapon is bought once a voyage (limit = 1)")
+			end
 		end
 		if not table.find(Merchant.ORDER or {}, id) then
 			c.add(w, "is not listed in Merchant.ORDER")

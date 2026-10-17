@@ -139,8 +139,8 @@ local function decide(d: Deps, player: any, itemId: string, env: Env): Result
 		bought[player] = mine
 	end
 	mine[itemId] = n + 1
-	if def.effect == "boost" then
-		d.applyBoosts(player)
+	if def.effect == "boost" or def.effect == "weapon" then
+		d.applyBoosts(player) -- boosts and the Orbit weapon are server-set player attributes
 	elseif def.effect == "heal" then
 		d.heal(player)
 	elseif def.effect == "oil" then

@@ -686,3 +686,24 @@ NOT MEASURED: the Shell sink (late-run Shell balance down ≥ 40% vs baseline) n
 MIRROR: 117 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (35d04467).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); prices D-019 flagged
 NEXT: S6.3 Orbiting Blades (first sold by the merchant).
+
+CHECKPOINT: S6.3 Orbiting Blades — 🟦 (a real phone check and Script Analysis are the owner's; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S6.3_before_2026-10-17 (Weapons, _Registry, Merchant, MerchantService, Economy, Encounter) · restore point "S6.3 passed"
+BUILT:
+- `Shared/Weapons`: every weapon now names its archetype (the four harpoons and the flare gun are `Thrown`); new `OrbitingBlades` (`Orbit`, `voyageOnly`): 3 blades on a 7-stud circle, a cut every 0.5 s for 4 damage to up to 3 creatures within 7 studs. Numbers and price: D-020 (recommendation, flagged). `_Registry` checks archetypes, blade fields, that only voyage-only weapons may skip an Items entry, and that a merchant weapon is a voyage-only Orbit weapon bought once (42 definitions at boot).
+- `Server/OrbitService` (new, `--!strict`, Encounter domain): 10 times a second it finds each crew member carrying blades (server-set `OrbitWeapon` attribute, alive, not at the lamp) and makes the cuts that are due through `CreatureService.damageArea`, with numbers from `StatPipeline.weapon` (the merchant's damage boost applies). Kills count as `Weapon:OrbitingBlades`.
+- `Client/OrbitView` (new): draws the blades around every carrier, 3 anchored non-colliding parts per carrier moved with one `BulkMoveTo` a frame; no input, no remotes, no lights.
+- The island merchant sells Orbiting Blades first in its list, once a voyage, 80 Shells; wiped at Results with the rest.
+TESTRUNNER (DEV, run in a Play server): **168 passed, 0 failed** (162 + new `OrbitSpec` 7: Orbit archetype and registry; merchant item once a voyage; a cut at once then every 0.5 s with the pipeline's numbers (19–20 cuts in 10 s); the damage boost applies (4.8); thrown weapons never cut; a carrier who drops out restarts; wiring and a view with no input and no remotes) + `MerchantSpec`. In Edit mode the run showed 3 stale failures because Studio keeps the pre-edit `Weapons` module cached in Edit; a fresh Play server ran clean, so from now on the checkpoint TestRunner runs in a Play server.
+PLAY TEST (DEV, owner's account, mock store; runtime-only TEMPTEST scripts):
+- Day 1, real 120 Shells: bought Orbiting Blades (120 → 40); a second purchase refused ("That's all the Orbiting Blades the Trader has for you this voyage."); the Trader sheet showed "Orbiting Blades (1/1) BOUGHT" (screenshot checked).
+- The blades: 3 parts circling the player at 7.00 studs, moving every frame (screenshot checked, 46 FPS while drawing).
+- 6 Rock Crabs spawned and the player was moved next to them with no attack input: all 6 killed in 11.8 s; run summary "Kills: 6 [Weapon:OrbitingBlades 6]", "Weapon attacks: 0".
+- Crew left (Abandoned): `OrbitWeapon` cleared, 0 blades left on the client.
+- 0 script errors (server only ProfileStore's refused Studio write, API off; Roblox's own UIBlox warnings). Play stopped; 0 TEMPTEST scripts remain.
+NOT MEASURED HERE: a real phone (the blades need no input at all, so touch adds nothing to test, but the owner's phone check stands); Script Analysis.
+MIRROR: 120 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (b735fa45).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); numbers D-020 flagged
+NEXT: S6.4 Quartermaster boosts and gear.

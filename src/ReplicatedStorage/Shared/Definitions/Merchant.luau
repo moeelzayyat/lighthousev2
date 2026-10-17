@@ -6,7 +6,8 @@
 --   scope       "player" helps the buyer; "crew" helps everyone
 --   effect      "boost" (a StatPipeline AdditivePct layer on `stat` for the rest of the voyage), "heal" (the
 --               buyer to full health), "shield" (the tower takes `mult` damage until the next dawn),
---               "oil" (`amount` fuel straight into the lamp)
+--               "oil" (`amount` fuel straight into the lamp), "weapon" (S6.3: carries the voyage-only Orbit
+--               weapon `weapon` for the rest of the voyage)
 --   limit       most one player may buy in a voyage (nil = no limit; the effect itself refuses when useless)
 
 export type MerchantDef = {
@@ -20,14 +21,25 @@ export type MerchantDef = {
 	add: number?,
 	mult: number?,
 	amount: number?,
+	weapon: string?,
 	limit: number?,
 }
 
 local Merchant = {
-	ORDER = { "DamageBoost", "SpeedBoost", "Heal", "OilBundle", "TowerShield" },
+	ORDER = { "OrbitingBlades", "DamageBoost", "SpeedBoost", "Heal", "OilBundle", "TowerShield" },
 	-- the most a voyage's boosts may add to a stat (two purchases of +10%)
 	BOOST_CAP = { WeaponDamage = 0.2, PlayerSpeed = 0.2 } :: { [string]: number },
 
+	OrbitingBlades = { -- S6.3 (owner request #3); price D-020
+		id = "OrbitingBlades",
+		displayName = "Orbiting Blades",
+		description = "Three blades circle you and cut nearby creatures, no aiming, for the rest of this voyage",
+		price = 80,
+		scope = "player",
+		effect = "weapon",
+		weapon = "OrbitingBlades",
+		limit = 1,
+	} :: MerchantDef,
 	DamageBoost = {
 		id = "DamageBoost",
 		displayName = "Whetstone",

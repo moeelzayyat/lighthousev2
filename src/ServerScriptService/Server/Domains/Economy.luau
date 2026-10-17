@@ -366,10 +366,15 @@ function Economy.Start(ctx)
 		local speed = MerchantService.boost(player, "PlayerSpeed")
 		player:SetAttribute("Boost_WeaponDamage", if damage > 0 then damage else nil)
 		player:SetAttribute("Boost_PlayerSpeed", if speed > 0 then speed else nil)
+		local orbit = nil -- S6.3: the voyage-only Orbit weapon this player carries (OrbitService, OrbitView)
 		for _, id in Merchant.ORDER do
 			local n = MerchantService.count(player, id)
 			player:SetAttribute("Merchant_" .. id, if n > 0 then n else nil)
+			if n > 0 and Merchant[id].effect == "weapon" then
+				orbit = Merchant[id].weapon
+			end
 		end
+		player:SetAttribute("OrbitWeapon", orbit)
 		local humanoid = humanoidOf(player)
 		if humanoid and LampService.getKeeper() ~= player then
 			humanoid.WalkSpeed = StatPipeline.compute("PlayerSpeed", StarterPlayer.CharacterWalkSpeed, { add = { speed } })
