@@ -17,7 +17,7 @@ None for Claude until the owner acts. When the owner publishes DEV or production
 - L1.7: the relaunch checklist at the end of `docs/HANDOFF_REPORT.md` ("L1.7 — READY FOR OWNER"); save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_L1RC_2026-10-17.rbxl` first.
 - L1.5: upload the icon, five thumbnails, description (and optionally the trailer) from `assets/`.
 - L1.6: set up Discord (docs/COMMUNITY.md) and fill in the creator list.
-- L1.3: on sale in DEV (12 products wired, switch on). After publishing DEV, buy one cheap item for real (R$ button in the Quartermaster's Cosmetics tab) and check it arrives once; Studio's purchase dialog did not open in Claude's test.
+- L1.3 ✅: a real Robux purchase worked in the published DEV game (2026-10-17). DEV is published: the live checks of S2.8–S7.6 are next (a survived night on the harbor board, the daily objective notice, an invite with a friend, code LIGHTHOUSE).
 - B1.4: 4-client Studio run; two phones on a night-7 swarm; the live server memory graph after publishing DEV.
 - B1.5: invite 30–100 testers after the DEV publish.
 - B1.1: create the developer products listed in the B1.1 record (HANDOFF_REPORT.md) when you want them, and send Claude the ids; nothing is enabled. D-030 to review.

@@ -1058,3 +1058,5 @@ L1.3 FOLLOW-UP · 2026-10-17 · product ids and selling switch
 - Receipt path with the real product id (runtime-only script through the real PurchaseService, GrantService and catalogue, mock profile): first receipt `granted` and Driftwood Housing owned; the same receipt again `granted` with no second claim (1 receipt claim).
 OWNER CHECK: in the published DEV game (after the S7.6 publish), open the Quartermaster → Cosmetics → a cheap item (Sea Glass Beam, 29) → R$ button → buy. It should arrive in your BAG once, with a "Thank you!" notice.
 MIRROR: 150 scripts, digest identical to `src/`.
+
+L1.3 LIVE · 2026-10-17 16:43 UTC · the owner saved `C:\RobloxProjects\Lighthousev2ackups\LighthouseKeepers_DEV_L1RC_2026-10-17.rbxl`, published DEV and made a real Robux purchase: "Purchase worked". L1.3 ✅. The DEV publish also carries every earlier package (S2.8–S7.6); their live checks (leaderboard after a night, daily objective notice, invite reward, codes, phone FPS) are still to be reported.
