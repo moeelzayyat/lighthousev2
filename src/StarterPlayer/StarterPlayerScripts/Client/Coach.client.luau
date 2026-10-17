@@ -202,6 +202,36 @@ local function wheel()
 	return partOf(stand)
 end
 
+-- ...and boarding left the camera facing the mast with the wheel behind the player: turn it toward the wheel once
+-- (first voyage only; the player keeps full control of the camera afterwards)
+local function eligibleFirstVoyage()
+	local runs = player:GetAttribute("RunsCompleted")
+	return Config.COACH_ENABLED and (runs == nil or runs <= 0)
+end
+player:GetAttributeChangedSignal("Ready"):Connect(function()
+	if player:GetAttribute("Ready") ~= true or not eligibleFirstVoyage() then
+		return
+	end
+	task.delay(0.6, function()
+		local target = wheel()
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+		local camera = Workspace.CurrentCamera
+		if not (target and root and camera) or camera.CameraType ~= Enum.CameraType.Custom then
+			return
+		end
+		if (root.Position - Config.LOBBY_SPAWN).Magnitude > 300 then
+			return
+		end
+		local flat = Vector3.new(target.Position.X - root.Position.X, 0, target.Position.Z - root.Position.Z)
+		if flat.Magnitude < 1 then
+			return
+		end
+		local back = -flat.Unit * 12
+		camera.CFrame = CFrame.lookAt(root.Position + back + Vector3.new(0, 5, 0), target.Position)
+	end)
+end)
+
 local X = Enum.KeyCode.ButtonX
 -- priority = order. keys: keyboard / touch / gamepad (nil = no hint on that input)
 -- harbor = true: shown on the ship in the harbor (before the voyage), not during the run
