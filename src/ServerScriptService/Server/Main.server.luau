@@ -1050,6 +1050,9 @@ GameState.run({
 		rematch = function()
 			ShipDeparture.rematch(SHIP_ID)
 		end,
+		mode = function()
+			return ShipDeparture.mode(SHIP_ID)
+		end,
 	},
 	departShip = function()
 		local sailing = ShipRoster.depart(SHIP_ID) -- freezes the party; only these players sail

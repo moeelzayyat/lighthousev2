@@ -1,7 +1,7 @@
 -- Results (client): the end-of-voyage screen.
 --
 -- Order of importance (spec): 1 outcome, 2 why it happened, 3 crew accomplishments,
--- 4 rewards, 5 next action. Sail Again (rematch) is the strongest action; Back to Harbor is
+-- 4 rewards, 5 next action. Sail Again (rematch) is the strongest action; Back to deck is
 -- clear but secondary. Victory is warm and restrained; a loss is darker, explains the cause
 -- and invites another try without shame.
 -- Data comes from the server's RunResults (EventLog.endRun + Pearls + cause/shells extras).
@@ -18,6 +18,7 @@ local UiKit = require(script.Parent:WaitForChild("UiKit"))
 local Items = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Items"))
 local SocialService = game:GetService("SocialService")
 local Forecasts = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Forecasts"))
+local RunCard = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("RunCard")) -- S2.5 share line
 
 local C, F = UiKit.Color, UiKit.Font
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
@@ -78,12 +79,29 @@ local trackLabel = UiKit.Label(why, "", "Micro", { Name = "TrackLabel", LayoutOr
 local tip = UiKit.Label(why, "", "BodySmall", { Name = "Tip", LayoutOrder = 4, TextXAlignment = Enum.TextXAlignment.Center })
 -- launch R12: the run's best moment (clutch save, big-monster kill, last-stand tower)
 local momentLine = UiKit.Label(why, "", "Body", { Name = "Moment", LayoutOrder = 5, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = C.AccentLighthouseSoft, Visible = false })
+-- S2.5: the run card, one line a player can select and copy to share (styled like the track label)
+local shareStyle = UiKit.Label(why, "", "Micro", { Name = "ShareStyle" })
+local shareBox = UiKit.new("TextBox", {
+	Name = "RunCard",
+	LayoutOrder = 6,
+	BackgroundTransparency = 1,
+	Size = UDim2.new(1, 0, 0, 20),
+	FontFace = shareStyle.FontFace,
+	TextSize = shareStyle.TextSize,
+	TextColor3 = shareStyle.TextColor3,
+	TextXAlignment = Enum.TextXAlignment.Center,
+	TextEditable = false,
+	ClearTextOnFocus = false,
+	TextTruncate = Enum.TextTruncate.AtEnd,
+	Text = "",
+}, why)
+shareStyle:Destroy()
 
 -- 3. CREW -------------------------------------------------------------------
 local crewSection = UiKit.Section(column, "The crew", { layoutOrder = 3, gap = 10 })
 local medals = UiKit.new("Frame", { Name = "Medals", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = 1 }, crewSection)
 local medalGrid = UiKit.new("UIGridLayout", { CellPadding = UDim2.fromOffset(10, 10), CellSize = UDim2.fromOffset(180, 78), HorizontalAlignment = Enum.HorizontalAlignment.Center, SortOrder = Enum.SortOrder.LayoutOrder }, medals)
-local yourPart = UiKit.Label(crewSection, "", "BodySmall", { Name = "YourPart", LayoutOrder = 2, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = C.TextPrimary })
+local yourPart = UiKit.Label(crewSection, "", "Body", { Name = "YourPart", LayoutOrder = 2, TextXAlignment = Enum.TextXAlignment.Center, TextColor3 = C.TextPrimary }) -- S2.5: larger
 -- launch R11: one natural, unrewarded invite point (no nagging; hidden after use or if invites aren't allowed)
 local inviteRow = UiKit.new("Frame", { Name = "Invite", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 44), LayoutOrder = 3, Visible = false }, crewSection)
 UiKit.list(inviteRow, "x", 0, { HorizontalAlignment = Enum.HorizontalAlignment.Center })
@@ -180,7 +198,7 @@ local actions = UiKit.new("Frame", { Name = "Actions", BackgroundColor3 = C.Surf
 UiKit.round(actions, UiKit.Radius.panel)
 UiKit.border(actions, C.BorderStructural, 1, 0.45)
 local againButton = UiKit.Button(actions, "Sail again", { name = "SailAgain", variant = "primary", size = "lg", width = 280 })
-local harborButton = UiKit.Button(actions, "Back to harbor", { name = "BackToHarbor", variant = "secondary", size = "md", width = 220 })
+local harborButton = UiKit.Button(actions, "Back to deck", { name = "BackToHarbor", variant = "secondary", size = "md", width = 220 })
 local countdown = UiKit.Label(actions, "", "Micro", { Name = "Countdown", AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false, TextTruncate = Enum.TextTruncate.AtEnd, TextYAlignment = Enum.TextYAlignment.Center })
 
 ---------------------------------------------------------------------
@@ -309,6 +327,7 @@ local function render()
 	if r.forecast and Forecasts[r.forecast] then
 		trackLabel.Text ..= " \u{00B7} Forecast: " .. Forecasts[r.forecast].displayName
 	end
+	shareBox.Text = RunCard.text(r)
 	-- 3 crew
 	clearMedals()
 	for i, award in r.awards or {} do

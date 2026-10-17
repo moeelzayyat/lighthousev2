@@ -291,3 +291,21 @@ MIRROR: 74 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (53f8
 OWNER APPROVAL: auto-approved (unattended, D-010)   PUBLISHED BY OWNER: n.a. (S2 publishes at S2.8, to DEV)
 NOTES / DEBT: the measurement is a script, not a person; the S3 public test's funnel (`FirstBeamHit` step) gives the real number. Keep the DEV window focused during scripted runs.
 NEXT: S2.5 Results and replay.
+
+CHECKPOINT: S2.5 Results and replay — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S2.5_before_2026-10-17 (GameState, Main, ShipDeparture, Results)
+BUILT:
+- Sail again leaves at once: a rematch departure skips the 10 s "setting sail" countdown (`ShipDeparture.mode`, `GameState` uses 0 s for mode "rematch"; every other departure still counts down `INTERMISSION_SECONDS` = 10). With a crew of 2 to 4, the Results screen still waits for everyone's choice (up to `RESULT_SECONDS` = 25) as before.
+- "Back to harbor" is now "Back to deck" (same action: leave the crew, back on the ship's deck).
+- "Your part" line enlarged (Body 17 instead of BodySmall 15).
+- Run card: `Shared/RunCard.text(results)` builds one share line, shown on Results in a selectable, read-only text box, e.g. "Lighthouse Keepers · Lost on night 1 of 7 · Standard Voyage · 2:14 · solo". Results now carry `crewSize`.
+TESTRUNNER (DEV): 99 passed, 0 failed. New `RunCardSpec` (3: win line, loss/solo line, missing fields).
+SCRIPT ANALYSIS: not measured (owner item).
+PLAY TEST (DEV, owner's account, mock store; TEMPTEST scripts runtime-only): a 1-voyage mock profile sailed with SAIL NOW, lost Night 1 (blackout, 2:14). Results showed the buttons "SAIL AGAIN" and "BACK TO DECK" and the run card line. Sent the Sail again vote (the button's exact remote call): **tap → next voyage's Prologue in 0.78 s** (target ≤ 3 s); log shows `RematchChoice play again`, funnel step 9 `SailAgain`, `DepartureStarted mode=rematch`, `RunStarted`. The second voyage was lost too; Back to deck (its exact remote call) set Ready=false and put the player back on the ship (`PlayerToMenu`). Console: only ProfileStore's refused Studio write (API off) and Roblox CorePackages UIBlox warnings; 0 game-script errors. Play stopped; 0 TEMPTEST scripts remain.
+NOTES: the `crewSize` field was added after the play test and is covered by `RunCardSpec` only; the share line itself was seen in play. Taps were sent as the buttons' remote calls, not mouse clicks.
+NUMBERS: Sail again → new voyage 0.78 s.
+MIRROR: 76 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (4e71147a).
+OWNER APPROVAL: auto-approved (unattended, D-010)   PUBLISHED BY OWNER: n.a. (S2 publishes at S2.8, to DEV)
+NEXT: S2.6 Controller aim.

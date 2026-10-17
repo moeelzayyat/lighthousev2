@@ -112,3 +112,8 @@ Architecture §3 says the emergency reserve "refills the lamp once" on the first
 Decision: the reserve fills the lamp to `MAX_FUEL` (100). No new number is added; it uses the existing maximum. Measured result: Night 1 survived with 24 fuel left at dawn, Night 2 lost to a blackout 39 s in. To change it, the owner names a different amount.
 ## CP — S2.3 passed (🟦 Script Analysis) · 2026-10-16 · auto-approved (unattended) · DEV only
 ## CP — S2.4 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 4 valid scripted runs, median 37.65 s
+## D-015 — Full unattended mode: decisions are taken, logged and revised later
+2026-10-17 · **Status: Accepted (owner)**
+Owner (project chat, 2026-10-17 02:52 UTC): "I want a full unattended experience please remember that, when there is a decision required just recommend one and execute it and we can revise later".
+Decision: no thread waits on a question. Every decision that comes up is taken on the recommendation, logged here as "Accepted (unattended, recommendation)" and listed in the next result for the owner to revise. Only steps that need the owner's hands stop the run (publishing, saving a `.rbxl`, keeping the DEV Studio window focused for play tests). Publishing stays the owner's step (CLAUDE.md hard rule 1).
+## CP — S2.5 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · Sail again → new voyage 0.78 s

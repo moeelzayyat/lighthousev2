@@ -45,7 +45,7 @@ Server → client only (15): `AdminResult`, `Notify`, `LootCollected`, `OpenUpgr
 | `Notify`, `PlaySound`, `LootCollected`, `CrewFeed`, `CoachEvent` | as today; `LootCollected` kinds: loot item ids, `Shells`, `Pearls`, and `PearlBanked` (S2.2, amount banked at dawn); `CrewFeed` kinds: `refuel`, `clutch`, `reserve` (S2.3, the Night-1 reserve refilled the lamp) | `PlaySound` client handler validates types (keep) |
 | `UpgradeResult`, `ShopResult`, `LoadoutResult`, `TraderResult`, `MerchantResult` | `{requestId, ok, reason?, state?}` | replayed for duplicate requestIds |
 | `AdminResult` (R1.8) | `requestId, ok, result` (table for inspect, message otherwise) | owner only in practice |
-| `RunResults` | results payload | |
+| `RunResults` | results payload (S2.2 adds `banked`, S2.5 `crewSize`) | |
 | `GearData` | profile view | **never** includes `Grants`, `RedeemedCodes` |
 | `CreatureSnapshot` (new, S4.2) | `buffer`: `[n][id u16, x f32, y f32, z f32, yaw u8, state u8, hpPct u8]` | 12 Hz, `U` |
 | `CombatResult` (new, S4) | `{Seq, Hits}` | `U`, batched |

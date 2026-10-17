@@ -25,7 +25,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Forecasts (3) + vote | Released | — | |
 | Island merchant (voyage-only Shell items) | Planned | S6.2 | |
 | Orbiting Blades | Planned | S6.3 | |
-| Results (cause, Moment, your part, rewards, next goal) | Released | S2.5 | Sail again |
+| Results (cause, Moment, your part, rewards, next goal) | Released; S2.5 Tested (not yet published) | S2.5 | Sail again leaves at once (0.78 s measured); Back to deck; larger "your part"; `RunCard` share line |
 | Dawn Pearl banking | Tested (not yet published) | S2.2 | D-004; `DawnBanking` bus consumer of NightSurvived → GrantService claim `voyageId:night<n>:userId`; Results pays the remainder (`Voyage.resultPearls`); play-tested in DEV (7 banked + 5 = 12) |
 
 ## Crew and social

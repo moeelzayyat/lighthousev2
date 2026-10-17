@@ -102,6 +102,12 @@ function ShipDeparture.rematch(shipId)
 	end
 end
 
+-- The pending departure's mode ("auto" | "manual" | "rematch"), or nil (S2.5: a rematch sails at once).
+function ShipDeparture.mode(shipId)
+	local r = requests[shipId]
+	return r and r.mode
+end
+
 -- Revalidates before answering: an automatic departure below 4/4, a SAIL NOW whose caller left, or an empty
 -- party is cancelled here, so GameState never launches on a request that is no longer valid.
 function ShipDeparture.requested(shipId)

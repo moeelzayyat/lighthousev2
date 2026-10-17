@@ -426,7 +426,9 @@ function GameState.run(deps)
 		-- SAIL NOW player left, the party emptied), and an empty snapshot never starts a voyage.
 		local departing = {}
 		-- the request is revalidated once more right before the party is frozen (no yield in between)
-		if countdown(Config.INTERMISSION_SECONDS, departureCancelled) and departureRequested() then
+		-- S2.5: Sail again (a rematch) leaves at once: the crew is already together and chose to go
+		local sailIn = if deps.departure and deps.departure.mode and deps.departure.mode() == "rematch" then 0 else Config.INTERMISSION_SECONDS
+		if countdown(sailIn, departureCancelled) and departureRequested() then
 			departing = if deps.departShip then deps.departShip() else readyPlayers()
 		end
 		if #departing > 0 then
@@ -627,6 +629,7 @@ function GameState.run(deps)
 				-- results.pearls is the voyage total (banked + paid now); results.banked the dawn part.
 				results.pearls = {}
 				results.banked = {}
+				results.crewSize = #voters -- S2.5: for the share line
 				if result ~= "Abandoned" then
 					local won = result == "Victory"
 					local nightReached = if won then def.nights else results.nightReached
