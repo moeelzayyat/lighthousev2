@@ -130,8 +130,8 @@ Purpose: real players answer whether the loop retains, before content work.
 | S4.3 🟦 | Client interpolation | Pooled models interpolate between snapshots; procedural walk/scuttle | No visible stepping at 12 Hz; 60 FPS PC | Play test |
 | S4.4 🟦 | Render budget | Neon eyes, shared boss bar, no per-creature lights, client hit flash; rain per device; sound pool | ≤ 3 replicated instances per creature; ≥ 30 FPS on the owner's phone during a night-7 swarm | Real phone |
 | S4.5 🟦 | Loot | Idle orbs static; bob on approach client-side | Orb replication only on spawn/pickup | Network probe |
-| S4.6 | 4-client soak | 3 consecutive voyages, 4 clients, 2 bosses | Memory growth < 50 MB/h; 0 errors | Profiler |
-| S4.7 | Publish (owner) | | Live phone check by the owner | Owner |
+| S4.6 🟦 | 4-client soak | 3 consecutive voyages, 4 clients, 2 bosses | Memory growth < 50 MB/h; 0 errors | Profiler |
+| S4.7 🟦 | Publish (owner) | | Live phone check by the owner | Owner |
 
 **S4 exit numbers:** send/player, FPS PC/phone, instances/creature, memory growth — all recorded in `PERFORMANCE_BUDGETS.md`. → S5.1.
 

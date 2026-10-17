@@ -463,3 +463,36 @@ SCRIPT ANALYSIS: not measured (owner item).
 MIRROR: 85 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (c0cf620c).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
 NEXT: S4.6 4-client soak.
+
+CHECKPOINT: S4.6 Soak — 🟦 (1 client, not 4; the 4-client run is the owner's; Script Analysis unmeasured)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: none needed (no code changed; the soak driver was a runtime-only TEMPTEST script)
+RUN: DEV Play, owner's account, mock store. A TEMPTEST server script kept the lamp lit and the tower standing, pressed Play Again after each result, and read memory every 60 s. **3 Standard voyages back to back, 47 minutes, 3 victories, 6 big monsters** (a Shipwreck Hermit on nights 4 and 7 of each voyage), up to 96 crabs on a night-7 swarm.
+MEASURED (Studio runs Edit, server and client in one process, so these are whole-Studio numbers):
+- Lua heap: 876.3 MB at the start, 834.7 MB at the end (**−41.6 MB**; it peaked at 899.4 MB in voyage 2 and fell when the garbage collector ran).
+- Total process memory: 2892 → 2938 MB, **+46 MB in 47 min (59 MB/h overall)**. Almost all of it came in the first 20 minutes (2885 → 2931, warm-up: pools, templates, sound and texture caches); **minutes 21–47 grew 7 MB (16 MB/h)**. The steady-state rate is under the 50 MB/h target; the overall rate is not, so the record stays 🟦 until a 4-client run (or a live server's memory graph) confirms it.
+- Errors: **0 server, 0 client** (LogService history); client 5 warnings (CorePackages). Creature folder empty after the last voyage; 0 TEMPTEST scripts remain after Stop.
+- Not measured: 4 clients (one Studio window cannot run 4 clients and the soak driver at once; needs the owner's Test → Clients and Servers run); the MicroProfiler.
+TESTRUNNER: not rerun (no code change since S4.5: 119 passed, 0 failed).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+NEXT: S4.7 publish package, then S5.1.
+
+
+=====================================================================
+S4.7 — READY FOR OWNER TO PUBLISH (DEV experience only)
+=====================================================================
+What is in this build (since the S2.8 package): S3.1b mode test (Endless Storm for half of new accounts, behind `MODE_TEST_ENABLED`) · S4.1 ground grid · S4.2/S4.3 creatures drawn on the client from 12 Hz snapshots (10 KB/s per player at 45 creatures) · S4.4 render budget (lights on big monsters only, pooled sounds and bursts, rain cap on phones) · S4.5 loot drawn on the client. If S2.8 was not published yet, this one package covers both: publish once.
+Before publishing:
+ 1. In the DEV Studio window: File → Save to File As → `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_S4_2026-10-17.rbxl`.
+ 2. Game Settings → Security → "Enable Studio Access to API Services" stays OFF.
+Publish:
+ 3. File → Publish to Roblox (DEV experience, PlaceId 102473202766620; production is not touched).
+ 4. Creator Hub → Lighthouse Keepers DEV → Servers → Shut down all servers.
+Live checks (about 20 minutes):
+ 5. Phone (S4.4/S4.7): play to night 7 if you can (or the busiest night you reach), with Performance Stats on (in the game: Roblox menu → Settings → Performance Stats). Tell Claude the lowest FPS you see during a swarm and the phone model.
+ 6. PC: creatures move smoothly (no stutter), crabs light up in the beam, a burned crab bursts, loot bobs and flies to you, a Barnacle Brute shows its health on the bar at the top, not over its head.
+ 7. Optional (S4.6, 4 players): Studio → Test → Clients and Servers → 4 players → Start; play one voyage; tell Claude whether anything errors.
+ 8. Tell Claude: the phone FPS and model, anything odd.
+If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.
+Claude's state: S4.7 set to 🟦; work continues with S5.
