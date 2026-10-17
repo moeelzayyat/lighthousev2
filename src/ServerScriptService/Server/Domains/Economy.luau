@@ -24,6 +24,7 @@ local VoyageCast = require(Server.VoyageCast)
 local NetGuard = require(Server.NetGuard)
 local MerchantService = require(Server.MerchantService) -- S6.2
 local Merchant = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Merchant"))
+local Boosts = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Boosts")) -- S6.4
 
 local Economy = { Name = "Economy" }
 
@@ -85,14 +86,19 @@ local function weaponsFor(player)
 	if Config.DEV_GIVE_ALL_WEAPONS then
 		local list = {}
 		for _, itemId in Items.SHOP_ORDER do
-			if Weapons[itemId] then
+			if Weapons[itemId] and Weapons[itemId].archetype ~= "Orbit" then
 				table.insert(list, itemId)
 			end
 		end
 		return list
 	end
 	local profile = PlayerData.get(player)
-	return { if profile then profile.equippedWeapon else Config.STARTER_WEAPON }
+	local weaponId = if profile then profile.equippedWeapon else Config.STARTER_WEAPON
+	-- S6.4: an Orbit weapon is not a tool: OrbitService cuts with it (applyBoosts sets OrbitWeapon)
+	if Weapons[weaponId] and Weapons[weaponId].archetype == "Orbit" then
+		return {}
+	end
+	return { weaponId }
 end
 
 -- Puts the equipped armor model on the character's torso (purely visual; stats are applied separately)
@@ -129,6 +135,42 @@ local function wearArmor(character, itemId)
 	weld.Part1 = handle
 	weld.Parent = handle
 	worn.Parent = character
+end
+
+local function humanoidOf(player)
+	local character = player.Character
+	return character and character:FindFirstChildOfClass("Humanoid")
+end
+
+-- Bonuses as server-set player attributes (Attack, OrbitService, LampService, LootService and the panels read
+-- them): the island merchant's voyage boosts (S6.2) plus the Quartermaster's permanent boosts (S6.4), the Orbit
+-- weapon carried (S6.3: the merchant's, else an equipped Orbit weapon), purchase counts and the walk speed.
+local function applyBoosts(player)
+	local data = PlayerData.data(player)
+	local ranks = if data and type(data.Boosts) == "table" then data.Boosts else {}
+	local damage = MerchantService.boost(player, "WeaponDamage") + Boosts.bonus(ranks, "WeaponDamage")
+	local speed = MerchantService.boost(player, "PlayerSpeed") + Boosts.bonus(ranks, "PlayerSpeed")
+	local shells = StatPipeline.compute("ShellGainPct", 0, { flat = { Boosts.bonus(ranks, "ShellGainPct") } })
+	player:SetAttribute("Boost_WeaponDamage", if damage > 0 then damage else nil)
+	player:SetAttribute("Boost_PlayerSpeed", if speed > 0 then speed else nil)
+	player:SetAttribute("Boost_ShellGainPct", if shells > 0 then shells else nil)
+	local orbit = nil -- S6.3: the voyage-only Orbit weapon this player carries (OrbitService, OrbitView)
+	for _, id in Merchant.ORDER do
+		local n = MerchantService.count(player, id)
+		player:SetAttribute("Merchant_" .. id, if n > 0 then n else nil)
+		if n > 0 and Merchant[id].effect == "weapon" then
+			orbit = Merchant[id].weapon
+		end
+	end
+	local equipped = data and data.Equipped.Weapon
+	if orbit == nil and equipped and Weapons[equipped] and Weapons[equipped].archetype == "Orbit" then
+		orbit = equipped -- S6.4: an equipped permanent Orbit weapon
+	end
+	player:SetAttribute("OrbitWeapon", orbit)
+	local humanoid = humanoidOf(player)
+	if humanoid and LampService.getKeeper() ~= player then
+		humanoid.WalkSpeed = StatPipeline.compute("PlayerSpeed", StarterPlayer.CharacterWalkSpeed, { add = { speed } })
+	end
 end
 
 -- Makes the player's tools and armor match their saved loadout.
@@ -193,6 +235,7 @@ local function syncGear(player)
 			wearArmor(character, profile.equippedArmor)
 		end
 	end
+	applyBoosts(player) -- S6.4: permanent boosts and an equipped Orbit weapon follow the profile
 end
 
 local function giveWeapons(player, character)
@@ -356,30 +399,7 @@ function Economy.Start(ctx)
 	end)
 
 	-- S6.2: the island merchant (the Trader's day job): voyage-only stock for the crew's Shells
-	local function humanoidOf(player)
-		local character = player.Character
-		return character and character:FindFirstChildOfClass("Humanoid")
-	end
-	-- boosts and purchase counts as server-set attributes (Attack, LampService and the Trader panel read them)
-	local function applyBoosts(player)
-		local damage = MerchantService.boost(player, "WeaponDamage")
-		local speed = MerchantService.boost(player, "PlayerSpeed")
-		player:SetAttribute("Boost_WeaponDamage", if damage > 0 then damage else nil)
-		player:SetAttribute("Boost_PlayerSpeed", if speed > 0 then speed else nil)
-		local orbit = nil -- S6.3: the voyage-only Orbit weapon this player carries (OrbitService, OrbitView)
-		for _, id in Merchant.ORDER do
-			local n = MerchantService.count(player, id)
-			player:SetAttribute("Merchant_" .. id, if n > 0 then n else nil)
-			if n > 0 and Merchant[id].effect == "weapon" then
-				orbit = Merchant[id].weapon
-			end
-		end
-		player:SetAttribute("OrbitWeapon", orbit)
-		local humanoid = humanoidOf(player)
-		if humanoid and LampService.getKeeper() ~= player then
-			humanoid.WalkSpeed = StatPipeline.compute("PlayerSpeed", StarterPlayer.CharacterWalkSpeed, { add = { speed } })
-		end
-	end
+	-- (applyBoosts, above, turns its purchases into player attributes)
 	MerchantService.init({
 		getShells = UpgradeService.getShells,
 		trySpend = UpgradeService.trySpend,

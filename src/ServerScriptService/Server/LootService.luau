@@ -170,19 +170,26 @@ local function collect(index, player)
 		removeAt(index)
 		return
 	end
+	local amount = drop.value
 	if info.item then
 		-- Personal loot: into this player's saved inventory
 		playerData.addItem(player, info.item, drop.value)
 		EventLog.loot(drop.kind, 0, player)
 	else
-		upgrades.addShells(drop.value, "loot")
-		EventLog.loot(drop.kind, drop.value, player)
+		-- S6.4: the collector's Shell Pouch (Quartermaster boost) adds its share; fractions round up by chance
+		local gain = player:GetAttribute("Boost_ShellGainPct")
+		if type(gain) == "number" and gain > 0 then
+			local exact = drop.value * (1 + gain)
+			amount = math.floor(exact) + (if math.random() < exact % 1 then 1 else 0)
+		end
+		upgrades.addShells(amount, "loot")
+		EventLog.loot(drop.kind, amount, player)
 	end
 	if drop.kind == "SeaGlass" or drop.kind == "BlackPearl" then
 		EventLog.log("RareLoot", { player = player.Name, kind = drop.kind })
 	end
-	remotes.LootCollected:FireClient(player, drop.kind, drop.value)
-	EventLog.Publish("LootCollected", { VoyageId = EventLog.voyageId(), UserId = player.UserId, ItemId = drop.kind, Qty = drop.value })
+	remotes.LootCollected:FireClient(player, drop.kind, amount)
+	EventLog.Publish("LootCollected", { VoyageId = EventLog.voyageId(), UserId = player.UserId, ItemId = drop.kind, Qty = amount })
 	if drop.kind == "BlackPearl" then
 		VoyageCast.fire(remotes.Notify, string.format("%s found %s!", player.DisplayName, info.name))
 	elseif drop.kind == "SeaGlass" then

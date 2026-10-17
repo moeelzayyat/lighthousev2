@@ -19,7 +19,7 @@ return function(T: any)
 			T.expect(blades.voyageOnly).toBe(true)
 			T.expect(blades.blades).toBe(3)
 			for id, w in Weapons do
-				if id ~= "OrbitingBlades" then
+				if id ~= "OrbitingBlades" and id ~= "TidecallerBlades" then -- S6.4: Tidecaller is the permanent Orbit weapon
 					T.expect(w.archetype).toBe("Thrown")
 				end
 			end

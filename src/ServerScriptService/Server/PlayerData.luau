@@ -46,6 +46,7 @@ local function view(data: any): any
 		equippedWeapon = data.Equipped.Weapon,
 		equippedBeam = data.Equipped.Beam,
 		stats = { runs = data.Stats.Runs, victories = data.Stats.Victories, bestNight = data.Stats.BestNight },
+		boosts = data.Boosts, -- S6.4: Quartermaster boost ranks
 	}
 end
 

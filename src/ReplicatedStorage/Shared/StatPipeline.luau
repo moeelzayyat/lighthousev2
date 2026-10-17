@@ -23,6 +23,7 @@ StatPipeline.STATS = {
 	PlayerMaxHealth = { unit = "HP", min = 50, max = 300, flat = true, add = true },
 	PlayerArmor = { unit = "damage reduction", min = 0, max = 0.6, flat = true },
 	PlayerSpeed = { unit = "studs/s", min = 12, max = 22, add = true }, -- S6.2: merchant speed boost
+	ShellGainPct = { unit = "share", min = 0, max = 0.15, flat = true }, -- S6.4: Quartermaster Shell Pouch
 	WeaponDamage = { unit = "per hit", min = 1, max = 200, add = true, mult = true },
 	WeaponCooldown = { unit = "s", min = 0.2, max = 5, add = true },
 	WeaponRange = { unit = "studs", min = 4, max = 100, add = true },

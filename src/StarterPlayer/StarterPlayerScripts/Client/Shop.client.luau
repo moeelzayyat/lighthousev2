@@ -23,6 +23,7 @@ local Weapons = require(Shared:WaitForChild("Weapons"))
 local Ammo = require(Shared:WaitForChild("Ammo"))
 local SoundFx = require(Shared:WaitForChild("SoundFx"))
 local StatPipeline = require(Shared:WaitForChild("StatPipeline")) -- S5.7: the values previews and voyages share
+local Boosts = require(Shared:WaitForChild("Definitions"):WaitForChild("Boosts")) -- S6.4: permanent boosts tab
 local UiKit = require(script.Parent:WaitForChild("UiKit"))
 local ItemPreview = require(script.Parent:WaitForChild("ItemPreview"))
 
@@ -190,6 +191,7 @@ local tabItems = {}
 for _, cat in Items.SHOP_CATEGORIES do
 	table.insert(tabItems, { id = cat, label = cat, color = UiKit.CATEGORY[cat] })
 end
+table.insert(tabItems, { id = "Boosts", label = "Boosts" }) -- S6.4
 local tabs = UiKit.Tabs(gridCol, tabItems, {
 	size = UDim2.new(1, 0, 0, 46),
 	textSize = 17,
@@ -330,6 +332,83 @@ local function send(action, itemId, qty, done)
 end
 
 ---------------------------------------------------------------------
+-- BOOSTS (S6.4): permanent, rank by rank, all together capped (their own tab: a list, not item cards)
+---------------------------------------------------------------------
+
+local boostList = UiKit.Scroll(gridCol, { Name = "BoostList", Position = UDim2.fromOffset(0, 56), Size = UDim2.new(1, 0, 1, -56), Visible = false })
+UiKit.list(boostList, "y", 10)
+UiKit.pad(boostList, 6, 6, 6, 6)
+local boostTotal = UiKit.Label(boostList, "", "BodySmall", { Name = "Total", LayoutOrder = 0, TextColor3 = C.TextPrimary })
+local boostRows = {}
+local buyBoost -- forward declaration
+for order, id in Boosts.ORDER do
+	local def = Boosts[id]
+	local row = UiKit.Inset(boostList, { Name = "Boost_" .. id, LayoutOrder = order, Size = UDim2.new(1, -4, 0, 74) })
+	local name = UiKit.Label(row, def.displayName, "H3", { Name = "BoostName", Position = UDim2.fromOffset(12, 8), Size = UDim2.new(1, -176, 0, 22), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false, TextTruncate = Enum.TextTruncate.AtEnd, TextSize = 16 })
+	UiKit.Label(row, def.description, "Micro", { Name = "Description", Position = UDim2.fromOffset(12, 32), Size = UDim2.new(1, -176, 0, 34), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = true })
+	local button = UiKit.Button(row, "BUY", {
+		name = "Buy",
+		variant = "primary",
+		size = "sm",
+		width = 150,
+		onClick = function()
+			buyBoost(id)
+		end,
+		onDisabledClick = function(reason)
+			SoundFx.play2D("denied")
+			if reason then
+				UiKit.Toast(root, reason, "info")
+			end
+		end,
+	})
+	button.AnchorPoint = Vector2.new(1, 0.5)
+	button.Position = UDim2.new(1, -12, 0.5, 0)
+	boostRows[id] = { name = name, button = button }
+end
+
+local function boostRanks()
+	return if profile and type(profile.boosts) == "table" then profile.boosts else {}
+end
+
+local function renderBoosts()
+	local ranks = boostRanks()
+	boostTotal.Text = string.format("Permanent boosts for Pearls. All together they stop at +%d%%; yours add +%d%%.", math.floor(Boosts.TOTAL_CAP * 100 + 0.5), math.floor(Boosts.total(ranks) * 100 + 0.5))
+	for id, r in boostRows do
+		local def = Boosts[id]
+		local rank = ranks[id] or 0
+		r.name.Text = string.format("%s  (rank %d/%d)", def.displayName, rank, #def.prices)
+		if pendingId then
+			UiKit.SetBusy(r.button, true, "...")
+		else
+			UiKit.SetBusy(r.button, false)
+			local ok, price, reason = Boosts.nextRank(ranks, id)
+			if not ok then
+				r.button.Text = if rank >= #def.prices then "TOP RANK" else "AT THE LIMIT"
+				UiKit.SetDisabled(r.button, true, reason)
+			elseif pearls() < price then
+				r.button.Text = string.format("NEED %d MORE", price - pearls())
+				UiKit.SetDisabled(r.button, true, "Earn Pearls by surviving nights.")
+			else
+				r.button.Text = string.format("BUY · %d PEARLS", price)
+				UiKit.SetDisabled(r.button, false)
+			end
+			r.button:SetAttribute("BaseText", r.button.Text)
+		end
+	end
+end
+
+buyBoost = function(id)
+	local sent = send("boost", id, 1, function(ok, message)
+		SoundFx.play2D(if ok then "build" else "denied")
+		UiKit.Toast(root, message, if ok then "success" else "danger")
+		renderBoosts()
+	end)
+	if sent then
+		renderBoosts()
+	end
+end
+
+---------------------------------------------------------------------
 -- RENDERING
 ---------------------------------------------------------------------
 
@@ -466,6 +545,16 @@ renderGrid = function()
 		gridState = nil
 	end
 	purse.set(pearls())
+	-- S6.4: the Boosts tab is a list of ranks, not item cards
+	local onBoosts = category == "Boosts"
+	boostList.Visible = onBoosts
+	gridScroll.Visible = not onBoosts
+	if onBoosts then
+		selectedId = nil
+		renderBoosts()
+		renderDetail()
+		return
+	end
 	if not profile then
 		gridState = UiKit.StateView(gridCol, "loading", { title = "Opening the counter", body = "The Quartermaster is checking your account." })
 		gridState.Position = UDim2.fromOffset(0, 56)

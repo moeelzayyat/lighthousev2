@@ -4,6 +4,7 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Items = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Items")) :: any
+local Boosts = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Boosts")) :: any
 
 local ProfileSchema = {}
 
@@ -25,6 +26,7 @@ export type Profile = {
 	Grants: { [string]: number },
 	RedeemedCodes: { [string]: boolean },
 	Settings: { Music: number, Sfx: number, Shake: boolean, Rain: boolean },
+	Boosts: { [string]: number }, -- S6.4 (D-021): Quartermaster boost id -> rank bought; added with default {}
 }
 
 ProfileSchema.DEFAULT_WEAPON = "DriftwoodHarpoon"
@@ -58,6 +60,7 @@ function ProfileSchema.template(): Profile
 		Grants = {},
 		RedeemedCodes = {},
 		Settings = { Music = 1, Sfx = 1, Shake = true, Rain = true },
+		Boosts = {},
 	}
 end
 
@@ -78,8 +81,11 @@ function ProfileSchema.validate(data: any): (Profile, { string })
 		table.insert(fixes, field .. ": " .. why)
 		return value
 	end
+	-- timestamps (os.time(), about 1.76e9 in 2026). D-022: they used the count check, whose 1e9 ceiling reset every
+	-- real timestamp to 0 on load, so CreatedAt and LastSeenAt never survived a session
 	for _, field in { "CreatedAt", "LastSeenAt" } do
-		if not isCount(data[field]) then
+		local v = data[field]
+		if not (type(v) == "number" and v == v and v >= 0 and v < 1e11 and v % 1 == 0) then
 			data[field] = fix(field, "not a whole number", 0)
 		end
 	end
@@ -150,6 +156,30 @@ function ProfileSchema.validate(data: any): (Profile, { string })
 	for field, default in t.Settings do
 		if type(data.Settings[field]) ~= type(default) then
 			data.Settings[field] = fix("Settings." .. field, "wrong type", default)
+		end
+	end
+	-- Boosts (S6.4): a profile saved before the field existed gets {} silently (a new field, not a repair);
+	-- unknown ids and bad ranks are dropped; ranks over the total cap come off the last boosts first
+	if data.Boosts == nil then
+		data.Boosts = {}
+	elseif type(data.Boosts) ~= "table" then
+		data.Boosts = fix("Boosts", "not a table", {})
+	end
+	for id, rank in data.Boosts do
+		local def = type(id) == "string" and table.find(Boosts.ORDER, id) and Boosts[id]
+		if not def or not isCount(rank) or rank == 0 or rank > #def.prices then
+			data.Boosts[id] = nil
+			fix("Boosts." .. tostring(id), "unknown boost or bad rank", nil)
+		end
+	end
+	for i = #Boosts.ORDER, 1, -1 do
+		local id = Boosts.ORDER[i]
+		while (data.Boosts[id] or 0) > 0 and Boosts.total(data.Boosts) > Boosts.TOTAL_CAP + 1e-9 do
+			data.Boosts[id] -= 1
+			if data.Boosts[id] == 0 then
+				data.Boosts[id] = nil
+			end
+			fix("Boosts." .. id, "over the total cap, lowered", nil)
 		end
 	end
 	if data.SchemaVersion ~= ProfileSchema.VERSION then

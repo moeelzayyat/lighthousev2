@@ -20,6 +20,7 @@ function Registry.catalogs(): Catalogs
 		Weapons = require(Shared:WaitForChild("Weapons")) :: any,
 		Voyages = require(Shared:WaitForChild("Definitions"):WaitForChild("Voyages")) :: any,
 		Merchant = require(Shared:WaitForChild("Definitions"):WaitForChild("Merchant")) :: any, -- S6.2
+		Boosts = require(Shared:WaitForChild("Definitions"):WaitForChild("Boosts")) :: any, -- S6.4
 		Events = require(Shared:WaitForChild("Events")) :: any,
 	}
 end
@@ -418,6 +419,37 @@ RULES.Merchant = function(c, Merchant, all)
 		end
 		if not table.find(Merchant.ORDER or {}, id) then
 			c.add(w, "is not listed in Merchant.ORDER")
+		end
+	end
+end
+
+-- S6.4: the Quartermaster's permanent boosts (small steps, a total cap, rising prices)
+RULES.Boosts = function(c, Boosts)
+	c.order("Boosts.ORDER", Boosts.ORDER, Boosts)
+	c.num("Boosts.TOTAL_CAP", Boosts.TOTAL_CAP, 0.01, 0.15)
+	for id, def in c.defs(Boosts) do
+		local w = "Boosts." .. id
+		if def.id ~= id then
+			c.add(w .. ".id", "must equal its key, got " .. tostring(def.id))
+		end
+		c.str(w .. ".displayName", def.displayName)
+		c.str(w .. ".description", def.description)
+		c.oneOf(w .. ".stat", def.stat, { "ShellGainPct", "PlayerSpeed", "WeaponDamage" })
+		c.num(w .. ".step", def.step, 0.005, 0.05)
+		if type(def.prices) ~= "table" or #def.prices == 0 then
+			c.add(w .. ".prices", "must list one Pearl price per rank")
+		else
+			local last = 0
+			for i, price in def.prices do
+				c.num(w .. ".prices[" .. i .. "]", price, 1, 1000, true)
+				if type(price) == "number" and price < last then
+					c.add(w .. ".prices", "must not go down rank by rank")
+				end
+				last = if type(price) == "number" then price else last
+			end
+		end
+		if not table.find(Boosts.ORDER or {}, id) then
+			c.add(w, "is not listed in Boosts.ORDER")
 		end
 	end
 end

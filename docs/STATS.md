@@ -11,8 +11,10 @@ Final = clamp((Base + ΣFlat) × (1 + ΣAdditivePct) × ΠMultipliers, Min, Max)
 |---|---|---|---|---|---|---|
 | `PlayerMaxHealth` ✅ | HP | armor def (100 / 140 / 190) | Flat, AdditivePct | 50 | 300 | armor, specialties |
 | `PlayerArmor` ✅ | % damage reduction | armor def | Flat | 0 | 60% | armor |
-| `PlayerSpeed` ✅ | studs/s | 16 | AdditivePct | 12 | 22 | merchant speed boost (voyage, +10% each, cap +20%: 17.6 / 19.2), Quartermaster boost (cap +5%) |
-| `WeaponDamage` ✅ | per hit | weapon def | AdditivePct, Multiplier | 1 | 200 | Quartermaster damage boost (cap +5%), merchant boost (voyage, +10% each, cap +20%) |
+| `PlayerSpeed` ✅ | studs/s | 16 | AdditivePct | 12 | 22 | merchant speed boost (voyage, +10% each, cap +20%: 17.6 / 19.2), Quartermaster Sea Boots (+1% a rank, cap +5%) |
+| `WeaponDamage` ✅ | per hit | weapon def | AdditivePct, Multiplier | 1 | 200 | Quartermaster Sharpened Steel (+1% a rank, cap +5%), merchant boost (voyage, +10% each, cap +20%) |
+
+**Quartermaster boosts (S6.4):** all three together stop at **+15%** (`Boosts.TOTAL_CAP`): a player can max two lines at most, so the boosts are a choice. Ranks are saved in the profile (`Boosts`).
 | `WeaponCooldown` ✅ | s | weapon def | AdditivePct (reduction) | 0.2 | 5 | — |
 | `WeaponRange` ✅ | studs | weapon def (50–70) | AdditivePct | 4 | 100 (S5.7: was 40, below every weapon's approved range) | — |
 | `WeaponHitRadius` ✅ | studs | weapon def | AdditivePct | 1 | 20 | — |
@@ -30,7 +32,7 @@ Final = clamp((Base + ΣFlat) × (1 + ΣAdditivePct) × ΠMultipliers, Min, Max)
 | `AutoSweepSpeed` | deg/s | 25 | AdditivePct | 10 | 60 | Clockwork Sweep |
 | `CannonDamage` | per shot | level table | AdditivePct | 5 | 60 | — |
 | `CannonRange` | studs | level table | AdditivePct | 25 | 60 | — |
-| `ShellGainPct` | % | 0 | AdditivePct | 0 | +15% | Quartermaster Shell boost (cap +10%), specialties |
+| `ShellGainPct` ✅ | share of loot Shells | 0 | Flat (S6.4: a share, so it adds as Flat on a 0 base) | 0 | +15% | Quartermaster Shell Pouch (+2% a rank, 5 ranks = +10%), specialties; fractions round up by chance (`LootService`) |
 | `LootMagnetRadius` | studs | 10 | Flat, AdditivePct | 6 | 24 | specialties |
 | `CrabCount(night)` | int | `nightPlan` | Multiplier | — | `MAX_CREATURES` | Spring tide (+40% at −20% HP) |
 | `CreatureHealthMult` | × | 1 | Multiplier | 0.5 | 2 | Spring tide, Long Voyage |

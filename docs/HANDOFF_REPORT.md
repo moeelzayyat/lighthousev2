@@ -707,3 +707,26 @@ NOT MEASURED HERE: a real phone (the blades need no input at all, so touch adds 
 MIRROR: 120 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (b735fa45).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); numbers D-020 flagged
 NEXT: S6.4 Quartermaster boosts and gear.
+
+CHECKPOINT: S6.4 Quartermaster boosts & gear — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S6.4_before_2026-10-17 (StatPipeline, Weapons, Items, _Registry, ProfileSchema, PlayerData, ShopService, LootService, Economy, Shop) · restore point "S6.4 passed"
+BUILT:
+- `Shared/Definitions/Boosts` (new): Shell Pouch (+2% Shells from loot a rank), Sea Boots (+1% walk speed), Sharpened Steel (+1% weapon damage), 5 ranks each for Pearls; all together capped at +15% (D-021). `_Registry` checks it at boot (50 definitions now).
+- Profile: new field `Boosts` (id → rank), default `{}`; a save without it loads with `{}` and no repair; unknown ids and bad ranks are dropped; ranks over the cap come down. Still schema v2 (D-021).
+- `ShopService` action `boost` (the next rank: cap, top rank, Pearls; the same replay map and range checks as buying gear); `ShopPurchase` event with `Boost:<id>`.
+- Effects: Economy's `applyBoosts` adds the Quartermaster ranks to the merchant's (damage, walk speed) and sets `Boost_ShellGainPct`; `LootService` gives the collector that share of each Shell pickup (fractions round up by chance).
+- Gear: Coral Lance, Tidecaller Blades (the permanent Orbit weapon: equipped, it gives no tool and OrbitService cuts with it), Kelpweave Vest; models in `ReplicatedStorage.ItemModels` built from the place's own models (`assets/ART_SOURCES.md`).
+- Shop: a Boosts tab listing each boost with its rank, the next price, and the reason when it can't be bought.
+- Bug fix D-022: saved timestamps were reset to 0 on every load (CreatedAt/LastSeenAt over the 1e9 count ceiling).
+TESTRUNNER (DEV, Play server): **177 passed, 0 failed** (168 + new `BoostsSpec` 9: registry clean with the new gear; the cap test (5 Shell Pouch + 5 Sea Boots = +15%, then Sharpened Steel refused "Your boosts together are at the +15% limit."); the migration fixture (a v2 save from before S6.4 loads with `Boosts = {}`, no repairs, every other field identical); a v1 save gets `{}`; bad and over-cap ranks repaired; real timestamps survive (D-022); the new gear; wiring) + `OrbitSpec` updated for the second Orbit weapon.
+PLAY TEST (DEV, owner's account, mock store; runtime-only TEMPTEST scripts; 400 + 300 test Pearls granted on the mock profile):
+- Quartermaster opened through its prompt; the Boosts tab clicked with the mouse: Shell Pouch bought 5 times and Sea Boots 5 times by clicking BUY (400 → 70 Pearls); Sharpened Steel then showed "AT THE LIMIT" with the cap message (screenshots checked). Server: `Boosts` SeaBoots 5, ShellPouch 5; attributes Shell gain 0.10, speed boost 0.05; walk speed 16.8.
+- Bought and equipped Tidecaller Blades and Kelpweave Vest: no tool in the backpack, `OrbitWeapon = TidecallerBlades`, 3 blades drawn, max health 160, armor "Kelpweave Vest" (screenshot checked).
+- Voyage: 20 kills by Tidecaller Blades with no attack input ("Kills: 20 [Weapon:TidecallerBlades 20]"); with the Shell gain pinned to 100% for the test, every Shell pickup came in doubled (6, 8, 6, 10).
+- 0 script errors (server only ProfileStore's refused Studio write, API off; Roblox's own UIBlox warnings). The real player's load no longer logs a CreatedAt repair. Play stopped; 0 TEMPTEST scripts remain.
+MIRROR: 123 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (d6904beb). The 3 new item models live in the place (not in the script mirror).
+OWNER: please save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_S6-4_2026-10-17.rbxl` from the DEV window when convenient (the item models are only in the place file). Optional: add `Boosts` to architecture §6.1.
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); numbers and the profile field D-021, bug fix D-022 flagged
+NEXT: S6.5 new monsters ×3 (Spitter Eel, Puffer Mine, Ghost Lantern).

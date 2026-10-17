@@ -74,6 +74,30 @@ local Weapons = {
 		voyageOnly = true,
 		color = Color3.fromRGB(200, 215, 230),
 	},
+	-- S6.4: Quartermaster gear (D-021)
+	CoralLance = {
+		displayName = "Coral Lance",
+		damage = 13,
+		cooldown = 1.3, -- 10 damage per second, and the throw passes through a second creature
+		range = 55,
+		hitRadius = 5,
+		maxTargets = 2,
+		archetype = "Thrown",
+		projectile = "spear",
+		color = Color3.fromRGB(235, 120, 105),
+	},
+	TidecallerBlades = { -- the permanent Orbit weapon: weaker than the merchant's voyage blades, and no thrown weapon
+		displayName = "Tidecaller Blades",
+		damage = 3,
+		cooldown = 0.5, -- 6 damage per second to each of up to 3 creatures close by
+		range = 7,
+		hitRadius = 7,
+		maxTargets = 3,
+		archetype = "Orbit",
+		blades = 3,
+		spin = 200,
+		color = Color3.fromRGB(90, 200, 190),
+	},
 }
 
 return Weapons

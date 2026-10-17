@@ -52,7 +52,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Locker / loadouts | Released | R1.4 | handled cap |
 | Trader (sell loot) | Released; merchant role tested (not yet published) | S6.2 | sells the merchant's stock by day |
 | Beam colours (Pearls) | Released | — | |
-| Quartermaster permanent boosts + gear | Planned | S6.4 | |
+| Quartermaster permanent boosts + gear | Tested (not yet published) | S6.4 | `Definitions/Boosts` (Shell Pouch, Sea Boots, Sharpened Steel; +15% total cap), `ShopService` action `boost`, Boosts tab; profile field `Boosts` (default {}); gear: Coral Lance, Tidecaller Blades (permanent Orbit), Kelpweave Vest; `BoostsSpec` 9 tests |
 | Logbook | Planned | S7.1 | |
 | Daily objective | Planned | S7.2 | |
 

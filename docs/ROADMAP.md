@@ -161,7 +161,7 @@ Purpose: real players answer whether the loop retains, before content work.
 | S6.1 🟦 | Bosses by crew + Long Voyage boss nights | One big monster per crew member on boss nights, different bearings; boss counts as 5 toward `MAX_CREATURES` | 4-client boss night: 4 bosses, budget within S4 numbers | Play test, profiler |
 | S6.2 🟦 | Island merchant | Trader's day-phase stock from `Definitions/Merchant`: speed/damage boosts (capped), heal, tower shield, oil bundle; all wiped at Results | Purchases idempotent; wipe verified; Shell sink measured (late-run Shell balance down ≥ 40% vs baseline) | TestRunner, telemetry |
 | S6.3 🟦 | Orbiting Blades | `Orbit` weapon archetype; merchant item first | Works on phone with no aiming; damage via `StatPipeline` | Play test |
-| S6.4 | Quartermaster boosts & gear | Permanent capped boosts (+15% total cap), 2 new weapons, 1 armor; new profile fields with defaults | Migration fixture; cap test | TestRunner |
+| S6.4 🟦 | Quartermaster boosts & gear | Permanent capped boosts (+15% total cap), 2 new weapons, 1 armor; new profile fields with defaults | Migration fixture; cap test | TestRunner |
 | S6.5 | New monsters ×3 | Spitter Eel, Puffer Mine, Ghost Lantern: telegraph ≥ 0.6 s, sound, loot table | Blind tester identifies each behaviour; budgets hold | Blind test |
 | S6.6 | New monsters ×2 | Tide Witch, Coral Shaman | same | Blind test |
 | S6.7 | Publish (owner) + playtest | Prototype B session | Rematch ≥ 60% maintained | Owner |

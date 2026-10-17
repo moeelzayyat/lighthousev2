@@ -17,6 +17,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 local EventLog = require(script.Parent.EventLog)
 local NetGuard = require(script.Parent.NetGuard) -- R1.4 remote guards
 local GrantService = require(script.Parent.GrantService) -- R1.3: the only writer of Pearl income
+local Boosts = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Boosts")) -- S6.4
 
 local ShopService = {}
 
@@ -136,6 +137,30 @@ local function sell(player, itemId, quantity)
 	return true, string.format("Sold %d %s for %d Pearls.", quantity, item.name, item.sell * quantity)
 end
 
+-- S6.4: the next rank of a permanent boost (Pearls; all boosts together stop at Boosts.TOTAL_CAP)
+local function buyBoost(player, boostId)
+	local data = playerData.data(player)
+	if not data then
+		return false, "Your data is still loading. Try again in a moment."
+	end
+	local ok, price, reason = Boosts.nextRank(data.Boosts, boostId)
+	if not ok then
+		return false, reason
+	end
+	if not playerData.spendPearls(player, price, "Boost:" .. boostId) then
+		return false, string.format("Need %d Pearls (you have %d).", price, data.Pearls)
+	end
+	local rank = (data.Boosts[boostId] or 0) + 1
+	playerData.mutate(player, function(d)
+		d.Boosts[boostId] = rank
+		return true
+	end, true)
+	local def = Boosts[boostId]
+	EventLog.log("BoostBuy", { player = player.Name, boost = boostId, rank = rank, cost = price })
+	EventLog.Publish("ShopPurchase", { UserId = player.UserId, ItemId = "Boost:" .. boostId, Price = price, Currency = "Pearls" })
+	return true, string.format("%s rank %d for %d Pearls: +%d%% in all.", def.displayName, rank, price, math.floor(def.step * rank * 100 + 0.5))
+end
+
 local function process(player, action, itemId, quantity)
 	if not openFor[player] then
 		return false, "Talk to the Quartermaster to trade."
@@ -143,6 +168,9 @@ local function process(player, action, itemId, quantity)
 	if distanceTo(player) > SHOP_RANGE + 2 then
 		close(player, "You walked away from the Quartermaster.")
 		return false, "You're too far from the Quartermaster."
+	end
+	if action == "boost" then
+		return buyBoost(player, itemId)
 	end
 	if type(itemId) ~= "string" or type(Items[itemId]) ~= "table" or not Items[itemId].kind then
 		return false, "Unknown item."

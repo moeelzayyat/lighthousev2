@@ -15,8 +15,8 @@
 
 local Items = {
 	SHOP_ORDER = {
-		"DriftwoodHarpoon", "StormHarpoon", "FlareGun", "WhalerHarpoon",
-		"OilskinCoat", "KeepersCoat", "IronclawPlate",
+		"DriftwoodHarpoon", "StormHarpoon", "FlareGun", "CoralLance", "TidecallerBlades", "WhalerHarpoon",
+		"OilskinCoat", "KeepersCoat", "KelpweaveVest", "IronclawPlate",
 		"FireShellCrate",
 		"CrabClaw", "SeaGlass", "BlackPearl",
 		"BeamAmber", "BeamSeaGlass", "BeamMoonlight", "BeamEmber",
@@ -58,6 +58,22 @@ local Items = {
 		tradeoffs = "Slow reload; only ever hits one creature",
 		price = 140, -- was 1500
 	},
+	CoralLance = { -- S6.4 (D-021)
+		kind = "Weapon", category = "Weapons", slot = "Primary", model = "CoralLance",
+		name = "Coral Lance",
+		description = "A heavy reef-grown spear. Each throw passes through two creatures.",
+		strengths = "Hits 2 creatures per throw; more damage per hit than the Storm Harpoon",
+		tradeoffs = "Slower reload",
+		price = 90,
+	},
+	TidecallerBlades = { -- S6.4 (D-021): the permanent Orbit weapon
+		kind = "Weapon", category = "Weapons", slot = "Primary", model = "TidecallerBlades",
+		name = "Tidecaller Blades",
+		description = "Three blades circle you and cut nearby creatures. Nothing to aim.",
+		strengths = "No aiming: great on a phone; cuts up to 3 creatures around you",
+		tradeoffs = "No thrown weapon while equipped; only reaches what is close",
+		price = 110,
+	},
 
 	-- ARMOR (one equipped at a time) ---------------------------------------
 	OilskinCoat = {
@@ -79,6 +95,16 @@ local Items = {
 		price = 35, -- was 500
 		maxHealth = 140,
 		damageReduction = 0.15,
+	},
+	KelpweaveVest = { -- S6.4 (D-021)
+		kind = "Armor", category = "Armor", slot = "Armor", model = "KelpweaveVest",
+		name = "Kelpweave Vest",
+		description = "Woven sea kelp over a cork lining. Between the greatcoat and the plate.",
+		strengths = "+60 health, 20% less damage",
+		tradeoffs = "Costs more than the greatcoat",
+		price = 80,
+		maxHealth = 160,
+		damageReduction = 0.2,
 	},
 	IronclawPlate = {
 		kind = "Armor", category = "Armor", slot = "Armor", model = "IronclawPlate",
