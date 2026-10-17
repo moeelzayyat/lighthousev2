@@ -19,7 +19,7 @@ function Telemetry.Init(ctx)
 	-- Each client reports its input type once per session (for the event log)
 	local VALID_DEVICES = { Touch = true, Keyboard = true, Gamepad = true }
 	local deviceReported = {}
-	ctx.remotes.ReportDevice.OnServerEvent:Connect(function(player, device)
+	NetGuard.connect(ctx.remotes.ReportDevice, function(player, device)
 		if deviceReported[player] or not NetGuard.allow(player, "ReportDevice") then
 			return
 		end

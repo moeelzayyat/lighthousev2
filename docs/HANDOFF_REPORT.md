@@ -923,3 +923,23 @@ OWNER STEPS (when you want them; nothing is switched on): Creator Hub → Lighth
 MIRROR: 140 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (51232cad).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-030 flagged
 NEXT: B1.2 age rating is the owner's (questionnaire in Creator Hub); B1.3 anti-exploit suite.
+
+CHECKPOINT: B1.3 Anti-exploit suite — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.B1.3_before_2026-10-17 (Crew, Data, Economy, Encounter, Telemetry, LampService, LoadoutService, PlayerData, ShopService, NetGuard, MerchantSpec) · restore point "B1.3 passed"
+BUILT:
+- `NetGuard.connect(remote, handler)` / `NetGuard.expose(name, fn)`: all 18 client→server handlers connect through it (18 call sites changed from `OnServerEvent:Connect`, nothing else in them). In Studio only, each handler is also a BindableFunction `ServerStorage.NetHooks.<Remote>`; the Data domain adds `NetHooks._Profile` (a read-only JSON copy of a profile). Live servers never create these (D-031).
+- `Tests/integration/SecuritySpec` (new, 6 tests, run in a Play server against the live handlers as the real harbor player or a fake non-owner):
+  1. every contract remote has a live hook and nothing in ServerScriptService connects `OnServerEvent`/`OnServerInvoke` around NetGuard;
+  2. invalid IDs (unknown items/upgrades/voyages/forecasts/prompts/shifts, the invite-only Shared Lantern, a negative quantity, a table for an id, a 500-character request id, an item not owned, a merchant quantity of 1e9): each reaches the decision (Allowed counters rise) and the profile, crew Shells, upgrade ranks, voyage choice and Ready are unchanged;
+  3. non-finite vectors and numbers (NaN, ±inf aims; NaN/±inf beam angles; a NaN admin target) are dropped before the rate limit (Allowed counters unchanged) and nothing changes;
+  4. non-crew Shell spend: a harbor player's bench upgrade is refused ("Only the voyage crew can spend the crew's Shells.", logged) and the merchant refuses; Shells and ranks unchanged;
+  5. admin probing: a non-owner's grant, rollback and inspect on the owner's account are refused and logged (`AdminRejected`); Pearls unchanged;
+  6. 50× spam on every remote: accepted ≤ burst + refill on each, and the profile is unchanged.
+TESTRUNNER (DEV, Play server): **218 passed, 0 failed** (212 + `SecuritySpec` 6; `MerchantSpec` wiring check follows the new form).
+NUMBERS (NetGuard counters after the suite, real player): Attack 10 accepted / 40 limited (burst 10); ShopRequest 12 / 42 (8 + 4 decided invalid-ID requests); LoadoutRequest 11 / 42; MerchantRequest 10 / 42; BuyUpgrade 7 / 45; AdminRequest 6 / 48; CoachEvent 9 / 42; LampShift 7 / 44; ForecastVote 6 / 45; ChooseVoyage 5 / 47; SetReady 3 / 47; VoteRematch 3 / 47; EnterLobby 2 / 48; GearAction 7 / 46 (includes the client's own syncs). BeamControl, LampAction (not Keeper), TraderRequest (unknown action) and ReportDevice (already reported) are dropped before the bucket, so they count 0.
+PLAY TEST (DEV): boot clean, 0 errors (only the expected refused Studio data-store calls with API access off, and the test's own warnings: `[AdminDataService] refused …`, the MerchantSpec's deliberate "telemetry broke").
+MIRROR: 141 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (06b583ca).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-031 logged
+NEXT: B1.4 soak (1 client in Studio; 4 clients and 2 real phones are the owner's).

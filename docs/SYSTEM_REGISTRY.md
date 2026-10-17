@@ -62,7 +62,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | ProfileStore persistence, schema v2, migration | Tested (not yet published) | R1.3 | D-002, D-012: store `LighthouseKeepers_PlayerData_v2`, fresh start; Studio always uses the mock |
 | GrantService (idempotent) | Tested (not yet published) | R1.3 | only writer of Pearl income (voyage result, boss drops, selling, admin) |
 | AdminDataService (inspect/grant/rollback) | Tested (not yet published) | R1.8 | owner-only; 7 daily snapshots in `LighthouseKeepers_Snapshots_v2` |
-| Remote contract registry + guards + buckets | Tested (not yet published) | R1.4 | `NetGuard` on all 15 client→server remotes; 11 tests + Play spam test |
+| Remote contract registry + guards + buckets | Tested (not yet published) | R1.4, B1.3 | `NetGuard` on all 18 client→server remotes; 11 tests + Play spam test. B1.3: handlers connect only through `NetGuard.connect`; anti-exploit suite `SecuritySpec` (6 tests in a Play server against the live handlers: guard coverage, invalid IDs, non-finite vectors, non-crew Shell spend, admin probing, 50× spam) |
 | Event bus (EventLog) | Tested (not yet published) | R1.6, S5.3 | `EventBus` + catalog `Shared/Events`; 12 bus tests; publishers for funnel, voyage, Pearl and (S5.3) every catalogued voyage event; cross-service callbacks replaced by events (`BusEventsSpec`) |
 | Analytics funnel | Implemented (live dashboard check pending, R1.9) | R1.6 | `Analytics` bus consumer → AnalyticsService; 4 tests; every step fired in Studio (DawnPearl from S2.2) |
 | Feature flags / remote config | Planned | S5.1 | |

@@ -328,7 +328,7 @@ function LampService.init(islandRefs, stateFolder, remoteFolder)
 	pushState()
 
 	-- Keeper aims the beam
-	remotes.BeamControl.OnServerEvent:Connect(function(player, requested)
+	NetGuard.connect(remotes.BeamControl, function(player, requested)
 		if player ~= keeper then
 			return
 		end
@@ -341,7 +341,7 @@ function LampService.init(islandRefs, stateFolder, remoteFolder)
 	end)
 
 	-- Keeper actions: leave the lamp, or switch beam mode
-	remotes.LampAction.OnServerEvent:Connect(function(player, action)
+	NetGuard.connect(remotes.LampAction, function(player, action)
 		if player ~= keeper or not NetGuard.allow(player, "LampAction") then
 			return
 		end
@@ -420,7 +420,7 @@ function LampService.init(islandRefs, stateFolder, remoteFolder)
 		end
 	end
 
-	remotes.LampShift.OnServerEvent:Connect(function(player, id, accepted)
+	NetGuard.connect(remotes.LampShift, function(player, id, accepted)
 		if not NetGuard.allow(player, "LampShift") then
 			return
 		end

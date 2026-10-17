@@ -368,7 +368,7 @@ function Economy.Start(ctx)
 		remotes.TraderOpen:FireClient(player)
 	end)
 
-	remotes.TraderRequest.OnServerEvent:Connect(function(player, requestId, action)
+	NetGuard.connect(remotes.TraderRequest, function(player, requestId, action)
 		if typeof(requestId) ~= "string" or #requestId == 0 or #requestId > 40 or action ~= "sellAll" then
 			return
 		end
@@ -464,7 +464,7 @@ function Economy.Start(ctx)
 		hookBoosts(player)
 	end
 
-	remotes.MerchantRequest.OnServerEvent:Connect(function(player, requestId, action, itemId, qty)
+	NetGuard.connect(remotes.MerchantRequest, function(player, requestId, action, itemId, qty)
 		local character = player.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		local result = MerchantService.process(player, requestId, action, itemId, qty, {

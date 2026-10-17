@@ -34,8 +34,14 @@ function Data.Init(ctx)
 	end)
 	PlayerData.init(remotes, ctx.notify)
 
+	-- B1.3: Studio-only read of a player's profile for the security suite (a JSON copy; nothing writes through it)
+	NetGuard.expose("_Profile", function(player)
+		local data = PlayerData.data(player)
+		return if data then game:GetService("HttpService"):JSONEncode(data) else nil
+	end)
+
 	-- Admin channel (R1.8): owner only; everyone else is refused and logged by AdminDataService
-	remotes.AdminRequest.OnServerEvent:Connect(function(player, requestId, action, targetUserId, arg)
+	NetGuard.connect(remotes.AdminRequest, function(player, requestId, action, targetUserId, arg)
 		if not NetGuard.isRequestId(requestId) or not NetGuard.allow(player, "AdminRequest") then
 			return
 		end

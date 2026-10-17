@@ -62,7 +62,7 @@ function LoadoutService.init(remoteFolder, playerDataService)
 
 	-- R1.4: duplicate requestIds replay from a map capped at 40 per player (was unbounded)
 	local replay = NetGuard.replayMap()
-	remotes.LoadoutRequest.OnServerEvent:Connect(function(player, requestId, action, itemId)
+	NetGuard.connect(remotes.LoadoutRequest, function(player, requestId, action, itemId)
 		if not NetGuard.isRequestId(requestId) then
 			return
 		end

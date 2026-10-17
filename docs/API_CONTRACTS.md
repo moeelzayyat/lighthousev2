@@ -9,6 +9,7 @@
 
 ## Client → Server (the 17 client→server remotes of the current 32; guards implemented in R1.4 via `NetGuard`)
 Every handler calls `NetGuard.allow(player, remote)` (per-player token bucket at the Rate below; counters `Allowed_<Remote>` / `Limited_<Remote>` on the `NetGuard` ModuleScript). Economic remotes check the replay map first, then the rate.
+B1.3: every handler is connected with `NetGuard.connect(remote, handler)`; no other `OnServerEvent` exists (checked by `SecuritySpec`). In Studio only, each handler is also exposed as `ServerStorage.NetHooks.<Remote>` (a BindableFunction) plus `NetHooks._Profile` (a read-only JSON copy of a profile) for the security suite; live servers never create them, and ServerStorage never replicates to clients.
 | Remote | Payload | Guard (R1.4, implemented) | Rate |
 |---|---|---|---|
 | `Attack` | `target: Vector3` | finite vector (NaN, ±inf rejected), not Keeper, alive, equipped Tool attr, cooldown, range clamp | 6 / 10 |

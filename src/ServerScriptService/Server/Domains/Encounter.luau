@@ -136,7 +136,7 @@ local function hookBench(ctx)
 	end
 
 	-- requestId (optional, sent by the upgrade bench UI) gets a direct UpgradeResult reply
-	remotes.BuyUpgrade.OnServerEvent:Connect(function(player, id, requestId)
+	NetGuard.connect(remotes.BuyUpgrade, function(player, id, requestId)
 		if typeof(id) ~= "string" or #id > 40 then
 			return
 		end
@@ -239,7 +239,7 @@ end
 
 local function hookAttack(ctx)
 	local lastAttack = {}
-	ctx.remotes.Attack.OnServerEvent:Connect(function(player, target)
+	NetGuard.connect(ctx.remotes.Attack, function(player, target)
 		-- Validate everything the client sends (R1.4: NaN and +/-inf rejected, contract rate)
 		if not NetGuard.isFiniteVector3(target) or not NetGuard.allow(player, "Attack") then
 			return
@@ -300,7 +300,7 @@ local function hookChoices(ctx)
 	local remotes, stateFolder = ctx.remotes, ctx.state
 
 	-- Results screen: Play Again
-	remotes.VoteRematch.OnServerEvent:Connect(function(player)
+	NetGuard.connect(remotes.VoteRematch, function(player)
 		if not NetGuard.allow(player, "VoteRematch") then
 			return
 		end
@@ -310,7 +310,7 @@ local function hookChoices(ctx)
 	end)
 
 	-- Storm forecast vote (launch R9): crew members pick one of the two offered forecasts before sailing
-	remotes.ForecastVote.OnServerEvent:Connect(function(player, choice)
+	NetGuard.connect(remotes.ForecastVote, function(player, choice)
 		if not NetGuard.allow(player, "ForecastVote") then
 			return
 		end
@@ -326,7 +326,7 @@ local function hookChoices(ctx)
 
 	-- Voyage choice (S2.1): a crew member who holds a voyage's unlock picks it before sailing. GameState checks
 	-- the unlock again when the ship leaves (a member who has it must be sailing).
-	remotes.ChooseVoyage.OnServerEvent:Connect(function(player, defId)
+	NetGuard.connect(remotes.ChooseVoyage, function(player, defId)
 		if type(defId) ~= "string" or #defId > 20 or not NetGuard.allow(player, "ChooseVoyage") then
 			return
 		end

@@ -204,7 +204,7 @@ function ShopService.init(remoteFolder, playerDataService, quartermasterPart, pr
 
 	prompt.Triggered:Connect(open)
 
-	remotes.ShopRequest.OnServerEvent:Connect(function(player, requestId, action, itemId, quantity)
+	NetGuard.connect(remotes.ShopRequest, function(player, requestId, action, itemId, quantity)
 		if action == "close" then
 			if NetGuard.allow(player, "ShopRequest") then
 				close(player, nil)

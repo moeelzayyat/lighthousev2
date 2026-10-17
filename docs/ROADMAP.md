@@ -190,8 +190,8 @@ Purpose: real players answer whether the loop retains, before content work.
 | ID | Substage | Deliverables | Passes when | Verify |
 |---|---|---|---|---|
 | B1.1 🟦 | Cosmetics pipeline | Beam colours (existing), lamp housings, keeper coats, lantern skins, ship flags as definitions; Robux products created but **not enabled** | Products listed; fairness test re-answered in writing | Owner |
-| B1.2 | Age rating & compliance | Questionnaire; Creator Hub policy check | Rating approved | Dashboard |
-| B1.3 | Anti-exploit suite | §24 security tests automated | All green | TestRunner |
+| B1.2 🟦 | Age rating & compliance | Questionnaire; Creator Hub policy check | Rating approved | Dashboard |
+| B1.3 🟦 | Anti-exploit suite | §24 security tests automated | All green | TestRunner |
 | B1.4 | Soak | 4-client, 2-hour, all modes; 2 real phones | Budgets met | Profiler, devices |
 | B1.5 | Cohort | 30–100 invited testers; feedback form; bug tracker | ≥ 30 active; bugs triaged daily | Tracker |
 | B1.6 | Go/no-go | | Logged | Owner |

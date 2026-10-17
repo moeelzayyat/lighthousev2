@@ -7,6 +7,8 @@
 -- another script context can read them; ServerScriptService never replicates to clients.
 
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ServerStorage = game:GetService("ServerStorage")
 
 local NetGuard = {}
 
@@ -88,6 +90,34 @@ function NetGuard.allow(player: any, remote: string): boolean
 	end
 	bump("Limited_" .. remote)
 	return false
+end
+
+-- Connecting handlers -------------------------------------------------------------
+-- B1.3: every client -> server handler is connected here (a spec checks that no other OnServerEvent exists). In
+-- Studio only, each handler is also exposed as ServerStorage.NetHooks.<Remote> (a BindableFunction), so the
+-- security suite in TestRunner can call the live handler as a real or a fake player. Live servers never make it.
+function NetGuard.expose(name: string, fn: (...any) -> ...any)
+	if not RunService:IsStudio() then
+		return
+	end
+	local folder = ServerStorage:FindFirstChild("NetHooks")
+	if not folder then
+		folder = Instance.new("Folder")
+		folder.Name = "NetHooks"
+		folder.Parent = ServerStorage
+	end
+	local hook = Instance.new("BindableFunction")
+	hook.Name = name
+	hook.OnInvoke = fn
+	hook.Parent = folder
+end
+
+function NetGuard.connect(remote: any, handler: (...any) -> ())
+	remote.OnServerEvent:Connect(handler)
+	NetGuard.expose(remote.Name, function(...)
+		local ok, err = pcall(handler, ...)
+		return ok, if ok then nil else tostring(err)
+	end)
 end
 
 function NetGuard.forget(player: any)

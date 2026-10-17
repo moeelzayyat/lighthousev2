@@ -7,7 +7,7 @@
 | Persistence | TestRunner against `ProfileStore.Mock` (never the real store) | R1.3 onward, every schema change |
 | Play test | `start_stop_play` + `get_console_output` (+ `screen_capture`), **API off in the production window** | every substage with gameplay/UI |
 | Multi-client | Studio Test → Clients: 4 | crew flows, bosses by crew, soak |
-| Security | TestRunner `security/` + scripted spam via `execute_luau` | R1.4, S5.2, B1.3 |
+| Security | TestRunner `integration/SecuritySpec` (live handlers through Studio-only `NetHooks`, run in a Play server) + `unit/NetGuardSpec` | R1.4, S5.2, B1.3 |
 | Performance | probe scripts in `ServerStorage/Tests/perf/`; real phone | S4, B1.4 |
 | Outside players | Prototype A/B sessions per `docs/legacy/PLAYTEST_KIT.md` | S3, S6.7, B1.5 |
 

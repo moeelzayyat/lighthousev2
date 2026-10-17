@@ -344,7 +344,7 @@ function PlayerData.init(remoteFolder: any, _notify: any, options: InitOptions?)
 	end
 
 	if remotes then
-		remotes.GearAction.OnServerEvent:Connect(function(player, action)
+		NetGuard.connect(remotes.GearAction, function(player, action)
 			-- The only client request handled here: "send me my data".
 			-- R1.4: contract rate (2/s, burst 4) so a client cannot spam full profile pushes.
 			if action == "sync" and NetGuard.allow(player, "GearAction") then

@@ -107,7 +107,7 @@ function Crew.Init(ctx)
 	-- Coach prompts (launch R3) report shown/done for the playtest log. Known ids only, rate limited.
 	local COACH_IDS = { oil = true, tank = true, lamp = true, aim = true, focus = true, repair = true, bench = true }
 	local coachBudget = {} -- player -> events left this session
-	remotes.CoachEvent.OnServerEvent:Connect(function(player, kind, id)
+	NetGuard.connect(remotes.CoachEvent, function(player, kind, id)
 		if not NetGuard.allow(player, "CoachEvent") then
 			return
 		end
@@ -123,7 +123,7 @@ function Crew.Init(ctx)
 	end)
 
 	-- Title screen "Play": you're now on the ship
-	remotes.EnterLobby.OnServerEvent:Connect(function(player)
+	NetGuard.connect(remotes.EnterLobby, function(player)
 		if not NetGuard.allow(player, "EnterLobby") then
 			return
 		end
@@ -137,7 +137,7 @@ function Crew.Init(ctx)
 	-- the crew happens at the ship's wheel. R1.4: one handler, contract rate, PlayerToMenu logged once per
 	-- session.
 	local menuLogged = {}
-	remotes.SetReady.OnServerEvent:Connect(function(player, ready)
+	NetGuard.connect(remotes.SetReady, function(player, ready)
 		if ready ~= false or not NetGuard.allow(player, "SetReady") then
 			return
 		end
