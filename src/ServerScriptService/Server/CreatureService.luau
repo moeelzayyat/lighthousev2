@@ -757,7 +757,8 @@ local function publishTemplates()
 end
 
 -- defenseService is used to damage cannons that creatures attack
-function CreatureService.init(islandRefs, lampService, towerService, upgradeService, defenseService, stateFolder)
+-- remotesFolder: the Remotes folder (S5.1: the Platform domain builds it before it is exposed to clients)
+function CreatureService.init(islandRefs, lampService, towerService, upgradeService, defenseService, stateFolder, remotesFolder)
 	refs = islandRefs
 	lamp = lampService
 	tower = towerService
@@ -768,7 +769,7 @@ function CreatureService.init(islandRefs, lampService, towerService, upgradeServ
 		state:SetAttribute("BossName", "")
 	end
 	publishTemplates()
-	local remotes = ReplicatedStorage:WaitForChild("Remotes")
+	local remotes = remotesFolder or ReplicatedStorage:WaitForChild("Remotes")
 	snapshotRemote = remotes:FindFirstChild("CreatureSnapshot")
 	if not snapshotRemote then
 		snapshotRemote = Instance.new("UnreliableRemoteEvent")

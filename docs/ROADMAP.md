@@ -39,7 +39,7 @@ A stage exits when every substage is ✅ and its exit numbers are recorded. **GO
 | S2 | First session & voyage length | 8 | 1.5 | Numeric + owner publish | 🟦 (S2.8 DEV publish waits for the owner) |
 | S3 | **Public test** | 6 | 2–3 live | **GO/NO-GO** | 🟨 provisional GO (D-018); live test on DEV (D-016) not started |
 | S4 | Performance & mobile | 7 | 2 | Numeric | 🟨 |
-| S5 | Domain split & UI refactor | 8 | 2–3 | Standard | ⬜ |
+| S5 | Domain split & UI refactor | 8 | 2–3 | Standard | 🟨 |
 | S6 | Content (owner's six requests) | 7 | 4–5 | Standard | ⬜ |
 | S7 | Return systems | 6 | 2 | Standard | ⬜ |
 | B1 | **Closed beta** | 6 | 3 | **GO/NO-GO** | ⬜ |
@@ -141,8 +141,8 @@ Purpose: real players answer whether the loop retains, before content work.
 
 | ID | Substage | Deliverables | Passes when | Verify |
 |---|---|---|---|---|
-| S5.1 | Lifecycle | `Bootstrap` with 8 domains, `Init/Start`, asserted order, remotes created last | Boot log ordered; a swapped phase trips the assertion in a test | TestRunner |
-| S5.2 | Dissolve `Main` | Remote handlers, oil carrying, tool building, routing, trader moved into their domains; `Main` ≤ 80 lines | Every remote still works (contract tests); diff reviewed | TestRunner, play test |
+| S5.1 🟦 | Lifecycle | `Bootstrap` with 8 domains, `Init/Start`, asserted order, remotes created last | Boot log ordered; a swapped phase trips the assertion in a test | TestRunner |
+| S5.2 🟦 | Dissolve `Main` | Remote handlers, oil carrying, tool building, routing, trader moved into their domains; `Main` ≤ 80 lines | Every remote still works (contract tests); diff reviewed | TestRunner, play test |
 | S5.3 | Callback wiring → bus | `CreatureService.onKilled`, `PlayerData.onChanged`, `ShipRoster.onChange` etc. replaced by bus events | `EVENTS.md` complete; no cross-domain function assignment remains (`script_grep`) | Review |
 | S5.4 | Definitions registry | `_Registry` validates all catalogs; loot tables must sum to 1; duplicate IDs fail boot | Broken sample fails boot with a clear message | Play test ×2 |
 | S5.5 | UiKit split | `Tokens/Primitives/Controls/Gauges/Dialogs`; dead v1 API deleted; `Gear.client` deleted | Every screen renders unchanged (screenshot diff at PC + phone) | `screen_capture` |

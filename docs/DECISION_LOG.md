@@ -144,3 +144,5 @@ The roadmap's GO thresholds (Night-1 survival ≥ 50 %, rematch ≥ 60 %, beam m
 ## CP — S4.5 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 0 server orb moves after landing
 ## CP — S4.6 measured (🟦: 1 client; 16 MB/h after warm-up, 59 MB/h overall incl. warm-up; 0 errors) · 2026-10-17 · auto-approved (unattended) · DEV only
 ## CP — S4.7 publish package written (🟦, waits for the owner's DEV publish and phone check) · 2026-10-17 · DEV only
+## CP — S5.1 + S5.2 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · Main 1073 → 14 lines; TestRunner 127/127; every remote answered
+- Accepted (unattended, recommendation): remotes are created by Platform and exposed (parented) by Network last, instead of created last, because handlers connect during Init. To revise: say so.

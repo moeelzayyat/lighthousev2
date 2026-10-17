@@ -496,3 +496,35 @@ Live checks (about 20 minutes):
  8. Tell Claude: the phone FPS and model, anything odd.
 If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.
 Claude's state: S4.7 set to 🟦; work continues with S5.
+
+CHECKPOINT: S5.1 Lifecycle + S5.2 Dissolve Main — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S5.1_before_2026-10-17 (Main, CreatureService)
+BUILT (one batch: Main could not shrink without the domains, and the domains replace Main's code):
+- `Server/Bootstrap` (new, `--!strict`): `ORDER` = Platform → Telemetry → Data → Definitions → Economy → World → Encounter → Crew → LiveOps → Network (architecture §5.2). `check` refuses an unknown domain, a domain out of order or repeated, and a list that does not end with Network; `run` checks, runs every `Init` in order, then every `Start` in order, and logs `Boot order=...`. A wrong order runs nothing.
+- `Server/Domains/*` (10 new modules, each `{ Name, Init?, Start? }`, sharing one `ctx`):
+  - Platform: the GameState folder and every remote (including the `CreatureSnapshot` unreliable remote), built unparented; `ctx.notify`.
+  - Telemetry: analytics start, `ReportDevice`, quit logging.
+  - Data: admin tools, `PlayerData.init`, `AdminRequest`.
+  - Definitions, LiveOps: empty slots (S5.4 `_Registry`; S6/S7 content).
+  - Economy: dawn banking, loadouts, gear (weapon tools, worn armor, `PlayerData.onChanged`), beam colour, the Trader (`TraderRequest`, auto-sell); Start: the shop and weapon hooks.
+  - World: island and ship builds (`ctx.refs`, `ctx.lobbyRefs`); Start: the ground grid.
+  - Encounter: lamp, tower, upgrades, creatures (now given the remotes folder), loot, cannons; oil carrying; the bench and `BuyUpgrade`; `Attack`; `VoteRematch`, `ForecastVote`, `ChooseVoyage`; Start: the round loop (`task.defer(GameState.run)`).
+  - Crew: ship travel, `CoachEvent`, `EnterLobby`, `SetReady`, roster/boarding/departure and the wheel, the first-voyage route, player join and the crew count.
+  - Network: Start parents the remotes folder, so clients see the remotes only after every handler is connected.
+- `Main`: 1073 lines → **14 lines** (requires the domains in `ORDER` and calls `Bootstrap.run`).
+- `CreatureService.init` takes the remotes folder (7th argument) instead of waiting for `ReplicatedStorage.Remotes`, which no longer exists until boot ends.
+- No behaviour change intended: a line-by-line check of the old Main against the domains leaves only rewritten wiring (require paths, `ctx` hand-offs, the merged route `PlayerAdded`).
+- Deviation (recommendation, D-015): architecture says "remotes created only after every Start"; they are created in Platform and **exposed** (parented) last, because the handlers must connect to them during Init. Clients cannot reach them earlier.
+- Not done: `--!strict` on the 10 domain modules (they wrap untyped services; strict typing lands with the bus wiring in S5.3 and the stat pipeline in S5.7). Feature flags / remote config stay Planned (no roadmap row in S5.1).
+TESTRUNNER (DEV): **127 passed, 0 failed** (119 + new `BootstrapSpec` 8: the order, a module for every domain and nothing else, the real order accepted, Economy/World swapped trips "Economy must start before World", Platform/Telemetry swapped trips, Network not last / repeated / unknown domains trip, Inits before Starts with one shared ctx and one Boot log, a wrong order runs nothing, one-phase domains).
+PLAY TEST (DEV, owner's account, mock store; a TEMPTEST client script, runtime only):
+- Boot log: `Boot order=Platform:Init Telemetry:Init Data:Init Definitions:Init Economy:Init World:Init Encounter:Init Crew:Init LiveOps:Init Network:Init Platform:Start Telemetry:Start Data:Start Definitions:Start Economy:Start World:Start Encounter:Start Crew:Start LiveOps:Start Network:Start`; 33 remotes exposed; ground grid built in 2.5 s.
+- Every client→server remote moved out of Main, plus the ones in unchanged services, answered: EnterLobby (InLobby), ReportDevice (Device logged), GearAction (GearData), LoadoutRequest (LoadoutResult "already equipped"), ShopRequest (ShopResult "Talk to the Quartermaster"), AdminRequest (AdminResult; AdminInspect logged), TraderRequest (TraderResult, before and as crew), CoachEvent (promptShown:oil marked), boarding (Ready), ChooseVoyage (Long → 13 nights → back to Standard 7, with the unlock attribute set at runtime), ForecastVote (vote counted at departure), the wheel (Prologue), oil prompt (CarryingOil), fuel prompt (Refueled 5 → full), Trader prompt (TraderOpen), bench prompt (OpenUpgrades), BuyUpgrade (Lens Power level 1), Attack (`step=strike` hit), lamp console (Keeper), LampAction toggleMode (BeamMode changed) and leave, BeamControl, VoteRematch (WantsRematch), SetReady(false) (back to the ship, voyage abandoned).
+- Server→client seen: AdminResult, CreatureSnapshot (412), CrewFeed, GearData, LoadoutResult, Notify, OpenUpgrades, PlaySound, ShopResult, TraderOpen, TraderResult, Travel, UpgradeResult.
+- Errors: 0 client; server only ProfileStore's refused Studio write (API off). Play stopped; 0 TEMPTEST scripts remain.
+SCRIPT ANALYSIS: not measured (owner item).
+MIRROR: 97 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (2455f1ec).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+NEXT: S5.3 Callback wiring → bus.
