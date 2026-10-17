@@ -25,6 +25,7 @@ local NetGuard = require(Server.NetGuard)
 local MerchantService = require(Server.MerchantService) -- S6.2
 local Merchant = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Merchant"))
 local Boosts = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Boosts")) -- S6.4
+local Specialties = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Specialties")) -- S7.4
 
 local Economy = { Name = "Economy" }
 
@@ -148,8 +149,12 @@ end
 local function applyBoosts(player)
 	local data = PlayerData.data(player)
 	local ranks = if data and type(data.Boosts) == "table" then data.Boosts else {}
-	local damage = MerchantService.boost(player, "WeaponDamage") + Boosts.bonus(ranks, "WeaponDamage")
-	local speed = MerchantService.boost(player, "PlayerSpeed") + Boosts.bonus(ranks, "PlayerSpeed")
+	local roles = if data and type(data.Roles) == "table" then data.Roles else {} -- S7.4: specialties
+	local damage = MerchantService.boost(player, "WeaponDamage") + Boosts.bonus(ranks, "WeaponDamage") + Specialties.bonus(roles, "Harpooner")
+	local speed = MerchantService.boost(player, "PlayerSpeed") + Boosts.bonus(ranks, "PlayerSpeed") + Specialties.bonus(roles, "Oiler")
+	local keeper, engineer = Specialties.bonus(roles, "Keeper"), Specialties.bonus(roles, "Engineer")
+	player:SetAttribute("Spec_Keeper", if keeper > 0 then keeper else nil) -- CreatureService: beam damage while keeping
+	player:SetAttribute("Spec_Engineer", if engineer > 0 then engineer else nil) -- TowerService: repair amount
 	local shells = StatPipeline.compute("ShellGainPct", 0, { flat = { Boosts.bonus(ranks, "ShellGainPct") } })
 	player:SetAttribute("Boost_WeaponDamage", if damage > 0 then damage else nil)
 	player:SetAttribute("Boost_PlayerSpeed", if speed > 0 then speed else nil)

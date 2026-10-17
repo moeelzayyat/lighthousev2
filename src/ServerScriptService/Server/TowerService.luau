@@ -31,7 +31,8 @@ function TowerService.init(stateFolder, repairPrompt, notify)
 		end
 		local before = integrity
 		-- evolution (Shared.Upgrades.EVOLUTIONS): Clockwork Bastion restores 50% more per repair
-		TowerService.repair(Config.REPAIR_AMOUNT * (if state:GetAttribute("Evo_ClockworkBastion") then 1.5 else 1))
+		-- S7.4: the Engineer specialty adds its share to the repairer's repairs
+		TowerService.repair(Config.REPAIR_AMOUNT * (if state:GetAttribute("Evo_ClockworkBastion") then 1.5 else 1) * (1 + (player:GetAttribute("Spec_Engineer") or 0)))
 		EventLog.count("repairs", 1, player)
 	EventLog.mark(player, "repair")
 		EventLog.first("repair")

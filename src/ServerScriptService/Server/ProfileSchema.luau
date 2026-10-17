@@ -27,6 +27,7 @@ export type Profile = {
 	RedeemedCodes: { [string]: boolean },
 	Settings: { Music: number, Sfx: number, Shake: boolean, Rain: boolean },
 	Boosts: { [string]: number }, -- S6.4 (D-021): Quartermaster boost id -> rank bought; added with default {}
+	Roles: { [string]: number }, -- S7.4 (D-028): role counters that earn specialties; added with default {}
 }
 
 ProfileSchema.DEFAULT_WEAPON = "DriftwoodHarpoon"
@@ -61,6 +62,7 @@ function ProfileSchema.template(): Profile
 		RedeemedCodes = {},
 		Settings = { Music = 1, Sfx = 1, Shake = true, Rain = true },
 		Boosts = {},
+		Roles = {},
 	}
 end
 
@@ -180,6 +182,18 @@ function ProfileSchema.validate(data: any): (Profile, { string })
 				data.Boosts[id] = nil
 			end
 			fix("Boosts." .. id, "over the total cap, lowered", nil)
+		end
+	end
+	-- Roles (S7.4): counters that earn specialties; a profile saved before the field existed gets {} silently
+	if data.Roles == nil then
+		data.Roles = {}
+	elseif type(data.Roles) ~= "table" then
+		data.Roles = fix("Roles", "not a table", {})
+	end
+	for role, n in data.Roles do
+		if type(role) ~= "string" or not isCount(n) then
+			data.Roles[role] = nil
+			fix("Roles." .. tostring(role), "not a whole number", nil)
 		end
 	end
 	if data.SchemaVersion ~= ProfileSchema.VERSION then

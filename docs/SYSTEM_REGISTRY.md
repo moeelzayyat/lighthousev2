@@ -40,7 +40,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Invites (unrewarded) | Released | S7.5 | reward |
 | Leaderboards | Tested in Studio (not yet published; live ordered stores untested) | S7.3 | `Definitions/Leaderboards` + `LeaderboardService` (LiveOps, bus only): best night Standard / Long, nights this week (new store each Monday 00:00 UTC); a board on the harbor island; written and re-read every 30 s; Studio uses a memory store; `LeaderboardsSpec` 4 tests |
 | Endless Storm (mode test arm) | Tested (not yet published) | S3.1b | test-only voyage; `ModeTest` 50/50 split of new accounts by UserId hash (D-017); flag `MODE_TEST_ENABLED` |
-| Specialties | Planned | S7.4 | |
+| Specialties | Tested (not yet published) | S7.4 | `Definitions/Specialties` + `SpecialtyService` (LiveOps, bus only): Keeper (beam kills), Harpooner (weapon kills), Oiler (oil delivered), Engineer (repairs + cannons); 3 ranks of +2% each, all together capped at +15%; profile field `Roles` (default {}), ranks in `Unlocks.Specialties`; `SpecialtiesSpec` 5 tests |
 | Controller beam aim | Tested (not yet published; controller voyage pending, owner) | S2.6 | right stick aims (left too at the lamp), Y Focus, B Leave; `InputController.stickAngle` |
 
 ## Economy and progression

@@ -695,7 +695,9 @@ local function step(dt)
 	local beam = lamp.getBeam()
 	local halfAngle = if beam.mode == "focused" then Config.FOCUSED_HALF_ANGLE else Config.WIDE_HALF_ANGLE * (state:GetAttribute("ForecastWideMult") or 1)
 	local now = os.clock()
-	local lens = upgrades.value("LensPower", 1) -- beam damage multiplier
+	local keeper = lamp.getKeeper()
+	local keeperBonus = keeper and keeper:GetAttribute("Spec_Keeper") or 0 -- S7.4: the Keeper specialty
+	local lens = upgrades.value("LensPower", 1) * (1 + keeperBonus) -- beam damage multiplier
 	local sweepDps = upgrades.value("ClockworkSweep", 0) -- automatic sweep damage
 	local towerCenter = Vector3.new(center.X, 0, center.Z)
 	local decay = 1 - Config.THREAT_DECAY * dt

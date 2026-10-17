@@ -840,3 +840,18 @@ NOT TESTED HERE: the live ordered data stores (Studio never writes them). After 
 MIRROR: 133 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (1a7cc08d).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-027 flagged
 NEXT: S7.4 Specialties.
+
+CHECKPOINT: S7.4 Specialties — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S7.4_before_2026-10-17 (ProfileSchema, Economy, CreatureService, TowerService, LiveOps, _Registry, BoostsSpec) · restore point "S7.4 passed"
+BUILT:
+- `Shared/Definitions/Specialties` (new): Keeper, Harpooner, Oiler, Engineer with thresholds, +2% a rank and the +15% total cap (D-028); `rankFor`, `ranks` (cap applied), `bonus`. `_Registry` checks it.
+- `Server/SpecialtyService` (new, `--!strict`, LiveOps domain): beam kills, weapon kills, oil delivered, repairs and cannons built from the bus → the profile's `Roles` counters → ranks in `Unlocks.Specialties`; a new rank is told to the player and pushes the profile (counting alone does not).
+- Profile: new field `Roles` (default {}, silent for older saves; bad counts dropped).
+- Bonuses: Harpooner and Oiler join the weapon-damage and walk-speed layers in Economy's applyBoosts; Keeper raises the beam's damage while that player keeps the lamp (CreatureService); Engineer raises that player's repairs (TowerService).
+TESTRUNNER (DEV, Play server): **202 passed, 0 failed** (197 + new `SpecialtiesSpec` 5: registry clean; ranks follow the thresholds; **cap test**: every role maxed gives Keeper 3, Harpooner 3, Oiler 1, Engineer 0 = +14% ≤ +15%; **unlock from stats only**: 24 deliveries give nothing, the 25th gives Oiler rank 1 (one profile push), cannon kills do not count, and no other server module writes `Unlocks.Specialties` or the `Roles` counters; older saves get `Roles = {}` with no repair; wiring) + `BoostsSpec` updated for the new field.
+PLAY TEST (DEV, owner's account, mock store; runtime-only TEMPTEST script): 50 kills with a harpoon by the player: `Roles.WeaponKills = 50`, Harpooner rank 1, the player's weapon-damage boost 0.02. 0 script errors. Play stopped; 0 TEMPTEST scripts remain.
+MIRROR: 136 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (d7de9898).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); D-028 flagged
+NEXT: S7.5 Invite reward.

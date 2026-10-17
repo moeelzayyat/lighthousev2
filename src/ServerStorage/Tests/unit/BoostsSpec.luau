@@ -78,7 +78,9 @@ return function(T: any)
 			local data, fixes = MigrationService.upgrade(deepCopy(saved))
 			T.expect(fixes).toEqual({})
 			T.expect(data.Boosts).toEqual({})
+			T.expect(data.Roles).toEqual({}) -- S7.4: also added with its default
 			data.Boosts = nil
+			data.Roles = nil
 			T.expect(data).toEqual(before)
 		end)
 

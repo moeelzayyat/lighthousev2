@@ -177,7 +177,7 @@ Purpose: real players answer whether the loop retains, before content work.
 | S7.1 🟦 | Logbook | Creatures, bosses, evolutions, forecasts; discovery from bus; category rewards | Discover once; reward once | TestRunner |
 | S7.2 🟦 | Daily objective | Pool in `Definitions/Objectives`; one per day; no streak | Missing a day changes nothing (test with advanced clock) | TestRunner |
 | S7.3 🟦 | Leaderboards | Best Night (Standard/Long), weekly nights survived | Updates within 60 s; reset on schedule | Play test |
-| S7.4 | Specialties | Keeper/Oiler/Engineer/Harpooner earned by role stats; capped bonuses | Cap test; unlock from stats only | TestRunner |
+| S7.4 🟦 | Specialties | Keeper/Oiler/Engineer/Harpooner earned by role stats; capped bonuses | Cap test; unlock from stats only | TestRunner |
 | S7.5 | Invite reward | Shared Lantern cosmetic after first shared voyage, once per pair | Idempotent | TestRunner |
 | S7.6 | Publish (owner) | | Live check | Owner |
 

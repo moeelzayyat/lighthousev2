@@ -13,6 +13,7 @@ local LampService = require(Server.LampService)
 local LogbookService = require(Server.LogbookService) -- S7.1
 local ObjectiveService = require(Server.ObjectiveService) -- S7.2
 local LeaderboardService = require(Server.LeaderboardService) -- S7.3
+local SpecialtyService = require(Server.SpecialtyService) -- S7.4
 
 local LiveOps = { Name = "LiveOps" }
 
@@ -148,6 +149,24 @@ function LiveOps.Init(ctx)
 		grant = GrantService.Grant,
 		notify = LampService.notify,
 		now = os.time,
+	})
+	-- S7.4: specialties are earned only by playing the role (counted from the bus)
+	SpecialtyService.start({
+		subscribe = EventLog.Subscribe,
+		byUserIds = function(ids)
+			local list = {}
+			for _, id in ids do
+				local player = Players:GetPlayerByUserId(id)
+				if player then
+					table.insert(list, player)
+				end
+			end
+			return list
+		end,
+		mutate = function(player, fn)
+			return PlayerData.mutate(player, fn)
+		end,
+		notify = LampService.notify,
 	})
 	-- S7.3: the harbor boards (best night per voyage, nights this week), written and re-read every 30 s
 	local board = ctx.lobbyRefs and ctx.lobbyRefs.leaderboard

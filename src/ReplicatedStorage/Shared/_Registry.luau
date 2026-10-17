@@ -24,6 +24,7 @@ function Registry.catalogs(): Catalogs
 		Logbook = require(Shared:WaitForChild("Definitions"):WaitForChild("Logbook")) :: any, -- S7.1
 		Objectives = require(Shared:WaitForChild("Definitions"):WaitForChild("Objectives")) :: any, -- S7.2
 		Leaderboards = require(Shared:WaitForChild("Definitions"):WaitForChild("Leaderboards")) :: any, -- S7.3
+		Specialties = require(Shared:WaitForChild("Definitions"):WaitForChild("Specialties")) :: any, -- S7.4
 		Events = require(Shared:WaitForChild("Events")) :: any,
 	}
 end
@@ -559,6 +560,34 @@ RULES.Leaderboards = function(c, Leaderboards)
 		c.oneOf(w .. ".kind", def.kind, { "best", "weekly" })
 		if def.kind == "best" then
 			c.oneOf(w .. ".voyage", def.voyage, { "Standard", "Long", "Endless" })
+		end
+	end
+end
+
+-- S7.4: specialties (earned from role counters; small steps; a total cap)
+RULES.Specialties = function(c, Specialties)
+	c.order("Specialties.ORDER", Specialties.ORDER, Specialties)
+	c.num("Specialties.TOTAL_CAP", Specialties.TOTAL_CAP, 0.01, 0.15)
+	for id, def in c.defs(Specialties) do
+		local w = "Specialties." .. id
+		if def.id ~= id then
+			c.add(w .. ".id", "must equal its key, got " .. tostring(def.id))
+		end
+		c.str(w .. ".displayName", def.displayName)
+		c.str(w .. ".bonus", def.bonus)
+		c.oneOf(w .. ".role", def.role, { "BeamKills", "WeaponKills", "OilDelivered", "Repairs" })
+		c.num(w .. ".step", def.step, 0.005, 0.05)
+		if type(def.thresholds) ~= "table" or #def.thresholds == 0 then
+			c.add(w .. ".thresholds", "must list the count for each rank")
+		else
+			local last = 0
+			for i, need in def.thresholds do
+				c.num(w .. ".thresholds[" .. i .. "]", need, 1, nil, true)
+				if type(need) == "number" and need <= last then
+					c.add(w .. ".thresholds", "must go up rank by rank")
+				end
+				last = if type(need) == "number" then need else last
+			end
 		end
 	end
 end
