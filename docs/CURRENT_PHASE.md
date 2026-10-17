@@ -16,7 +16,7 @@ Follow "S5.8 — READY FOR OWNER TO PUBLISH" at the end of `docs/HANDOFF_REPORT.
 - Verify: blind test (the owner's or a tester's; Claude records the telegraphs, sounds and budgets).
 
 ## Open owner items
-- S6.4: save `C:\\RobloxProjects\\Lighthousev2\\backups\\LighthouseKeepers_DEV_S6-4_2026-10-17.rbxl` (new item models live only in the place); D-021 and D-022 to review.
+- S6.4: save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_S6-4_2026-10-17.rbxl` (new item models live only in the place); D-021 and D-022 to review.
 - S6.2: merchant prices are D-019 (recommendation); after live voyages, compare the run summaries' `Shells spent (merchant n)` and Shells left with earlier runs.
 - S6.1: optional 4-client boss night (Test → Clients and Servers → 4 players, sail, reach night 4): 4 boss bars, note any lag.
 - S4.6: optional 4-client Studio run (Test → Clients and Servers → 4 players, one voyage); say whether anything errors.
