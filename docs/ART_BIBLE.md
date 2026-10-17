@@ -24,6 +24,8 @@
 ## Menu pattern — "grid + detail pane" (owner-chosen 2026-10-17; D-041)
 Reference: the crafting screen of *99 Nights in the Forest*. The owner's note: **people like the big buttons.** Every full-screen menu in the game — Quartermaster shop, workbench, locker/loadout, island merchant, specialties (skill tree), cosmetics — is built on this one pattern. Nothing is restyled a second time: the pattern **replaces** a screen, it is never layered on top of it (rule 5 stands).
 
+**Look (owner, D-042, 2026-10-17):** the pattern is built in the Bold skin (`Config.UI_SKIN = "bold"`: navy panels, thick dark outlines, chunky 3D buttons, Luckiest Guy and Fredoka One). Where the layout table below says pirate wood header or glass body, use the Bold panel and header instead; every size and rule stays.
+
 ### Why it works (the rules we keep)
 1. **One tile is always selected.** Highlighted tile → the same item enlarged in the detail pane → name → one-line description → cost → one big action button. The player never wonders what they just tapped.
 2. **Every tile is the same shape and the same stack:** icon → name → cost. The eye learns the layout once and scans the whole grid.
