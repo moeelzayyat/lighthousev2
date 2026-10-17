@@ -29,7 +29,7 @@ Every handler calls `NetGuard.allow(player, remote)` (per-player token bucket at
 | `ChooseVoyage` (S2.1) | `defId` | string ≤ 20, a known voyage definition that is not test-only (S3.1b: Endless Storm is refused); Ready; phase Waiting/Intermission; the sender holds the definition's unlock (`Unlock_<key>`); GameState re-checks at departure that a sailing member holds it | 2 / 3 |
 | `AdminRequest` (R1.8) | `requestId, action, targetUserId, arg?` | requestId ≤ 40; action string ≤ 20; finite targetUserId; arg number or string ≤ 20; **owner UserId only** (`AdminDataService.OWNER_IDS`), anyone else refused and logged `AdminRejected`; actions inspect / grant (1–1000 Pearls, target online) / rollback (YYYY-MM-DD snapshot) | 1 / 3 |
 | `MerchantRequest` (S6.2 ✅) | `requestId, action, itemId, qty` | requestId ≤ 40; action `"buy"`; itemId a string ≤ 40 in `Merchant.ORDER`; qty exactly 1; capped replay map (checked before the rate); Ready; phase Day; distance to the Trader ≤ 18; the item's per-voyage limit; the effect would do something (hurt for Heal, lamp not full for Oil, no shield up for Shield); crew Shells | 5 / 8 |
-| `ObjectiveClaim` (new, S7.2) | `objectiveId, claimId` | complete, unclaimed, GrantService | 2 / 3 |
+| `ObjectiveClaim` (S7.2: not built, D-026) | — | the reward is paid by the server the moment the objective is done (GrantService claim `objective:<day>:<id>`), so no client request exists to guard | — |
 | `CodeRedeem` (new, L1.4) | `code ≤ 32` | once per profile, expiry | 1 per 10 s |
 | `Settings` (new, S5) | `key, value` | whitelist of keys | 5 / 10 |
 

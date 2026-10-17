@@ -809,3 +809,18 @@ NOT BUILT: a logbook page to browse the entries (notices only for now; flagged i
 MIRROR: 127 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (856025b8).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); rewards D-025 flagged
 NEXT: S7.2 Daily objective.
+
+CHECKPOINT: S7.2 Daily objective — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S7.2_before_2026-10-17 (Events, _Registry, LiveOps) · restore point "S7.2 passed"
+BUILT:
+- `Shared/Definitions/Objectives` (new): five objectives (D-026), `dayKey` (UTC), `pick` (the same all day for an account), `rollOver` (a new day starts a fresh objective and resets only today's progress), `count`. `_Registry` checks it (64 definitions at boot).
+- `Server/ObjectiveService` (new, `--!strict`, LiveOps domain): counts the player's own Refuelled, NightSurvived, CannonBuilt, TowerRepaired and CreatureKilled events; pays once through GrantService; publishes `ObjectiveCompleted`; a join notice "Today's objective: …"; player attributes ObjectiveText / Progress / Target / Done.
+- The `ObjectiveClaim` remote in API_CONTRACTS is not built: the reward pays itself (D-026).
+TESTRUNNER (DEV, Play server): **193 passed, 0 failed** (187 + new `ObjectivesSpec` 6: registry clean; one objective a day from the pool, the same all day, at least 3 different ones over 30 days; counts its own event and finishes once at 10/10; "survive night 4" counts the night reached; **a missed day changes nothing**: with the clock moved 3 days on, the state holds only DayKey, Progress and Claimed (no streak or missed-day counter), progress starts fresh and the objective is exactly what a player without the gap would get; the service pays once with the claim `objective:2025-10-17:RepairTower` after 7 repairs; wiring).
+PLAY TEST (DEV, owner's account, mock store; runtime-only TEMPTEST scripts): today's objective on the real account was "Defeat 40 creatures" (0/40 on the player attributes); 45 Sand Skitters killed by the player during a voyage: 40/40, done, Pearls 0 → 3 once (`Grant claim=objective:2026-10-17:DefeatCreatures pearls=3`). 0 script errors. Play stopped; 0 TEMPTEST scripts remain.
+NOT BUILT: a HUD line or menu card for the objective (attributes and notices only).
+MIRROR: 130 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (8e42701f).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); pool and rewards D-026 flagged
+NEXT: S7.3 Leaderboards.

@@ -53,6 +53,7 @@ local Events: { [string]: Schema } = {
 
 	-- LiveOps
 	LogbookDiscovered = { UserId = "number", EntryId = "string" }, -- S7.1
+	ObjectiveCompleted = { UserId = "number", ObjectiveId = "string" }, -- S7.2
 }
 
 return Events

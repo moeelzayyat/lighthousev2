@@ -39,7 +39,7 @@ Module: `EventLog` (Telemetry domain) exposes `Publish(name, payload)` / `Subscr
 | `ItemGranted` | `{UserId, ItemId, Source}` | Economy (Grant) | Logbook, Analytics | R1.3 |
 | `ShopPurchase` | `{UserId, ItemId, Price, Currency}` | Economy (ShopService) | Analytics | S5.3 ✅ |
 | `MerchantPurchase` | `{VoyageId?, UserId, ItemId, Price, Currency}` | Economy (MerchantService via `Domains/Economy`) | Analytics | S6.2 ✅ (with `ShellsChanged` reason `merchant`) |
-| `ObjectiveCompleted` | `{UserId, ObjectiveId}` | LiveOps | Analytics | S7.2 |
+| `ObjectiveCompleted` | `{UserId, ObjectiveId}` | LiveOps (ObjectiveService) | Analytics | S7.2 ✅ |
 | `LogbookDiscovered` | `{UserId, EntryId}` | LiveOps (LogbookService) | Analytics | S7.1 ✅ |
 | `InviteCompleted` | `{InviterId, InviteeId}` | Crew | Grant | S7.5 |
 | `PurchaseGranted` | `{UserId, ProductId, ReceiptId}` | LiveOps | Analytics | L1.3 |

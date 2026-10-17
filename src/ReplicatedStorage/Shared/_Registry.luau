@@ -22,6 +22,7 @@ function Registry.catalogs(): Catalogs
 		Merchant = require(Shared:WaitForChild("Definitions"):WaitForChild("Merchant")) :: any, -- S6.2
 		Boosts = require(Shared:WaitForChild("Definitions"):WaitForChild("Boosts")) :: any, -- S6.4
 		Logbook = require(Shared:WaitForChild("Definitions"):WaitForChild("Logbook")) :: any, -- S7.1
+		Objectives = require(Shared:WaitForChild("Definitions"):WaitForChild("Objectives")) :: any, -- S7.2
 		Events = require(Shared:WaitForChild("Events")) :: any,
 	}
 end
@@ -523,6 +524,22 @@ RULES.Logbook = function(c, Logbook)
 		c.str(w .. ".displayName", def.displayName)
 		c.str(w .. ".how", def.how)
 		c.num(w .. ".reward", def.reward, 0, 100, true)
+	end
+end
+
+-- S7.2: the daily objective pool (each counts one bus event; no streak fields exist to check)
+RULES.Objectives = function(c, Objectives)
+	c.order("Objectives.ORDER", Objectives.ORDER, Objectives)
+	for id, def in c.defs(Objectives) do
+		local w = "Objectives." .. id
+		if def.id ~= id then
+			c.add(w .. ".id", "must equal its key, got " .. tostring(def.id))
+		end
+		c.str(w .. ".displayName", def.displayName)
+		c.oneOf(w .. ".event", def.event, { "Refuelled", "NightSurvived", "CannonBuilt", "TowerRepaired", "CreatureKilled" })
+		c.num(w .. ".target", def.target, 1, 1000, true)
+		c.num(w .. ".reward", def.reward, 0, 20, true)
+		c.bool(w .. ".reach", def.reach, true)
 	end
 end
 
