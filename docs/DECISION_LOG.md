@@ -141,3 +141,4 @@ The roadmap's GO thresholds (Night-1 survival ≥ 50 %, rematch ≥ 60 %, beam m
 ## CP — S4.1 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 0 creature raycasts over night 1
 ## CP — S4.2 + S4.3 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 10.0 KB/s per client at 45 creatures; 60 FPS
 ## CP — S4.4 passed (🟦 Script Analysis; phone FPS pending, owner) · 2026-10-17 · auto-approved (unattended) · DEV only · 1 light in a 45-creature swarm; 0 new sound/burst parts
+## CP — S4.5 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · 0 server orb moves after landing

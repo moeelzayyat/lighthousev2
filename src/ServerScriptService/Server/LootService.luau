@@ -7,6 +7,9 @@
 -- Loot flies to any player who comes close and goes into the crew's shared pool.
 -- Uncollected loot washes away after LOOT_LIFETIME seconds, and at dawn,
 -- so someone has to run out into the dark to grab it.
+-- S4.5: the server places an orb once (a short pop when it drops), then never moves it: the bob, the spin and the
+-- flight to a nearby player are drawn by each client (Client/LootView). The server still decides the pickup from
+-- the same magnet range and speed, so loot replicates only when it spawns and when it is collected.
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -94,11 +97,13 @@ local function spawnDrop(kind, value, position)
 		bornAt = os.clock(),
 		landed = false,
 	}
+	orb:SetAttribute("Landing", landing) -- where clients draw it once it has landed (S4.5)
 	local pop = TweenService:Create(orb, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 		CFrame = CFrame.new(landing),
 	})
 	pop.Completed:Connect(function()
 		drop.landed = true
+		orb:SetAttribute("Landed", true)
 	end)
 	pop:Play()
 	if pillar then
@@ -262,16 +267,9 @@ local function onHeartbeat(dt)
 			if nearest and nearestDistance <= Config.LOOT_PICKUP_RADIUS then
 				collect(index, nearest.player)
 			elseif nearest then
+				-- pulled toward the player (the client draws the flight; the orb itself stays put here)
 				local step = math.min(MAGNET_SPEED * dt, nearestDistance)
 				drop.position += (nearest.position - drop.position).Unit * step
-				drop.orb.CFrame = CFrame.new(drop.position)
-			else
-				-- Idle: bob and spin so it catches the eye
-				local bob = math.sin(now * 3 + index) * 0.2
-				drop.orb.CFrame = CFrame.new(drop.position + Vector3.new(0, bob, 0)) * CFrame.Angles(0, now * 2, 0)
-			end
-			if drop.pillar then
-				drop.pillar.CFrame = drop.orb.CFrame * CFrame.new(0, 7, 0)
 			end
 		end
 	end

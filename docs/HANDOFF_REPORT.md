@@ -446,3 +446,20 @@ SCRIPT ANALYSIS: not measured (owner item).
 MIRROR: 84 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (32f19f1d).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
 NEXT: S4.5 Loot.
+
+CHECKPOINT: S4.5 Loot — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S4.5_before_2026-10-17 (LootService)
+BUILT:
+- `LootService`: an orb is placed once (the short pop tween when it drops, then the `Landing` and `Landed` attributes) and never moved again on the server; the magnet only moves the server's own copy of the position that decides the pickup (same range and speed as before).
+- `Client/LootView` (new LocalScript): landed orbs bob and spin in place; an orb within this player's magnet range flies to them; the rare-loot pillar follows the orb. Local moves only.
+MEASURED (DEV Play, owner's account, mock store; TEMPTEST script killed one creature a second on night 1):
+- 23 orbs dropped; **0 server-side CFrame changes after landing** (replication only on spawn, its pop, and removal).
+- Client: idle orbs bob (position changes frame to frame); walking to an orb collected it and sent `LootCollected` (Shells 4, then a Crab Claw pulled in on the way).
+- 0 client errors; server console only ProfileStore's refused Studio write (API off) and CorePackages UIBlox warnings. Play stopped; 0 TEMPTEST scripts remain.
+TESTRUNNER (DEV): 119 passed, 0 failed (no new pure logic).
+SCRIPT ANALYSIS: not measured (owner item).
+MIRROR: 85 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (c0cf620c).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+NEXT: S4.6 4-client soak.
