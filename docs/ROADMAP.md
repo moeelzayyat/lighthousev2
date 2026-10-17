@@ -36,9 +36,9 @@ A stage exits when every substage is ✅ and its exit numbers are recorded. **GO
 |---|---|---|---|---|---|
 | R0 | Re-baseline | 6 | 0.5 | Decision | 🟨 (R0.2, R0.4 wait on owner actions) |
 | R1 | Safety & structure | 9 | 2 | Numeric + owner publish | 🟨 |
-| S2 | First session & voyage length | 8 | 1.5 | Numeric + owner publish | 🟨 |
-| S3 | **Public test** | 6 | 2–3 live | **GO/NO-GO** | ⬜ |
-| S4 | Performance & mobile | 7 | 2 | Numeric | ⬜ |
+| S2 | First session & voyage length | 8 | 1.5 | Numeric + owner publish | 🟦 (S2.8 DEV publish waits for the owner) |
+| S3 | **Public test** | 6 | 2–3 live | **GO/NO-GO** | 🟨 provisional GO (D-018); live test on DEV (D-016) not started |
+| S4 | Performance & mobile | 7 | 2 | Numeric | 🟨 |
 | S5 | Domain split & UI refactor | 8 | 2–3 | Standard | ⬜ |
 | S6 | Content (owner's six requests) | 7 | 4–5 | Standard | ⬜ |
 | S7 | Return systems | 6 | 2 | Standard | ⬜ |
@@ -108,13 +108,13 @@ Purpose: real players answer whether the loop retains, before content work.
 
 | ID | Substage | Deliverables | Passes when | Verify |
 |---|---|---|---|---|
-| S3.1 | Diagnostic traffic | Small sponsored campaign (ads = diagnostics, not ranking); flags for icon A/B and title A/B/C ("13 Nights at the Lighthouse 🔦") | Playthrough visible per variant after 48 h | Creator analytics |
-| S3.1b | Mode test | Feature flag: half of new accounts get the 7-night Standard Voyage, half get Endless Storm (Best Night score, same difficulty curve) | Rematch rate and D1 play days per arm after 7 days; the winner becomes the default; if Endless wins, S4 adds a day-phase work pass (scavenging, building) | Telemetry |
-| S3.2 | Prototype A sessions | 5+ sessions, 2–4 players, ≥ 1 real phone each, one with no verbal help; `PLAYTEST_KIT.md` thresholds | Observer sheets filled; run summaries pasted | Owner |
-| S3.3 | Weekly iteration ×2 | Two data-driven passes (FTUE, difficulty, oil role, vote clarity); hypothesis + result logged | Shipped within the week each | `DECISION_LOG.md` |
-| S3.4 | Signal read | First-play bounce (<60 s, 61–180 s), D1 play days, co-play days, qualified sessions; funnel conversion per step | Written review | Document |
-| S3.5 | Role check | Per-role contribution from "your part": share of voyages where a non-Keeper had the Moment of the storm | ≥ 30% | Telemetry |
-| S3.6 | Go/no-go | Written decision | Logged | Owner |
+| S3.1 🟦 | Diagnostic traffic | Small sponsored campaign (ads = diagnostics, not ranking); flags for icon A/B and title A/B/C ("13 Nights at the Lighthouse 🔦") | Playthrough visible per variant after 48 h | Creator analytics |
+| S3.1b 🟦 | Mode test | Feature flag: half of new accounts get the 7-night Standard Voyage, half get Endless Storm (Best Night score, same difficulty curve) | Rematch rate and D1 play days per arm after 7 days; the winner becomes the default; if Endless wins, S4 adds a day-phase work pass (scavenging, building) | Telemetry |
+| S3.2 🟦 | Prototype A sessions | 5+ sessions, 2–4 players, ≥ 1 real phone each, one with no verbal help; `PLAYTEST_KIT.md` thresholds | Observer sheets filled; run summaries pasted | Owner |
+| S3.3 🟦 | Weekly iteration ×2 | Two data-driven passes (FTUE, difficulty, oil role, vote clarity); hypothesis + result logged | Shipped within the week each | `DECISION_LOG.md` |
+| S3.4 🟦 | Signal read | First-play bounce (<60 s, 61–180 s), D1 play days, co-play days, qualified sessions; funnel conversion per step | Written review | Document |
+| S3.5 🟦 | Role check | Per-role contribution from "your part": share of voyages where a non-Keeper had the Moment of the storm | ≥ 30% | Telemetry |
+| S3.6 🟨 | Go/no-go | Written decision | Logged | Owner |
 
 **GO (to S4) when, over the final 7 days:** Night-1 survival (unassisted new accounts) ≥ 50% · Sail again / rematch ≥ 60% of finished voyages · both beam modes used on purpose ≥ 70% (observer sheets) · first-play bounce lower in week 2 than week 1 · at least one tester describes an oil/cannon moment as the highlight.
 **NO-GO (back to S2):** Night-1 survival < 30% after two passes, or rematch < 40%. **Shelve review:** the beam is not understood by most testers after two passes.

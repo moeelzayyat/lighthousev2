@@ -132,10 +132,16 @@ function Analytics.start(bus: Bus, sink: Sink): { () -> () }
 		for _, userId in e.Crew do
 			step(userId, "VoyageEnded")
 			sink.custom(userId, "VoyageEnded", e.NightReached, e.Outcome .. ":" .. e.Cause)
+			if e.Voyage then
+				sink.custom(userId, "VoyageMode", e.NightReached, e.Voyage) -- S3.1b: nights reached per mode
+			end
 		end
 	end)
 	on("SailAgain", function(e)
 		step(e.UserId, "SailAgain")
+	end)
+	on("ModeAssigned", function(e)
+		sink.custom(e.UserId, "ModeArm", nil, e.Arm) -- S3.1b: the account's arm in the mode test
 	end)
 	on("PlayerLeft", function(e)
 		sink.custom(e.UserId, "Left", e.Night, e.Phase)

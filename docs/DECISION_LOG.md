@@ -124,3 +124,17 @@ Decision: no thread waits on a question. Every decision that comes up is taken o
 2026-10-17 · S3 · **Status: Accepted (unattended, recommendation)** — flagged for the owner
 S3 needs real players for 2–3 weeks, but D-013 keeps production untouched until the rebuild is finished. Options: (1) make the DEV experience public for the test; (2) publish the rebuild to production early; (3) skip S3 and go to S4.
 Decision (recommended): (1). The owner sets Lighthouse Keepers DEV to Public for S3 (Game Settings → Permissions), applies the S2.7 store page there, and points the S3.1 diagnostic ads at it. Production stays untouched (D-013 holds), and S3's real-player data still gates S4 as the roadmap requires. DEV saves are the DEV experience's own (`LighthouseKeepers_PlayerData_v2` in DEV), so testers' progress does not carry to production at relaunch (consistent with D-012's fresh start). To revise: choose (2) or (3).
+## D-017 — Mode test design (S3.1b): split by account id, no save field
+2026-10-17 · S3.1b · **Status: Accepted (unattended, recommendation)**
+- Who is tested: accounts whose profile was created on or after `MODE_TEST_START` (2026-10-17 00:00 UTC), i.e. new accounts. Older accounts keep the Standard voyage.
+- Split: 50/50 by a hash of the UserId (`ModeTest.armFor`), so an account keeps its arm forever and the save schema does not change (no new field).
+- Mixed crews: a crew sails Endless Storm only when every tested member is in the Endless arm; otherwise it sails the default (a crew member's own choice of the Long voyage always wins). Analysis uses the per-account `ModeArm` custom event and the per-voyage `VoyageMode` event.
+- Endless Storm: the Standard curve continued, big monsters on nights 4 and 7 and every night from 8 (Long's rule), no final-night crisis, no victory; dawn Pearls as usual (1 per night), no victory bonus; the night reached is the score. No stored personal best yet (a schema field waits for S7.3 leaderboards); `Stats.BestNight` is no longer raised by Endless voyages, and Long voyages now raise `Stats.BestNightLong` (the field existed but was unused).
+- Flag: `Config.MODE_TEST_ENABLED = true` in the DEV build that S3 runs on (D-016). Turn it off to end the test.
+To revise: change the start time, the split rule, or the Endless boss rule.
+## CP — S3.1 (owner: diagnostic ads, icon/title A/B through Creator Hub) · not code · 2026-10-17 · queued in the handoff for the owner
+## CP — S3.1b built (🟦 Script Analysis; live per-arm numbers pending) · 2026-10-17 · auto-approved (unattended) · DEV only
+## D-018 — S3 GO/NO-GO taken provisionally: GO to S4, with no live data
+2026-10-17 · S3.6 · **Status: Accepted (unattended, provisional — no live data)** — flagged for the owner
+Owner (project chat, 2026-10-17 03:18 UTC): "I'm going to bed so keep going even in s3 go/no go gate, keep going don't wait on my input".
+The roadmap's GO thresholds (Night-1 survival ≥ 50 %, rematch ≥ 60 %, beam modes used on purpose ≥ 70 %, falling first-play bounce, an oil/cannon highlight) need the public test, which has not started (S2.8 is not published yet). Decision: take the GO path provisionally and build S4 (performance and mobile), which every outcome of S3 needs anyway. The 7-night Standard voyage stays the default; the mode test keeps running once S3 is live. When S3 data arrives, the owner reads the gate for real: a NO-GO sends the work back to S2 (S4 work is kept); if Endless Storm wins the mode test, S4 adds the day-phase work pass the roadmap names.

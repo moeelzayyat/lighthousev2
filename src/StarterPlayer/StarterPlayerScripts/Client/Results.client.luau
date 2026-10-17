@@ -322,8 +322,11 @@ local function render()
 		tip.Visible = true
 		tip.Text = if (r.nightReached or 0) <= 1 and causeKey ~= "" then TIPS[causeKey] .. " " .. TIPS.early else (TIPS[causeKey] or TIPS.early)
 	end
-	drawTrack(math.max(1, r.nightReached or 0), r.totalNights or 1, won)
-	trackLabel.Text = string.format("%s %d of %d \u{00B7} %s", if won then "Survived" else "Lost on night", if won then r.totalNights else math.max(1, r.nightReached or 0), r.totalNights or 0, clock(r.duration))
+	local endless = r.voyage == "Endless" -- S3.1b: no last night; the night reached is the score
+	drawTrack(math.max(1, r.nightReached or 0), if endless then math.max(1, r.nightReached or 0) else r.totalNights or 1, won)
+	trackLabel.Text = if endless
+		then string.format("Endless Storm \u{00B7} reached night %d \u{00B7} %s", math.max(1, r.nightReached or 0), clock(r.duration))
+		else string.format("%s %d of %d \u{00B7} %s", if won then "Survived" else "Lost on night", if won then r.totalNights else math.max(1, r.nightReached or 0), r.totalNights or 0, clock(r.duration))
 	if r.forecast and Forecasts[r.forecast] then
 		trackLabel.Text ..= " \u{00B7} Forecast: " .. Forecasts[r.forecast].displayName
 	end

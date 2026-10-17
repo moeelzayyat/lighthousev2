@@ -24,13 +24,16 @@ end
 function RunCard.text(r: Results): string
 	local total = r.totalNights or 0
 	local parts = { "Lighthouse Keepers" }
+	local def = if r.voyage then (Voyages :: any)[r.voyage] else nil
+	local endless = type(def) == "table" and def.endless == true
 	if r.result == "Victory" then
 		table.insert(parts, string.format("The light held: %d of %d nights", total, total))
+	elseif endless then
+		table.insert(parts, string.format("Endless Storm: reached night %d", math.max(1, r.nightReached or 1))) -- S3.1b
 	else
 		table.insert(parts, string.format("Lost on night %d of %d", math.max(1, r.nightReached or 1), total))
 	end
-	local def = if r.voyage then (Voyages :: any)[r.voyage] else nil
-	if type(def) == "table" and def.displayName then
+	if type(def) == "table" and def.displayName and not endless then
 		table.insert(parts, def.displayName)
 	end
 	table.insert(parts, clock(r.duration or 0))

@@ -358,3 +358,29 @@ Live checks (about 20 minutes, owner's account in the normal Roblox player):
  10. Tell Claude: the Pearl counts in step 6, anything odd, and whether step 8/9 were done.
 If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.
 Claude's state: S2.8 set to 🟦; work continues on the next substage that does not need the live build.
+
+CHECKPOINT: S3.1 Diagnostic traffic — 🟦 (owner only: buying ads and the Creator Hub icon/title A/B are the owner's hands)
+DATE: 2026-10-17
+OWNER STEPS (after the S2.8 DEV publish and D-016): Lighthouse Keepers DEV → Game Settings → Permissions → Public. Creator Hub → DEV → Ads Manager: a small sponsored campaign as a diagnostic (not for ranking), running for at least 48 h. Creator Hub thumbnail/icon personalization (if offered) with icon A and icon B from `assets/icons/`; title A first (`assets/store/STORE_PAGE.md`). Read "Playthrough" per variant in Creator Analytics after 48 h and tell Claude the numbers.
+
+CHECKPOINT: S3.1b Mode test (build) — 🟦 (Script Analysis unmeasured; the 7-day per-arm numbers need live players)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S3.1b_before_2026-10-17 (Voyages, Config, Events, RunCard, PlayerData, GameState, Main, Analytics, Hud, Results)
+BUILT (D-017):
+- `ModeTest` (new, pure): `armFor(userId, createdAt, config)` splits accounts created from `MODE_TEST_START` (2026-10-17 00:00 UTC) 50/50 by a hash of the UserId; `voyageFor(arms)` gives Endless only when every tested crew member is in the Endless arm.
+- `Definitions/Voyages.Endless`: Endless Storm (test-only, never on the crew card; ChooseVoyage refuses it): no last night, big monsters on 4, 7 and every night from 8, no final-night crisis, no victory, dawn Pearls as usual.
+- `PlayerData`: sets the `ModeArm` attribute at load and publishes `ModeAssigned`; `recordRun` keeps `BestNight` for Standard, `BestNightLong` for Long, none for Endless.
+- `GameState`: a crew sailing the default gets `ModeTest.voyageFor`; `TotalNights` = 0 for Endless; `VoyageEnded` carries `Voyage`.
+- Analytics: `ModeArm` (per account) and `VoyageMode` (per voyage, nights reached) custom events. HUD shows "NIGHT 8" (no "of"); Results shows "Endless Storm · reached night N"; the share line says the same.
+- Flag: `Config.MODE_TEST_ENABLED = true`.
+TESTRUNNER (DEV): 111 passed, 0 failed. New `ModeTestSpec` (7) and an analytics test (ModeArm and VoyageMode events).
+SCRIPT ANALYSIS: not measured (owner item).
+PLAY TEST (DEV, owner's account, mock store; a TEMPTEST script gave this account the Endless arm and kept lamp and tower alive to night 9): `Voyage nights=0 voyage=Endless`; HUD "DAY 1" / "NIGHT 8"; nights 1 to 8 survived with no victory at night 7; big monsters on nights 4, 7, 8 and 9; lost on night 9 (breach) after 18:35; Results: voyage Endless, total 0, night 9, 8 Pearls (8 dawns), track "Endless Storm · reached night 9 · 18:35", share "Lighthouse Keepers · Endless Storm: reached night 9 · 18:35 · solo"; analytics `VoyageEnded Defeat:breach` and `VoyageMode Endless`. Console: only ProfileStore's refused Studio write (API off) and Roblox CorePackages UIBlox warnings; 0 game-script errors. (In Studio the mock profile is new each Play, so the account got an arm; the owner's live DEV profile predates the start time and stays on Standard.)
+MIRROR: 80 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (96fd4aa2).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+NEXT: S3.2–S3.5 need live players (queued for the owner); S3.6 gate taken provisionally (D-018); then S4.1.
+
+CHECKPOINT: S3.2–S3.5 — 🟦 not started (they need the public test running with real players: playtest sessions with real phones, two weekly iterations on live data, the signal read, the role check). Queued for the owner; Claude picks them up when the DEV experience has players and data.
+
+CHECKPOINT: S3.6 Go/no-go — provisional GO (D-018, no live data). Work continues with S4.

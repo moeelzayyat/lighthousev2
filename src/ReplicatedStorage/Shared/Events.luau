@@ -11,6 +11,7 @@ local Events: { [string]: Schema } = {
 	PlayerJoinedCrew = { UserId = "number", Route = "string?" },
 	PlayerLeft = { UserId = "number", Phase = "string", Night = "number?" },
 	SailAgain = { VoyageId = "string", UserId = "number" },
+	ModeAssigned = { UserId = "number", Arm = "string" }, -- S3.1b: the account's arm in the mode test
 
 	-- Encounter (voyage)
 	VoyageStarted = { VoyageId = "string", Crew = "table", Forecast = "string?" },
@@ -18,7 +19,7 @@ local Events: { [string]: Schema } = {
 	FirstAction = { VoyageId = "string?", UserId = "number", Kind = "string" },
 	BeamHit = { VoyageId = "string?", KeeperId = "number", First = "boolean", CreatureId = "number?", Mode = "string?" },
 	NightSurvived = { VoyageId = "string", Night = "number", Crew = "table" },
-	VoyageEnded = { VoyageId = "string", Outcome = "string", Cause = "string", NightReached = "number", Crew = "table" },
+	VoyageEnded = { VoyageId = "string", Outcome = "string", Cause = "string", NightReached = "number", Crew = "table", Voyage = "string?" },
 
 	-- Data
 	ProfileLoaded = { UserId = "number", SchemaVersion = "number", IsNew = "boolean", Runs = "number" },

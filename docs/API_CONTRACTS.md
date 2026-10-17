@@ -26,7 +26,7 @@ Every handler calls `NetGuard.allow(player, remote)` (per-player token bucket at
 | `ReportDevice` | `device` | whitelist; **once per session** | 1 / 1 |
 | `CoachEvent` | `kind, id` | enums, 60/session | 4 / 8 |
 | `ForecastVote` | `choice` | Ready, phase Waiting/Intermission, one of the two offered | 3 / 5 |
-| `ChooseVoyage` (S2.1) | `defId` | string ≤ 20, a known voyage definition; Ready; phase Waiting/Intermission; the sender holds the definition's unlock (`Unlock_<key>`); GameState re-checks at departure that a sailing member holds it | 2 / 3 |
+| `ChooseVoyage` (S2.1) | `defId` | string ≤ 20, a known voyage definition that is not test-only (S3.1b: Endless Storm is refused); Ready; phase Waiting/Intermission; the sender holds the definition's unlock (`Unlock_<key>`); GameState re-checks at departure that a sailing member holds it | 2 / 3 |
 | `AdminRequest` (R1.8) | `requestId, action, targetUserId, arg?` | requestId ≤ 40; action string ≤ 20; finite targetUserId; arg number or string ≤ 20; **owner UserId only** (`AdminDataService.OWNER_IDS`), anyone else refused and logged `AdminRejected`; actions inspect / grant (1–1000 Pearls, target online) / rollback (YYYY-MM-DD snapshot) | 1 / 3 |
 | `MerchantRequest` (new, S6.2) | `requestId, action, itemId, qty` | replay, Day phase, Ready, distance ≤ 18, stock, Shells | 5 / 8 |
 | `ObjectiveClaim` (new, S7.2) | `objectiveId, claimId` | complete, unclaimed, GrantService | 2 / 3 |

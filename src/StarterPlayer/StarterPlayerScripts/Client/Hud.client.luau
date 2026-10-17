@@ -562,9 +562,9 @@ local function refreshVoyage()
 	elseif phase == "Prologue" then
 		title, sub, showTimer = "THE STORM HITS", "Restore the light", false
 	elseif phase == "Day" then
-		title, sub = string.format("DAY %d OF %d", night, total), "Prepare for the night"
+		title, sub = (if total > 0 then string.format("DAY %d OF %d", night, total) else string.format("DAY %d", night)), "Prepare for the night" -- total 0 = Endless Storm
 	elseif phase == "Night" then
-		title, sub = string.format("NIGHT %d OF %d", night, total), "Keep the light alive"
+		title, sub = (if total > 0 then string.format("NIGHT %d OF %d", night, total) else string.format("NIGHT %d", night)), "Keep the light alive"
 	elseif phase == "Victory" then
 		title, sub, showTimer = "VICTORY", "The light survived", false
 	elseif phase == "Defeat" then

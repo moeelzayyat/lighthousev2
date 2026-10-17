@@ -748,7 +748,7 @@ remotes.ChooseVoyage.OnServerEvent:Connect(function(player, defId)
 	end
 	local def = Voyages[defId]
 	local phase = stateFolder:GetAttribute("Phase")
-	if type(def) ~= "table" or not def.nights or player:GetAttribute("Ready") ~= true then
+	if type(def) ~= "table" or not def.nights or def.testOnly or player:GetAttribute("Ready") ~= true then
 		return
 	end
 	if phase ~= "Waiting" and phase ~= "Intermission" then

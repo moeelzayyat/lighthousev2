@@ -19,6 +19,7 @@ local WaveDirector = require(script.Parent.WaveDirector) -- pure night plan (R1.
 local Voyage = require(script.Parent.Voyage) -- pure Pearl rules (R1.2)
 local DawnBanking = require(script.Parent.DawnBanking) -- S2.2: Pearls banked at each dawn
 local NightSafety = require(script.Parent.NightSafety) -- S2.3: Night-1 safety reserve (pure)
+local ModeTest = require(script.Parent.ModeTest) -- S3.1b: Standard vs Endless Storm (pure)
 local GrantService = require(script.Parent.GrantService) -- R1.3: the only writer of Pearl income
 
 local GameState = {}
@@ -438,8 +439,8 @@ function GameState.run(deps)
 				local forecast, votesA, votesB = chooseForecast(departing)
 				-- Voyage definition (S2.1): the crew's choice if a sailing member holds its unlock, else the default
 				local def = Voyages[state:GetAttribute("VoyageDef")]
-				if type(def) ~= "table" or not def.nights then
-					def = Voyages[Voyages.DEFAULT]
+				if type(def) ~= "table" or not def.nights or def.testOnly then
+					def = Voyages[Voyages.DEFAULT] -- (S3.1b: a test-only voyage is never carried over; ModeTest decides below)
 				end
 				if def.unlock then
 					local allowed = false
@@ -452,13 +453,27 @@ function GameState.run(deps)
 						def = Voyages[Voyages.DEFAULT]
 					end
 				end
+				-- S3.1b: a crew sailing the default sails Endless Storm when its tested members are all in that arm
+				if def.id == Voyages.DEFAULT then
+					local arms = {}
+					for _, player in departing do
+						local arm = player:GetAttribute("ModeArm")
+						if type(arm) == "string" then
+							table.insert(arms, arm)
+						end
+					end
+					local tested = ModeTest.voyageFor(arms)
+					if tested and type(Voyages[tested]) == "table" then
+						def = Voyages[tested]
+					end
+				end
 				local voyageConfig = WaveDirector.configFor(def, Config)
 				state:SetAttribute("VoyageDef", def.id)
-				state:SetAttribute("TotalNights", def.nights)
+				state:SetAttribute("TotalNights", if def.endless then 0 else def.nights) -- 0 = Endless Storm (S3.1b)
 				state:SetAttribute("ReserveUsed", false) -- S2.3
 				local reserveUsed = false -- S2.3: the Night-1 reserve is used at most once per voyage
 				EventLog.startRun(departing)
-				EventLog.setVoyage(def.id, def.nights)
+				EventLog.setVoyage(def.id, if def.endless then 0 else def.nights)
 				if forecast then
 					EventLog.setForecast(forecast)
 					EventLog.log("Forecast", { id = forecast, votesA = votesA, votesB = votesB, a = state:GetAttribute("ForecastA"), b = state:GetAttribute("ForecastB") })
@@ -610,6 +625,7 @@ function GameState.run(deps)
 					Cause = results.cause,
 					NightReached = results.nightReached,
 					Crew = userIds(departing),
+					Voyage = def.id, -- S3.1b: which mode the crew sailed
 				})
 				results.shellsLeft = upgrades.getShells()
 				results.economy = Config.ECONOMY_ENABLED
@@ -644,7 +660,7 @@ function GameState.run(deps)
 						if earned > 0 then
 							GrantService.Grant(player, EventLog.voyageId() .. ":result:" .. player.UserId, { Pearls = earned }, "run")
 						end
-						deps.playerData.recordRun(player, result == "Victory", results.nightReached)
+						deps.playerData.recordRun(player, result == "Victory", results.nightReached, def.id)
 						if won and def.unlocks then
 							deps.playerData.unlock(player, def.unlocks) -- S2.1: a Standard win unlocks the Long Voyage
 						end

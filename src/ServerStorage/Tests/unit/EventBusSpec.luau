@@ -187,6 +187,20 @@ return function(T: any)
 			})
 		end)
 
+		T.it("S3.1b: the mode-test arm and the mode of each voyage reach analytics", function()
+			local bus = quietBus()
+			local sink, calls = recordingSink()
+			Analytics.start(bus, sink)
+			bus.Publish("ModeAssigned", { UserId = 6, Arm = "Endless" })
+			bus.Publish("VoyageEnded", { VoyageId = "v", Outcome = "Defeat", Cause = "blackout", NightReached = 9, Crew = { 6 }, Voyage = "Endless" })
+			T.expect(calls).toEqual({
+				"custom 6 ModeArm nil Endless",
+				"funnel 6 8 VoyageEnded",
+				"custom 6 VoyageEnded 9 Defeat:blackout",
+				"custom 6 VoyageMode 9 Endless",
+			})
+		end)
+
 		T.it("funnel step names are the fixed dashboard names", function()
 			T.expect(Analytics.STEPS).toEqual({
 				Joined = 1,

@@ -20,6 +20,8 @@ local EventLog = require(script.Parent.EventLog) :: any
 local NetGuard = require(script.Parent.NetGuard)
 local MigrationService = require(script.Parent.MigrationService)
 local ProfileSchema = require(script.Parent.ProfileSchema)
+local ModeTest = require(script.Parent.ModeTest) -- S3.1b
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config")) :: any
 
 local PlayerData = {}
 
@@ -126,8 +128,14 @@ local function load(store: any, player: Player)
 			player:SetAttribute("Unlock_" .. key, value)
 		end
 	end
+	-- S3.1b: the account's arm in the mode test (no attribute = not in the test)
+	local arm = ModeTest.armFor(player.UserId, data.CreatedAt, Config)
+	player:SetAttribute("ModeArm", arm)
 	push(player)
 	EventLog.Publish("ProfileLoaded", { UserId = player.UserId, SchemaVersion = data.SchemaVersion, IsNew = isNew, Runs = data.Stats.Runs })
+	if arm then
+		EventLog.Publish("ModeAssigned", { UserId = player.UserId, Arm = arm })
+	end
 end
 
 -- Replaces the whole v2 data (admin rollback only). The new data is validated first; saved immediately.
@@ -211,7 +219,7 @@ function PlayerData.removeItem(player: Player, itemId: string, amount: number?):
 	return true
 end
 
-function PlayerData.recordRun(player: Player, won: boolean, nightReached: number)
+function PlayerData.recordRun(player: Player, won: boolean, nightReached: number, voyage: string?)
 	local data = dataOf(player)
 	if not data then
 		return
@@ -220,7 +228,12 @@ function PlayerData.recordRun(player: Player, won: boolean, nightReached: number
 	if won then
 		data.Stats.Victories += 1
 	end
-	data.Stats.BestNight = math.max(data.Stats.BestNight, nightReached)
+	-- best night per voyage (S3.1b): Long has its own field; Endless Storm has no stored best yet (D-017)
+	if voyage == "Long" then
+		data.Stats.BestNightLong = math.max(data.Stats.BestNightLong, nightReached)
+	elseif voyage ~= "Endless" then
+		data.Stats.BestNight = math.max(data.Stats.BestNight, nightReached)
+	end
 	data.Stats.NightsSurvived += math.max(0, if won then nightReached else nightReached - 1)
 	player:SetAttribute("RunsCompleted", data.Stats.Runs)
 	changed(player, true)

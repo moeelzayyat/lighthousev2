@@ -39,6 +39,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Lamp shift | Released (untested 2+) | S3 | |
 | Invites (unrewarded) | Released | S7.5 | reward |
 | Leaderboards | Planned | S7.3 | |
+| Endless Storm (mode test arm) | Tested (not yet published) | S3.1b | test-only voyage; `ModeTest` 50/50 split of new accounts by UserId hash (D-017); flag `MODE_TEST_ENABLED` |
 | Specialties | Planned | S7.4 | |
 | Controller beam aim | Tested (not yet published; controller voyage pending, owner) | S2.6 | right stick aims (left too at the lamp), Y Focus, B Leave; `InputController.stickAngle` |
 

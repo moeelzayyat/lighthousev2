@@ -83,6 +83,8 @@ local Config = {
 	AUTO_SELL_LOOT = false, -- true = carried loot sells itself at dawn at Trader values (the Trader stays). Owner: keep false until Test B
 	COSMETICS_ENABLED = true, -- beam colours bought with Pearls; looks only, no power (owner-approved Oct 12)
 	LAMP_SHIFT_ENABLED = true, -- at dawn, offer the lamp to a crew member who hasn't held it (both must agree)
+	MODE_TEST_ENABLED = true, -- S3.1b (D-017): accounts created from MODE_TEST_START split 50/50: Standard voyage or Endless Storm
+	MODE_TEST_START = 1792195200, -- 2026-10-17 00:00 UTC; older accounts stay on the Standard voyage
 
 	-- Loot (shells go into the crew's shared pool and buy lighthouse upgrades)
 	-- Shell income +30% (owner, Oct 12 2026: "not enough for a cannon by the big monster"). Was 2-4.
