@@ -1309,7 +1309,7 @@ OWNER: to start S3, see "S3 — START THE PUBLIC TEST" below.
 S3 — START THE PUBLIC TEST (owner; DEV experience only; production stays untouched)
 =====================================================================
 D-016: the public test runs on DEV, made public. Testers' DEV progress does not carry over to production at the relaunch.
- 0. Publish DEV once more first, so the live game sends the new S3 measures: File → Save to File As → `C:\RobloxProjects\Lighthousev2ackups\LighthouseKeepers_DEV_S3_2026-10-17.rbxl`; Studio API access stays OFF; File → Publish to Roblox (DEV); Creator Hub → Servers → Shut down all servers. Nothing a player sees changes.
+ 0. Publish DEV once more first, so the live game sends the new S3 measures: File → Save to File As → `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_S3_2026-10-17.rbxl`; Studio API access stays OFF; File → Publish to Roblox (DEV); Creator Hub → Servers → Shut down all servers. Nothing a player sees changes.
  1. Make Lighthouse Keepers DEV **Public**: in the DEV Studio window, Game Settings → Permissions → Public (or the experience's Public/Private switch in Creator Hub).
  2. The store page on DEV: icon and thumbnails from `assets/` (L1.5 files), description and title A from `assets/store/STORE_PAGE.md`.
  3. Creator Hub → DEV → Ads Manager: a small sponsored campaign of your choosing. Run it for at least 48 hours, as a diagnostic, not for ranking. If thumbnail or icon testing is offered, use icon A and icon B from `assets/icons/`.
