@@ -134,6 +134,13 @@ local function buildTemplate(kind)
 			body.Shape = Enum.PartType.Ball
 			body.Transparency = 0.25
 			makeModelPart(model, "Cage", Vector3.new(0.4, 0.6, 0.4) * s, Vector3.new(0, 1.2, 0) * s, Color3.fromRGB(60, 60, 70), Enum.Material.Metal)
+		elseif stats.shape == "witch" then -- S6.6
+			body = makeModelPart(model, "Body", Vector3.new(1.6, 3.2, 1.6) * s, Vector3.zero, stats.color, Enum.Material.Fabric)
+			local head = makeModelPart(model, "Head", Vector3.new(1.2, 1.2, 1.2) * s, Vector3.new(0, 2.2, 0) * s, Color3.fromRGB(200, 215, 230))
+			head.Shape = Enum.PartType.Ball
+		elseif stats.shape == "shaman" then -- S6.6
+			body = makeModelPart(model, "Body", Vector3.new(2, 2.2, 2) * s, Vector3.zero, stats.color, Enum.Material.Slate)
+			makeModelPart(model, "Staff", Vector3.new(0.3, 3.2, 0.3) * s, Vector3.new(1.3, 0.6, 0) * s, Color3.fromRGB(120, 85, 55), Enum.Material.Wood)
 		else
 			body = makeModelPart(model, "Body", Vector3.new(3.2, 1.4, 2.6) * s, Vector3.new(0, 0, 0), CRAB_COLOR)
 			makeModelPart(model, "ClawL", Vector3.new(0.9, 0.9, 1.2) * s, Vector3.new(-1.3, 0.1, -1.7) * s, CLAW_COLOR)
@@ -434,6 +441,16 @@ local function startMove(crab, target, now)
 	SoundFx.playAt(stats.telegraphSound, crab.worldPos)
 end
 
+-- S6.6: a summoned creature climbs out next to its summoner instead of at the shore line
+local function spawnNear(kind, pos, i)
+	if CreatureService.spawn(kind) then
+		local summoned = creatures[#creatures]
+		local angle = i * 2.1
+		summoned.pos = flat(pos) + Vector3.new(math.cos(angle), 0, math.sin(angle)) * 3
+		place(summoned)
+	end
+end
+
 -- The move goes off. Returns true when the creature is used up (a Puffer Mine bursts).
 local function releaseMove(crab, players)
 	local stats = crab.stats
@@ -466,6 +483,22 @@ local function releaseMove(crab, players)
 		burst(crab)
 	elseif stats.behaviour == "ghost" then
 		lamp.setFuel(math.max(0, lamp.getFuel() - (stats.fuelDrain or 0)))
+	elseif stats.behaviour == "summoner" then
+		-- S6.6: called out of the sea beside the witch, within the creature cap
+		for i = 1, stats.summonCount do
+			if CreatureService.load() >= Config.MAX_CREATURES then
+				break
+			end
+			spawnNear(stats.summonKind, crab.pos, i)
+		end
+		EventLog.log("WitchSummoned", { count = stats.summonCount })
+	elseif stats.behaviour == "healer" then
+		-- S6.6: mends the small creatures around it (never a big monster)
+		for _, other in creatures do
+			if not other.stats.big and (other.pos - crab.pos).Magnitude <= stats.healRadius then
+				other.health = math.min(other.maxHealth, other.health + other.maxHealth * stats.healShare)
+			end
+		end
 	end
 	SoundFx.playAt(stats.releaseSound, crab.worldPos)
 	crab.moveSpot, crab.moveTarget = nil, nil
@@ -765,8 +798,8 @@ local function step(dt)
 			continue
 		end
 
-		-- Choose a target and move toward it / attack it (S6.5: a Ghost Lantern only ever wants the lamp)
-		local target = if stats.behaviour == "ghost" then "tower" else chooseTarget(crab)
+		-- Choose a target and move toward it / attack it (S6.5/S6.6: some monsters only ever want the lighthouse)
+		local target = if stats.ignoresPlayers then "tower" else chooseTarget(crab)
 		crab.target = target
 		setEyes(crab, target)
 		local goal = targetPosition(target) or towerCenter

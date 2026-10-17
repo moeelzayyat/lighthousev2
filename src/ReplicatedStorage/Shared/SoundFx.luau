@@ -53,6 +53,11 @@ SoundFx.SOUNDS = {
 	pufferBoom = { id = "rbxasset://sounds/bass.wav", volume = 0.9, speed = 0.7 },
 	ghostWail = { id = "rbxasset://sounds/HalloweenGhost.wav", volume = 0.7, speed = 1.4 },
 	ghostDrain = { id = "rbxasset://sounds/impact_water.mp3", volume = 0.6, speed = 0.55 },
+	-- S6.6
+	witchChant = { id = "rbxasset://sounds/HalloweenGhost.wav", volume = 0.8, speed = 0.85 },
+	witchTide = { id = "rbxasset://sounds/impact_water.mp3", volume = 0.8, speed = 1.0 },
+	shamanChime = { id = "rbxasset://sounds/electronicpingshort.wav", volume = 0.7, speed = 1.6 },
+	shamanMend = { id = "rbxasset://sounds/snap.wav", volume = 0.6, speed = 1.6 },
 }
 
 local function makeSound(name)

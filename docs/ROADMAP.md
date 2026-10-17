@@ -163,7 +163,7 @@ Purpose: real players answer whether the loop retains, before content work.
 | S6.3 🟦 | Orbiting Blades | `Orbit` weapon archetype; merchant item first | Works on phone with no aiming; damage via `StatPipeline` | Play test |
 | S6.4 🟦 | Quartermaster boosts & gear | Permanent capped boosts (+15% total cap), 2 new weapons, 1 armor; new profile fields with defaults | Migration fixture; cap test | TestRunner |
 | S6.5 🟦 | New monsters ×3 | Spitter Eel, Puffer Mine, Ghost Lantern: telegraph ≥ 0.6 s, sound, loot table | Blind tester identifies each behaviour; budgets hold | Blind test |
-| S6.6 | New monsters ×2 | Tide Witch, Coral Shaman | same | Blind test |
+| S6.6 🟦 | New monsters ×2 | Tide Witch, Coral Shaman | same | Blind test |
 | S6.7 | Publish (owner) + playtest | Prototype B session | Rematch ≥ 60% maintained | Owner |
 
 **S6 exit:** all six requests Implemented and Tested in the registry. → S7.1.

@@ -10,8 +10,8 @@ Every asset, package and audio ID used in the place, recorded before it ships.
 | Creature models (Rock Crab, Barnacle Brute, Shipwreck Hermit) | Model | in place | project-built | owner | owner | — | `CreatureService` templates | Active |
 | Gear models S6.4: `CoralLance` (the Storm Harpoon model recoloured), `KelpweaveVest` (the Keeper's Greatcoat mesh, texture removed, kelp green fabric), `TidecallerBlades` (3 parts round a hub, built in Studio) | Model | in place (`ReplicatedStorage.ItemModels`) | project-built from the place's own models | owner | owner | 2026-10-17 | shop and bag icons, tools, worn armor | Active (DEV) |
 | Sounds (SoundFx catalog) | Audio | see `Shared/SoundFx` | Creator Store | per asset — **audit at B1.2** | — | — | `SoundFx` | Active, licence check pending |
-| S6.5 monster sounds (`eelRear`, `eelSpit`, `pufferFuse`, `pufferBoom`, `ghostWail`, `ghostDrain`) | Audio | built-in `rbxasset://sounds/...` at their own pitch | ships with Roblox | Roblox built-in | — | 2026-10-17 | `SoundFx` | Active (DEV) |
-| S6.5 monster bodies (Spitter Eel, Puffer Mine, Ghost Lantern) | Model | built at run time from plain parts (`CreatureService` template fallback, `shape`) | project-built | owner | owner | 2026-10-17 | `CreatureTemplates` | Active (DEV); replace with art later |
+| S6.5/S6.6 monster sounds (`eelRear`, `eelSpit`, `pufferFuse`, `pufferBoom`, `ghostWail`, `ghostDrain`, `witchChant`, `witchTide`, `shamanChime`, `shamanMend`) | Audio | built-in `rbxasset://sounds/...` at their own pitch | ships with Roblox | Roblox built-in | — | 2026-10-17 | `SoundFx` | Active (DEV) |
+| S6.5/S6.6 monster bodies (Spitter Eel, Puffer Mine, Ghost Lantern, Tide Witch, Coral Shaman) | Model | built at run time from plain parts (`CreatureService` template fallback, `shape`) | project-built | owner | owner | 2026-10-17 | `CreatureTemplates` | Active (DEV); replace with art later |
 | Production place | Experience | place 132065051336560 / universe 10769064643 | owner | — | owner | — | — | Live |
 
 ## Store assets

@@ -16,7 +16,9 @@
 -- S6.5 (owner request #5, D-023): monsters with their own move, shown at least 0.6 s before it goes off
 --   behaviour       "spitter" (spits at a marked spot from range), "mine" (lights a fuse when a player comes
 --                   close or it reaches the tower, then bursts), "ghost" (only the beam hurts it; it drains the
---                   lamp's fuel at the tower)
+--                   lamp's fuel at the tower); S6.6: "summoner" (calls `summonCount` `summonKind` out of the sea
+--                   beside it), "healer" (mends the small creatures within `healRadius` by `healShare` of their health)
+--   ignoresPlayers  always goes for the lighthouse
 --   telegraph       seconds of warning (the TELEGRAPH snapshot state and telegraphSound), then releaseSound
 --   towerRange / towerHit / cannonHit / splashRadius / triggerRadius / blastRadius / fuelDrain   the move's numbers
 --   weaponImmune    weapons and cannons pass through it (the beam is the counter)
@@ -192,6 +194,7 @@ local Creatures = {
 		scale = 1,
 		big = false,
 		behaviour = "ghost",
+		ignoresPlayers = true,
 		telegraph = 0.9,
 		fuelDrain = 6,
 		telegraphSound = "ghostWail",
@@ -200,6 +203,74 @@ local Creatures = {
 		loot = {
 			{ chance = 0.6, drops = { { "Shells", 6, 9 } } },
 			{ chance = 0.4, drops = { { "Shells", 6, 9 }, { "SeaGlass", 1, 1 } } },
+		},
+	},
+
+	-- S6.6: stays back on the beach and, after a 1 s chant, calls three Sand Skitters out of the sea: take her out first
+	TideWitch = {
+		displayName = "Tide Witch",
+		art = "TideWitch",
+		shape = "witch",
+		color = Color3.fromRGB(95, 85, 170),
+		health = 45,
+		speed = 3,
+		pushable = true,
+		beamDamageMult = 1,
+		bodyRadius = 1.1,
+		attackRange = 3,
+		towerRange = 30,
+		ignoresPlayers = true,
+		playerDamage = 0,
+		attackInterval = 7,
+		slamRadius = 0,
+		towerDps = 0,
+		cannonDps = 0,
+		scale = 1,
+		big = false,
+		behaviour = "summoner",
+		telegraph = 1.0,
+		summonKind = "SandSkitter",
+		summonCount = 3,
+		telegraphSound = "witchChant",
+		releaseSound = "witchTide",
+		appears = { from = 4, base = 1, every = 3, max = 2 },
+		loot = {
+			{ chance = 0.6, drops = { { "Shells", 5, 8 } } },
+			{ chance = 0.4, drops = { { "Shells", 5, 8 }, { "SeaGlass", 1, 1 } } },
+		},
+	},
+
+	-- S6.6: walks behind the crowd and, after a 0.8 s chime, mends every small creature near it: burn it first
+	CoralShaman = {
+		displayName = "Coral Shaman",
+		art = "CoralShaman",
+		shape = "shaman",
+		color = Color3.fromRGB(240, 120, 130),
+		health = 70,
+		speed = 3.5,
+		pushable = true,
+		beamDamageMult = 1,
+		bodyRadius = 1.3,
+		attackRange = 3,
+		towerRange = 14,
+		ignoresPlayers = true,
+		playerDamage = 0,
+		attackInterval = 5,
+		slamRadius = 0,
+		towerDps = 0,
+		cannonDps = 0,
+		scale = 1,
+		big = false,
+		behaviour = "healer",
+		telegraph = 0.8,
+		healRadius = 14,
+		healShare = 0.3,
+		telegraphSound = "shamanChime",
+		releaseSound = "shamanMend",
+		appears = { from = 6, base = 1, every = 3, max = 2 },
+		loot = {
+			{ chance = 0.5, drops = { { "Shells", 5, 8 }, { "CrabClaw", 1, 1 } } },
+			{ chance = 0.5, drops = { { "Shells", 5, 8 }, { "SeaGlass", 1, 1 } } },
 		},
 	},
 }

@@ -1,5 +1,5 @@
 --!strict
--- S6.5: Spitter Eel, Puffer Mine and Ghost Lantern: each warns for at least 0.6 s with its own sound, has a loot
+-- S6.5/S6.6: Spitter Eel, Puffer Mine, Ghost Lantern, Tide Witch and Coral Shaman: each warns for at least 0.6 s with its own sound, has a loot
 -- table, joins the nights on a schedule, and the telegraph reaches the client in the snapshot.
 return function(T: any)
 	local Creatures = T.require(game.ReplicatedStorage.Shared.Creatures)
@@ -8,7 +8,7 @@ return function(T: any)
 	local Snap = T.require(game.ReplicatedStorage.Shared.CreatureSnapshot)
 	local WaveDirector = T.require(game.ServerScriptService.Server.WaveDirector)
 
-	local NEW = { "SpitterEel", "PufferMine", "GhostLantern" }
+	local NEW = { "SpitterEel", "PufferMine", "GhostLantern", "TideWitch", "CoralShaman" }
 	local function source(inst: Instance): string
 		return (inst :: any).Source
 	end
@@ -39,7 +39,8 @@ return function(T: any)
 				end
 				T.expect(sum).toBeCloseTo(1)
 			end
-			T.expect({ Creatures.SpitterEel.behaviour, Creatures.PufferMine.behaviour, Creatures.GhostLantern.behaviour }).toEqual({ "spitter", "mine", "ghost" })
+			T.expect({ Creatures.SpitterEel.behaviour, Creatures.PufferMine.behaviour, Creatures.GhostLantern.behaviour, Creatures.TideWitch.behaviour, Creatures.CoralShaman.behaviour }).toEqual({ "spitter", "mine", "ghost", "summoner", "healer" })
+			T.expect(Creatures[Creatures.TideWitch.summonKind].big).toBe(false)
 			T.expect(Creatures.GhostLantern.weaponImmune).toBe(true)
 		end)
 	end)
@@ -49,8 +50,9 @@ return function(T: any)
 			T.expect(WaveDirector.specials(1, Creatures)).toEqual({})
 			T.expect(WaveDirector.specials(2, Creatures)).toEqual({ SpitterEel = 1 })
 			T.expect(WaveDirector.specials(3, Creatures)).toEqual({ SpitterEel = 1, PufferMine = 2 })
-			T.expect(WaveDirector.specials(5, Creatures)).toEqual({ SpitterEel = 2, PufferMine = 3, GhostLantern = 1 })
-			T.expect(WaveDirector.specials(13, Creatures)).toEqual({ SpitterEel = 4, PufferMine = 5, GhostLantern = 3 })
+			T.expect(WaveDirector.specials(5, Creatures)).toEqual({ SpitterEel = 2, PufferMine = 3, GhostLantern = 1, TideWitch = 1 })
+			T.expect(WaveDirector.specials(6, Creatures)).toEqual({ SpitterEel = 3, PufferMine = 3, GhostLantern = 1, TideWitch = 1, CoralShaman = 1 })
+			T.expect(WaveDirector.specials(13, Creatures)).toEqual({ SpitterEel = 4, PufferMine = 5, GhostLantern = 3, TideWitch = 2, CoralShaman = 2 })
 		end)
 	end)
 

@@ -169,7 +169,7 @@ RULES.Creatures = function(c, Creatures)
 		c.bool(w .. ".swarm", d.swarm, true)
 		-- S6.5: a monster with its own move warns for at least 0.6 s (architecture §14)
 		if d.behaviour ~= nil then
-			c.oneOf(w .. ".behaviour", d.behaviour, { "spitter", "mine", "ghost" })
+			c.oneOf(w .. ".behaviour", d.behaviour, { "spitter", "mine", "ghost", "summoner", "healer" })
 			c.num(w .. ".telegraph", d.telegraph, 0.6, 5)
 			c.str(w .. ".telegraphSound", d.telegraphSound)
 			c.str(w .. ".releaseSound", d.releaseSound)
@@ -181,11 +181,21 @@ RULES.Creatures = function(c, Creatures)
 				c.pos(w .. ".blastRadius", d.blastRadius)
 			elseif d.behaviour == "ghost" then
 				c.num(w .. ".fuelDrain", d.fuelDrain, 0, 50)
+			elseif d.behaviour == "summoner" then -- S6.6
+				local summoned = Creatures[d.summonKind]
+				if type(summoned) ~= "table" or summoned.big or summoned.behaviour == "summoner" then
+					c.add(w .. ".summonKind", "must name a small creature that does not summon, got " .. tostring(d.summonKind))
+				end
+				c.num(w .. ".summonCount", d.summonCount, 1, 5, true)
+			elseif d.behaviour == "healer" then -- S6.6
+				c.pos(w .. ".healRadius", d.healRadius)
+				c.num(w .. ".healShare", d.healShare, 0.01, 1)
 			end
 		end
 		c.bool(w .. ".weaponImmune", d.weaponImmune, true)
+		c.bool(w .. ".ignoresPlayers", d.ignoresPlayers, true)
 		if d.shape ~= nil then
-			c.oneOf(w .. ".shape", d.shape, { "eel", "puffer", "lantern" })
+			c.oneOf(w .. ".shape", d.shape, { "eel", "puffer", "lantern", "witch", "shaman" })
 			c.color(w .. ".color", d.color)
 		end
 		if d.appears ~= nil then

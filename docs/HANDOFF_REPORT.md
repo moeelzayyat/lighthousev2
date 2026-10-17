@@ -753,3 +753,22 @@ NOT TESTED HERE: the blind test (a tester names each monster's behaviour); a bea
 MIRROR: 124 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (f0ccde62).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015); numbers D-023 flagged
 NEXT: S6.6 new monsters ×2 (Tide Witch, Coral Shaman).
+
+CHECKPOINT: S6.6 New monsters ×2 — 🟦 (the blind test is the owner's/a tester's; Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S6.6_before_2026-10-17 (Creatures, _Registry, SoundFx, CreatureService, MonstersSpec) · restore point "S6.6 passed"
+BUILT:
+- `Shared/Creatures`: Tide Witch (`summoner`) and Coral Shaman (`healer`), each with a telegraph, two sounds, a loot table, an `appears` schedule and a plain-part body (D-024); `ignoresPlayers` replaces the Ghost Lantern special case. `_Registry` checks the summoned kind (small, not a summoner), the summon count, the heal radius and share (55 definitions at boot).
+- `CreatureService`: the witch's chant ends in 3 Sand Skitters climbing out beside her (inside the 45-slot cap); the shaman's chime ends in +30% health for small creatures within 14 studs.
+TESTRUNNER (DEV, Play server): **182 passed, 0 failed** (`MonstersSpec` now covers all five monsters: registry, telegraph ≥ 0.6 s with unique sounds, loot, the night schedule up to night 13 with witches and shamans).
+PLAY TEST (DEV, owner's account, mock store; runtime-only TEMPTEST scripts):
+- Tide Witch alone: creature count every 2 s 1,1,…,1 (walking in), then 4, then 7: three skitters each chant, every 7 s.
+- Coral Shaman with 5 Rock Crabs at the tower knocked to 50%: the 3 crabs within its reach went 0.50 → 0.80 → 1.00 over two chimes; the 2 out of reach stayed at 0.50.
+- Telegraphs measured on the client: witch 0.99–1.08 s (6), shaman 0.75–0.83 s (6).
+- Budget: 2 witches + 2 shamans + 4 eels + 5 puffers + 3 lanterns + small creatures to 45: **9.59 KB/s average, 10.41 max, 60.0 FPS, lowest 1 s 60** (screenshot checked).
+- 0 script errors (server only ProfileStore's refused Studio write, API off; Roblox's own UIBlox warnings). Play stopped; 0 TEMPTEST scripts remain.
+NOT TESTED HERE: the blind test; the night schedule live (unit-tested).
+MIRROR: 124 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (9f61386e).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); numbers D-024 flagged
+NEXT: S6.7 publish package (owner), then S7.1 Logbook.
