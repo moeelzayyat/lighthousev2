@@ -133,6 +133,8 @@ Purpose: real players answer whether the loop retains, before content work.
 | S4.4 | Render budget | Neon eyes, shared boss bar, no per-creature lights, client hit flash; rain per device; sound pool | ≤ 3 replicated instances per creature; ≥ 30 FPS on the owner's phone during a night-7 swarm | Real phone |
 | S4.5 | Loot | Idle orbs static; bob on approach client-side | Orb replication only on spawn/pickup | Network probe |
 | S4.6 | 4-client soak | 3 consecutive voyages, 4 clients, 2 bosses | Memory growth < 50 MB/h; 0 errors | Profiler |
+| S4.9 | Seagull airstrike | 3 per voyage, small AOE on crabs, cooldown chip on the HUD, on-theme sound | Kills counted via `CreatureKilled{Source="airstrike"}`; cap of 3 enforced server-side | TestRunner, play test |
+| S4.10 | Upgrade rebalance + repair limit | Bench costs scale with strength; no upgrade is the obvious pick (pick-rate telemetry); repairs limited per night (N tuned after S3), remaining shown | Pick rates no upgrade > 50% over 20 voyages; repair cap enforced | Telemetry, play test |
 | S4.7 | Publish (owner) | | Live phone check by the owner | Owner |
 
 **S4 exit numbers:** send/player, FPS PC/phone, instances/creature, memory growth — all recorded in `PERFORMANCE_BUDGETS.md`. → S5.1.
