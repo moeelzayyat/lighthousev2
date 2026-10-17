@@ -169,6 +169,7 @@ local Config = {
 	-- Island layout
 	ISLAND_CENTER = Vector3.new(0, 0, 0),
 	ISLAND_RADIUS = 70,
+	GROUND_GRID_RADIUS = 128, -- S4.1: the height grid covers this far from the island centre (creatures spawn at 92)
 	GROUND_Y = 10, -- height of the island surface where the lighthouse stands (sea surface is y = 0)
 	TOWER_HEIGHT = 60,
 	TOWER_ATTACK_RADIUS = 10, -- creatures stop here to attack the tower

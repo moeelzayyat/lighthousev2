@@ -384,3 +384,22 @@ NEXT: S3.2–S3.5 need live players (queued for the owner); S3.6 gate taken prov
 CHECKPOINT: S3.2–S3.5 — 🟦 not started (they need the public test running with real players: playtest sessions with real phones, two weekly iterations on live data, the signal read, the role check). Queued for the owner; Claude picks them up when the DEV experience has players and data.
 
 CHECKPOINT: S3.6 Go/no-go — provisional GO (D-018, no live data). Work continues with S4.
+
+CHECKPOINT: S4.1 Ground grid — 🟦 (Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S4.1_before_2026-10-17 (Ground, Config, Main)
+BUILT:
+- `Shared/Ground` (now `--!strict`): `buildGrid(cx, cz, radius)` samples the terrain once into a 1-stud grid, and every cell whose corners differ by more than 0.3 studs gets a 4 × 4 sub-grid (slopes, rocks); `heightAt` reads the grid inside it (bilinear) and raycasts only outside it; `sample` is the old raycast; `Ground.raycasts` counts raycasts for the probe.
+- `Main` builds the grid at boot (`Config.GROUND_GRID_RADIUS` = 128 around the island centre; creatures spawn at 92 and the beam reaches 105) in a background thread; logs `GroundGrid`.
+- No creature, loot or lamp code changed: they already call `Ground.heightAt`.
+MEASURED:
+- Accuracy (Edit, real terrain, 3000 random points over the whole 256 × 256 area): 0 points off by more than 0.2 studs within radius 95 (where creatures walk); 12 of 3000 (0.4 %) beyond, all at radius 100–140 on sea-stack edges (max 3.0 studs). A plain 1-stud grid had 26/2000 points over 0.2 (max 9.4); 2-stud 80/2000.
+- Boot: in Play the grid was ready 2.7 s after boot (398,974 samples including sub-grids; it yields every 32 rows). Memory not measured separately (S4.6 soak measures growth).
+- Probe (DEV Play, SAIL NOW, TEMPTEST keep-alive): `Ground.raycasts` did not change from the end of boot through the prologue, day 1 and night 1 (0 raycasts, up to 31 creatures).
+TESTRUNNER (DEV): 113 passed, 0 failed. New `GroundSpec` (2): 300 grid reads across the shoreline make 0 raycasts and match raycasts within 0.2 studs; outside the grid a read raycasts.
+SCRIPT ANALYSIS: not measured (owner item).
+PLAY TEST: console showed only ProfileStore's refused Studio write (API off) and Roblox CorePackages UIBlox warnings; 0 game-script errors. Play stopped; 0 TEMPTEST scripts remain.
+MIRROR: 81 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (a608ef19).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+NEXT: S4.2 20 Hz step + snapshots.

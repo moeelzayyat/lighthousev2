@@ -32,6 +32,7 @@ local GrantService = require(script.Parent.GrantService) -- R1.3: the only write
 local AdminDataService = require(script.Parent.AdminDataService) -- R1.8: inspect / grant / rollback
 local Voyages = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Voyages")) -- S2.1
 local DawnBanking = require(script.Parent.DawnBanking) -- S2.2: Pearls banked at each dawn (bus consumer)
+local Ground = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Ground")) -- S4.1: the island height grid
 
 -- Telemetry consumes the bus before any player can join (funnel step 1 is PlayerJoined)
 Analytics.start(EventLog, Analytics.robloxSink(Config.EVENT_LOG_ENABLED))
@@ -89,6 +90,13 @@ DawnBanking.start(EventLog, {
 
 local refs = IslandBuilder.build()
 local lobbyRefs = LobbyBuilder.build(refs) -- the pirate-ship lobby (also moves the Quartermaster aboard)
+-- S4.1: sample the island's ground once, so creatures never raycast while they move (until it is ready,
+-- Ground.heightAt raycasts as before)
+task.spawn(function()
+	local started = os.clock()
+	local samples = Ground.buildGrid(Config.ISLAND_CENTER.X, Config.ISLAND_CENTER.Z, Config.GROUND_GRID_RADIUS)
+	EventLog.log("GroundGrid", { samples = samples, seconds = math.floor((os.clock() - started) * 100) / 100 })
+end)
 LampService.init(refs, stateFolder, remotes)
 TowerService.init(stateFolder, refs.repairPrompt, LampService.notify)
 -- R1.8 admin tools: snapshots on every profile load (Studio keeps them in memory, never in a real store)

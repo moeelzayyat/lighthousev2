@@ -125,7 +125,7 @@ Purpose: real players answer whether the loop retains, before content work.
 
 | ID | Substage | Deliverables | Passes when | Verify |
 |---|---|---|---|---|
-| S4.1 | Ground grid | Island height grid built at boot; `Ground.heightAt` reads the grid | 0 runtime raycasts from creatures (probe); heights within 0.2 studs of raycast samples | TestRunner, probe |
+| S4.1 🟦 | Ground grid | Island height grid built at boot; `Ground.heightAt` reads the grid | 0 runtime raycasts from creatures (probe); heights within 0.2 studs of raycast samples | TestRunner, probe |
 | S4.2 | 20 Hz step + snapshots | `SimulationStep` at 20 Hz; `buffer` snapshots over `UnreliableRemoteEvent` at 12 Hz, interest = whole island | Server send ≤ 30 KB/s per player at 45 creatures, 4 clients | Network probe |
 | S4.3 | Client interpolation | Pooled models interpolate between snapshots; procedural walk/scuttle | No visible stepping at 12 Hz; 60 FPS PC | Play test |
 | S4.4 | Render budget | Neon eyes, shared boss bar, no per-creature lights, client hit flash; rain per device; sound pool | ≤ 3 replicated instances per creature; ≥ 30 FPS on the owner's phone during a night-7 swarm | Real phone |

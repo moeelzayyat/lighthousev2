@@ -7,7 +7,7 @@ Targets from `architecture.md` §23. Measured cells hold real numbers only. Base
 |---|---|---|---|---|---|---|
 | Game work per frame (ms) at 4 players, 45 creatures | ≤ 2 avg | 0.11 (swarm, solo) | | | | |
 | Send per player (KB/s) at 45 creatures | ≤ 30 | ~50 (per-frame PivotTo) | | | | |
-| Runtime creature raycasts per frame | 0 | ~90 (2 per creature) | | | | |
+| Runtime creature raycasts per frame | 0 | ~90 (2 per creature) | 0 (S4.1: 0 raycasts across prologue, day 1 and night 1, up to 31 creatures) | | | |
 | Memory growth (MB/h, 3 voyages, 4 clients) | < 50 | not measured | | | | |
 | Save failures (unresolved) | 0 | unknown | | | | |
 
@@ -26,7 +26,7 @@ Targets from `architecture.md` §23. Measured cells hold real numbers only. Base
 |---|---|---|---|---|
 | Join → control (new account, s) | ≤ 5 | 1.1 | | |
 | Landed (s) | ≤ 15 | 12.0 | | |
-| First beam hit, median (s) | ≤ 45 | 50.3 (scripted) | | |
+| First beam hit, median (s) | ≤ 45 | 50.3 (scripted) | 37.7 (5 scripted runs, since control; before the change 44.5) | |
 | Night-1 survival, 0-run unassisted | ≥ 50% | unknown | | |
 
 ## Probes (`ServerStorage/Tests/perf/`)
