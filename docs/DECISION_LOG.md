@@ -156,3 +156,4 @@ The roadmap's GO thresholds (Night-1 survival ≥ 50 %, rematch ≥ 60 %, beam m
 ## CP — S5.7 passed (🟦 Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · StatPipeline for weapons, armor and bench upgrades; previews == voyage values; no number changed; TestRunner 147/147
 - Accepted (unattended, recommendation): STATS.md cap for WeaponRange raised 40 → 100 so the pipeline keeps today's approved ranges (50–70). To revise: say so.
 ## CP — S5.8 publish package written (🟦, waits for the owner's DEV publish) · 2026-10-17 · DEV only · S5 exit: 147 tests, Main 15 lines; warnings unmeasured
+## CP — S6.1 passed (🟦 4-client run, Script Analysis) · 2026-10-17 · auto-approved (unattended) · DEV only · one boss per crew member, evenly spread; boss = 5 slots of MAX_CREATURES; 4 bosses + 25 small at 6.3 KB/s, 60 FPS; TestRunner 152/152

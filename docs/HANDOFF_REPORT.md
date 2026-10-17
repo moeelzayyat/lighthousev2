@@ -643,3 +643,24 @@ Live checks (about 20 minutes, on a phone if you can):
  9. Tell Claude: anything that looks different from before, the phone FPS, the Script Analysis numbers.
 If something is wrong: Creator Hub → DEV place → Version History → restore the previous version, then Shut down all servers.
 Claude's state: S5.8 set to 🟦; work continues with S6.1.
+
+CHECKPOINT: S6.1 Bosses by crew + Long Voyage boss nights — 🟦 (4-client run and Script Analysis are the owner's; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S6.1_before_2026-10-17 (GameState, CreatureService, WaveDirector, Config) · restore point "S6.1 passed"
+BUILT:
+- Boss nights: one big monster per ready crew member (1–4). The night's scheduled kind leads; the others are random kinds. Bearings are evenly spread from a random start (`WaveDirector.bossBearings`: 4 crew → 90° apart). One notice for the crew ("4 big monsters climb out of the sea, one for each Keeper!"); a `BigMonsterSpawned` log line and a `BossWarning` event per boss. Bosses arrive at full health (no scaling; tuned after the public test, architecture §6).
+- Creature cap: a boss counts as 5 toward `MAX_CREATURES` 45 (`Config.BOSS_SLOTS = 5`, `CreatureService.load()`); bosses always arrive, crabs and skitter packs wait while the slots are full. With 4 bosses up, 25 small creatures fit.
+- Long Voyage boss nights (4, 7, 10, 13 and every night from 8) were already built in S2.1; each of those nights now gets one boss per crew member.
+- New gameplay value: `BOSS_SLOTS = 5` is the number named in architecture §6 and the roadmap row, not a new decision.
+TESTRUNNER (DEV): **152 passed, 0 failed** (147 + new `BossesByCrewSpec` 5: one boss per crew member clamped 1..4; even spread; a boss = 5 slots and 4 bosses leave 25; the spawn cap and both wave waits use the slot count; boss nights read the ready crew).
+PLAY TEST (DEV, owner's account, mock store; runtime-only TEMPTEST scripts):
+- Real voyage path, solo (Standard voyage with night 1 made a boss night at runtime): `BigMonsterSpawned bearing=270 kind=ShipwreckHermit night=1 of=1`, one HUD boss row.
+- 4 bosses (the crew-of-4 bearings 281/11/101/191) + small creatures to the cap: 4 bosses, 25 small spawned, 35 refused, 29 alive, slots 45/45; 4 HUD boss rows.
+- Budget at that cap, 10 s, 1 client: snapshots **6.26 KB/s average, 6.75 KB/s max** (S4: 10.0 / 10.7 at 45 creatures; target ≤ 30); **59.9 FPS average, lowest 1 s 60** (S4: 60). Fewer creatures on screen than S4's 45 because bosses take 5 slots each.
+- With 4 bosses during a real night 1 (1 + 3 added): 21 alive, slots 37; the undefended tower fell to the 4 bosses (expected on night 1 with one player).
+- 0 script errors (server only ProfileStore's refused Studio write, API off; Roblox's own UIBlox warnings). Play stopped; 0 TEMPTEST scripts remain.
+NOT MEASURED HERE: a real 4-client boss night (owner: Test → Clients and Servers → 4 players, sail, reach night 4, count 4 boss bars and note any lag); Script Analysis.
+MIRROR: 114 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (a11900c7).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
+NEXT: S6.2 island merchant.

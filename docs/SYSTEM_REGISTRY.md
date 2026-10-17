@@ -16,7 +16,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Cannons (build/upgrade/reload/ammo/health) | Released | S4 | |
 | Aggro / threat | Released | — | |
 | Rock Crab, Sand Skitter swarm | Released | S4 | render budget |
-| Big monsters (Barnacle Brute, Shipwreck Hermit) | Released | S6.1 | by crew size |
+| Big monsters (Barnacle Brute, Shipwreck Hermit) | Released; by crew size tested (not yet published) | S6.1 | S6.1: one per crew member on boss nights, evenly spread bearings (`WaveDirector.bossBearings`); a boss counts as 5 toward `MAX_CREATURES` (`Config.BOSS_SLOTS`, `CreatureService.load`); `BossesByCrewSpec` 5 tests |
 | New monsters ×5 | Planned | S6.5–S6.6 | |
 | Wave director (`nightPlan` pure) | Tested (not yet published) | R1.2 | `WaveDirector.nightPlan/bigNights/growth`; 12 tests vs pre-R1.2 reference |
 | Pearl rule (`pearlsFor` pure) | Tested (not yet published) | R1.2 | `Voyage.pearlsFor`; 4 tests (win 7 = 12, win 13 = 18, loss n = n−1) |

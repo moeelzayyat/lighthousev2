@@ -123,6 +123,7 @@ local Config = {
 	CRABS_PER_NIGHT = 8, -- extra crabs each night after
 	SPAWN_WINDOW = 0.7, -- crabs arrive during the first 70% of the night
 	MAX_CREATURES = 45, -- was 60; 45 alive at once keeps phones smooth (new ones arrive as others die)
+	BOSS_SLOTS = 5, -- S6.1: a big monster counts as 5 toward MAX_CREATURES (fewer small ones while bosses are up)
 	-- Swarm (Oct 12 2026): packs of small Sand Skitters arrive all night on top of the Rock Crabs,
 	-- so there is always something to do. Switch off with SWARM_ENABLED = false.
 	SWARM_ENABLED = true,

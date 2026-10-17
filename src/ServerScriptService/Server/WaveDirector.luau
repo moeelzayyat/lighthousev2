@@ -20,6 +20,7 @@ export type WaveConfig = {
 	BIG_MONSTERS_ENABLED: boolean?,
 	BIG_EVERY_NIGHTS: number?,
 	MAX_BIG_PER_RUN: number?,
+	BOSS_SLOTS: number?,
 }
 
 -- A forecast definition (Shared/Forecasts entry) or nil; only crabMult affects the plan.
@@ -119,6 +120,22 @@ function WaveDirector.nightPlan(night: number, crewSize: number, forecast: Forec
 		boss = true
 	end
 	return { crabs = crabs, skitters = skitters, boss = boss }
+end
+
+-- S6.1: the bearings of a boss night's big monsters, one per crew member (1..4), evenly spread around the
+-- tower starting at `offset` degrees.
+function WaveDirector.bossBearings(crewSize: number, offset: number): { number }
+	local count = math.clamp(crewSize, 1, 4)
+	local list: { number } = table.create(count)
+	for i = 0, count - 1 do
+		table.insert(list, (offset + i * 360 / count) % 360)
+	end
+	return list
+end
+
+-- S6.1: slots used toward MAX_CREATURES: a big monster counts as BOSS_SLOTS (5), anything else as 1.
+function WaveDirector.slotsUsed(small: number, bosses: number, config: WaveConfig): number
+	return small + bosses * (config.BOSS_SLOTS or 1)
 end
 
 return WaveDirector

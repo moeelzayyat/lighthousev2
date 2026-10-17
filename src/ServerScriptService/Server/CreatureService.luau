@@ -382,7 +382,8 @@ function CreatureService.spawn(kind, bearing)
 	if not stats then
 		return false
 	end
-	if #creatures >= Config.MAX_CREATURES and not stats.big then
+	-- Bosses always arrive; small creatures wait while the slots (a boss counts as BOSS_SLOTS, S6.1) are full
+	if not stats.big and CreatureService.load() >= Config.MAX_CREATURES then
 		return false
 	end
 	bearing = bearing or math.random() * 360
@@ -497,6 +498,17 @@ end
 
 function CreatureService.count()
 	return #creatures
+end
+
+-- S6.1: slots in use toward MAX_CREATURES; a big monster counts as Config.BOSS_SLOTS (5)
+function CreatureService.load()
+	local bosses = 0
+	for _, crab in creatures do
+		if crab.stats.big then
+			bosses += 1
+		end
+	end
+	return #creatures + bosses * ((Config.BOSS_SLOTS or 1) - 1)
 end
 
 function CreatureService.clearAll()

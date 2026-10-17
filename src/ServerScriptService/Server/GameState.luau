@@ -177,7 +177,7 @@ function GameState.run(deps)
 		task.spawn(function()
 			local interval = window / math.max(total, 1)
 			for _ = 1, total do
-				while active and creatures.count() >= Config.MAX_CREATURES do
+				while active and creatures.load() >= Config.MAX_CREATURES do
 					task.wait(0.5)
 				end
 				if not active then
@@ -205,7 +205,7 @@ function GameState.run(deps)
 			local spawned = 0
 			task.wait(2)
 			while active and spawned < total do
-				while active and creatures.count() >= Config.MAX_CREATURES do
+				while active and creatures.load() >= Config.MAX_CREATURES do
 					task.wait(0.5)
 				end
 				if not active then
@@ -493,7 +493,8 @@ function GameState.run(deps)
 					result = "Abandoned"
 				else
 					-- Big monsters this run: the definition's schedule (Standard 4, 7; Long 4, 7 and every night
-					-- from 8), one random kind per scheduled night, picked in schedule order.
+					-- from 8), one random kind per scheduled night, picked in schedule order. S6.1: that kind leads;
+					-- the other crew members' bosses are random kinds.
 					local bigNights = {}
 					for _, n in WaveDirector.bossNightsFor(def, Config) do
 						bigNights[n] = Creatures.BIG_POOL[math.random(1, #Creatures.BIG_POOL)]
@@ -525,7 +526,7 @@ function GameState.run(deps)
 						local stopSwarm = startSwarm(plan.skitters, Config.NIGHT_SECONDS * (Config.SWARM_WINDOW or 0.85))
 						EventLog.log("NightSpawns", { night = night, crabs = plan.crabs, skitters = plan.skitters })
 
-						-- A big sea monster arrives partway through this night
+						-- Big sea monsters arrive partway through this night: one per crew member (S6.1)
 						local bigKind = bigNights[night]
 						if bigKind then
 							task.delay(3, function()
@@ -539,13 +540,18 @@ function GameState.run(deps)
 								if state:GetAttribute("Phase") ~= "Night" or state:GetAttribute("Night") ~= night then
 									return -- the night already ended
 								end
-								local bearing = math.random() * 360
-								creatures.spawn(bigKind, bearing)
-								local rad = math.rad(bearing)
-								SoundFx.playAt("monster", Vector3.new(-math.sin(rad) * 80, 5, -math.cos(rad) * 80))
-								notifyAll(string.format("A %s climbs out of the sea! Big monsters hit hard: bring your best gear.", string.upper(Creatures[bigKind].displayName)))
-								EventLog.log("BigMonsterSpawned", { kind = bigKind, night = night })
-								EventLog.Publish("BossWarning", { VoyageId = EventLog.voyageId(), DefId = bigKind, Night = night })
+								local bearings = WaveDirector.bossBearings(#readyPlayers(), math.random() * 360)
+								for i, bearing in bearings do
+									local kind = if i == 1 then bigKind else Creatures.BIG_POOL[math.random(1, #Creatures.BIG_POOL)]
+									creatures.spawn(kind, bearing)
+									local rad = math.rad(bearing)
+									SoundFx.playAt("monster", Vector3.new(-math.sin(rad) * 80, 5, -math.cos(rad) * 80))
+									EventLog.log("BigMonsterSpawned", { kind = kind, night = night, bearing = math.floor(bearing), of = #bearings })
+									EventLog.Publish("BossWarning", { VoyageId = EventLog.voyageId(), DefId = kind, Night = night })
+								end
+								notifyAll(if #bearings == 1
+									then string.format("A %s climbs out of the sea! Big monsters hit hard: bring your best gear.", string.upper(Creatures[bigKind].displayName))
+									else string.format("%d big monsters climb out of the sea, one for each Keeper! Split up and bring your best gear.", #bearings))
 							end)
 						end
 
