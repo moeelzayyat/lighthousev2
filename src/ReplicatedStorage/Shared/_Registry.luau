@@ -19,6 +19,7 @@ function Registry.catalogs(): Catalogs
 		Upgrades = require(Shared:WaitForChild("Upgrades")) :: any,
 		Weapons = require(Shared:WaitForChild("Weapons")) :: any,
 		Voyages = require(Shared:WaitForChild("Definitions"):WaitForChild("Voyages")) :: any,
+		Merchant = require(Shared:WaitForChild("Definitions"):WaitForChild("Merchant")) :: any, -- S6.2
 		Events = require(Shared:WaitForChild("Events")) :: any,
 	}
 end
@@ -357,6 +358,52 @@ RULES.Voyages = function(c, Voyages)
 	end
 	if type(Voyages.DEFAULT) == "string" and type(Voyages[Voyages.DEFAULT]) == "table" and Voyages[Voyages.DEFAULT].unlock ~= nil then
 		c.add("Voyages.DEFAULT", "must not need an unlock")
+	end
+end
+
+-- S6.2: the island merchant's stock (boosts name a stat the pipeline knows and stay under the voyage cap)
+local MERCHANT_STATS = { "WeaponDamage", "PlayerSpeed" }
+RULES.Merchant = function(c, Merchant)
+	c.order("Merchant.ORDER", Merchant.ORDER, Merchant)
+	if type(Merchant.BOOST_CAP) ~= "table" then
+		c.add("Merchant.BOOST_CAP", "must map a stat to its voyage cap")
+	else
+		for stat, cap in Merchant.BOOST_CAP do
+			if not table.find(MERCHANT_STATS, stat) then
+				c.add("Merchant.BOOST_CAP." .. tostring(stat), "is not a stat the merchant can boost")
+			end
+			c.num("Merchant.BOOST_CAP." .. tostring(stat), cap, 0, 0.5)
+		end
+	end
+	for id, def in c.defs(Merchant) do
+		local w = "Merchant." .. id
+		if def.id ~= id then
+			c.add(w .. ".id", "must equal its key, got " .. tostring(def.id))
+		end
+		c.str(w .. ".displayName", def.displayName)
+		c.str(w .. ".description", def.description)
+		c.num(w .. ".price", def.price, 1, 10000, true)
+		c.oneOf(w .. ".scope", def.scope, { "player", "crew" })
+		c.oneOf(w .. ".effect", def.effect, { "boost", "heal", "shield", "oil" })
+		if def.limit ~= nil then
+			c.num(w .. ".limit", def.limit, 1, 10, true)
+		end
+		if def.effect == "boost" then
+			c.oneOf(w .. ".stat", def.stat, MERCHANT_STATS)
+			c.num(w .. ".add", def.add, 0.01, 0.5)
+			if type(def.limit) ~= "number" then
+				c.add(w .. ".limit", "a boost needs a limit")
+			elseif type(Merchant.BOOST_CAP) == "table" and type(def.add) == "number" and def.add * def.limit > (Merchant.BOOST_CAP[def.stat] or 0) + 1e-9 then
+				c.add(w, "limit × add is over Merchant.BOOST_CAP." .. tostring(def.stat))
+			end
+		elseif def.effect == "shield" then
+			c.num(w .. ".mult", def.mult, 0, 0.99)
+		elseif def.effect == "oil" then
+			c.num(w .. ".amount", def.amount, 1, 200)
+		end
+		if not table.find(Merchant.ORDER or {}, id) then
+			c.add(w, "is not listed in Merchant.ORDER")
+		end
 	end
 end
 

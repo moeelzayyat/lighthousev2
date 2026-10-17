@@ -49,6 +49,7 @@ local Events: { [string]: Schema } = {
 	PearlsGranted = { UserId = "number", Amount = "number", Balance = "number", Source = "string", ClaimId = "string?" },
 	PearlsSpent = { UserId = "number", Amount = "number", Balance = "number", ItemId = "string?" },
 	ShopPurchase = { UserId = "number", ItemId = "string", Price = "number", Currency = "string" },
+	MerchantPurchase = { VoyageId = "string?", UserId = "number", ItemId = "string", Price = "number", Currency = "string" }, -- S6.2
 }
 
 return Events

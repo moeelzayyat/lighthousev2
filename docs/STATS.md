@@ -11,8 +11,8 @@ Final = clamp((Base + ΣFlat) × (1 + ΣAdditivePct) × ΠMultipliers, Min, Max)
 |---|---|---|---|---|---|---|
 | `PlayerMaxHealth` ✅ | HP | armor def (100 / 140 / 190) | Flat, AdditivePct | 50 | 300 | armor, specialties |
 | `PlayerArmor` ✅ | % damage reduction | armor def | Flat | 0 | 60% | armor |
-| `PlayerSpeed` | studs/s | 16 | AdditivePct | 12 | 22 | merchant speed boost (voyage), Quartermaster boost (cap +5%) |
-| `WeaponDamage` ✅ | per hit | weapon def | AdditivePct, Multiplier | 1 | 200 | Quartermaster damage boost (cap +5%), merchant boost (voyage) |
+| `PlayerSpeed` ✅ | studs/s | 16 | AdditivePct | 12 | 22 | merchant speed boost (voyage, +10% each, cap +20%: 17.6 / 19.2), Quartermaster boost (cap +5%) |
+| `WeaponDamage` ✅ | per hit | weapon def | AdditivePct, Multiplier | 1 | 200 | Quartermaster damage boost (cap +5%), merchant boost (voyage, +10% each, cap +20%) |
 | `WeaponCooldown` ✅ | s | weapon def | AdditivePct (reduction) | 0.2 | 5 | — |
 | `WeaponRange` ✅ | studs | weapon def (50–70) | AdditivePct | 4 | 100 (S5.7: was 40, below every weapon's approved range) | — |
 | `WeaponHitRadius` ✅ | studs | weapon def | AdditivePct | 1 | 20 | — |

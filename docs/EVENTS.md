@@ -27,7 +27,7 @@ Module: `EventLog` (Telemetry domain) exposes `Publish(name, payload)` / `Subscr
 | `CreatureKilled` | `{VoyageId, CreatureId, DefId, Source, KillerId?, X, Y, Z, Big: boolean}` (`Source` is the damage tag as recorded: `WideBeam`, `FocusedBeam`, `Cannon`, `Weapon:<id>`; X/Y/Z where it fell) | Encounter (CreatureService) | **Loot (drops, S5.3 ✅)**, Results, Logbook, Objectives, Analytics | S5.3 ✅ |
 | `BossWarning` / `BossDefeated` | `{VoyageId, DefId, Night}` / `{VoyageId, DefId, FinalBlow?}` | Encounter (GameState / CreatureService) | HUD, Results, Logbook | S5.3 ✅ |
 | `LootCollected` | `{VoyageId, UserId, ItemId, Qty}` | Encounter (Loot) | Objectives, Analytics | S5.3 ✅ |
-| `ShellsChanged` | `{VoyageId, Delta, Reason}` (`loot`, `tide`, `waveBonus`, `trader`, `upgrade`) | Encounter (UpgradeService holds the crew pool today) | Analytics | S5.3 ✅ |
+| `ShellsChanged` | `{VoyageId, Delta, Reason}` (`loot`, `tide`, `waveBonus`, `trader`, `upgrade`, `merchant`) | Encounter (UpgradeService holds the crew pool today) | Analytics | S5.3 ✅ |
 | `UpgradeBought` / `EvolutionUnlocked` | `{VoyageId, UserId, Id, Rank}` / `{VoyageId, Id}` | Encounter (bench / UpgradeService) | Results, Logbook, Objectives | S5.3 ✅ |
 | `NightSurvived` | `{VoyageId, Night, Crew}` | Encounter | **Grant (dawn Pearl, `DawnBanking`, S2.2 ✅)**, Analytics (`Night1Survived`), Leaderboard | R1.6 ✅ |
 | `DawnLootWindow` | `{VoyageId, Seconds}` | Encounter (GameState) | **Economy (auto-sell, launch R10 switch, S5.3 ✅)**, HUD | S5.3 ✅ |
@@ -38,7 +38,7 @@ Module: `EventLog` (Telemetry domain) exposes `Publish(name, payload)` / `Subscr
 | `PearlsSpent` | `{UserId, Amount, Balance, ItemId?}` | Data (PlayerData.spendPearls) | Analytics (economy sink) | R1.6 ✅ |
 | `ItemGranted` | `{UserId, ItemId, Source}` | Economy (Grant) | Logbook, Analytics | R1.3 |
 | `ShopPurchase` | `{UserId, ItemId, Price, Currency}` | Economy (ShopService) | Analytics | S5.3 ✅ |
-| `MerchantPurchase` | `{UserId, ItemId, Price, Currency}` | Economy (merchant) | Analytics | S6.2 (the merchant does not exist yet) |
+| `MerchantPurchase` | `{VoyageId?, UserId, ItemId, Price, Currency}` | Economy (MerchantService via `Domains/Economy`) | Analytics | S6.2 ✅ (with `ShellsChanged` reason `merchant`) |
 | `ObjectiveCompleted` | `{UserId, ObjectiveId}` | LiveOps | Analytics | S7.2 |
 | `LogbookDiscovered` | `{UserId, EntryId}` | LiveOps | Analytics | S7.1 |
 | `InviteCompleted` | `{InviterId, InviteeId}` | Crew | Grant | S7.5 |

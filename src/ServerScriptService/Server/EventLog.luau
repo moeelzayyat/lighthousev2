@@ -63,6 +63,7 @@ local function freshStats()
 		autoSweepSeconds = 0, -- time the lamp swept on its own at night (nobody at the console)
 		shellsSpent = 0,
 		lootSold = 0, -- shells the Trader paid for loot this run
+		merchantShells = 0, -- S6.2: shells spent at the island merchant this run
 		quits = 0, -- players who left mid-run
 		clutchSaves = 0, -- refuels at night with the tank under 10% (launch R4/R12)
 		moments = {}, -- { priority, text } candidates for the Results "Moment of the storm" (lower = better)
@@ -320,7 +321,7 @@ function EventLog.endRun(result, reason)
 		string.format("Oil grabbed: %d  Refuels: %d  Repairs: %d", stats.oilGrabbed, stats.refuels, stats.repairs),
 		string.format("Lamp: %d keeper sessions, %ds manned, %ds automatic sweep (lamp lit, nobody at the console), %d idle releases, %d beam toggles, went dark %d times",
 			stats.keeperSessions, math.floor(stats.keeperSeconds), math.floor(stats.autoSweepSeconds), stats.idleReleases, stats.beamToggles, stats.darkEvents),
-		string.format("Shells spent: %d   Players who quit mid-run: %d", stats.shellsSpent, stats.quits),
+		string.format("Shells spent: %d (merchant %d)   Players who quit mid-run: %d", stats.shellsSpent, stats.merchantShells, stats.quits),
 		"First times (seconds into run): " .. (function()
 			local parts = {}
 			for _, key in { "oil pickup", "lamp refuel", "took the lamp", "wide beam", "focused beam", "harpoon attack", "repair", "opening completed" } do
@@ -415,6 +416,7 @@ function EventLog.endRun(result, reason)
 		clutchSaves = stats.clutchSaves,
 		shellsSpent = stats.shellsSpent,
 		lootSold = stats.lootSold,
+		merchantShells = stats.merchantShells, -- S6.2
 		crew = crew,
 		result = result,
 		reason = reason or "",

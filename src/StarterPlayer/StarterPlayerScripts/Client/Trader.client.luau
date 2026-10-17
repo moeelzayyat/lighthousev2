@@ -1,7 +1,9 @@
 -- Trader (client): the salvage buyer on the lighthouse island.
 --
 -- Loot (crab claws, sea glass, black pearls) only lasts one voyage. The Trader turns it into
--- Shells for the whole crew. This is NOT a shop: no Pearls, no permanent items, one action.
+-- Shells for the whole crew. This is NOT a shop: no Pearls, no permanent items.
+-- S6.2: by day the sheet also lists the merchant's voyage-only stock (Definitions/Merchant), bought
+-- with the crew's Shells (MerchantRequest -> MerchantResult); the server checks and applies everything.
 -- The server opens it (TraderOpen, from the Trader's prompt) and does the selling
 -- (TraderRequest -> TraderResult); shell values come from Shared/Items unchanged.
 --
@@ -19,6 +21,7 @@ local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Items = require(Shared:WaitForChild("Items"))
+local Merchant = require(Shared:WaitForChild("Definitions"):WaitForChild("Merchant")) -- S6.2
 local SoundFx = require(Shared:WaitForChild("SoundFx"))
 local UiKit = require(script.Parent:WaitForChild("UiKit"))
 local ItemPreview = require(script.Parent:WaitForChild("ItemPreview"))
@@ -49,6 +52,12 @@ local pendingId = nil
 local errorText = nil
 local awaitingCheck = nil -- after a timeout: the sack's value before, while we re-check the server
 local layout, closeTrader, render -- forward declarations
+local pendingBuy = {} -- S6.2: itemId -> requestId while a purchase is in flight
+local STOCK_ROW_H = 64
+
+local function merchantOpen()
+	return state:GetAttribute("Phase") == "Day"
+end
 
 -- while a sale is in flight the sheet keeps showing what was being sold (the server's new,
 -- empty sack can arrive before its reply); the live counts decide everything else
@@ -150,6 +159,41 @@ noteGlyph.Position = UDim2.fromOffset(0, 2)
 local noteText = UiKit.Label(note, "", "BodySmall", { Name = "Text", Position = UDim2.fromOffset(26, 0), Size = UDim2.new(1, -26, 0, 0), TextColor3 = C.TextPrimary })
 noteText.Text = "<b>Loot only lasts this voyage.</b> Sell it here for Shells the whole crew can spend at the upgrade bench. Anything you don't sell is gone when the run ends."
 
+-- S6.2: the merchant's day stock ------------------------------------
+local stock = UiKit.Section(body, "Island stock: by day, for the crew's Shells", { layoutOrder = 4, gap = 0 })
+stock.Name = "Stock"
+local stockRows = {}
+local buyItem -- forward declaration
+for order, id in Merchant.ORDER do
+	local def = Merchant[id]
+	local row = UiKit.new("Frame", { Name = "Stock_" .. id, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, STOCK_ROW_H), LayoutOrder = order }, stock)
+	if order > 1 then
+		UiKit.new("Frame", { Name = "Hairline", BackgroundColor3 = C.BorderSubtle, BorderSizePixel = 0, Size = UDim2.new(1, 0, 0, 1) }, row)
+	end
+	local nameLabel = UiKit.Label(row, def.displayName, "H3", { Name = "ItemName", Position = UDim2.fromOffset(0, 8), Size = UDim2.new(1, -132, 0, 22), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false, TextTruncate = Enum.TextTruncate.AtEnd, TextSize = 16 })
+	UiKit.Label(row, def.description, "Micro", { Name = "Description", Position = UDim2.fromOffset(0, 30), Size = UDim2.new(1, -132, 0, 28), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = true })
+	local button = UiKit.Button(row, string.format("BUY %d", def.price), {
+		name = "Buy",
+		variant = "secondary",
+		size = "sm",
+		width = 120,
+		onClick = function()
+			buyItem(id)
+		end,
+		onDisabledClick = function(reason)
+			SoundFx.play2D("denied")
+			if reason then
+				errorText = reason
+				layout()
+				render()
+			end
+		end,
+	})
+	button.AnchorPoint = Vector2.new(1, 0.5)
+	button.Position = UDim2.new(1, 0, 0.5, 0)
+	stockRows[id] = { frame = row, button = button, name = nameLabel }
+end
+
 local emptyView = UiKit.StateView(panel, "empty", { title = "Nothing to sell yet", body = "Creatures drop crab claws, sea glass and black pearls. Bring them here before the voyage ends." })
 emptyView.Visible = false
 local loadingView = UiKit.StateView(panel, "loading", { title = "Counting your salvage" })
@@ -238,6 +282,36 @@ function render()
 	end
 	totalDisplay.set(total)
 
+	-- S6.2: the merchant's stock, by day (the server has the final word on every purchase)
+	local showStock = merchantOpen() and not loading and view == "list"
+	stock.Visible = showStock
+	if showStock then
+		local shells = state:GetAttribute("Shells") or 0
+		for id, r in stockRows do
+			local def = Merchant[id]
+			local owned = player:GetAttribute("Merchant_" .. id) or 0
+			r.name.Text = if def.limit then string.format("%s  (%d/%d)", def.displayName, owned, def.limit) else def.displayName
+			if pendingBuy[id] then
+				UiKit.SetBusy(r.button, true, "...")
+			else
+				UiKit.SetBusy(r.button, false)
+				r.button.Text = string.format("BUY %d", def.price)
+				if def.limit and owned >= def.limit then
+					r.button.Text = "BOUGHT"
+					UiKit.SetDisabled(r.button, true, "That's all the Trader has for you this voyage.")
+				elseif def.effect == "shield" and state:GetAttribute("TowerShield") then
+					r.button.Text = "ACTIVE"
+					UiKit.SetDisabled(r.button, true, "The tower is already shielded until dawn.")
+				elseif shells < def.price then
+					UiKit.SetDisabled(r.button, true, string.format("Need %d Shells (the crew has %d).", def.price, shells))
+				else
+					UiKit.SetDisabled(r.button, false)
+				end
+				r.button:SetAttribute("BaseText", r.button.Text)
+			end
+		end
+	end
+
 	errorLabel.Text = errorText or ""
 	errorLabel.Visible = errorText ~= nil
 
@@ -316,6 +390,61 @@ actionButton.Activated:Connect(function()
 	end
 end)
 
+-- S6.2: buying from the merchant's stock
+function buyItem(id)
+	if pendingBuy[id] or not merchantOpen() then
+		return
+	end
+	local requestId = HttpService:GenerateGUID(false)
+	pendingBuy[id] = requestId
+	errorText = nil
+	render()
+	remotes.MerchantRequest:FireServer(requestId, "buy", id, 1)
+	task.delay(REQUEST_TIMEOUT, function()
+		if pendingBuy[id] == requestId then
+			pendingBuy[id] = nil -- the counts on the sheet are the server's, so they show what really happened
+			errorText = "The Trader didn't answer. Check the sheet and try again."
+			if isOpen then
+				layout()
+				render()
+			end
+		end
+	end)
+end
+
+remotes:WaitForChild("MerchantResult").OnClientEvent:Connect(function(requestId, ok, message)
+	for id, pending in pendingBuy do
+		if pending == requestId then
+			pendingBuy[id] = nil
+			if ok then
+				errorText = nil
+			else
+				SoundFx.play2D("denied")
+				errorText = message or "That didn't work. No Shells were spent."
+			end
+			if isOpen then
+				layout()
+				render()
+			end
+			return
+		end
+	end
+end)
+
+for _, name in { "Phase", "TowerShield" } do
+	state:GetAttributeChangedSignal(name):Connect(function()
+		if isOpen then
+			layout()
+			render()
+		end
+	end)
+end
+player.AttributeChanged:Connect(function(name)
+	if isOpen and string.sub(name, 1, 9) == "Merchant_" then
+		render()
+	end
+end)
+
 remotes:WaitForChild("TraderResult").OnClientEvent:Connect(function(requestId, ok, message, total)
 	if requestId ~= pendingId then
 		return
@@ -363,6 +492,7 @@ end)
 state:GetAttributeChangedSignal("Shells"):Connect(function()
 	if isOpen then
 		purse.set(state:GetAttribute("Shells") or 0)
+		render() -- S6.2: what the crew can afford at the merchant
 	end
 end)
 
@@ -392,6 +522,9 @@ function layout()
 	local bodyWanted = 24 + listH + 54 + 92
 	if profile and listH == 0 and view == "list" then
 		bodyWanted = 150 + 104 -- empty state + the loot rule
+	end
+	if profile and view == "list" and merchantOpen() then
+		bodyWanted += 34 + #Merchant.ORDER * STOCK_ROW_H -- S6.2: the merchant's stock
 	end
 	local wanted = 12 + headerH + 8 + bodyWanted + errorH + buttonH + pad + 8 + (if #vitalChips > 0 then 28 else 0)
 	local ph = math.min(math.max(wanted, 330), H - (if phone then 12 else 48))
@@ -486,6 +619,7 @@ local function openTrader()
 	isOpen = true
 	view = "list"
 	errorText = nil
+	table.clear(pendingBuy)
 	awaitingCheck = nil
 	frozen = nil
 	soldFor = 0

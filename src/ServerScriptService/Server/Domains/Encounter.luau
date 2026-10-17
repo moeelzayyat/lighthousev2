@@ -260,7 +260,8 @@ local function hookAttack(ctx)
 		if not weapon then
 			return
 		end
-		local stats = StatPipeline.weapon(weaponId) -- S5.7: the numbers the shop shows
+		-- S5.7: the numbers the shop shows; S6.2: plus the merchant's damage boost (a server-set attribute)
+		local stats = StatPipeline.weapon(weaponId, { damage = { add = { player:GetAttribute("Boost_WeaponDamage") or 0 } } })
 
 		local now = os.clock()
 		if (lastAttack[player] or 0) + stats.cooldown > now then

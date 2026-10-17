@@ -23,7 +23,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Loot drops, magnet, dawn window, tide | Released | S4.5 | |
 | Bench upgrades (4) + evolutions (2) | Released | S5.7 | StatPipeline |
 | Forecasts (3) + vote | Released | — | |
-| Island merchant (voyage-only Shell items) | Planned | S6.2 | |
+| Island merchant (voyage-only Shell items) | Tested (not yet published) | S6.2 | `Definitions/Merchant` (5 items, checked at boot), `MerchantService`, `MerchantRequest`/`MerchantResult`, Trader panel "Island stock" by day; wiped at Results; `MerchantSpec` 10 tests |
 | Orbiting Blades | Planned | S6.3 | |
 | Results (cause, Moment, your part, rewards, next goal) | Released; S2.5 Tested (not yet published) | S2.5 | Sail again leaves at once (0.78 s measured); Back to deck; larger "your part"; `RunCard` share line |
 | Dawn Pearl banking | Tested (not yet published) | S2.2 | D-004; `DawnBanking` bus consumer of NightSurvived → GrantService claim `voyageId:night<n>:userId`; Results pays the remainder (`Voyage.resultPearls`); play-tested in DEV (7 banked + 5 = 12) |
@@ -50,7 +50,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Pearls (saved) | Released | R1.3 | GrantService |
 | Quartermaster shop (idempotent) | Released | — | |
 | Locker / loadouts | Released | R1.4 | handled cap |
-| Trader (sell loot) | Released | S6.2 | merchant role |
+| Trader (sell loot) | Released; merchant role tested (not yet published) | S6.2 | sells the merchant's stock by day |
 | Beam colours (Pearls) | Released | — | |
 | Quartermaster permanent boosts + gear | Planned | S6.4 | |
 | Logbook | Planned | S7.1 | |

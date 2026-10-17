@@ -20,6 +20,7 @@ local CONTRACT: { [string]: { number } } = {
 	ForecastVote = { 3, 5 },
 	AdminRequest = { 1, 3 },
 	ChooseVoyage = { 2, 3 },
+	MerchantRequest = { 5, 8 }, -- S6.2
 }
 
 return function(T: any)

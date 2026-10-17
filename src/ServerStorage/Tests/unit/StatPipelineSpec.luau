@@ -92,7 +92,7 @@ return function(T: any)
 			local function source(inst: Instance): string
 				return (inst :: any).Source
 			end
-			T.expect(source(Server.Domains.Encounter)).toContain("StatPipeline.weapon(weaponId)")
+			T.expect(source(Server.Domains.Encounter)).toContain("StatPipeline.weapon(weaponId, ")
 			T.expect(source(Server.Domains.Economy)).toContain("StatPipeline.armor(profile.equippedArmor)")
 			T.expect(source(Server.UpgradeService)).toContain("StatPipeline.upgrade(id, level)")
 			for _, name in { "Shop", "Inventory" } do

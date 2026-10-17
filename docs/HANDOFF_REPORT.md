@@ -664,3 +664,25 @@ NOT MEASURED HERE: a real 4-client boss night (owner: Test → Clients and Serve
 MIRROR: 114 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (a11900c7).
 OWNER APPROVAL: auto-approved (unattended, D-010/D-015)
 NEXT: S6.2 island merchant.
+
+CHECKPOINT: S6.2 Island merchant — 🟦 (Shell-sink telemetry needs live voyages; Script Analysis unmeasured; everything else passed)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF before Play (probe refused, error 7)
+BACKUP: ServerStorage.Backups.S6.2_before_2026-10-17 (StatPipeline, Events, _Registry, NetGuard, Platform, TowerService, LampService, Encounter, Economy, EventLog, StatPipelineSpec, Trader) · restore point "S6.2 passed"
+BUILT:
+- `Shared/Definitions/Merchant` (new): Whetstone +10% weapon damage (50), Sea Legs Tonic +10% walk speed (40) (each twice a voyage, cap +20%), Kelp Poultice full heal (15), Oil Bundle +40 lamp fuel (30), Tower Shield half tower damage until dawn (60). Prices are D-019 (recommendation, flagged). `_Registry` checks the catalog at boot (40 definitions now).
+- `Server/MerchantService` (new, `--!strict`): the rules (Day phase, crew, within 18 studs of the Trader, per-voyage limit, the effect must do something, crew Shells), a capped requestId replay map (a repeated request gets the first answer and spends nothing, even if an effect fails), boosts as capped AdditivePct layers, the shield until dawn, a wipe on VoyageStarted and VoyageEnded.
+- Wiring: `MerchantRequest`/`MerchantResult` remotes (contract row, type guard, token bucket 5/8); weapon hits read the damage boost through `StatPipeline.weapon` (new `PlayerSpeed` stat row); walk speed re-applied on respawn and when the Keeper leaves the lamp; `TowerService` halves damage while the shield is up; `MerchantPurchase` event and `ShellsChanged` reason `merchant`; the run summary shows merchant Shells.
+- Trader panel: an "Island stock" section by day with a BUY button per item, owned count (n/2), and the server's reason when it can't be bought.
+TESTRUNNER (DEV): **162 passed, 0 failed** (152 + new `MerchantSpec` 10: the catalog passes the registry and an over-cap boost is refused; day/crew/range checks; Shells spent and refused; malformed requests ignored; a repeated requestId spends once; a failing effect still answers once; boosts stack to +20% and stop; heal/oil/shield refuse when useless; the shield drops at dawn; everything wiped at Results; wiring) + `NetGuardSpec` contract row.
+PLAY TEST (DEV, owner's account, mock store; runtime-only TEMPTEST scripts; the Trader panel was opened by the server's own TraderOpen and purchases sent as the panel sends them):
+- Day 1 with the real 120 starting Shells: Whetstone 120 → 70; the same requestId again answered "Bought Whetstone." with 70 left (no second purchase); Sea Legs Tonic → 30, walk speed 16 → 17.6; Kelp Poultice → 15, health 59 → 100; Oil Bundle refused "Need 30 Shells (the crew has 15)."; the panel showed "Whetstone (1/2)" and disabled the rows the crew could not afford with that reason.
+- With 200 test Shells added: Oil Bundle fuel 0 → 40; Tower Shield on; a second shield refused; 10 damage took the shielded tower 100 → 95; after a dawn event the shield dropped and 10 damage took 95 → 85.
+- A harpoon attack with one Whetstone hit for 8.8 (Driftwood Harpoon base 8, +10%).
+- Crew left the island (Abandoned): every boost and count attribute cleared, walk speed back to 16, shield off. Run summary: "Shells spent: 195 (merchant 195)".
+- A first run found a bug (a missing run counter made every successful purchase error after spending, so a repeated request bought again); fixed (counter added; the answer is now remembered even if an effect fails) and covered by a test before this run. 0 errors in the final run (server only ProfileStore's refused Studio write, API off; Roblox's own UIBlox warnings). Play stopped; 0 TEMPTEST scripts remain.
+- The test's fake dawn event also ran dawn Pearl banking on the mock profile (memory store, nothing saved).
+NOT MEASURED: the Shell sink (late-run Shell balance down ≥ 40% vs baseline) needs live voyages: compare `shellsLeft` and "merchant" in the run summaries before and after the publish. The panel's look was not checked on screen (Studio was not drawing frames during this run); its rows, texts and sizes were read back (5 rows 442×62 in a 485×535 sheet).
+MIRROR: 117 scripts in DEV, digest of all FNV-1a hashes identical to `src/` (35d04467).
+OWNER APPROVAL: auto-approved (unattended, D-010/D-015); prices D-019 flagged
+NEXT: S6.3 Orbiting Blades (first sold by the merchant).

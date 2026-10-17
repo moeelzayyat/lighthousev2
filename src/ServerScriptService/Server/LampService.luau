@@ -13,6 +13,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayer = game:GetService("StarterPlayer")
 
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
+local StatPipeline = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("StatPipeline")) -- S6.2
 local EventLog = require(script.Parent.EventLog)
 local NetGuard = require(script.Parent.NetGuard) -- R1.4 remote guards
 local Ground = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Ground"))
@@ -150,7 +151,8 @@ function LampService.setKeeper(player, reason)
 	if keeper then
 		local humanoid = getHumanoid(keeper)
 		if humanoid then
-			humanoid.WalkSpeed = StarterPlayer.CharacterWalkSpeed
+			-- S6.2: with the merchant's speed boost (a server-set attribute)
+			humanoid.WalkSpeed = StatPipeline.compute("PlayerSpeed", StarterPlayer.CharacterWalkSpeed, { add = { keeper:GetAttribute("Boost_PlayerSpeed") or 0 } })
 		end
 	end
 

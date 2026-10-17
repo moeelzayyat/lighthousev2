@@ -1,8 +1,10 @@
 -- Economy domain (S5.1/S5.2): Pearls banked at dawn, the Quartermaster shop, loadouts, the gear a player
--- carries (weapon tools, worn armor), beam-colour cosmetics and the island Trader.
+-- carries (weapon tools, worn armor), beam-colour cosmetics and the island Trader (selling loot, and from S6.2
+-- the merchant's voyage-only stock).
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterPlayer = game:GetService("StarterPlayer")
 
 local Server = script.Parent.Parent
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
@@ -20,6 +22,8 @@ local UpgradeService = require(Server.UpgradeService)
 local LampService = require(Server.LampService)
 local VoyageCast = require(Server.VoyageCast)
 local NetGuard = require(Server.NetGuard)
+local MerchantService = require(Server.MerchantService) -- S6.2
+local Merchant = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Merchant"))
 
 local Economy = { Name = "Economy" }
 
@@ -295,7 +299,7 @@ function Economy.Init(ctx)
 end
 
 function Economy.Start(ctx)
-	local remotes, refs = ctx.remotes, ctx.refs
+	local remotes, refs, state = ctx.remotes, ctx.refs, ctx.state
 	ShopService.init(remotes, PlayerData, refs.shopCounter, refs.shopPrompt)
 
 	Players.PlayerAdded:Connect(hookWeapons)
@@ -351,9 +355,102 @@ function Economy.Start(ctx)
 		remotes.TraderResult:FireClient(player, requestId, ok, message, total)
 	end)
 
+	-- S6.2: the island merchant (the Trader's day job): voyage-only stock for the crew's Shells
+	local function humanoidOf(player)
+		local character = player.Character
+		return character and character:FindFirstChildOfClass("Humanoid")
+	end
+	-- boosts and purchase counts as server-set attributes (Attack, LampService and the Trader panel read them)
+	local function applyBoosts(player)
+		local damage = MerchantService.boost(player, "WeaponDamage")
+		local speed = MerchantService.boost(player, "PlayerSpeed")
+		player:SetAttribute("Boost_WeaponDamage", if damage > 0 then damage else nil)
+		player:SetAttribute("Boost_PlayerSpeed", if speed > 0 then speed else nil)
+		for _, id in Merchant.ORDER do
+			local n = MerchantService.count(player, id)
+			player:SetAttribute("Merchant_" .. id, if n > 0 then n else nil)
+		end
+		local humanoid = humanoidOf(player)
+		if humanoid and LampService.getKeeper() ~= player then
+			humanoid.WalkSpeed = StatPipeline.compute("PlayerSpeed", StarterPlayer.CharacterWalkSpeed, { add = { speed } })
+		end
+	end
+	MerchantService.init({
+		getShells = UpgradeService.getShells,
+		trySpend = UpgradeService.trySpend,
+		fuel = function()
+			return LampService.getFuel(), LampService.getMaxFuel()
+		end,
+		addFuel = LampService.addFuel,
+		health = function(player)
+			local humanoid = humanoidOf(player)
+			if humanoid and humanoid.Health > 0 then
+				return humanoid.Health, humanoid.MaxHealth
+			end
+			return nil, nil
+		end,
+		heal = function(player)
+			local humanoid = humanoidOf(player)
+			if humanoid then
+				humanoid.Health = humanoid.MaxHealth
+			end
+		end,
+		applyBoosts = applyBoosts,
+		setShield = function(on)
+			state:SetAttribute("TowerShield", on)
+		end,
+		purchased = function(player, itemId, price)
+			local def = Merchant[itemId]
+			applyBoosts(player)
+			EventLog.Publish("ShellsChanged", { VoyageId = EventLog.voyageId(), Delta = -price, Reason = "merchant" })
+			EventLog.Publish("MerchantPurchase", { VoyageId = EventLog.voyageId(), UserId = player.UserId, ItemId = itemId, Price = price, Currency = "Shells" })
+			EventLog.log("MerchantPurchase", { player = player.Name, item = itemId, price = price })
+			EventLog.count("merchantShells", price)
+			SoundFx.playAt("build", refs.traderPrompt.Parent.Position)
+			if def.scope == "crew" then
+				VoyageCast.fire(remotes.Notify, string.format("%s bought a %s for the crew: %s.", player.DisplayName, def.displayName, string.lower(def.description))) -- island merchant: crew only
+			else
+				LampService.notify(player, string.format("%s: %s.", def.displayName, def.description))
+			end
+		end,
+	})
+	-- wiped when a voyage starts and at Results; the shield drops at dawn
+	EventLog.Subscribe("VoyageStarted", function()
+		MerchantService.reset()
+	end)
+	EventLog.Subscribe("VoyageEnded", function()
+		MerchantService.reset()
+	end)
+	EventLog.Subscribe("NightSurvived", function()
+		MerchantService.endNight()
+	end)
+	local function hookBoosts(player)
+		player.CharacterAdded:Connect(function()
+			task.defer(applyBoosts, player) -- a new character walks at the boosted speed
+		end)
+	end
+	Players.PlayerAdded:Connect(hookBoosts)
+	for _, player in Players:GetPlayers() do
+		hookBoosts(player)
+	end
+
+	remotes.MerchantRequest.OnServerEvent:Connect(function(player, requestId, action, itemId, qty)
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		local result = MerchantService.process(player, requestId, action, itemId, qty, {
+			phase = state:GetAttribute("Phase"),
+			ready = player:GetAttribute("Ready") == true,
+			distance = if root and root:IsA("BasePart") then (root.Position - refs.traderPrompt.Parent.Position).Magnitude else math.huge,
+		})
+		if result then
+			remotes.MerchantResult:FireClient(player, requestId, result.ok, result.message, result.state)
+		end
+	end)
+
 	Players.PlayerRemoving:Connect(function(player)
 		traderHandled[player] = nil
 		lastTrade[player] = nil
+		MerchantService.forget(player)
 	end)
 end
 

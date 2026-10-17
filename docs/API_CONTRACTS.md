@@ -28,22 +28,22 @@ Every handler calls `NetGuard.allow(player, remote)` (per-player token bucket at
 | `ForecastVote` | `choice` | Ready, phase Waiting/Intermission, one of the two offered | 3 / 5 |
 | `ChooseVoyage` (S2.1) | `defId` | string ≤ 20, a known voyage definition that is not test-only (S3.1b: Endless Storm is refused); Ready; phase Waiting/Intermission; the sender holds the definition's unlock (`Unlock_<key>`); GameState re-checks at departure that a sailing member holds it | 2 / 3 |
 | `AdminRequest` (R1.8) | `requestId, action, targetUserId, arg?` | requestId ≤ 40; action string ≤ 20; finite targetUserId; arg number or string ≤ 20; **owner UserId only** (`AdminDataService.OWNER_IDS`), anyone else refused and logged `AdminRejected`; actions inspect / grant (1–1000 Pearls, target online) / rollback (YYYY-MM-DD snapshot) | 1 / 3 |
-| `MerchantRequest` (new, S6.2) | `requestId, action, itemId, qty` | replay, Day phase, Ready, distance ≤ 18, stock, Shells | 5 / 8 |
+| `MerchantRequest` (S6.2 ✅) | `requestId, action, itemId, qty` | requestId ≤ 40; action `"buy"`; itemId a string ≤ 40 in `Merchant.ORDER`; qty exactly 1; capped replay map (checked before the rate); Ready; phase Day; distance to the Trader ≤ 18; the item's per-voyage limit; the effect would do something (hurt for Heal, lamp not full for Oil, no shield up for Shield); crew Shells | 5 / 8 |
 | `ObjectiveClaim` (new, S7.2) | `objectiveId, claimId` | complete, unclaimed, GrantService | 2 / 3 |
 | `CodeRedeem` (new, L1.4) | `code ≤ 32` | once per profile, expiry | 1 per 10 s |
 | `Settings` (new, S5) | `key, value` | whitelist of keys | 5 / 10 |
 
 Deferred from this table: `Attack.Seq` + `CombatResult` (architecture §7.1 feel work) — not in the R1.4 roadmap row; lands with client prediction in S4.
 
-## All 32 current remotes
-Client → server (17): `AdminRequest`, `Attack`, `ChooseVoyage`, `BeamControl`, `LampAction`, `LampShift` (both directions), `BuyUpgrade`, `ShopRequest`, `TraderRequest`, `LoadoutRequest`, `GearAction`, `SetReady`, `VoteRematch`, `EnterLobby`, `ReportDevice`, `CoachEvent` (both directions), `ForecastVote`.
-Server → client only (15): `AdminResult`, `Notify`, `LootCollected`, `OpenUpgrades`, `PlaySound`, `RunResults`, `GearData`, `ShopOpen`, `ShopResult`, `LoadoutResult`, `Travel`, `UpgradeResult`, `TraderOpen`, `TraderResult`, `CrewFeed`. They have no server handler, so client input on them is ignored.
+## All 34 current remotes
+Client → server (18): `AdminRequest`, `Attack`, `ChooseVoyage`, `BeamControl`, `LampAction`, `LampShift` (both directions), `BuyUpgrade`, `ShopRequest`, `TraderRequest`, `MerchantRequest` (S6.2), `LoadoutRequest`, `GearAction`, `SetReady`, `VoteRematch`, `EnterLobby`, `ReportDevice`, `CoachEvent` (both directions), `ForecastVote`.
+Server → client only (16): `AdminResult`, `Notify`, `LootCollected`, `OpenUpgrades`, `PlaySound`, `RunResults`, `GearData`, `ShopOpen`, `ShopResult`, `LoadoutResult`, `Travel`, `UpgradeResult`, `TraderOpen`, `TraderResult`, `MerchantResult` (S6.2), `CrewFeed`. They have no server handler, so client input on them is ignored.
 
 ## Server → Client
 | Remote | Payload | Notes |
 |---|---|---|
 | `Notify`, `PlaySound`, `LootCollected`, `CrewFeed`, `CoachEvent` | as today; `LootCollected` kinds: loot item ids, `Shells`, `Pearls`, and `PearlBanked` (S2.2, amount banked at dawn); `CrewFeed` kinds: `refuel`, `clutch`, `reserve` (S2.3, the Night-1 reserve refilled the lamp) | `PlaySound` client handler validates types (keep) |
-| `UpgradeResult`, `ShopResult`, `LoadoutResult`, `TraderResult`, `MerchantResult` | `{requestId, ok, reason?, state?}` | replayed for duplicate requestIds |
+| `UpgradeResult`, `ShopResult`, `LoadoutResult`, `TraderResult`, `MerchantResult` | `{requestId, ok, reason?, state?}` (`MerchantResult`: `requestId, ok, message, {itemId, count, shells}`) | replayed for duplicate requestIds |
 | `AdminResult` (R1.8) | `requestId, ok, result` (table for inspect, message otherwise) | owner only in practice |
 | `RunResults` | results payload (S2.2 adds `banked`, S2.5 `crewSize`) | |
 | `GearData` | profile view | **never** includes `Grants`, `RedeemedCodes` |

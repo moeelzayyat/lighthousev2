@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local EventLog = require(script.Parent.EventLog)
 local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SoundFx"))
+local Merchant = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Merchant"))
 
 local TowerService = {}
 
@@ -41,6 +42,9 @@ function TowerService.init(stateFolder, repairPrompt, notify)
 end
 
 function TowerService.damage(amount)
+	if state:GetAttribute("TowerShield") then
+		amount *= Merchant.TowerShield.mult -- S6.2: the merchant's shield, until dawn
+	end
 	local floor = if protected then 1 else 0
 	local before = integrity / maxIntegrity
 	integrity = math.max(floor, integrity - amount)
