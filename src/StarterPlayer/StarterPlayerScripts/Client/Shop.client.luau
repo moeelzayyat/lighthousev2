@@ -551,6 +551,26 @@ renderDetail = function()
 	end
 end
 
+-- L1.3: the price Roblox reports for this player (managed pricing can change it by region); the catalogue's price
+-- until the answer arrives
+local livePrices = {}
+local function priceFor(product)
+	local live = livePrices[product.productId]
+	if live == nil then
+		livePrices[product.productId] = false -- asked once
+		task.spawn(function()
+			local ok, info = pcall(function()
+				return MarketplaceService:GetProductInfo(product.productId, Enum.InfoType.Product)
+			end)
+			if ok and type(info) == "table" and type(info.PriceInRobux) == "number" then
+				livePrices[product.productId] = info.PriceInRobux
+				renderDetail()
+			end
+		end)
+	end
+	return if type(live) == "number" then live else product.robux
+end
+
 -- L1.3: the Robux button next to (or instead of) the Pearl price
 local function renderRobux()
 	local item = selectedId and Items[selectedId]
@@ -562,7 +582,7 @@ local function renderRobux()
 	buyButton.Size = if show then half else BUY_SIZE
 	robuxButton.Size = if buyButton.Visible then half else BUY_SIZE
 	if show and product then
-		robuxButton.Text = string.format("R$ %d", product.robux)
+		robuxButton.Text = string.format("R$ %d", priceFor(product))
 		robuxButton:SetAttribute("BaseText", robuxButton.Text)
 	end
 end
