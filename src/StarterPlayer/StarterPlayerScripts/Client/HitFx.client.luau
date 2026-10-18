@@ -24,7 +24,7 @@ end
 -- cannon shots: the server adds a short-lived "Flash" part at the muzzle (DefenseService)
 task.spawn(function()
 	local defenses = Workspace:WaitForChild("Island"):WaitForChild("Defenses")
-	defenses.ChildAdded:Connect(function(child)
+	defenses.ChildAdded:Connect(function(child: Instance)
 		if child.Name == "Flash" and child:IsA("BasePart") then
 			local distance = (child.Position - camera.CFrame.Position).Magnitude
 			if distance < CANNON_RANGE then
@@ -52,7 +52,7 @@ end
 localPlayer.CharacterAdded:Connect(watch)
 
 -- after the camera has moved this frame, nudge it; the camera rebuilds its own position every frame, so nothing drifts
-RunService:BindToRenderStep("HitFxShake", Enum.RenderPriority.Camera.Value + 1, function(dt)
+RunService:BindToRenderStep("HitFxShake", Enum.RenderPriority.Camera.Value + 1, function(dt: number)
 	if trauma <= 0 then
 		return
 	end

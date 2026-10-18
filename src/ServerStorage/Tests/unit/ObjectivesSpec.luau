@@ -62,7 +62,7 @@ return function(T: any)
 			end
 			T.expect(done).toBe("DeliverOil")
 			T.expect(Objectives.count(state, user, T0 + 20, "TowerRepaired", 1)).toBe(nil) -- another objective's event
-			T.expect(state.Progress.DeliverOil).toBe(10)
+			T.expect((state.Progress :: any).DeliverOil).toBe(10)
 		end)
 
 		T.it("a night objective counts the night reached", function()
@@ -70,7 +70,7 @@ return function(T: any)
 			local state = { DayKey = "", Progress = {}, Claimed = {} }
 			T.expect(Objectives.count(state, user, T0, "NightSurvived", 2)).toBe(nil)
 			T.expect(Objectives.count(state, user, T0, "NightSurvived", 1)).toBe(nil)
-			T.expect(state.Progress.SurviveNight4).toBe(2)
+			T.expect((state.Progress :: any).SurviveNight4).toBe(2)
 			T.expect(Objectives.count(state, user, T0, "NightSurvived", 4)).toBe("SurviveNight4")
 		end)
 

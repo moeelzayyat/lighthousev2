@@ -45,7 +45,7 @@ function EventBus.new(catalog: { [string]: { [string]: string } }, warnFn: ((str
 	local subscribers: { [string]: { Handler } } = {}
 	local warned: { [string]: boolean } = {}
 	local stats: Stats = { published = 0, delivered = 0, rejected = 0, handlerErrors = 0 }
-	local say = warnFn or warn
+	local say: (string) -> () = warnFn or warn
 
 	local function warnOnce(key: string, text: string)
 		if not warned[key] then
@@ -89,7 +89,7 @@ function EventBus.new(catalog: { [string]: { [string]: string } }, warnFn: ((str
 			if list then
 				for _, handler in table.clone(list) do
 					task.spawn(function()
-						local handlerOk, err = pcall(handler, payload)
+						local handlerOk, err = pcall(handler :: any, payload)
 						if handlerOk then
 							stats.delivered += 1
 						else

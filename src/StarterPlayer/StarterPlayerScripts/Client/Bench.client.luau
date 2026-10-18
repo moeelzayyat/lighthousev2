@@ -95,7 +95,7 @@ end
 ---------------------------------------------------------------------
 
 local function tiles(): { any }
-	local list = {}
+	local list: { any } = {}
 	local balance = shells()
 	for _, id in Upgrades.ORDER do
 		local upgrade = Upgrades[id]

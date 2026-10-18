@@ -793,7 +793,7 @@ function Registry.check(all: Catalogs): { string }
 		if type(cat) ~= "table" then
 			c.add(name, "catalog is missing")
 		elseif rule then
-			local ok, err = pcall(rule, c, cat, all)
+			local ok, err = pcall(rule :: any, c, cat, all)
 			if not ok then
 				c.add(name, "could not be checked: " .. tostring(err))
 			end

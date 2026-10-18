@@ -371,3 +371,4 @@ Numbers (chosen by Claude; the owner may change any of them):
 Balance rule kept: every one is below the wide beam's 12 damage a second on one creature (7.1, 1.0 and 6.7).
 ## CP — WPN.1 passed · 2026-10-18 · auto-approved (unattended) · TestRunner 276/276; digest 174 scripts 4bde78bc
 ## CP — SET.1 passed · 2026-10-18 · auto-approved (unattended) · TestRunner 276/276; digest 174 scripts 7e9b990f · Results and Settings already in the Bold look (not rebuilt, D-041); Settings now open from the BAG anywhere. Settings still last one session: saving them needs a new save field (owner approval, CLAUDE.md rule 5)
+## CP — SA.2 passed · 2026-10-18 · auto-approved (unattended) · TestRunner 276/276; digest 174 scripts ccecd045 · Script Analysis 103 → 18 distinct warnings, the 18 all inside the vendored ProfileStore (left unchanged on purpose: it is the library as shipped)

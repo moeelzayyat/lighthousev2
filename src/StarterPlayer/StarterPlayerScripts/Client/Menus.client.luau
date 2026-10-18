@@ -1144,7 +1144,7 @@ closePanel = function()
 	current = "title"
 	tween(scrim, UiKit.Motion.fast, { BackgroundTransparency = 1 })
 	UiKit.Close(panel, function()
-		if current == "title" then
+		if (current :: string) == "title" then
 			scrim.Visible = false
 		end
 	end)

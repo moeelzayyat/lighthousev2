@@ -43,7 +43,7 @@ return function(T: any)
 		end)
 
 		T.it("a window that ends before it starts, or an event voyage with an unlock, fails the boot", function()
-			local bad = table.clone(LiveEvents)
+			local bad: any = table.clone(LiveEvents)
 			bad.ShipwreckRescue = table.clone(LiveEvents.ShipwreckRescue)
 			bad.ShipwreckRescue.ends = bad.ShipwreckRescue.starts - 10
 			local found = table.concat(problems(bad), "\n")

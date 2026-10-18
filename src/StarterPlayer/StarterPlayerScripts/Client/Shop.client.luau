@@ -501,7 +501,7 @@ renderAll = function()
 	end
 	local list = if category == "Boosts" then boostTiles() else itemTiles()
 	local stillThere = false
-	for _, t in list do
+	for _, t in list :: { any } do
 		if t.id == selectedId then
 			stillThere = true
 		end

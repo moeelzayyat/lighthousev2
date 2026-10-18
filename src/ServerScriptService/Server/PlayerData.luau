@@ -126,7 +126,7 @@ local function load(store: any, player: Player)
 	-- unlocks as Unlock_<Key> attributes (S2.1: the crew card offers the Long Voyage to holders)
 	for key, value in data.Unlocks do
 		if type(value) == "boolean" then
-			player:SetAttribute("Unlock_" .. key, value)
+			player:SetAttribute("Unlock_" .. tostring(key), value)
 		end
 	end
 	-- S3.1b: the account's arm in the mode test (no attribute = not in the test)

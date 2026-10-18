@@ -117,7 +117,7 @@ end
 function NetGuard.connect(remote: any, handler: (...any) -> ())
 	remote.OnServerEvent:Connect(handler)
 	NetGuard.expose(remote.Name, function(...)
-		local ok, err = pcall(handler, ...)
+		local ok, err = pcall(handler :: any, ...)
 		return ok, if ok then nil else tostring(err)
 	end)
 end

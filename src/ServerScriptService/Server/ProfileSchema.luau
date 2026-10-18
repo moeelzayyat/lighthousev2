@@ -124,7 +124,7 @@ function ProfileSchema.validate(data: any): (Profile, { string })
 	for slot, default in { Weapon = t.Equipped.Weapon, Armor = t.Equipped.Armor, Beam = t.Equipped.Beam } do
 		local id = data.Equipped[slot]
 		if type(id) ~= "string" or not data.Owned[id] then
-			data.Equipped[slot] = fix("Equipped." .. slot, "missing or not owned", default)
+			data.Equipped[slot] = fix("Equipped." .. tostring(slot), "missing or not owned", default)
 		end
 	end
 	-- L1.3: cosmetic slots are optional (nil = none); the item must be owned and fit the slot
@@ -134,7 +134,7 @@ function ProfileSchema.validate(data: any): (Profile, { string })
 			local item = type(id) == "string" and data.Owned[id] and Items[id]
 			if not item or item.slot ~= slot then
 				data.Equipped[slot] = nil
-				fix("Equipped." .. slot, "not owned or not a " .. slot, nil)
+				fix("Equipped." .. tostring(slot), "not owned or not a " .. slot, nil)
 			end
 		end
 	end
@@ -144,7 +144,7 @@ function ProfileSchema.validate(data: any): (Profile, { string })
 	end
 	for field, default in t.Stats do
 		if not isCount(data.Stats[field]) then
-			data.Stats[field] = fix("Stats." .. field, "not a whole number", default)
+			data.Stats[field] = fix("Stats." .. tostring(field), "not a whole number", default)
 		end
 	end
 	-- Tables that only need to exist with the right shape
@@ -168,7 +168,7 @@ function ProfileSchema.validate(data: any): (Profile, { string })
 	end
 	for field, default in t.Settings do
 		if type(data.Settings[field]) ~= type(default) then
-			data.Settings[field] = fix("Settings." .. field, "wrong type", default)
+			data.Settings[field] = fix("Settings." .. tostring(field), "wrong type", default)
 		end
 	end
 	-- Boosts (S6.4): a profile saved before the field existed gets {} silently (a new field, not a repair);

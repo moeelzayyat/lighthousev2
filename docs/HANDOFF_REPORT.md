@@ -1684,3 +1684,11 @@ MIRROR: 174 scripts in DEV, digest identical to `src/` (7e9b990f).
 SCREENS: `assets/screens/settings/bag_settings_tile_pc.jpg`, `settings_open_in_game_pc.jpg`, `results_bold_rewards_pc.jpg`
 NOT DONE: saving settings between sessions (needs a new save field: owner approval); a phone check.
 SEEN, NOT CHANGED: one mouse click in the harbor counted as the first "harpoon attack" in the log while the BAG closed; it looks like a click passing through a menu to the world. Worth a look later.
+
+CHECKPOINT: SA.2 Script Analysis clean-up, second pass — ✅ in DEV Studio
+DATE: 2026-10-18
+COUNT: luau-lsp 1.70.1 `analyze`, all 174 scripts, Roblox definitions, run from `src/` with `rojo sourcemap default.project.json` (from the repo root the sourcemap paths miss `src/` and every cross-file require shows as "Unknown require"; that is how the earlier per-file checks in this session were run, so they under-counted cross-file types). Distinct warnings: **103 → 18**; the 18 left are all in `ServerScriptService.Server.ProfileStore`, the bought-in library, kept exactly as shipped.
+FIXED (type-only, 29 files): `UI/Controls` (typed tile state), `UiSkin` (optional Config keys), `WindFx`/`HitFx` (parameter types), `UI/Gauges`, `UI/Dialogs` (nil-safe `table.remove`), `UI/Tiles`, `Inventory`, `Shop`, `Trader`, `Bench`, `Menus` (typed loops and comparisons), `LeaderboardService`, `PlayerData` and `ProfileSchema` (`tostring` on labels: same text), `RescueService`, `EventBus`, `NetGuard`, `Analytics`, `_Registry`, `TestRunner` (pcall casts), and 9 test specs (fixture casts). In `CodesSpec` a line began with `(`, which Luau can read as a call on the previous line; it now uses a named local.
+BACKUP: ServerStorage.Backups.SA2_before_2026-10-18 (29 scripts) · restore points "SA2 before", "SA2 code", "SA2 passed"
+CHECKED: TestRunner **276 passed, 0 failed**; play test in DEV Studio: a voyage from the ship through the opening to night 1, the tower broken by a test script, Results ("The lighthouse fell"), back to the deck, the BAG (Weapons tab) and the Quartermaster; console: no game errors; API access off (probe failed).
+MIRROR: 174 scripts in DEV, digest identical to `src/` (ccecd045).

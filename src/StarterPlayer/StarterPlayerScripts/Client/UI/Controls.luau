@@ -1101,7 +1101,7 @@ function UiKit.ItemCard(parent, opts)
 	local brackets = UiKit.Brackets(card, Color.AccentLighthouse, 12, 2, -4)
 
 	local self = { frame = card, preview = preview, name = name, typeLine = typeLine }
-	local state = {}
+	local state: { [string]: any } = {}
 	local function render()
 		local emphasized = state.selected or state.equipped
 		stroke.Transparency = if emphasized then 0 else 1

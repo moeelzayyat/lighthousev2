@@ -40,7 +40,7 @@ function LeaderboardService.flush(deps: Deps)
 		local def = Leaderboards[id]
 		local store = deps.storeFor(Leaderboards.storeName(def, now))
 		if def.kind == "best" then
-			for userId, night in best[id] or {} do
+			for userId, night in (best[id] or {}) :: { [any]: any } do
 				store.raise(tostring(userId), night)
 			end
 			best[id] = {}

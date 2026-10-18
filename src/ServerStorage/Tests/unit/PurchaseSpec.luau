@@ -61,7 +61,7 @@ return function(T: any)
 			T.expect(PurchaseService.process(receipt("r-1"), w.deps)).toBe("granted")
 			T.expect(w.grants).toBe(1)
 			T.expect(w.notes).toBe(1)
-			T.expect(w.profile.Owned.LanternTide).toBe(true)
+			T.expect((w.profile.Owned :: any).LanternTide).toBe(true)
 			T.expect(w.profile.Grants["receipt:r-1"] ~= nil).toBe(true)
 		end)
 
@@ -92,7 +92,7 @@ return function(T: any)
 			PurchaseService.process(receipt("r-5"), w.deps)
 			PurchaseService.process(receipt("r-6"), w.deps)
 			T.expect(w.grants).toBe(2) -- the item stays owned once; both receipts are honoured
-			T.expect(w.profile.Owned.LanternTide).toBe(true)
+			T.expect((w.profile.Owned :: any).LanternTide).toBe(true)
 		end)
 	end)
 end

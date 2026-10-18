@@ -63,7 +63,7 @@ function Analytics.robloxSink(debugPrint: boolean?): Sink
 			end
 			return
 		end
-		local ok, err = pcall(fn, player)
+		local ok, err = pcall(fn :: any, player)
 		if not ok then
 			warn("[Analytics] " .. what .. " failed: " .. tostring(err))
 		elseif debugPrint then

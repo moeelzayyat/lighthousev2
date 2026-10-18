@@ -51,7 +51,10 @@ local function trim(stack, limit)
 		return a.LayoutOrder < b.LayoutOrder
 	end)
 	while #items >= limit do
-		table.remove(items, 1):Destroy()
+		local oldest = table.remove(items, 1)
+		if oldest then
+			oldest:Destroy()
+		end
 	end
 end
 

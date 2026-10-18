@@ -123,7 +123,7 @@ return function(T: any)
 			end
 			-- the requests reached the decision (not just the rate limit) and nothing changed
 			for remote, n in reached do
-				T.expect(allowed(remote)).toBeGreaterThan(n)
+				T.expect(allowed(remote :: any)).toBeGreaterThan(n)
 			end
 			T.expect(world(player)).toEqual(before)
 		end, 15)

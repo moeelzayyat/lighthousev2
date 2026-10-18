@@ -186,7 +186,7 @@ function Tiles.glyph(holder: Instance, kind: string, color: Color3): any
 	local function fit()
 		s.Scale = math.max(1, (holder :: any).Size.X.Offset * 0.5 / 64)
 	end
-	holder:GetPropertyChangedSignal("Size"):Connect(fit)
+	(holder :: any):GetPropertyChangedSignal("Size"):Connect(fit)
 	fit()
 	return g
 end
@@ -315,7 +315,7 @@ function Tiles.Menu(opts: any): any
 	new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder, VerticalAlignment = Enum.VerticalAlignment.Center }, alertsRow)
 	local alertKey = ""
 	function menu:setAlerts(list: { any }?)
-		local items = list or {}
+		local items: { any } = list or {}
 		local parts = {}
 		for _, a in items do
 			table.insert(parts, tostring(a.level) .. ":" .. tostring(a.text))
@@ -370,7 +370,7 @@ function Tiles.Menu(opts: any): any
 		end
 		table.clear(tabButtons)
 		tabsRow.Visible = items ~= nil and #items > 0
-		for i, item in items or {} do
+		for i, item in (items or {}) :: { any } do
 			local b = bigButton(tabsRow, "Tab_" .. item.id)
 			b.button.LayoutOrder = i
 			b.text.Text = string.upper(item.label)
@@ -417,7 +417,7 @@ function Tiles.Menu(opts: any): any
 			local n = label(costRowT, { Text = tostring(t.cost.amount), FontFace = F.Display, TextSize = 28, TextColor3 = if t.affordable == false then TILE.short else Color3.new(1, 1, 1), Size = UDim2.fromOffset(0, 30), AutomaticSize = Enum.AutomaticSize.X, LayoutOrder = 2 })
 			textOutline(n, 2)
 		end
-		for i, c2 in t.cost2 and { t.cost2 } or {} do
+		for i, c2 in (if t.cost2 then { t.cost2 } else {}) :: { any } do
 			local n = label(costRowT, { Text = c2, FontFace = F.Display, TextSize = 24, TextColor3 = Color3.fromRGB(120, 220, 60), Size = UDim2.fromOffset(0, 30), AutomaticSize = Enum.AutomaticSize.X, LayoutOrder = 10 + i })
 			textOutline(n, 2)
 		end

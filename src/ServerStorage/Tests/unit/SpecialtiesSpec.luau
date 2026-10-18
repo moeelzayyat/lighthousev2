@@ -70,10 +70,10 @@ return function(T: any)
 			for _ = 1, 24 do
 				handlers.Refuelled({ UserId = 7 })
 			end
-			T.expect(data.Unlocks.Specialties.Oiler).toBe(nil)
+			T.expect((data.Unlocks.Specialties :: any).Oiler).toBe(nil)
 			handlers.Refuelled({ UserId = 7 })
-			T.expect(data.Roles.OilDelivered).toBe(25)
-			T.expect(data.Unlocks.Specialties.Oiler).toBe(1)
+			T.expect((data.Roles :: any).OilDelivered).toBe(25)
+			T.expect((data.Unlocks.Specialties :: any).Oiler).toBe(1)
 			T.expect(notes).toEqual({ "Specialty earned: Oiler rank 1! +2% walk speed." })
 			T.expect(pushes).toBe(1) -- counting alone does not push the profile
 			handlers.CreatureKilled({ Source = "Weapon:DriftwoodHarpoon", KillerId = 7 })

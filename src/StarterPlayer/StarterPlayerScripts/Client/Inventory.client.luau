@@ -619,7 +619,7 @@ renderAll = function()
 	end
 	local list = if tab == "Keeper" then keeperTiles() elseif tab == "Logbook" then logbookTiles() else itemTiles()
 	local stillThere = false
-	for _, t in list do
+	for _, t in list :: { any } do
 		if t.id == selectedId then
 			stillThere = true
 		end

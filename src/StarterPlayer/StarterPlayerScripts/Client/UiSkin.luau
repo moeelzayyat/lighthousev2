@@ -20,11 +20,12 @@ do
 	end
 end
 
-local ATLAS = Config.UI_SKIN_ATLAS
-UiSkin.enabled = Config.UI_SKIN == "pirate"
+local Cfg = Config :: any -- SA.2: UI_SKIN / UI_SKIN_ATLAS are optional Config keys
+local ATLAS = Cfg.UI_SKIN_ATLAS
+UiSkin.enabled = Cfg.UI_SKIN == "pirate"
 UiSkin.images = UiSkin.enabled and type(ATLAS) == "string" and ATLAS:match("%d%d%d%d+") ~= nil
-UiSkin.look = Config.UI_SKIN or "lighthouse"
-local Bold = if Config.UI_SKIN == "bold" then require(script.Parent:WaitForChild("UiSkinBold")) else nil
+UiSkin.look = Cfg.UI_SKIN or "lighthouse"
+local Bold = if Cfg.UI_SKIN == "bold" then require(script.Parent:WaitForChild("UiSkinBold")) else nil
 UiSkin.bold = Bold ~= nil
 UiSkin.style = if Bold then Bold.style else nil
 UiSkin.Bold = Bold

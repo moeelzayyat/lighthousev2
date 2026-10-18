@@ -117,8 +117,8 @@ return function(T: any)
 			local map = NetGuard.replayMap()
 			local p = {}
 			T.expect(map.get(p, "r1")).toBeNil()
-			map.put(p, "r1", { true, "bought" })
-			T.expect(map.get(p, "r1")).toEqual({ true, "bought" })
+			map.put(p, "r1", { true :: any, "bought" })
+			T.expect(map.get(p, "r1")).toEqual({ true :: any, "bought" })
 			T.expect(map.get({}, "r1")).toBeNil() -- per player
 		end)
 
@@ -126,21 +126,21 @@ return function(T: any)
 			local map = NetGuard.replayMap()
 			local p = {}
 			for i = 1, 50 do
-				map.put(p, "req" .. i, { true, i })
+				map.put(p, "req" .. i, { true :: any, i })
 			end
 			T.expect(map.size(p)).toBe(40)
 			T.expect(map.get(p, "req10")).toBeNil()
-			T.expect(map.get(p, "req11")).toEqual({ true, 11 })
-			T.expect(map.get(p, "req50")).toEqual({ true, 50 })
+			T.expect(map.get(p, "req11")).toEqual({ true :: any, 11 })
+			T.expect(map.get(p, "req50")).toEqual({ true :: any, 50 })
 		end)
 
 		T.it("a requestId named like an internal key cannot corrupt it", function()
 			local map = NetGuard.replayMap()
 			local p = {}
-			map.put(p, "order", { false, "x" })
-			map.put(p, "results", { false, "y" })
-			map.put(p, "next", { true, "z" })
-			T.expect(map.get(p, "order")).toEqual({ false, "x" })
+			map.put(p, "order", { false :: any, "x" })
+			map.put(p, "results", { false :: any, "y" })
+			map.put(p, "next", { true :: any, "z" })
+			T.expect(map.get(p, "order")).toEqual({ false :: any, "x" })
 			T.expect(map.size(p)).toBe(3)
 		end)
 	end)

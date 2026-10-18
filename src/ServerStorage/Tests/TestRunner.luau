@@ -53,7 +53,7 @@ function TestRunner.describe(name: string, fn: () -> ())
 	table.insert(current.children, suite)
 	local parent = current
 	current = suite
-	local ok, err = pcall(fn)
+	local ok, err = pcall(fn :: any)
 	current = parent
 	if not ok then
 		-- a broken describe body registers one failing test so it is never silent
@@ -330,7 +330,7 @@ local function runFn(fn: TestFn, timeout: number): (boolean, string?)
 	local done = false
 	local ok, err = true, nil :: string?
 	local thread = task.spawn(function()
-		local s, e = pcall(fn)
+		local s, e = pcall(fn :: any)
 		ok = s
 		err = if s then nil else tostring(e)
 		done = true

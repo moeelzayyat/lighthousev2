@@ -180,8 +180,8 @@ function UiKit.HealthGauge(parent, opts)
 		local critical = alpha <= 0.25
 		cap.BackgroundColor3 = if critical then Color.StateDanger else P.SurfaceInset
 		UiKit.SetGlyphColor(heart, if critical then Color.TextOnAccent else Color.StateDanger)
-		label.Text = noteText(label, self.note or (if critical then "HEALTH · CRITICAL" else "HEALTH"))
-		label.TextColor3 = if critical or self.note then Color.StateDanger else Color.TextSecondary
+		label.Text = noteText(label, (self :: any).note or (if critical then "HEALTH · CRITICAL" else "HEALTH"))
+		label.TextColor3 = if critical or (self :: any).note then Color.StateDanger else Color.TextSecondary
 	end
 	-- the maximum can change (armor); the current value is kept
 	function self.setMax(newMax)

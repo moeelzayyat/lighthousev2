@@ -38,7 +38,7 @@ local function remove(instance: Instance)
 	end
 end
 
-for tag, flutter in { Sway = false, Flutter = true } do
+for tag, flutter in ({ Sway = false, Flutter = true } :: { [string]: boolean }) do
 	for _, instance in CollectionService:GetTagged(tag) do
 		add(instance, flutter)
 	end
@@ -67,7 +67,7 @@ end
 CollectionService:GetInstanceAddedSignal("Flicker"):Connect(addFlicker)
 
 local strength = 0.35
-RunService.RenderStepped:Connect(function(dt)
+RunService.RenderStepped:Connect(function(dt: number)
 	-- ease between calm and storm wind, with slow gusts on top
 	local target = if stormy() then 1 else 0.35
 	strength += (target - strength) * math.min(1, dt * 0.5)
