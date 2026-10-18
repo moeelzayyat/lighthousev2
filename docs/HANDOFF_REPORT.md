@@ -1708,3 +1708,11 @@ NOT CHECKED: snowfall seen on screen (the capture ran in daylight after the stor
 SCREENS: `assets/screens/frost_isle/frostbite_isle_day_pc.jpg`, `frostbite_isle_opening_night_pc.jpg`, `frostbite_isle_ground_pc.jpg`
 MIRROR: 177 scripts in DEV, digest identical to `src/` (1ed1b376).
 OWNER: in the published game a crew needs a Standard win first (or an older save that has one). Publish both places as before.
+
+CHECKPOINT: ICON3 Armor and cosmetic icons from the owner's packs — ✅ in DEV Studio (owner said yes, 2026-10-18 20:46 UTC)
+DATE: 2026-10-18
+BUILT: 9 ids in `Shared/ItemIcons` (Ironclaw Plate, Kelpweave Vest, Keeper's Greatcoat, the four beam colours, Moth and Tide lanterns), uploaded from Studio.
+BACKUP: ServerStorage.Backups.ICON3_before_2026-10-18 · restore points "ICON3 code", "ICON3 passed"
+CHECKED: Quartermaster Armor and Cosmetics tabs draw every new picture (`assets/screens/icons3/`); TestRunner **280 passed, 0 failed**; API access off.
+MIRROR: 177 scripts, digest identical to `src/` (dba1cbcd).
+STILL DRAWN (owner to find icons): Oilskin Coat, Storm Blue coat, Kelp Green coat, Kraken flag, Founder's flag, Keeper's Glow beam, Shared Lantern beam (and, if wanted, the two housings and the Gull and Rescuer flags).

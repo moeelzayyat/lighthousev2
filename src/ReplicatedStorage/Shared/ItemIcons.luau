@@ -17,27 +17,27 @@ local ItemIcons: { [string]: string } = {
 	TidecallerBlades = "rbxassetid://139899207751386",
 	-- armor and ammo (Claude-drawn)
 	OilskinCoat = "rbxassetid://114074436530125",
-	KeepersCoat = "rbxassetid://94339926459043",
-	KelpweaveVest = "rbxassetid://97891374327995",
-	IronclawPlate = "rbxassetid://131837581985487",
+	KeepersCoat = "rbxassetid://131656108776329", -- ICON3: Fancy GUI Kit chestplate (purple) (owner's pick)
+	KelpweaveVest = "rbxassetid://124053449421528", -- ICON3: Fancy GUI Kit chestplate (green) (owner's pick)
+	IronclawPlate = "rbxassetid://137830247927584", -- ICON3: Fancy GUI Kit helmet (red) (owner's pick)
 	FireShellCrate = "rbxassetid://76691933271523",
 	-- loot (Claude-drawn)
 	CrabClaw = "rbxassetid://121044171653520",
 	SeaGlass = "rbxassetid://89799167872846",
 	BlackPearl = "rbxassetid://102509802032581",
 	-- cosmetics (Claude-drawn)
-	BeamAmber = "rbxassetid://116090183262825",
-	BeamSeaGlass = "rbxassetid://102490477434070",
-	BeamMoonlight = "rbxassetid://81571281305906",
-	BeamEmber = "rbxassetid://105007451360115",
+	BeamAmber = "rbxassetid://119109547863812", -- ICON3: Fancy GUI Kit gem (yellow) (owner's pick)
+	BeamSeaGlass = "rbxassetid://109723220449796", -- ICON3: Fancy GUI Kit gem (green) (owner's pick)
+	BeamMoonlight = "rbxassetid://111225726755713", -- ICON3: Fancy GUI Kit gem (blue) (owner's pick)
+	BeamEmber = "rbxassetid://87696380334290", -- ICON3: Fancy GUI Kit gem (red) (owner's pick)
 	BeamSharedLantern = "rbxassetid://83228195674142",
 	BeamKeepersGlow = "rbxassetid://96464902613251",
 	HousingDriftwood = "rbxassetid://75465142387655",
 	HousingBrass = "rbxassetid://94796303291915",
 	CoatStormBlue = "rbxassetid://110363693204788",
 	CoatKelpGreen = "rbxassetid://132502189617087",
-	LanternMoth = "rbxassetid://102162800434776",
-	LanternTide = "rbxassetid://94479891019422",
+	LanternMoth = "rbxassetid://71280815821669", -- ICON3: RPG Craft Resources 4053 (owner's pick)
+	LanternTide = "rbxassetid://84668867223781", -- ICON3: RPG Craft Resources 4054 (owner's pick)
 	FlagGull = "rbxassetid://97803221222199",
 	FlagKraken = "rbxassetid://100752905653856",
 	FlagFounder = "rbxassetid://98378099554182",

@@ -382,3 +382,4 @@ Decision:
 - Save field (owner approval covered by the "Yes"): `Unlocks.FrostIsle` (boolean, default false). A profile saved before it gets it silently on load, set to its `LongVoyage` (whoever already won a Standard voyage earned it the same way). No other field changes.
 - New remote `ChooseMap` (string up to 20, a known map, Ready, phase Waiting/Intermission, a crew member holds the unlock; 2 / 3 rate). Harbor to isle teleport data gains `map` (known ids only).
 ## CP — MAP.1 passed · 2026-10-18 · TestRunner 280/280; digest 177 scripts 1ed1b376
+## CP — ICON3 passed · 2026-10-18 · owner's yes to the icon picks (20:46 UTC) · TestRunner 280/280; digest 177 scripts dba1cbcd
