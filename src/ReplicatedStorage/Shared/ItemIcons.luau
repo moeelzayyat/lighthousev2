@@ -18,10 +18,10 @@ local ItemIcons: { [string]: string } = {
 	KelpweaveVest = "rbxassetid://97891374327995",
 	IronclawPlate = "rbxassetid://131837581985487",
 	FireShellCrate = "rbxassetid://76691933271523",
-	-- loot (Sealoot pack)
-	CrabClaw = "rbxassetid://125494313308190",
-	SeaGlass = "rbxassetid://78566778258629",
-	BlackPearl = "rbxassetid://117189862331089",
+	-- loot (Claude-drawn)
+	CrabClaw = "rbxassetid://121044171653520",
+	SeaGlass = "rbxassetid://89799167872846",
+	BlackPearl = "rbxassetid://102509802032581",
 	-- cosmetics (Claude-drawn)
 	BeamAmber = "rbxassetid://116090183262825",
 	BeamSeaGlass = "rbxassetid://102490477434070",
@@ -57,10 +57,10 @@ local ItemIcons: { [string]: string } = {
 	ShellPouch = "rbxassetid://136304543316792",
 	SeaBoots = "rbxassetid://93253580577782",
 	SharpSteel = "rbxassetid://130874696589207",
-	-- menu spots (Sealoot pack)
-	Codes = "rbxassetid://96013858620736",
-	LogSummary = "rbxassetid://95524164604917",
-	Salvage = "rbxassetid://137083461181210",
+	-- menu spots (Fancy GUI Kit)
+	Codes = "rbxassetid://109335607792459",
+	LogSummary = "rbxassetid://139867160924968",
+	Salvage = "rbxassetid://103025507172963",
 }
 
 return ItemIcons

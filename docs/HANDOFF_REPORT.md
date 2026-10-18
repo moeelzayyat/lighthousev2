@@ -1585,3 +1585,12 @@ CHECKED: workbench and shop boosts on PC show the kit icons; TestRunner **258 pa
 SCREENSHOTS: `assets/screens/item_icons/after_kit_bench_pc.jpg`, `after_kit_boosts_pc.jpg`.
 MIRROR: 167 scripts in DEV, digest identical to `src/` (ad812d5d).
 OWNER: publish DEV again for KIT1 (save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_KIT_2026-10-18.rbxl` first).
+
+CHECKPOINT: SEA1 Unknown-licence pictures replaced — ✅ in DEV, waits for the next DEV publish
+DATE: 2026-10-18
+WHY: the owner does not know where the Sealoot pack came from, so its licence cannot be shown. A public game should not carry art of unknown origin.
+CHANGED: `Shared/ItemIcons` only. Crab Claw, Sea Glass, Black Pearl: the drawn set. Codes, Logbook, empty sack: Fancy GUI Kit key, book, chest. 6 new uploads (owner's account).
+BACKUP: ServerStorage.Backups.SEA1_before_2026-10-18 (ItemIcons) · restore point "SEA1"
+CHECKED: all 6 new pictures load in a play test (IsLoaded true); the Logbook tab shows the book; TestRunner **258 passed, 0 failed**.
+MIRROR: 167 scripts in DEV, digest identical to `src/` (29955551).
+OWNER: the KIT backup is saved (`backups/LighthouseKeepers_DEV_KIT_2026-10-18.rbxl`, on disk). Publish DEV for KIT1 and SEA1; if you already published before this change, save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_SEA_2026-10-18.rbxl` and publish once more. The 6 old Sealoot uploads stay on your account unused; you may archive them in the Creator Dashboard.
