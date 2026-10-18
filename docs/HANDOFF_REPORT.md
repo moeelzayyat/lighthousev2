@@ -1409,3 +1409,17 @@ TESTRUNNER (DEV, Play server): **258 passed, 0 failed**. 0 errors from game scri
 STILL OPEN from pass 1: on boarding, the camera faces the mast and cargo, so the wheel is behind a first-timer (a camera turn toward the wheel would help).
 MIRROR: 166 scripts in DEV, digest identical to `src/` (9c6f282d).
 NEXT: (c) the ForgeGUI crab and skitter models when the coordinator sends their ids; then (a) the older screens on the menu pattern.
+
+CHECKPOINT: ART.2 ForgeGUI crab and skitter — ✅ in DEV (Script Analysis unmeasured; the owner judges the look)
+DATE: 2026-10-18
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF (probe failed as expected)
+BACKUP: ServerStorage.Backups.ART7_before_2026-10-18 (the earlier RockCrab mesh, Creatures) · restore points "ART7 before", "ART7 passed"
+BUILT:
+- Rock Crab (107087579544073) and Sand Skitter (99470346593772): ForgeGUI generations made to look like the owner's designs; they are not the owner's own .glb files, which he can still import by hand (File → Import 3D) and drop into `ServerStorage.Art` under the same name.
+- Each is one MeshPart with one SurfaceAppearance, so each creature still draws one part. Sized to the old crab's footprint (3.13 studs across; the skitter keeps its 0.6 scale), `YawOffset` -90 (both faced sideways), glow eyes placed on the face with `EyeAt`/`EyeSize`.
+- `Creatures.SandSkitter.art` is now "SandSkitter" (it used the Rock Crab's model, smaller). No gameplay number changed.
+TESTRUNNER (DEV, Play server): **258 passed, 0 failed**.
+PLAY TEST (DEV, Studio memory store; runtime helper spawned a crab and two skitters by day): one part each, facing the way they walk, eyes on the face. 0 errors from game scripts.
+SCREENSHOTS: `assets/screens/creatures_forgegui/` (game_day_rock_crab.jpg, game_day_sand_skitter.jpg; edit_raw_*_side.jpg show them as they arrived).
+MIRROR: 166 scripts in DEV, digest identical to `src/` (8a8fede1).
+NEXT: the logbook page in the BAG (MP.4).

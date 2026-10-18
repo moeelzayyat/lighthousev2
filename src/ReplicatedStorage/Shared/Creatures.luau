@@ -50,7 +50,7 @@ local Creatures = {
 	-- all night so the wide beam and harpoons always have targets. Worth little loot (economy unchanged).
 	SandSkitter = {
 		displayName = "Sand Skitter",
-		art = "RockCrab", -- same model, smaller
+		art = "SandSkitter", -- its own ForgeGUI model since ART.2 (was the Rock Crab's, smaller)
 		health = 6, -- was 10 in the first test: the beam must sweep them, not grind them
 		speed = 8.5,
 		pushable = true,
