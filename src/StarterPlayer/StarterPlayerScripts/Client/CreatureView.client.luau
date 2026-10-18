@@ -98,6 +98,35 @@ local function emitAt(position, emitter, count)
 	emitter:Emit(count)
 end
 
+-- KRAKEN.2: the Kraken's tentacles (parts named Tentacle* on its body) rear back while a strike is marked, then
+-- slam forward when it lands. Their rest placement is read once per part, relative to the body.
+local tentacleRest = setmetatable({}, { __mode = "k" })
+local function tentaclesOf(body)
+	local list = {}
+	for _, d in body:GetChildren() do
+		if d:IsA("BasePart") and string.sub(d.Name, 1, 8) == "Tentacle" then
+			if not tentacleRest[d] then
+				tentacleRest[d] = body.CFrame:ToObjectSpace(d.CFrame)
+			end
+			table.insert(list, d)
+		end
+	end
+	return list
+end
+-- the angle (radians, + = reared back) a tentacle has `since` seconds into a tell (or after the slam)
+local function tentacleAngle(tellFor, tellLength, slamFor)
+	if tellFor then
+		return 0.55 * math.min(1, tellFor / math.max(0.1, tellLength))
+	end
+	if slamFor and slamFor < 0.75 then
+		if slamFor < 0.15 then
+			return 0.55 - 1.35 * (slamFor / 0.15) -- whip down past upright
+		end
+		return -0.8 * (1 - (slamFor - 0.15) / 0.6) -- settle back up
+	end
+	return 0
+end
+
 local function has(state, bit)
 	return state // bit % 2 == 1
 end
@@ -150,6 +179,8 @@ local function newView(id, kindIndex)
 		inflates = stats ~= nil and stats.behaviour == "mine",
 		scale = 1,
 		tellSince = nil,
+		tentacles = tentaclesOf(body), -- KRAKEN.2
+		slamSince = nil,
 	}
 	if bar then
 		bar.Enabled = false
@@ -265,7 +296,22 @@ RunService.RenderStepped:Connect(function()
 		if tell and not view.tellSince then
 			view.tellSince = now
 		elseif not tell then
+			if view.tellSince then
+				view.slamSince = now -- KRAKEN.2: the strike lands
+			end
 			view.tellSince = nil
+		end
+		-- KRAKEN.2: rear the tentacles back over the tell, whip them down when it lands
+		if #view.tentacles > 0 then
+			local stats = Creatures[view.kind]
+			local angle = tentacleAngle(if view.tellSince then now - view.tellSince else nil, stats and stats.telegraph or 1, if view.slamSince then now - view.slamSince else nil)
+			local pivot = view.model:GetPivot()
+			local axis = pivot.RightVector
+			for _, t in view.tentacles do
+				local rest = view.body.CFrame * tentacleRest[t]
+				local base = rest.Position - Vector3.new(0, t.Size.Y * 0.45, 0)
+				t.CFrame = CFrame.new(base) * CFrame.fromAxisAngle(axis, angle) * CFrame.new(-base) * rest
+			end
 		end
 		-- V7: a few white sparks the moment a hit lands
 		local hit = has(state, Snap.HIT)

@@ -75,7 +75,7 @@ return function(T: any)
 			T.expect(creatures).toContain("if crab.stats.weaponImmune then")
 			T.expect(creatures).toContain("if releaseMove(crab, players) then")
 			T.expect(creatures).toContain("CreatureSnapshot.TELEGRAPH")
-			T.expect(creatures).toContain("markSpot(spot, stats.splashRadius, stats.telegraph)")
+			T.expect(creatures).toContain("markSpot(spot, stats.splashRadius, stats.telegraph") -- KRAKEN.2: plus the mark colour
 			T.expect(source(Server.LootService)).toContain("if stats and stats.loot then")
 			local gameState = source(Server.GameState)
 			T.expect(gameState).toContain("WaveDirector.specials(night, Creatures)")

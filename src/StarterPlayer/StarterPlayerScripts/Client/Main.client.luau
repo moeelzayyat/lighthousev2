@@ -219,14 +219,29 @@ end)
 
 local mouse = player:GetMouse()
 
+-- KRAKEN.2 follow-up (seen in a play test): a click or tap on a HUD or menu button (the BAG, CODES, a prompt card)
+-- also counted as a throw. A press over an active button is the button's, never an attack.
+local function overButton(): boolean
+	local pg = player:FindFirstChild("PlayerGui")
+	if not pg then
+		return false
+	end
+	for _, g in (pg :: PlayerGui):GetGuiObjectsAtPosition(mouse.X, mouse.Y) do
+		if g:IsA("GuiButton") and g.Active then
+			return true
+		end
+	end
+	return false
+end
+
 local function hookWeapon(child)
 	if not child:IsA("Tool") or not child:GetAttribute("WeaponId") or child:GetAttribute("Hooked") then
 		return
 	end
 	child:SetAttribute("Hooked", true)
 	child.Activated:Connect(function()
-		if isKeeper or player:GetAttribute("MenuOpen") then
-			return -- no attacking while the Keeper, or while a menu is open
+		if isKeeper or player:GetAttribute("MenuOpen") or overButton() then
+			return -- no attacking while the Keeper, while a menu is open, or when the press was on a button
 		end
 		attackRemote:FireServer(mouse.Hit.Position)
 	end)

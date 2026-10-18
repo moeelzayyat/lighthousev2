@@ -385,3 +385,4 @@ Decision:
 ## CP — ICON3 passed · 2026-10-18 · owner's yes to the icon picks (20:46 UTC) · TestRunner 280/280; digest 177 scripts dba1cbcd
 ## Owner report · 2026-10-18 20:57 UTC · phone: the E-button prompt is too wide and covers the screen. Fixed in PH.2.
 ## CP — PH.2 passed · 2026-10-18 · TestRunner 280/280; digest 177 scripts ce8ba3e1
+## CP — KRAKEN.2 passed · 2026-10-18 · TestRunner 280/280; digest 177 scripts 94e4604a

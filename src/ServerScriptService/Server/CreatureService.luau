@@ -417,7 +417,7 @@ end
 -- (the snapshot's TELEGRAPH state and a sound; a spit also marks where it will land) before it goes off.
 ---------------------------------------------------------------------
 
-local function markSpot(spot, radius, seconds)
+local function markSpot(spot, radius, seconds, color)
 	local mark = Instance.new("Part")
 	mark.Name = "SpitMark"
 	mark.Shape = Enum.PartType.Cylinder
@@ -429,7 +429,7 @@ local function markSpot(spot, radius, seconds)
 	mark.CanTouch = false
 	mark.CastShadow = false
 	mark.Material = Enum.Material.Neon
-	mark.Color = Color3.fromRGB(150, 230, 90)
+	mark.Color = color or Color3.fromRGB(150, 230, 90)
 	mark.Transparency = 0.45
 	mark.Parent = workspace
 	task.delay(seconds, function()
@@ -450,7 +450,8 @@ local function startMove(crab, target, now)
 			spot = towerCenter + (if away.Magnitude > 0.01 then away.Unit else Vector3.new(0, 0, 1)) * Config.TOWER_ATTACK_RADIUS
 		end
 		crab.moveSpot = spot
-		markSpot(spot, stats.splashRadius, stats.telegraph)
+		-- KRAKEN.2: a big monster's strike (the Kraken's tentacle) is marked red, an eel's spit green
+		markSpot(spot, stats.splashRadius, stats.telegraph, if stats.big then Color3.fromRGB(235, 70, 55) else nil)
 	end
 	SoundFx.playAt(stats.telegraphSound, crab.worldPos)
 end

@@ -1724,3 +1724,10 @@ FIXED: `HudParts/Prompts` (each card measures its own text), `HudParts/Layout` (
 BACKUP: ServerStorage.Backups.PH2_before_2026-10-18 · restore points "PH2 code", "PH2 passed"
 CHECKED: iPhone 17 Pro in Studio's Device Simulator, landscape: on the ship the wheel prompt now ends before the vote panel and the hint is on the left; at the lamp the prompt and the hint no longer stack and the middle of the screen is clear (`assets/screens/prompts_phone/before_after.jpg`). TestRunner **280 passed, 0 failed**; API access off. Not checked on a real phone.
 MIRROR: 177 scripts, digest identical to `src/` (ce8ba3e1).
+
+CHECKPOINT: KRAKEN.2 Kraken strike look, and button taps no longer throw — ✅ in DEV Studio
+DATE: 2026-10-18
+BUILT: `CreatureService` (a big monster's strike mark is red), `Client/CreatureView` (Tentacle* parts rear back during the tell and whip forward when it lands; rest placement read once per part), `Client/Main` (no attack when the press is over an active GuiButton), `MonstersSpec` (source check updated for the mark colour argument).
+BACKUP: ServerStorage.Backups.KRAKEN2_before_2026-10-18 · restore points "KRAKEN2 code", "KRAKEN2 passed"
+CHECKED (DEV Studio play): tentacle angle sampled every 0.2 s over one strike: 0, rising to 0.52, the whip (0.34, 0.58), back to 0; a test listener on the Attack remote: clicking BAG and its Close fired nothing, one click on the world fired one attack. TestRunner **280 passed, 0 failed**; API access off. Picture: `assets/screens/kraken/kraken_tentacle_rearing_side_pc.jpg`.
+MIRROR: 177 scripts, digest identical to `src/` (94e4604a).
