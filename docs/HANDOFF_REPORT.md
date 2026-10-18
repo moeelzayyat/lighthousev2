@@ -1458,3 +1458,18 @@ TESTRUNNER (DEV, Play server): **258 passed, 0 failed**. 0 errors from game scri
 SCREENSHOTS: `assets/screens/phone_pass/` (before/after small phone island and results, night breach, lamp keeper, tablet).
 MIRROR: 166 scripts in DEV, digest identical to `src/` (acaa324e).
 NEXT: SND.1 sound licence audit.
+
+CHECKPOINT: SND.1 Sound licence audit — ✅ in DEV (the owner listens to the two new loops after the next DEV publish)
+DATE: 2026-10-18
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: ServerStorage.Backups.SND1_before_2026-10-18 (Storm) · restore points "SND1 before", "SND1 passed"
+FOUND: the place has no Sound instances; every sound comes from `Shared/SoundFx` or `Client/Storm`. 8 uploaded audio ids and 10 built-in Roblox sound files. Each uploaded id was looked up with MarketplaceService:GetProductInfo (name, uploader, description):
+- 6 from ProSoundEffects (Roblox's licensed sound-effects library; each says "Courtesy of Pro Sound Effects"): cannon/sniper 9114361763, wind 9120610116, thunder 9120016241 / 9120016037 / 9120016256, beam hum 9126086336. Cleared.
+- 2 from private uploaders with no source given: storm waves 3159087887 ("Waves", camcool12354) and storm rain 365362615 ("Rain sound effect", InfiniteYield). Not clearly cleared → REPLACED.
+- Built-in `rbxasset://sounds/...` files ship with the Roblox client. Cleared.
+REPLACED: waves → 9119677305 "Surf Ocean Wave Impact On Zuma Beach 4 (SFX)"; rain → 9112793875 "Heavy Rain 3 (SFX)" (both ProSoundEffects). Loudness matched by measurement (average PlaybackLoudness over 40 s: old waves 103.8 / new 58.8, old rain 82.2 / new 19.9), so `Storm.client` raises them by 1.8× and 4× (calm waves now volume 0.81).
+CHECKED: in Play the three storm loops load and play with the new ids; TestRunner **258 passed, 0 failed**; 0 errors.
+NOTE: the licence status is inferred from the uploader account and the asset descriptions on Roblox; nothing was bought or downloaded.
+FOR THE OWNER: listen to the harbor/island waves and a night's rain after the next DEV publish; say if either is too loud or too quiet.
+MIRROR: 166 scripts in DEV, digest identical to `src/` (501ceba5).
+NEXT: SA.1 Script Analysis clean-up.

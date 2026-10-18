@@ -14,13 +14,17 @@ local camera = Workspace.CurrentCamera
 local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SoundFx"))
 local localPlayer = game:GetService("Players").LocalPlayer
 
--- Sounds (free Creator Store audio; swap the IDs here to change them)
+-- Sounds (free Creator Store audio; swap the IDs here to change them). SND.1: all from ProSoundEffects, the library
+-- Roblox licenses for experiences (assets/ART_SOURCES.md); waves and rain replaced two uploads of unknown origin.
 local SOUND_IDS = {
-	waves = "rbxassetid://3159087887",
+	waves = "rbxassetid://9119677305", -- Surf Ocean Wave Impact On Zuma Beach 4 (was 3159087887)
 	wind = "rbxassetid://9120610116",
-	rain = "rbxassetid://365362615",
+	rain = "rbxassetid://9112793875", -- Heavy Rain 3 (was 365362615)
 	thunder = { "rbxassetid://9120016241", "rbxassetid://9120016037", "rbxassetid://9120016256" },
 }
+-- SND.1: the new recordings are quieter (average PlaybackLoudness over 40 s: waves 58.8 against 103.8, rain 19.9
+-- against 82.2), so their volumes are raised to sound as before
+local GAIN = { waves = 1.8, wind = 1, rain = 4 }
 
 local function makeSound(name, id, looped)
 	local sound = Instance.new("Sound")
@@ -160,9 +164,9 @@ local function setStorm(on)
 	if sky then
 		sky.StarCount = preset.stars
 	end
-	TweenService:Create(waves, info, { Volume = preset.volumes.waves }):Play()
-	TweenService:Create(wind, info, { Volume = preset.volumes.wind }):Play()
-	TweenService:Create(rain, info, { Volume = preset.volumes.rain }):Play()
+	TweenService:Create(waves, info, { Volume = preset.volumes.waves * GAIN.waves }):Play()
+	TweenService:Create(wind, info, { Volume = preset.volumes.wind * GAIN.wind }):Play()
+	TweenService:Create(rain, info, { Volume = preset.volumes.rain * GAIN.rain }):Play()
 	-- "Low effects" (Settings menu) turns off the rain particles for weaker phones.
 	-- Phones and tablets get a lighter storm by default (about a third of the drops, slightly bigger so it
 	-- still reads as heavy rain): 900 drops/s was the heaviest thing on screen for mobile GPUs (Oct 12).
