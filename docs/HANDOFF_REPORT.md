@@ -1510,3 +1510,16 @@ NEXT: the readiness list (PH.1, SND.1, SA.1) is done; the DEV publish waits for 
 
 DEV PUBLISHED · 2026-10-18 10:38 UTC · the owner saved `backups/LighthouseKeepers_DEV_ISL_2026-10-17.rbxl` (1,313,214 bytes, checked on disk) and published DEV. Live on DEV now: the Trader and BAG menus (MP.2, MP.3), the logbook tab (MP.4), the lighthouse island about 50% bigger (ISL.2), the sniper tower in the sea with its bridge (ISL.1), ForgeGUI models for seven creatures (ART.1, ART.2), the oil pile back near the lighthouse (F10.2), the phone layout fixes (PH.1, PH.1b), the new storm waves and rain (SND.1) and the Script Analysis clean-up (SA.1).
 LIVE CHECKS FOR THE OWNER (Claude cannot join a live server): (1) on a real phone: the LAMP FUEL bar and voyage title clear Roblox's top-bar buttons; climb the sniper tower and check FIRE, ZOOM and CLIMB DOWN reach your thumb with the joystick gone; the six BAG tabs are readable; (2) listen to the waves in the harbor/island and the rain at night: too loud, too quiet or right; (3) judge the new island size, the tower in the sea and the monster models; (4) the frame rate on a phone during a night-7 swarm (Settings → Performance Stats). Report any of these in the thread and Claude acts on them.
+
+CHECKPOINT: SNV.1 Sniper tower view (the owner's report from live DEV) — ✅ in DEV, waits for the next DEV publish
+DATE: 2026-10-18
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: ServerStorage.Backups.SNV1_before_2026-10-18 (SniperService, SniperView) · restore points "SNV1 before", "SNV1 passed"
+CAUSE (reproduced in DEV): when the tower moved into the sea (ISL.1) the creatures came to be between the tower and the lighthouse, but the climber was still turned to face the open sea, and the first-person camera kept whatever direction it had. Turning toward the island, the tower's own platform (black at night), corner posts, rails and roof filled most of the screen.
+FIXED:
+- `SniperService`: out in the sea the climber faces the lighthouse (on land, the old place, they still face the sea).
+- `SniperView`: on climbing, the camera turns to the island centre, and every part of the tower is hidden for the shooter only (LocalTransparencyModifier = 1; other players still see the tower); everything comes back on climbing down.
+CHECKED (DEV, Studio memory store): PC: the view opens on the lighthouse (0° off), nothing of the tower in the way; 5 shots at prologue crabs, 2 kills; after "leave" no tower part stays hidden and touch controls come back. iPhone 17 Pro in the Device Simulator: the same clear view, CLIMB DOWN at the bottom right. TestRunner **258 passed, 0 failed**; 0 errors.
+SCREENSHOTS: `assets/screens/sniper_view/` (before_pc, after_pc, after_iphone17pro_simulator).
+MIRROR: 166 scripts in DEV, digest identical to `src/` (3e958918).
+OWNER: publish DEV again for this fix to reach the live game (save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_SNV_2026-10-18.rbxl` first).

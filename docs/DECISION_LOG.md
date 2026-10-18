@@ -320,3 +320,5 @@ Status: Accepted (unattended, recommendation) · 2026-10-17 · DEV only. The own
 ## CP — PH.1b Device Simulator check passed (🟦 a simulator, not a phone) · 2026-10-18 · auto-approved (unattended) · DEV only; TestRunner 258/258; digest 166 scripts fcca71bc
 ## CP — SA.1 Script Analysis clean-up passed (🟦 the count is luau-lsp's, Studio's own panel cannot be read by a script; 165 findings remain, listed in the handoff) · 2026-10-18 · auto-approved (unattended) · DEV only; TestRunner 258/258; digest 166 scripts 25595dce
 ## DEV published by the owner · 2026-10-18 10:38 UTC · carries MP.2, MP.3, ISL.1, ISL.2, ART.1, F10.2, ART.2, MP.4, PH.1/PH.1b, SND.1, SA.1; backup `backups/LighthouseKeepers_DEV_ISL_2026-10-17.rbxl` (1.3 MB, checked on disk)
+## Owner report · 2026-10-18 10:49 UTC · project chat: the sniper tower's view is blocked (screenshot from live DEV: a black floor and thick posts). Fixed in SNV.1.
+## CP — SNV.1 sniper tower view passed · 2026-10-18 · auto-approved (unattended) · DEV only; TestRunner 258/258; digest 166 scripts 3e958918; ships with the next DEV publish

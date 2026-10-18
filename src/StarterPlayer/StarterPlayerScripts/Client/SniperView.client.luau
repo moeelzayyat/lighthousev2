@@ -16,6 +16,7 @@ local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local StatPipeline = require(Shared:WaitForChild("StatPipeline")) :: any
 local SoundFx = require(Shared:WaitForChild("SoundFx")) :: any
+local Config = require(Shared:WaitForChild("Config")) :: any
 local UiKit = require(script.Parent:WaitForChild("UiKit")) :: any
 local Tiles = require(script.Parent:WaitForChild("UI"):WaitForChild("Tiles")) :: any
 
@@ -166,11 +167,27 @@ local function build(): ScreenGui
 	return screen
 end
 
+-- SNV.1: the tower's own floor, posts, rails and roof filled the shooter's view; they are hidden for the shooter
+-- only (everyone else still sees the tower)
+local function hideTower(hidden: boolean)
+	local island = workspace:FindFirstChild("Island")
+	local tower = island and island:FindFirstChild("SniperTower")
+	if not tower then
+		return
+	end
+	for _, d in tower:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.LocalTransparencyModifier = if hidden then 1 else 0
+		end
+	end
+end
+
 local function mount()
 	if mounted then
 		return
 	end
 	mounted = true
+	hideTower(true)
 	pcall(function() -- PH.1: no joystick or jump button up the tower (nobody walks there); FIRE and ZOOM take that corner
 		GuiService.TouchControlsEnabled = false
 	end)
@@ -180,6 +197,14 @@ local function mount()
 	saved.sensitivity = UserInputService.MouseDeltaSensitivity
 	saved.minZoom = player.CameraMinZoomDistance
 	player.CameraMode = Enum.CameraMode.LockFirstPerson
+	-- SNV.1: start looking at the island (first person keeps the camera's old direction otherwise)
+	task.delay(0.15, function()
+		if mounted then
+			local c = camera()
+			local target = Config.ISLAND_CENTER + Vector3.new(0, Config.GROUND_Y, 0)
+			c.CFrame = CFrame.lookAt(c.CFrame.Position, target)
+		end
+	end)
 	cam.FieldOfView = NORMAL_FOV
 	parts = {}
 	gui = build()
@@ -212,6 +237,7 @@ local function unmount()
 	end
 	setScope(false)
 	mounted = false
+	hideTower(false)
 	pcall(function()
 		GuiService.TouchControlsEnabled = player:GetAttribute("MenuOpen") ~= true
 	end)

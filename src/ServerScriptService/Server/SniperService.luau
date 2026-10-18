@@ -233,7 +233,9 @@ local function build(deps: Deps): (Model, ProximityPrompt, CFrame, CFrame, Vecto
 	prompt.Parent = foot
 
 	model.Parent = deps.island
-	local stand = frame * CFrame.new(0, h + 3.5, half - 0.6) * CFrame.Angles(0, math.rad(180), 0) -- facing the sea
+	-- SNV.1: out in the sea the creatures are between the tower and the lighthouse, so the climber faces the
+	-- lighthouse; on land (the old place) they came from the sea behind
+	local stand = frame * CFrame.new(0, h + 3.5, half - 0.6) * (if inSea then CFrame.new() else CFrame.Angles(0, math.rad(180), 0))
 	local down = frame * CFrame.new(0, 3, ladderZ - 3.5)
 	return model, prompt, stand, down, muzzleCf.Position
 end
