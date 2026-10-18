@@ -13,14 +13,15 @@ return function(T: any)
 	local HERE = Vector3.new(10, 5, -3)
 
 	T.describe("the weapon", function()
-		T.it("is an Orbit weapon sold only for a voyage; every other weapon is Thrown", function()
+		T.it("is an Orbit weapon sold only for a voyage; every other weapon is aimed", function()
 			local blades = Weapons.OrbitingBlades
 			T.expect(blades.archetype).toBe("Orbit")
 			T.expect(blades.voyageOnly).toBe(true)
 			T.expect(blades.blades).toBe(3)
 			for id, w in Weapons do
 				if id ~= "OrbitingBlades" and id ~= "TidecallerBlades" then -- S6.4: Tidecaller is the permanent Orbit weapon
-					T.expect(w.archetype).toBe("Thrown")
+					-- WPN.1: the Chain Hook, Net Launcher and Lantern Bomb are aimed like the Thrown weapons
+					T.expect(table.find({ "Thrown", "Chain", "Net", "Bomb" }, w.archetype) ~= nil).toBe(true)
 				end
 			end
 			local problems = {}

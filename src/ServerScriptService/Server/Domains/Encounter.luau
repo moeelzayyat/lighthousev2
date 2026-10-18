@@ -207,6 +207,64 @@ end
 ---------------------------------------------------------------------
 
 -- Projectile visuals (cosmetic only; damage is decided on the server before this plays)
+local BOMB_FLIGHT = 0.35 -- WPN.1: seconds a Lantern Bomb flies before it lands and its fuse starts
+
+-- WPN.1: what the Chain Hook, Net Launcher and Lantern Bomb leave behind (looks only; the server already applied the hit)
+local function showWeaponFx(folder, weapon, from, to)
+	local function part(props)
+		local p = Instance.new("Part")
+		p.Anchored = true
+		p.CanCollide = false
+		p.CanQuery = false
+		p.CanTouch = false
+		for k, v in props do
+			p[k] = v
+		end
+		p.Parent = folder
+		return p
+	end
+	if weapon.projectile == "hook" then
+		-- the chain from the thrower to the hook, fading as it is reeled in
+		local length = (to - from).Magnitude
+		local chain = part({ Size = Vector3.new(0.18, 0.18, math.max(0.5, length)), Color = weapon.color, Material = Enum.Material.Metal, CFrame = CFrame.lookAt(from, to) * CFrame.new(0, 0, -length / 2) })
+		local fade = TweenService:Create(chain, TweenInfo.new(0.35), { Transparency = 1 })
+		fade.Completed:Connect(function()
+			chain:Destroy()
+		end)
+		fade:Play()
+	elseif weapon.projectile == "net" then
+		-- the net spread on the ground over the area it holds, for as long as it holds
+		local net = part({ Shape = Enum.PartType.Cylinder, Size = Vector3.new(0.3, 1, 1), Color = weapon.color, Material = Enum.Material.Fabric, Transparency = 0.35, CFrame = CFrame.new(to + Vector3.new(0, 0.3, 0)) * CFrame.Angles(0, 0, math.rad(90)) })
+		TweenService:Create(net, TweenInfo.new(0.2, Enum.EasingStyle.Back), { Size = Vector3.new(0.3, weapon.hitRadius * 2, weapon.hitRadius * 2) }):Play()
+		task.delay(weapon.slowSeconds or 1, function()
+			local fade = TweenService:Create(net, TweenInfo.new(0.4), { Transparency = 1 })
+			fade.Completed:Connect(function()
+				net:Destroy()
+			end)
+			fade:Play()
+		end)
+	elseif weapon.projectile == "bomb" then
+		-- the lantern lands, blinks while its fuse burns, then bursts
+		local lantern = part({ Shape = Enum.PartType.Ball, Size = Vector3.new(1.4, 1.4, 1.4), Color = weapon.color, Material = Enum.Material.Neon, CFrame = CFrame.new(to + Vector3.new(0, 0.7, 0)) })
+		local light = Instance.new("PointLight")
+		light.Color = weapon.color
+		light.Range = 12
+		light.Brightness = 3
+		light.Parent = lantern
+		TweenService:Create(lantern, TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Transparency = 0.6 }):Play()
+		task.delay(weapon.fuse or 0, function()
+			lantern:Destroy()
+			local burst = part({ Shape = Enum.PartType.Ball, Size = Vector3.new(2, 2, 2), Color = weapon.color, Material = Enum.Material.Neon, Transparency = 0.2, CFrame = CFrame.new(to + Vector3.new(0, 1, 0)) })
+			SoundFx.playAt("pufferBoom", to)
+			local grow = TweenService:Create(burst, TweenInfo.new(0.35), { Size = Vector3.new(weapon.hitRadius * 2, weapon.hitRadius * 2, weapon.hitRadius * 2), Transparency = 1 })
+			grow.Completed:Connect(function()
+				burst:Destroy()
+			end)
+			grow:Play()
+		end)
+	end
+end
+
 local function showProjectile(folder, weapon, from, to)
 	local shot = Instance.new("Part")
 	shot.Anchored = true
@@ -214,10 +272,10 @@ local function showProjectile(folder, weapon, from, to)
 	shot.CanQuery = false
 	shot.CanTouch = false
 	shot.Color = weapon.color
-	if weapon.projectile == "flare" then
+	if weapon.projectile == "flare" or weapon.projectile == "bomb" or weapon.projectile == "net" then
 		shot.Shape = Enum.PartType.Ball
 		shot.Size = Vector3.new(1, 1, 1)
-		shot.Material = Enum.Material.Neon
+		shot.Material = if weapon.projectile == "net" then Enum.Material.Fabric else Enum.Material.Neon
 	else
 		shot.Size = Vector3.new(0.3, 0.3, 3)
 		shot.Material = Enum.Material.Metal
@@ -226,8 +284,14 @@ local function showProjectile(folder, weapon, from, to)
 	shot.Parent = folder
 	SoundFx.playOn("throw", shot)
 
-	local travel = TweenService:Create(shot, TweenInfo.new(0.15, Enum.EasingStyle.Linear), { CFrame = CFrame.lookAt(to, to + (to - from)) })
+	local flight = if weapon.projectile == "bomb" then BOMB_FLIGHT else 0.15 -- WPN.1: a lobbed lantern is slower
+	local travel = TweenService:Create(shot, TweenInfo.new(flight, Enum.EasingStyle.Linear), { CFrame = CFrame.lookAt(to, to + (to - from)) })
 	travel.Completed:Connect(function()
+		if weapon.projectile == "hook" or weapon.projectile == "net" or weapon.projectile == "bomb" then
+			shot:Destroy()
+			showWeaponFx(folder, weapon, from, to)
+			return
+		end
 		if weapon.projectile == "flare" then
 			-- burst showing the area it hit
 			local burst = TweenService:Create(shot, TweenInfo.new(0.3), {
@@ -286,16 +350,34 @@ local function hookAttack(ctx)
 			target = root.Position + offset.Unit * stats.range
 		end
 
-		local hits = CreatureService.damageArea(target, stats.hitRadius, stats.damage, stats.maxTargets, "Weapon:" .. weaponId, player)
 		EventLog.count("attacks")
 		EventLog.first("harpoon attack")
 		EventLog.mark(player, "firstAction")
-		if #hits > 0 then
-			EventLog.mark(player, "strike")
-			EventLog.count("attackHits")
-			SoundFx.playAt("hit", hits[1])
+		local function landed(hits)
+			if #hits > 0 then
+				EventLog.mark(player, "strike")
+				EventLog.count("attackHits")
+				SoundFx.playAt("hit", hits[1])
+			end
 		end
-		showProjectile(ctx.refs.folder, weapon, root.Position + Vector3.new(0, 1.5, 0), hits[1] or target)
+		-- WPN.1: a Lantern Bomb flies, lands and blasts after its fuse, where it landed
+		if weapon.archetype == "Bomb" then
+			showProjectile(ctx.refs.folder, weapon, root.Position + Vector3.new(0, 1.5, 0), target)
+			task.delay(BOMB_FLIGHT + (weapon.fuse or 0), function()
+				landed(CreatureService.damageArea(target, stats.hitRadius, stats.damage, stats.maxTargets, "Weapon:" .. weaponId, player))
+			end)
+			return
+		end
+		-- WPN.1: the Chain Hook drags what it hooks toward the thrower; a net slows what it lands on
+		local effect = nil
+		if weapon.archetype == "Chain" then
+			effect = { pullTo = root.Position, pullDistance = weapon.pullDistance, pullStopAt = weapon.pullStopAt }
+		elseif weapon.archetype == "Net" then
+			effect = { slowFactor = weapon.slowFactor, slowSeconds = weapon.slowSeconds }
+		end
+		local hits = CreatureService.damageArea(target, stats.hitRadius, stats.damage, stats.maxTargets, "Weapon:" .. weaponId, player, effect)
+		landed(hits)
+		showProjectile(ctx.refs.folder, weapon, root.Position + Vector3.new(0, 1.5, 0), if weapon.archetype == "Net" then target else hits[1] or target)
 	end)
 	Players.PlayerRemoving:Connect(function(player)
 		lastAttack[player] = nil

@@ -15,7 +15,7 @@
 
 local Items = {
 	SHOP_ORDER = {
-		"DriftwoodHarpoon", "StormHarpoon", "FlareGun", "CoralLance", "TidecallerBlades", "WhalerHarpoon",
+		"DriftwoodHarpoon", "StormHarpoon", "FlareGun", "CoralLance", "ChainHook", "NetLauncher", "TidecallerBlades", "LanternBomb", "WhalerHarpoon",
 		"OilskinCoat", "KeepersCoat", "KelpweaveVest", "IronclawPlate",
 		"FireShellCrate",
 		"CrabClaw", "SeaGlass", "BlackPearl",
@@ -81,6 +81,33 @@ local Items = {
 		strengths = "No aiming: great on a phone; cuts up to 3 creatures around you",
 		tradeoffs = "No thrown weapon while equipped; only reaches what is close",
 		price = 110,
+	},
+	ChainHook = { -- WPN.1 (D-048)
+		kind = "Weapon", category = "Weapons", slot = "Primary", model = "ChainHook",
+		name = "Chain Hook",
+		tier = "Rare", -- display only (harbor UI rarity)
+		description = "Hook a creature and yank it toward you, away from the lighthouse.",
+		strengths = "Drags a creature 14 studs toward you: pull crabs off the tower",
+		tradeoffs = "One creature at a time; big monsters are too heavy to pull",
+		price = 70,
+	},
+	NetLauncher = { -- WPN.1 (D-048)
+		kind = "Weapon", category = "Weapons", slot = "Primary", model = "NetLauncher",
+		name = "Net Launcher",
+		tier = "Rare", -- display only (harbor UI rarity)
+		description = "Fires a weighted net that tangles a whole group.",
+		strengths = "Slows up to 6 creatures to a crawl for 3 seconds",
+		tradeoffs = "Barely hurts them; slow reload",
+		price = 80,
+	},
+	LanternBomb = { -- WPN.1 (D-048)
+		kind = "Weapon", category = "Weapons", slot = "Primary", model = "LanternBomb",
+		name = "Lantern Bomb",
+		tier = "Epic", -- display only (harbor UI rarity)
+		description = "A storm lantern packed with powder. Lob it, then step back.",
+		strengths = "Big blast: hits up to 8 creatures for heavy damage",
+		tradeoffs = "A short fuse before it goes off; slowest reload",
+		price = 120,
 	},
 
 	-- ARMOR (one equipped at a time) ---------------------------------------

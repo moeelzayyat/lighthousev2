@@ -29,6 +29,7 @@ local Ground = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Gr
 local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SoundFx"))
 local Creatures = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Creatures"))
 local CreatureSnapshot = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("CreatureSnapshot"))
+local WeaponFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("WeaponFx")) -- WPN.1
 
 local CreatureService = {}
 
@@ -583,7 +584,22 @@ end
 -- Damages up to `maxTargets` creatures within `radius` of `position` (measured flat),
 -- closest first. Returns a list of the positions that were hit (empty if none).
 -- `source` names what dealt the damage (for the event log).
-function CreatureService.damageArea(position, radius, amount, maxTargets, source, attacker)
+-- WPN.1: an aimed weapon's effect on a creature it hit and did not kill (rules in Shared/WeaponFx)
+local function applyEffect(crab, effect, now)
+	if effect.pullTo and WeaponFx.canPull(crab.stats.pushable) then
+		crab.pos = WeaponFx.pullPosition(crab.pos, effect.pullTo, effect.pullDistance or 0, effect.pullStopAt or 0)
+	end
+	if effect.slowFactor then
+		local factor = WeaponFx.slowFor(crab.stats.big, effect.slowFactor)
+		if not crab.slowUntil or now >= crab.slowUntil or factor < (crab.slowFactor or 1) then
+			crab.slowFactor = factor
+		end
+		crab.slowUntil = math.max(crab.slowUntil or 0, now + (effect.slowSeconds or 0))
+	end
+end
+
+-- effect (WPN.1, optional): { pullTo, pullDistance, pullStopAt } for the Chain Hook, { slowFactor, slowSeconds } for a net
+function CreatureService.damageArea(position, radius, amount, maxTargets, source, attacker, effect)
 	local candidates = {}
 	for index, crab in creatures do
 		if crab.stats.weaponImmune then
@@ -616,6 +632,8 @@ function CreatureService.damageArea(position, radius, amount, maxTargets, source
 		crab.flashUntil = os.clock() + 0.12
 		if crab.health <= 0 then
 			table.insert(killed, candidates[n].index)
+		elseif effect then
+			applyEffect(crab, effect, os.clock())
 		end
 	end
 
@@ -814,6 +832,14 @@ local function step(dt)
 
 		crab.burning = burning
 		crab.lit = lit
+		-- WPN.1: a Net Launcher's net slows it for a few seconds
+		if crab.slowUntil then
+			if now < crab.slowUntil then
+				speedFactor *= crab.slowFactor or 1
+			else
+				crab.slowUntil, crab.slowFactor = nil, nil
+			end
+		end
 
 		if crab.health <= 0 then
 			removeAt(index, "killed")

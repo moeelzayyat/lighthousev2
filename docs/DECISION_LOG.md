@@ -360,3 +360,13 @@ Decision: `Config.FINAL_BOSS = "Kraken"`. On a voyage's last night (`WaveDirecto
 Numbers (chosen by Claude; the owner may change any of them): health 1200 for one Keeper, ×(1 + 0.6 per extra Keeper) (`FINAL_BOSS_HEALTH_PER_EXTRA`; 3360 for 4); stays at least 110 studs from the tower (`minRadius`, the shallows); one telegraphed strike every 4 s, warned 1.2 s before, splash radius 7: 30 to a Keeper, 20 to a cannon, 4 to the tower (at most 1 tower damage a second); beam does 60% to it; loot and Pearls: the existing big-monster rules (no new economy numbers).
 First numbers tried and rejected in Studio: health 2200 and 12 tower damage every 3.2 s (one Keeper could not win).
 ## CP — KRAKEN.1 passed · 2026-10-18 · auto-approved (unattended) · TestRunner 272/272; digest 172 scripts 62d95cbc
+## D-048 — Chain Hook, Net Launcher and Lantern Bomb
+2026-10-18 · WPN.1 · **Status: Accepted (unattended, recommendation); numbers revisable by the owner**
+Owner (2026-10-13, request #3): "add more weapons"; the plan named "later: chain hook, net launcher, lantern bomb" and architecture §15 lists the `Chain`, `Net` and `Bomb` archetypes. Picked as the next item on the list after the Kraken (owner asked "what's next?", 2026-10-18).
+Decision: three permanent Quartermaster weapons, earned with Pearls only (never Robux: combat items are never sold for Robux). Each is aimed like a harpoon (same Attack remote: the client sends only the aim point; the server decides the weapon, range, cooldown, damage and effect).
+Numbers (chosen by Claude; the owner may change any of them):
+- Chain Hook: 70 Pearls; 10 damage, 1.4 s reload, range 45, one creature; drags it 14 studs toward the thrower, stopping 6 studs short; big monsters are too heavy (the same rule as the wide beam's push).
+- Net Launcher: 80 Pearls; 3 damage, 3 s reload, range 55, radius 9, up to 6 creatures; they move at 35% speed for 3 s (big monsters feel half: 67.5%).
+- Lantern Bomb: 120 Pearls; 30 damage (one Rock Crab), 4.5 s reload, range 45, radius 10, up to 8 creatures, after a 0.35 s flight and a 0.9 s fuse.
+Balance rule kept: every one is below the wide beam's 12 damage a second on one creature (7.1, 1.0 and 6.7).
+## CP — WPN.1 passed · 2026-10-18 · auto-approved (unattended) · TestRunner 276/276; digest 174 scripts 4bde78bc

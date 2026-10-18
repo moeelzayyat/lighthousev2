@@ -1659,3 +1659,16 @@ MIRROR: 172 scripts in DEV, digest identical to `src/` (62d95cbc).
 SCREENS: `assets/screens/kraken/kraken_model_front.jpg`, `assets/screens/kraken/kraken_in_play_boss_bar_pc.jpg`
 NOT DONE: a red strike ring for the Kraken (its mark is the same green ring as the eel's); a phone check of the boss fight.
 OWNER: save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_KRAKEN_2026-10-18.rbxl`, File → Publish to Roblox (harbor), then File → Publish to Roblox As… → Lighthouse Keepers DEV → Lighthouse Isle → Overwrite; reopen Lighthouse Keepers DEV in Studio.
+
+CHECKPOINT: WPN.1 Chain Hook, Net Launcher, Lantern Bomb (D-048) — ✅ in DEV Studio, waits for the publish to both places
+DATE: 2026-10-18
+WHY: the owner's request #3 (2026-10-13) planned these three after the Orbiting Blades; next on the list after the Kraken.
+BUILT: `Shared/Weapons` (archetypes Chain, Net, Bomb with their effect fields), `Shared/Items` (Quartermaster entries and shop order), `Shared/WeaponFx` (new: pull, slow and can-pull rules), `_Registry` (the new archetypes, projectiles and effect fields are checked at boot), `CreatureService` (`damageArea` takes an optional effect; a netted creature's speed is scaled until its net wears off), `Domains/Encounter` (Attack applies the effect; the bomb lands, waits its fuse, then blasts where it landed; chain, net and lantern visuals). Tool models in `ReplicatedStorage.ItemModels` (ChainHook, NetLauncher, LanternBomb), built from parts in Studio. No new remote, event or save field.
+NUMBERS (D-048, revisable): Chain Hook 70 Pearls, 10 dmg / 1.4 s, pull 14 studs; Net Launcher 80, 3 dmg / 3 s, 35% speed for 3 s, up to 6; Lantern Bomb 120, 30 dmg / 4.5 s, radius 10, up to 8, fuse 0.9 s.
+BACKUP: ServerStorage.Backups.WPN1_before_2026-10-18 · restore points "WPN1 before", "WPN1 models", "WPN1 code", "WPN1 passed"
+CHECKED (DEV Studio play through the real Attack remote from the client, crabs spawned by a test script during a voyage): Chain Hook: a Rock Crab 37.3 studs away was 23.0 studs away one tick after the hit (pulled 14.3) and it survived (10 of 30 health); Net Launcher: a crab's approach dropped from about 6 to 2.3 studs a second for 3 s, then recovered; Lantern Bomb: one bomb killed all 4 Rock Crabs about 1.25 s after the throw (run summary "Kills: 4 [Weapon:LanternBomb 4]"). The Quartermaster shows the three weapons with prices. TestRunner **276 passed, 0 failed**. Console: no game errors. API access off (probe failed).
+ANALYZER: no new warnings in the 8 touched files.
+MIRROR: 174 scripts in DEV, digest identical to `src/` (4bde78bc).
+SCREENS: `assets/screens/weapons/quartermaster_new_weapons_pc.jpg`, `net_launcher_in_hand_pc.jpg`, `models_hook_net_bomb.jpg`
+NOT DONE: drawn shop icons for the three (the tiles show the 3D model for now; drawing them needs an upload to the owner's account); a phone check; a picture of the effects in action (Studio's camera resets after each scripted step).
+OWNER: save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_WPN_2026-10-18.rbxl`, File → Publish to Roblox (harbor), then File → Publish to Roblox As… → Lighthouse Keepers DEV → Lighthouse Isle → Overwrite; reopen Lighthouse Keepers DEV in Studio. This one publish also carries KRAKEN.1.

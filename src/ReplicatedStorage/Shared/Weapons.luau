@@ -7,7 +7,11 @@
 --   maxTargets  how many creatures one shot can hit (1 = single target)
 --   archetype   "Thrown" (aimed: a click or tap throws a spear or fires a flare) or "Orbit" (S6.3: blades
 --               circle the player and cut what they pass; nothing to aim)
---   projectile  "spear" or "flare" (the visual of a Thrown weapon)
+--   projectile  "spear" or "flare" (the visual of a Thrown weapon); "hook", "net", "bomb" for WPN.1
+--   WPN.1 (D-048), aimed like Thrown, each with one effect (Shared/WeaponFx):
+--     "Chain" pullDistance, pullStopAt   drags the hooked creature toward the thrower (not big monsters)
+--     "Net"   slowFactor, slowSeconds    slows every creature hit (big monsters feel half)
+--     "Bomb"  fuse                       lands, waits `fuse` seconds, then blasts hitRadius
 --   For an Orbit weapon: range = the blades' circle radius, cooldown = seconds between cuts, blades = how many
 --   are drawn, spin = degrees per second. voyageOnly = sold only by the island merchant for one voyage (no
 --   Items entry, never owned).
@@ -97,6 +101,46 @@ local Weapons = {
 		blades = 3,
 		spin = 200,
 		color = Color3.fromRGB(90, 200, 190),
+	},
+	-- WPN.1 (the owner's Oct 13 list: "Later: chain hook, net launcher, lantern bomb"; architecture §15 archetypes).
+	-- Aimed like a harpoon; each adds one effect (rules in Shared/WeaponFx). Numbers chosen unattended (D-048), revisable.
+	ChainHook = {
+		displayName = "Chain Hook",
+		damage = 10,
+		cooldown = 1.4, -- about 7 damage per second, and the hooked creature is yanked toward you
+		range = 45,
+		hitRadius = 5,
+		maxTargets = 1,
+		archetype = "Chain",
+		projectile = "hook",
+		pullDistance = 14, -- studs it is dragged toward the thrower (big monsters are too heavy)
+		pullStopAt = 6, -- it stops this far from the thrower
+		color = Color3.fromRGB(110, 115, 125),
+	},
+	NetLauncher = {
+		displayName = "Net Launcher",
+		damage = 3,
+		cooldown = 3, -- little damage: the net holds a group for the beam and the crew
+		range = 55,
+		hitRadius = 9,
+		maxTargets = 6,
+		archetype = "Net",
+		projectile = "net",
+		slowFactor = 0.35, -- netted creatures move at 35% speed (big monsters feel half: 67.5%)
+		slowSeconds = 3,
+		color = Color3.fromRGB(205, 180, 120),
+	},
+	LanternBomb = {
+		displayName = "Lantern Bomb",
+		damage = 30, -- one blast takes down a Rock Crab
+		cooldown = 4.5, -- under 7 damage per second to each of up to 8 creatures, after a short fuse
+		range = 45,
+		hitRadius = 10,
+		maxTargets = 8,
+		archetype = "Bomb",
+		projectile = "bomb",
+		fuse = 0.9, -- seconds between landing and the blast
+		color = Color3.fromRGB(255, 170, 60),
 	},
 }
 

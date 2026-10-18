@@ -16,7 +16,7 @@ Final = clamp((Base + ΣFlat) × (1 + ΣAdditivePct) × ΠMultipliers, Min, Max)
 
 **Quartermaster boosts (S6.4):** all three together stop at **+15%** (`Boosts.TOTAL_CAP`): a player can max two lines at most, so the boosts are a choice. Ranks are saved in the profile (`Boosts`).
 | `WeaponCooldown` ✅ | s | weapon def | AdditivePct (reduction) | 0.2 | 5 | — |
-| `WeaponRange` ✅ | studs | weapon def (50–70) | AdditivePct | 4 | 100 (S5.7: was 40, below every weapon's approved range) | — |
+| `WeaponRange` ✅ | studs | weapon def (45–70; WPN.1 hook and bomb 45) | AdditivePct | 4 | 100 (S5.7: was 40, below every weapon's approved range) | — |
 | `WeaponHitRadius` ✅ | studs | weapon def | AdditivePct | 1 | 20 | — |
 | `WeaponMaxTargets` ✅ | creatures | weapon def | Flat | 1 | 10 | — |
 | `BeamDamageMult` ✅ | × | 1 | Multiplier | 1 | 3 | Lens Power (1.25 / 1.5 / 1.75) |
@@ -56,3 +56,5 @@ Reference table (crew 4, no forecast): night 1 → 14 / 42 · 4 → 34 / 82 · 7
 
 ## Caps (owner policy)
 Permanent Quartermaster boosts total ≤ +15% across Shells/speed/damage (D-pending S6.4). Specialties ≤ +10% each, one active. Voyage-only merchant boosts ≤ +25%, wiped at Results.
+
+**WPN.1 (D-048):** weapon effects are definition values, not pipeline stats (no boost touches them yet): `pullDistance` 14 / `pullStopAt` 6 (Chain Hook), `slowFactor` 0.35 / `slowSeconds` 3 (Net Launcher; big monsters `1 − (1 − f)/2`), `fuse` 0.9 (Lantern Bomb). Rules in `Shared/WeaponFx`.

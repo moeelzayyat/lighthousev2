@@ -347,12 +347,22 @@ RULES.Weapons = function(c, Weapons, all)
 		c.pos(w .. ".range", wpn.range)
 		c.pos(w .. ".hitRadius", wpn.hitRadius)
 		c.num(w .. ".maxTargets", wpn.maxTargets, 1, nil, true)
-		c.oneOf(w .. ".archetype", wpn.archetype, { "Thrown", "Orbit" }) -- S6.3
+		c.oneOf(w .. ".archetype", wpn.archetype, { "Thrown", "Orbit", "Chain", "Net", "Bomb" }) -- S6.3; WPN.1
 		if wpn.archetype == "Orbit" then
 			c.num(w .. ".blades", wpn.blades, 1, 6, true)
 			c.pos(w .. ".spin", wpn.spin)
 		else
-			c.oneOf(w .. ".projectile", wpn.projectile, { "spear", "flare" })
+			c.oneOf(w .. ".projectile", wpn.projectile, { "spear", "flare", "hook", "net", "bomb" })
+		end
+		-- WPN.1: each aimed archetype's own effect
+		if wpn.archetype == "Chain" then
+			c.num(w .. ".pullDistance", wpn.pullDistance, 1, 40)
+			c.num(w .. ".pullStopAt", wpn.pullStopAt, 0, 20)
+		elseif wpn.archetype == "Net" then
+			c.num(w .. ".slowFactor", wpn.slowFactor, 0, 0.95)
+			c.num(w .. ".slowSeconds", wpn.slowSeconds, 0.5, 10)
+		elseif wpn.archetype == "Bomb" then
+			c.num(w .. ".fuse", wpn.fuse, 0, 3)
 		end
 		c.color(w .. ".color", wpn.color)
 		c.bool(w .. ".voyageOnly", wpn.voyageOnly, true)
