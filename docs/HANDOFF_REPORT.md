@@ -1636,3 +1636,13 @@ DATE: 2026-10-18 · DEV Studio check: role = harbor, 4 ships, TestRunner **268 p
 4. File → Publish to Roblox As… → Lighthouse Keepers DEV → Lighthouse Isle → Overwrite. (The same file: the game picks its job from the place.)
 5. Studio's window is now the Lighthouse Isle place. Close it and open Lighthouse Keepers DEV again (File → Open from Roblox), so the next Studio work is on the harbor.
 LIVE CHECK (needs two players, or two accounts): two players board two different ships and press SAIL NOW; both crews land on their own island at the same time; after Results, "Back to the deck" returns each player to the harbor with their Pearls; a full ship of 4 sails by itself.
+
+CHECKPOINT: HX.6 Fixes from the owner's first live test (phone) — ✅ in DEV Studio, waits for the publish to both places
+DATE: 2026-10-18
+SEEN LIVE (owner, phone): after the countdown the game reloaded (the teleport to the crew's own Lighthouse Isle server worked) but the player stayed at the harbor spot and heard the storm; the ship's "LEAVING IN" sign sat under the crew card.
+CAUSE: the isle server sailed as soon as the player was listed, before the phone had loaded the character, so the move to the island found no character; nothing moved it later because it spawned between phases.
+FIXED: (`Crew`) an isle arrival counts only once the character is in the world (up to 20 s); moving a player waits for a character that is still loading (up to 15 s); on the isle a crew member always spawns on the island. (`Departure.client`) on phones your own ship's wheel sign hides while your crew card is up. (`PlaceRole`) Studio plays the one-place game (Studio cannot teleport); the published game runs harbor/isle.
+BACKUP: ServerStorage.Backups.HX6_before_2026-10-18 · restore points "HX6 before", "HX6 passed"
+CHECKED (DEV Studio): role single: pier → ship → SAIL NOW → Prologue on the island; iPhone 17 Pro simulator: your ship's sign hidden while the crew card shows; isle override: on the island within 1 s, and back on the island after a respawn. TestRunner **269 passed, 0 failed**.
+MIRROR: 171 scripts in DEV, digest identical to `src/` (2de84a10).
+OWNER: save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_HX6_2026-10-18.rbxl`, File → Publish to Roblox (harbor), then File → Publish to Roblox As… → Lighthouse Keepers DEV → Lighthouse Isle → Overwrite; reopen Lighthouse Keepers DEV in Studio.

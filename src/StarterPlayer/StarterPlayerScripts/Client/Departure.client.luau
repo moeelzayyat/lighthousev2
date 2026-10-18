@@ -544,6 +544,12 @@ local function render()
 	-- crew card: you're in the crew and the ship hasn't sailed yet
 	local showCrew = ready and not underway and (sailing or phase == "Waiting") and not hidden
 	crewCard.Visible = showCrew
+	-- HX.6 (owner, phone): the crew card already shows your ship's countdown; on a phone your ship's wheel sign
+	-- would sit under the card, so it hides while the card is up
+	local phoneScreen = UiKit.Breakpoint(root.AbsoluteSize) == "phone"
+	for _, w in wheels do
+		w.sign.Enabled = not (showCrew and phoneScreen and w.shipId == player:GetAttribute("ShipId"))
+	end
 	if showCrew then
 		crewEyebrow.Text = "YOUR CREW · " .. seats -- seats on this ship
 		crewHeadline.Text = if leaving then (if atHarbor then "Sailing in " else "Next storm in ") .. clock(left) else "Waiting for crew"

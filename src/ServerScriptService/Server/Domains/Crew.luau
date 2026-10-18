@@ -117,6 +117,12 @@ function Crew.Init(ctx)
 	-- Lobby ship: getting from the deck to the island and back
 	local function moveCharacterTo(player, target)
 		local character = player.Character
+		-- HX.6: a player who has just arrived may still be loading; wait for their character (up to 15 s)
+		local started = os.clock()
+		while player.Parent == Players and not (character and character:FindFirstChild("HumanoidRootPart")) and os.clock() - started < 15 do
+			task.wait(0.2)
+			character = player.Character
+		end
 		if character and character:FindFirstChild("HumanoidRootPart") then
 			remotes.Travel:FireClient(player) -- short fade on their screen
 			task.wait(0.35)
@@ -372,7 +378,7 @@ function Crew.Start(ctx)
 		player.CharacterAdded:Connect(function()
 			player:SetAttribute("CarryingOil", false)
 			-- Everyone spawns on the ship. Crew members who die mid-run go straight back to the island.
-			if player:GetAttribute("Ready") and RUN_PHASES[stateFolder:GetAttribute("Phase")] then
+			if player:GetAttribute("Ready") and (RUN_PHASES[stateFolder:GetAttribute("Phase")] or ROLE == "isle") then
 				task.delay(0.3, function()
 					local character = player.Character
 					if character and character:FindFirstChild("HumanoidRootPart") then
@@ -386,7 +392,16 @@ function Crew.Start(ctx)
 			local ok, joinData = pcall(function()
 				return player:GetJoinData()
 			end)
-			IsleArrival.onJoin(player, if ok then joinData else nil, os.clock())
+			-- HX.6: a crew member counts as arrived once their character is in the world (phones load slowly)
+			task.spawn(function()
+				local started = os.clock()
+				while player.Parent == Players and not (player.Character and player.Character:FindFirstChild("HumanoidRootPart")) and os.clock() - started < 20 do
+					task.wait(0.2)
+				end
+				if player.Parent == Players then
+					IsleArrival.onJoin(player, if ok then joinData else nil, os.clock())
+				end
+			end)
 		end
 	end
 
