@@ -335,3 +335,14 @@ Status: Accepted (unattended, recommendation) · 2026-10-17 · DEV only. The own
 ## CP — SEA1 passed · 2026-10-18 · auto-approved (unattended) · DEV only; TestRunner 258/258; digest 167 scripts 29955551; ships with the next DEV publish
 ## Owner · 2026-10-18 12:25 UTC · thread: Sealoot is CraftPix "RPG Sea Loot Icons" (paid, $5.50 or membership). Licence checked: commercial games allowed if bought; raw files may not be redistributed. SEA1 stands until the owner confirms the purchase.
 ## Owner · 2026-10-18 12:27 UTC · thread: the Sealoot pack was not bought. It stays out of the game (SEA1 final); its local files stay out of the repo.
+
+## D-046 — Harbor and Lighthouse Isle become separate places; the harbor has 4 ships (supersedes D-001)
+2026-10-18 · HX · **Status: Accepted (owner)**
+Owner (project chat, 2026-10-18 12:29 UTC): "How come you wanna start publishing the game for people without doing the task of separating the harbor isle and the lighthouse isle??? also we need more ships for more separate instances of the game!!!"
+Context: D-001 (2026-10-16) replaced the Harbor/Isle split with one crew per server. It was auto-approved with five other recommendations under unattended mode, and the owner was never told plainly that it dropped the shared harbor and the extra ships. That was Claude's miss.
+Decision: two places in the DEV experience, one place file published to both; the role comes from the PlaceId.
+- **Harbor** (start place, about 24 players): the harbor island with **4 ships**. Each ship has its own crew (max 4), crew card, forecast vote, voyage choice and SAIL NOW. When a ship's countdown ends, its crew is teleported to a **reserved Lighthouse Isle server** (TeleportService:ReserveServer + TeleportAsync), carrying the ship id, voyage, forecast offer and votes in the teleport data. The ship takes a new crew at once.
+- **Lighthouse Isle** (max 4 players): the existing voyage loop, one crew per server (D-001's rule still holds inside an isle server). The crew boards on arrival and sails as soon as everyone is in (or after 20 s). Sail again stays on the isle; leaving after Results teleports the player back to the harbor.
+- Saves: ProfileStore only. It already handles a player moving between servers (session lock released on leave, taken on join). None of the old custom session lock, manifest, hand-off or reclaim code comes back (audit §2.2 findings 1, 2, 4, 6, 7, 10 do not apply).
+- Until the owner creates the Isle place (`Config.ISLE_PLACE_ID = 0`), the game runs as today (one place, one ship); a Studio override tests each role.
+Consequences: the S3 public test waits until HX is done and live-checked. Each publish publishes the same file to both places. architecture.md §0 / §4.4 change accordingly.
