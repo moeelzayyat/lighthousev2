@@ -67,13 +67,18 @@ end
 
 local function nearShip()
 	local lobby = lobbyFolder()
-	local ship = lobby and lobby:FindFirstChild("PirateShip")
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
-	if not ship or not root then
+	if not lobby or not root then
 		return false
 	end
-	return (root.Position - ship:GetPivot().Position).Magnitude < NEAR_SHIP
+	-- D-046: the harbor has several ships ("PirateShip", "PirateShip_Ship2", ...)
+	for _, ship in lobby:GetChildren() do
+		if ship:IsA("Model") and string.sub(ship.Name, 1, 10) == "PirateShip" and (root.Position - ship:GetPivot().Position).Magnitude < NEAR_SHIP then
+			return true
+		end
+	end
+	return false
 end
 
 local function inputKey()
@@ -296,7 +301,8 @@ local function renderVoyageChoice(crew)
 	if not offered then
 		return
 	end
-	local chosen = state:GetAttribute("VoyageDef")
+	-- D-046: in the harbor each ship has its own voyage choice
+	local chosen = state:GetAttribute("Ship_" .. shownShip() .. "_VoyageDef") or state:GetAttribute("VoyageDef")
 	for id, button in voyageButtons do
 		local def = Voyages[id]
 		local mine = def.unlock == nil or player:GetAttribute("Unlock_" .. def.unlock) == true

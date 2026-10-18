@@ -37,7 +37,7 @@ A stage exits when every substage is ✅ and its exit numbers are recorded. **GO
 | R0 | Re-baseline | 6 | 0.5 | Decision | 🟨 (R0.2, R0.4 wait on owner actions) |
 | R1 | Safety & structure | 9 | 2 | Numeric + owner publish | 🟨 |
 | S2 | First session & voyage length | 8 | 1.5 | Numeric + owner publish | 🟦 (S2.8 DEV publish waits for the owner) |
-| S3 | **Public test** | 6 | 2–3 live | **GO/NO-GO** | 🟨 provisional GO (D-018); live test on DEV (D-016) not started |
+| S3 | **Public test** | 6 | 2–3 live | **GO/NO-GO** | ⏸ on hold until HX (D-046) is built and live-checked; provisional GO (D-018) |
 | S4 | Performance & mobile | 7 | 2 | Numeric | 🟨 |
 | S5 | Domain split & UI refactor | 8 | 2–3 | Standard | 🟦 |
 | S6 | Content (owner's six requests) | 7 | 4–5 | Standard | 🟦 |
@@ -277,6 +277,11 @@ The owner judges every step from before/after screenshots (`assets/screens/visua
 | ICON1 ✅ | Item icons (owner's report, 2026-10-18: the icons looked AI-generated) | Menus showed 3D model renders or plain symbols. Now every tile and detail pane in the shop, workbench, Trader and BAG shows a picture from `Shared/ItemIcons`: 33 Claude-drawn item icons, 8 Layer Lab renders (workbench, boosts) and 6 Sealoot pictures (loot, Codes, Logbook, empty sack), uploaded from DEV Studio with the owner's OK | Every menu shows the pictures on PC and phone; an id without a picture keeps its old look | Play test, Device Simulator, TestRunner |
 | KIT1 ✅ | Fancy GUI Kit icons (owner's purchase, 2026-10-18) | The kit's painted icons replace the Layer Lab renders on the workbench (Lens Power, Fuel Tank, Walls, Clockwork Sweep, both evolutions, each with its own picture) and two shop boosts (Shell Pouch, Sharpened Steel); Sea Boots keeps Layer Lab (the kit has no boots). The kit's buttons, panels and bars were not used (the Bold look already matches, D-041/D-042) | Workbench and boosts show the kit icons | Play test, TestRunner |
 | SEA1 ✅ | Unknown-licence pictures out (owner: the Sealoot pack's origin is unknown) | The 6 Sealoot pictures are replaced: Crab Claw, Sea Glass and Black Pearl use the drawn set; Codes, Logbook and the empty sack use the Fancy GUI Kit's key, book and chest | No picture of unknown origin in the game | Play test, TestRunner |
+| HX.1 ✅ | Place roles (D-046) | `Shared/PlaceRole`: harbor / isle / single from the PlaceId (`Config.HARBOR_PLACE_ID`, `ISLE_PLACE_ID`); single until the Isle place exists; Studio override | Unit tests | TestRunner |
+| HX.2 ✅ | Harbor: 4 ships | Ships at 0°, 90°, 180°, 270° around the harbor island, each a copy of the first ship and its pier pushed to the shore; own BoardingZone, wheel (SAIL NOW), crew card, forecast vote and voyage choice (`Ship_<id>_VoyageDef`); `HarborDepartures` runs one countdown per ship (`Ship_<id>_Phase/TimeLeft`); no voyage loop in the harbor | Walk onto a second ship, SAIL NOW, its countdown runs alone and launches it | Studio (harbor override), TestRunner |
+| HX.3 ✅ | Isle arrival and return | `IsleArrival`: the crew joins on arrival and sails at once (or after 20 s); the harbor's voyage and votes applied; a player in a non-reserved isle server is sent to the harbor; leaving after Results teleports to the harbor (3 tries) | Studio (isle override): voyage starts 1 s after joining; leaving goes to the harbor (stand-in) | Studio, TestRunner |
+| HX.4 🟦 | Owner: the Isle place | Owner creates "Lighthouse Isle" in the DEV experience and sends its PlaceId; sets Max Players 4 (isle) and 24 (harbor) | `Config.ISLE_PLACE_ID` set | Owner |
+| HX.5 🟦 | Publish both places (owner) and live check | The same place file published to the harbor and to the Isle place | Two crews on two ships sail at the same time to separate isles; Pearls saved after returning | Owner, live |
 
 ---
 

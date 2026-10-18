@@ -17,7 +17,7 @@ The current game is a complete, playable co-op survival loop with a unique core 
 
 | Area | Current | v2.0 |
 |---|---|---|
-| Place model | One place in production; Harbor + Isle split with reserved servers in test | **One place, one crew per server (max 4).** No teleports, no manifests, no hand-offs. Scaling revisited only when fill data demands it (§4.4). |
+| Place model | One place in production; Harbor + Isle split with reserved servers in test | **Superseded by D-046 (2026-10-18):** a shared harbor place with 4 ships and a Lighthouse Isle place (one reserved server per crew, max 4). Teleports carry only the crew's choices; ProfileStore is the only save path (no manifests, no hand-offs). See §4.4. |
 | Persistence | Blind `UpdateAsync` overwrite, no lock, single save attempt (prod); custom metadata lock (test) | **ProfileStore** in production with session locking, retries, `BindToClose`; schema v2 with type validation (§19) |
 | Code structure | God `Main`, implicit init order, callback wiring | 8 domains, `Init/Start` lifecycle, typed event bus (§5) |
 | Remotes | 29 created by name in a loop, handled anywhere, uneven validation | Contract registry; guard + rate limit per remote; created last (§18) |
@@ -176,6 +176,9 @@ ServerStorage/Backups/         <Name>_before_<date>
 ```
 
 ## 4.4 Place and server model
+**D-046 (2026-10-18, owner) supersedes the text below.** Two places, one place file: the **harbor** (start place, about 24 players, 4 ships around the harbor island, `HarborDepartures`) and **Lighthouse Isle** (one reserved server per crew, max 4, `IsleArrival` + the unchanged voyage loop). The role comes from the PlaceId (`Shared/PlaceRole`). Teleport data carries the ship id, crew ids, voyage and forecast votes, and the isle re-checks it. ProfileStore handles a player moving between servers; the old session lock, manifest, hand-off and reclaim code stays out.
+
+The original v2.0 text (kept for history):
 **One place. Server size 4. The server is the crew.** The harbor is the crew's own deck: a player who joins mid-voyage is rowed out (existing behaviour); public matchmaking fills servers to 4; friends use Join or private servers. `MAX_CREW = 4`.
 
 Why: a 60-player social harbor is empty at today's traffic and expensive at tomorrow's; reserved servers, teleports, manifests and save hand-offs add four failure modes before the first fight; ProfileStore already solves the only real cross-server problem (rejoin while a save is in flight).

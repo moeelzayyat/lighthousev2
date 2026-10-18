@@ -9,12 +9,18 @@ local Ground = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Gr
 local EventLog = require(Server.EventLog)
 local IslandBuilder = require(Server.IslandBuilder)
 local LobbyBuilder = require(Server.LobbyBuilder)
+local PlaceRole = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("PlaceRole"))
 
 local World = { Name = "World" }
 
 function World.Init(ctx)
 	ctx.refs = IslandBuilder.build()
 	ctx.lobbyRefs = LobbyBuilder.build(ctx.refs) -- the pirate-ship lobby (also moves the Quartermaster aboard)
+	-- D-046: the harbor has several ships around its island; the isle and the one-place game keep the first ship
+	if PlaceRole.isHarbor() then
+		local angles = table.move(Config.HARBOR_SHIP_ANGLES, 1, math.min(Config.HARBOR_SHIPS, #Config.HARBOR_SHIP_ANGLES), 1, {})
+		ctx.lobbyRefs.ships = LobbyBuilder.buildExtraShips(ctx.lobbyRefs, angles)
+	end
 end
 
 function World.Start(_ctx)

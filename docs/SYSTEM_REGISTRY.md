@@ -6,6 +6,9 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | System | Status | Target | Notes |
 |---|---|---|---|
 | Voyage phase loop (Waiting→Prologue→Day/Night→Results→Rematch) | Released; isolation Tested (not yet published) | R1.5, S2.1 | R1.5: each voyage in `xpcall`, `ErrorReport`, crew back to the deck; VoyageDefinition at S2.1 |
+| Place roles: harbor / Lighthouse Isle (`Shared/PlaceRole`) | Tested in DEV Studio (not yet published) | HX.1 | D-046; single until `Config.ISLE_PLACE_ID` is set |
+| Harbor with 4 ships, per-ship countdown and teleport (`HarborDepartures`) | Tested in DEV Studio, teleport stood in | HX.2 | D-046; reserved Lighthouse Isle server per crew |
+| Isle arrival and return to the harbor (`IsleArrival`) | Tested in DEV Studio, teleport stood in | HX.3 | D-046; sails at once when the crew is in (20 s wait) |
 | Standard Voyage (7 nights) | Tested (not yet published) | S2.1 | D-003; `Definitions/Voyages`; bosses 4, 7; win = 12 Pearls, unlocks Long (play-tested in DEV) |
 | Long Voyage (13 nights, unlock) | Tested (not yet published) | S2.1 | now the unlock (`Unlocks.LongVoyage`, `ChooseVoyage`); bosses 4, 7, 10, 13 and every night from 8; win = 18 Pearls |
 | Lamp beam (wide/focused, fuel, auto-sweep, idle release) | Released | S4 | server pin of the Keeper |

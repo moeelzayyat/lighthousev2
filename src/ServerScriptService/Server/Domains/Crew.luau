@@ -1,9 +1,13 @@
 -- Crew domain (S5.1/S5.2): players joining, the title screen and the ship's deck, the ship party (roster,
 -- boarding, departure), the first-voyage route, coach prompts, and moving players between ship and island.
--- One place, one crew per server (D-001).
+-- D-046: the role of this place (Shared/PlaceRole). Harbor: several ships, each crew teleported to its own isle
+-- server (HarborDepartures). Isle: the arriving crew sails at once (IsleArrival) and goes back to the harbor after.
+-- Single (no isle place yet): one place, one ship, as before.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TeleportService = game:GetService("TeleportService")
 
 local Server = script.Parent.Parent
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
@@ -14,11 +18,36 @@ local ShipBoarding = require(Server.ShipBoarding)
 local ShipDeparture = require(Server.ShipDeparture)
 local NetGuard = require(Server.NetGuard)
 local OilCarry = require(Server.OilCarry)
+local HarborDepartures = require(Server.HarborDepartures)
+local IsleArrival = require(Server.IsleArrival)
+local PlaceRole = require(ReplicatedStorage.Shared:WaitForChild("PlaceRole"))
+local Forecasts = require(ReplicatedStorage.Shared:WaitForChild("Forecasts"))
+local Voyages = require(ReplicatedStorage.Shared:WaitForChild("Definitions"):WaitForChild("Voyages"))
 
 local Crew = { Name = "Crew" }
 
-local SHIP_ID = "Ship1" -- the existing pirate ship
+local SHIP_ID = "Ship1" -- the existing pirate ship (the only ship outside the harbor role)
 local SHIP_IDS = { SHIP_ID }
+local ROLE = PlaceRole.get()
+
+-- D-046: TeleportService with retries. Studio cannot teleport: callers log and say so instead.
+local function teleportTo(placeId, players, options)
+	if RunService:IsStudio() then
+		return false, "studio"
+	end
+	local lastErr = nil
+	for attempt = 1, 3 do
+		local ok, err = pcall(function()
+			TeleportService:TeleportAsync(placeId, players, options)
+		end)
+		if ok then
+			return true, nil
+		end
+		lastErr = tostring(err)
+		task.wait(attempt * 2)
+	end
+	return false, lastErr
+end
 local RUN_PHASES = { Prologue = true, Day = true, Night = true }
 
 -- The ship's wheel: SAIL NOW for a party of 1 to 3 (a full party departs automatically)
@@ -46,6 +75,13 @@ local function chooseRoute(player)
 		return
 	end
 	local profileState = player:GetAttribute("ProfileState")
+	-- D-046: on Lighthouse Isle the crew came from the harbor; they sail as soon as everyone is in
+	if ROLE == "isle" then
+		EventLog.setRoute(player, "isle")
+		player:SetAttribute("Route", "fast")
+		player:SetAttribute("InLobby", true)
+		return
+	end
 	local fast = Config.FIRST_VOYAGE_FAST_PATH == true
 		and (profileState == "saved" or profileState == "memory")
 		and player:GetAttribute("RunsCompleted") == 0
@@ -99,6 +135,22 @@ function Crew.Init(ctx)
 		OilCarry.remove(player)
 		if LampService.getKeeper() == player then
 			LampService.setKeeper(nil, "leave")
+		end
+		-- D-046: leaving a voyage on Lighthouse Isle means going back to the harbor
+		if ROLE == "isle" then
+			task.spawn(function()
+				local ok, why = teleportTo(Config.HARBOR_PLACE_ID, { player })
+				EventLog.log("IsleToHarbor", { player = player.Name, ok = ok, why = why or "" })
+				if not ok and player.Parent == Players then
+					if why == "studio" then
+						LampService.notify(player, "(Studio) This is where you would go back to the harbor.")
+						moveCharacterTo(player, lobbyRefs.spawn.CFrame)
+					else
+						player:Kick("The harbor could not be reached. Rejoin Lighthouse Keepers to get back to it.")
+					end
+				end
+			end)
+			return
 		end
 		task.spawn(moveCharacterTo, player, lobbyRefs.spawn.CFrame)
 	end
@@ -159,6 +211,16 @@ function Crew.Init(ctx)
 
 	-- Ship party: the server is the crew (D-001). The one ship takes a party of at most Config.MAX_CREW.
 	-- ShipRoster is the only thing that puts a player in a crew (Ready = true).
+	local ships = lobbyRefs.ships or { [SHIP_ID] = { helmPrompt = lobbyRefs.helmPrompt, boardingZone = lobbyRefs.boardingZone } }
+	if ROLE == "harbor" then
+		SHIP_IDS = {}
+		for k = 1, 16 do
+			if ships["Ship" .. k] then
+				table.insert(SHIP_IDS, "Ship" .. k)
+			end
+		end
+	end
+	ctx.shipIds = SHIP_IDS
 	ShipRoster.init(stateFolder, Config.MAX_CREW or 4, SHIP_IDS)
 
 	-- Boarding: standing in the ship's BoardingZone joins its party (no button). Boarding never starts a
@@ -166,7 +228,13 @@ function Crew.Init(ctx)
 	-- SAIL NOW at the ship's wheel.
 	ShipBoarding.init({
 		roster = ShipRoster,
-		zones = { [SHIP_ID] = lobbyRefs.boardingZone },
+		zones = (function()
+			local zones = {}
+			for _, id in SHIP_IDS do
+				zones[id] = ships[id].boardingZone
+			end
+			return zones
+		end)(),
 		notify = LampService.notify,
 		log = EventLog.log,
 		mark = EventLog.mark,
@@ -185,16 +253,93 @@ function Crew.Init(ctx)
 	})
 
 	-- The server checks everything; the client only shows the prompt to members who can use it.
-	lobbyRefs.helmPrompt.Triggered:Connect(function(player)
-		if not player:GetAttribute("InLobby") then
-			return
-		end
-		local ok, reason = ShipDeparture.sailNow(player, SHIP_ID)
-		if not ok then
-			LampService.notify(player, SAIL_REFUSED[reason] or "You can't sail right now.")
-			EventLog.log("SailNowRefused", { player = player.Name, reason = reason, ship = SHIP_ID })
-		end
-	end)
+	for _, id in SHIP_IDS do
+		ships[id].helmPrompt.Triggered:Connect(function(player)
+			if not player:GetAttribute("InLobby") then
+				return
+			end
+			local ok, reason = ShipDeparture.sailNow(player, id)
+			if not ok then
+				LampService.notify(player, SAIL_REFUSED[reason] or "You can't sail right now.")
+				EventLog.log("SailNowRefused", { player = player.Name, reason = reason, ship = id })
+			end
+		end)
+	end
+
+	-- D-046: the harbor sends each crew to its own Lighthouse Isle server
+	if ROLE == "harbor" then
+		HarborDepartures.init({
+			roster = ShipRoster,
+			departure = ShipDeparture,
+			state = stateFolder,
+			shipIds = SHIP_IDS,
+			countdown = Config.INTERMISSION_SECONDS,
+			voyageFor = function(id)
+				return stateFolder:GetAttribute("Ship_" .. id .. "_VoyageDef")
+			end,
+			forecast = function()
+				return stateFolder:GetAttribute("ForecastA"), stateFolder:GetAttribute("ForecastB")
+			end,
+			teleport = function(players, data)
+				if RunService:IsStudio() then
+					for _, p in players do
+						LampService.notify(p, "(Studio) Your crew would now be teleported to its own Lighthouse Isle server.")
+						p:SetAttribute("Ready", false)
+					end
+					return false, "studio"
+				end
+				local ok, code = pcall(function()
+					return TeleportService:ReserveServer(Config.ISLE_PLACE_ID)
+				end)
+				if not ok then
+					return false, "reserve: " .. tostring(code)
+				end
+				local options = Instance.new("TeleportOptions")
+				options.ReservedServerAccessCode = code
+				options:SetTeleportData(data)
+				local sent, why = teleportTo(Config.ISLE_PLACE_ID, players, options)
+				if not sent then
+					for _, p in players do
+						if p.Parent == Players then
+							p:SetAttribute("Ready", false)
+						end
+					end
+				end
+				return sent, why
+			end,
+			notify = LampService.notify,
+			log = EventLog.log,
+		})
+		TeleportService.TeleportInitFailed:Connect(function(player, result, message)
+			EventLog.log("TeleportFailed", { player = player.Name, result = tostring(result), message = string.sub(tostring(message), 1, 120) })
+			if player.Parent == Players then
+				player:SetAttribute("Ready", false)
+				LampService.notify(player, "The ship couldn't reach Lighthouse Isle. You're back on the deck: sail again when you're ready.")
+			end
+		end)
+	elseif ROLE == "isle" then
+		IsleArrival.init({
+			roster = ShipRoster,
+			departure = ShipDeparture,
+			state = stateFolder,
+			shipId = SHIP_ID,
+			wait = Config.ISLE_ARRIVAL_WAIT or 20,
+			known = { voyages = Voyages, forecasts = Forecasts },
+			reserved = function()
+				return RunService:IsStudio() or (game.PrivateServerId ~= "" and game.PrivateServerOwnerId == 0)
+			end,
+			toHarbor = function(player, why)
+				EventLog.log("IsleRefused", { player = player.Name, why = why })
+				task.spawn(function()
+					local ok = teleportTo(Config.HARBOR_PLACE_ID, { player })
+					if not ok and player.Parent == Players then
+						player:Kick("Lighthouse Isle is reached by ship from the harbor. Rejoin Lighthouse Keepers.")
+					end
+				end)
+			end,
+			log = EventLog.log,
+		})
+	end
 
 	-- What the round loop needs from the ship
 	ctx.departure = {
@@ -237,6 +382,12 @@ function Crew.Start(ctx)
 			end
 		end)
 		task.spawn(chooseRoute, player)
+		if ROLE == "isle" then
+			local ok, joinData = pcall(function()
+				return player:GetJoinData()
+			end)
+			IsleArrival.onJoin(player, if ok then joinData else nil, os.clock())
+		end
 	end
 
 	Players.PlayerAdded:Connect(onPlayerAdded)

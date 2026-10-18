@@ -259,65 +259,97 @@ function LobbyBuilder.build(islandRefs)
 	}
 end
 
--- Multi-ship phase 2 (harbor role only, behind Config.MULTI_SHIP_ENABLED): more departure ships moored beside
--- the first. Each is a copy of the first ship with its OWN BoardingZone (the first ship's zone, moved with it),
--- its own wheel prompt (SAIL NOW) and a gangway to the shore. Returns { [shipId] = { helmPrompt, boardingZone } }.
-local EXTRA_SHIPS = { { id = "Ship2", side = 48 } } -- side: studs along world X from the first ship
+-- D-046 (harbor role): more ships around the harbor island. Each is a copy of the first ship (with its collision,
+-- stairs and gangway) and of the first ship's pier, turned around the island's middle to its bearing in
+-- Config.HARBOR_SHIP_ANGLES and moved in or out so the pier meets the shore there. Each ship has its OWN
+-- BoardingZone and wheel prompt (SAIL NOW). Returns { [shipId] = { helmPrompt, boardingZone, ship } }.
+local HARBOR_MIDDLE = Vector3.new(0, 0, 575) -- the harbor island's middle (measured; the first ship is due north)
+local PIER_PARTS = {
+	PierLanding = true, PierRamp = true, PierDock = true, Rail = true, RailPost = true, Post = true,
+	Bollard = true, RopeCoil = true, Lantern = true, LanternBase = true, LanternCap = true, LanternPost = true,
+}
 
-function LobbyBuilder.buildExtraShips(lobbyRefs)
+-- distance from the harbor's middle to the first water along a bearing (0 = north, 90 = west)
+local function shoreRadius(degrees)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Include
+	params.FilterDescendantsInstances = { Workspace.Terrain }
+	local r = math.rad(degrees)
+	local dir = Vector3.new(-math.sin(r), 0, -math.cos(r))
+	for d = 40, 240, 2 do
+		local at = HARBOR_MIDDLE + dir * d
+		local hit = Workspace:Raycast(at + Vector3.new(0, 200, 0), Vector3.new(0, -400, 0), params)
+		if hit and hit.Material == Enum.Material.Water then
+			return d
+		end
+	end
+	return nil
+end
+
+function LobbyBuilder.buildExtraShips(lobbyRefs, angles)
 	local lobby = lobbyRefs.folder
 	local first = lobby:FindFirstChild("PirateShip")
 	lobbyRefs.helmPrompt:SetAttribute("ShipId", "Ship1")
 	lobbyRefs.boardingZone:SetAttribute("ShipId", "Ship1")
-	local built = {}
-	for _, spec in EXTRA_SHIPS do
-		local shift = CFrame.new(spec.side, 0, 0)
+	local built = { Ship1 = { helmPrompt = lobbyRefs.helmPrompt, boardingZone = lobbyRefs.boardingZone, ship = first } }
+
+	-- the first ship's pier (static harbor decor between the shore and the ship's stern)
+	local pier = {}
+	local decor = Workspace:FindFirstChild("LobbyIslandDecor")
+	local stern = lobbyRefs.boardingZone.Position
+	if decor then
+		for _, part in decor:GetChildren() do
+			if part:IsA("BasePart") and PIER_PARTS[part.Name] then
+				local p = part.Position
+				if math.abs(p.X - stern.X) < 8 and p.Z > stern.Z + 20 and p.Z < stern.Z + 70 then
+					table.insert(pier, part)
+				end
+			end
+		end
+	end
+	local home = shoreRadius(0) or 116
+
+	for k = 2, #angles do
+		local id = "Ship" .. k
+		local push = (shoreRadius(angles[k]) or home) - home
+		local turn = CFrame.new(HARBOR_MIDDLE) * CFrame.Angles(0, math.rad(angles[k]), 0) * CFrame.new(0, 0, -push) * CFrame.new(-HARBOR_MIDDLE)
+
 		local ship = first:Clone()
-		ship.Name = "PirateShip_" .. spec.id
+		ship.Name = "PirateShip_" .. id
 		for _, d in ship:GetDescendants() do
 			if d:IsA("ProximityPrompt") then
 				d:Destroy()
 			end
 		end
-		ship:PivotTo(shift * first:GetPivot())
+		ship:PivotTo(turn * first:GetPivot())
 		ship.Parent = lobby
 
+		local pierFolder = Instance.new("Folder")
+		pierFolder.Name = "Pier_" .. id
+		for _, part in pier do
+			local copy = part:Clone()
+			copy.CFrame = turn * part.CFrame
+			copy.Parent = pierFolder
+		end
+		pierFolder.Parent = lobby
+
 		local zone = lobbyRefs.boardingZone:Clone()
-		zone.Name = "BoardingZone_" .. spec.id
-		zone.CFrame = shift * lobbyRefs.boardingZone.CFrame
-		zone:SetAttribute("ShipId", spec.id)
+		zone.Name = "BoardingZone_" .. id
+		zone.CFrame = turn * lobbyRefs.boardingZone.CFrame
+		zone:SetAttribute("ShipId", id)
 		zone.Parent = lobby
 
-		-- the wheel: the copy's own wheel, or a simple post at the stern if the ship has none
 		local wheel = ship:FindFirstChild("WheelStand", true) or ship:FindFirstChild("WheelHub", true)
 		if not wheel then
 			local post = lobbyRefs.helmPrompt.Parent
-			wheel = makePart("WheelPost_" .. spec.id, post.Size, shift * post.CFrame, post.Color, post.Material, lobby)
+			wheel = makePart("WheelPost_" .. id, post.Size, turn * post.CFrame, post.Color, post.Material, lobby)
 		end
 		local prompt = lobbyRefs.helmPrompt:Clone()
 		prompt.Enabled = true
-		prompt:SetAttribute("ShipId", spec.id)
+		prompt:SetAttribute("ShipId", id)
 		prompt.Parent = wheel
 
-		-- gangway from the stern down to the shore
-		local deckTop = -math.huge
-		for _, part in ship:GetDescendants() do
-			if part:IsA("BasePart") and (part.Name:find("Floor") or part.Name == "Deck") then
-				deckTop = math.max(deckTop, part.Position.Y + part.Size.Y / 2)
-			end
-		end
-		if deckTop == -math.huge then
-			deckTop = zone.Position.Y - zone.Size.Y / 2 + 1
-		end
-		local sternZ = zone.Position.Z + zone.Size.Z / 2
-		local x = zone.Position.X
-		local fromPos = Vector3.new(x, deckTop, sternZ - 2)
-		local shoreZ = sternZ + 24
-		local toPos = Vector3.new(x, Ground.heightAt(x, shoreZ) + 0.5, shoreZ)
-		local length = (toPos - fromPos).Magnitude
-		makePart("Gangway_" .. spec.id, Vector3.new(7, 1, length), CFrame.lookAt((fromPos + toPos) / 2, toPos), Color3.fromRGB(120, 85, 55), Enum.Material.WoodPlanks, lobby)
-
-		built[spec.id] = { helmPrompt = prompt, boardingZone = zone, ship = ship }
+		built[id] = { helmPrompt = prompt, boardingZone = zone, ship = ship }
 	end
 	return built
 end

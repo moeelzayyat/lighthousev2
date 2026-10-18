@@ -28,6 +28,8 @@ local OrbitService = require(Server.OrbitService) -- S6.3
 local RescueService = require(Server.RescueService) -- LO.2
 local SniperService = require(Server.SniperService) -- D-044
 local GrantService = require(Server.GrantService)
+local PlaceRole = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("PlaceRole")) -- D-046
+local Forecasts = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Forecasts"))
 
 local Encounter = { Name = "Encounter" }
 
@@ -352,10 +354,14 @@ local function hookChoices(ctx)
 		if def.event and not LiveEvents.isOn(def.event, os.time()) then
 			return -- LO.1: an event voyage only while its event is on
 		end
-		if stateFolder:GetAttribute("VoyageDef") ~= def.id then
-			stateFolder:SetAttribute("VoyageDef", def.id)
-			stateFolder:SetAttribute("TotalNights", def.nights)
-			EventLog.log("VoyageChosen", { player = player.Name, voyage = def.id })
+		-- D-046: in the harbor every ship has its own choice (it travels to the isle with the crew)
+		local key = if PlaceRole.isHarbor() then "Ship_" .. tostring(player:GetAttribute("ShipId")) .. "_VoyageDef" else "VoyageDef"
+		if stateFolder:GetAttribute(key) ~= def.id then
+			stateFolder:SetAttribute(key, def.id)
+			if key == "VoyageDef" then
+				stateFolder:SetAttribute("TotalNights", def.nights)
+			end
+			EventLog.log("VoyageChosen", { player = player.Name, voyage = def.id, ship = player:GetAttribute("ShipId") or "" })
 		end
 	end)
 end
@@ -487,6 +493,19 @@ function Encounter.Start(ctx)
 		first = EventLog.first,
 		mark = EventLog.mark,
 	})
+
+	-- D-046: the harbor has no voyage loop (each crew sails on its own isle server); it waits forever and
+	-- offers one pair of storm forecasts that every ship's crew votes on before sailing.
+	if PlaceRole.isHarbor() then
+		ctx.state:SetAttribute("Phase", "Waiting")
+		ctx.state:SetAttribute("Night", 0)
+		if Config.FORECASTS_ENABLED then
+			local pool = table.clone(Forecasts.ORDER)
+			ctx.state:SetAttribute("ForecastA", table.remove(pool, math.random(#pool)))
+			ctx.state:SetAttribute("ForecastB", table.remove(pool, math.random(#pool)))
+		end
+		return
+	end
 
 	-- The round loop runs for the life of the server; it starts once boot has finished (Network last).
 	task.defer(GameState.run, {

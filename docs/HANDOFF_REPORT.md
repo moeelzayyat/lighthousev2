@@ -1594,3 +1594,27 @@ BACKUP: ServerStorage.Backups.SEA1_before_2026-10-18 (ItemIcons) · restore poin
 CHECKED: all 6 new pictures load in a play test (IsLoaded true); the Logbook tab shows the book; TestRunner **258 passed, 0 failed**.
 MIRROR: 167 scripts in DEV, digest identical to `src/` (29955551).
 OWNER: the KIT backup is saved (`backups/LighthouseKeepers_DEV_KIT_2026-10-18.rbxl`, on disk). Publish DEV for KIT1 and SEA1; if you already published before this change, save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_SEA_2026-10-18.rbxl` and publish once more. The 6 old Sealoot uploads stay on your account unused; you may archive them in the Creator Dashboard.
+
+CHECKPOINT: HX.1–HX.3 Separate harbor and Lighthouse Isle, 4 ships (D-046, the owner's ask) — ✅ in DEV Studio; HX.4 and HX.5 wait for the owner
+DATE: 2026-10-18
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF (probe refused before every Play)
+WHY: the owner: the harbor and the lighthouse isle must be separate, and more ships so several crews play separate games. D-001 had dropped both (auto-approved under unattended mode, never flagged plainly). D-046 brings them back.
+BACKUP: ServerStorage.Backups.HX1_before_2026-10-18 (Crew, World, Encounter, LobbyBuilder, Departure, Config, the pier's port rail) · restore points "HX1 before", "HX1 pier rail", "HX1 passed"
+BUILT:
+- `Shared/PlaceRole` (new): harbor / isle / single from the PlaceId. Until `Config.ISLE_PLACE_ID` is set, the game stays exactly as it is (single).
+- Harbor: 4 ships (north, west, south, east of the harbor island), each a copy of the first ship with its collision, stairs and gangway, and a copy of the pier pushed to the shore; each has its own crew card, forecast vote, voyage choice and SAIL NOW. `HarborDepartures` (new) runs each ship's countdown and teleports that crew to a reserved Lighthouse Isle server with its choices. The harbor runs no voyage.
+- Isle: `IsleArrival` (new): the crew joins on arrival and sails at once (or after 20 s for anyone missing), with the harbor's voyage and votes; a player who reaches an isle server that is not reserved is sent to the harbor. Leaving after Results (or with Back to the deck) teleports to the harbor, 3 tries, else a kick with "rejoin".
+- Bug found on the way (new-player walk): the pier's port rail blocked stepping from the pier onto the gangway; the rail now starts 3 studs further in.
+CHECKED (DEV Studio; teleports cannot run in Studio, so the last step is a logged stand-in):
+- Single role (as today): walking spawn → pier → gangway → deck works, Ready = true.
+- Harbor override: 4 ships built; walked onto Ship 4 by its own pier and gangway (Ready, ShipId = Ship4); SAIL NOW → its countdown 10…1 while Ship 1 stayed Waiting → HarborLaunch → stand-in.
+- Isle override: route "isle", the voyage started 1 s after joining (IsleLaunch, Prologue on the island); leaving → IsleToHarbor (stand-in).
+- TestRunner **268 passed, 0 failed** (10 new: HarborSplitSpec). luau-lsp: 0 findings in the new modules.
+SCREENSHOTS: `assets/screens/harbor_ships/` (4 ships from above; Ship 4 counting down).
+MIRROR: 171 scripts in DEV, digest identical to `src/` (b4da73b9).
+OWNER (HX.4, then HX.5):
+1. Creator Hub → Lighthouse Keepers DEV → Places → add a place named "Lighthouse Isle". Send Claude its PlaceId.
+2. In that place's settings: Max Players 4. In the start place (the harbor): Max Players 24.
+3. Claude sets `Config.ISLE_PLACE_ID`, then you save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_HX_2026-10-18.rbxl` and publish the same Studio file twice: File → Publish to Roblox (the harbor, as always), then File → Publish to Roblox As… → Lighthouse Keepers DEV → Lighthouse Isle.
+4. Live check: two people on two different ships press SAIL NOW; both crews land on their own island at the same time; after Results, Back to the harbor brings you back with your Pearls.
+The public test (S3) stays on hold until this live check passes.
