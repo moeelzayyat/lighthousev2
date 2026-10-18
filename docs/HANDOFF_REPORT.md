@@ -1535,3 +1535,20 @@ FIXED (`Departure.client`):
 CHECKED: 1150×550 phone: card 52→304 px, BAG button top 314 px; scrolling shows all three voyages; your vote (Spring Tide) in a gold ring with gold text "(1)". PC 2004×985: the whole card shows (120→639 px), BAG button at 797 px. TestRunner **258 passed, 0 failed**; 0 errors.
 SCREENSHOTS: `assets/screens/vote_panel/` (before and after on the phone, scrolled, PC).
 MIRROR: 166 scripts in DEV, digest identical to `src/` (0afc29b0).
+
+CHECKPOINT: SHIP.1 Harbor ship walls and boarding (the owner's report) — ✅ in DEV, waits for the next DEV publish
+DATE: 2026-10-18
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF (probe refused, error 7, before every Play)
+BACKUP: ServerStorage.Backups.SHIP1_before_2026-10-18 (PirateShip art model, PierLanding, PierRamp, PierDock, LobbyBuilder) · restore points "SHIP1 before", "SHIP1 colliders"
+CAUSE (reproduced in DEV): the ship you see is one mesh with collision off. Its invisible floors and walls did not match it: the main deck floor stood 2.3 studs above the planks, the forecastle and quarterdeck floors 3.7 and 3.3 below theirs (players stood inside the hull), the side walls were straight boxes at ±14.5 (in the air beside the narrow bow, nothing below the deck, nothing at the stern), and the pier's landing ran 3 studs into the stern.
+FIXED (`ServerStorage.Art.PirateShip`, `LobbyIslandDecor.PierLanding`; no scripts changed):
+- 30 invisible hull walls along the measured outline, from under the water to the rail top, a hull bottom, the raised decks' front faces and edge guards, the masts and the quarterdeck's deck house.
+- Floors on the visible decks (main 8.3, forecastle 16.3, quarterdeck 16.9; names kept so the BoardingZone and the deck ray cast still work).
+- Stairs to the forecastle and the wheel deck (visible steps over an invisible ramp).
+- A visible gangway from the pier along the port side, over the low rail onto the main deck; the pier landing now stops at the stern.
+- The SAIL NOW prompt moved up onto the quarterdeck.
+Layout and numbers: `assets/world/ship_colliders.md`.
+CHECKED (DEV, Studio memory store): pier → gangway → deck → stairs → quarterdeck by walking (Humanoid:MoveTo), Ready = true, ShipId = Ship1; walking at the hull from the gangway, the deck sides, the bow, the stern, the raised decks' faces, the masts and the deck house all stop the player; swimming at the hull stops at the hull. iPhone 17 Pro in the Device Simulator: the same walk, the crew card shows on deck. TestRunner **258 passed, 0 failed**; 0 errors.
+SCREENSHOTS: `assets/screens/ship_walls/` (before: pier into the stern, the old invisible walls in red; after: gangway and deck on PC, gangway and deck on the phone simulator).
+MIRROR: 166 scripts in DEV, digest identical to `src/` (0afc29b0). The model itself is not mirrored (no .rbxm in the repo); `assets/world/ship_colliders.md` records it.
+OWNER: publish DEV again for SNV.1, VOTE.1 and SHIP.1 to reach the live game. Save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_SHIP_2026-10-18.rbxl` first.
