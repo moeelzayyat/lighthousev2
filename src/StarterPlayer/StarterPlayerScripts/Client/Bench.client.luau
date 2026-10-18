@@ -119,7 +119,7 @@ local function tiles(): { any }
 			table.insert(list, {
 				id = "Evo_" .. evo.id,
 				name = evo.displayName,
-				icon = glyphIcon("diamond", Color3.fromRGB(176, 113, 255), "Evolution"),
+				icon = glyphIcon("diamond", Color3.fromRGB(176, 113, 255), "Evo_" .. evo.id),
 				owned = forged,
 				ownedText = "Forged",
 				locked = if forged then nil else "Max both upgrades to forge",
@@ -191,7 +191,7 @@ local function evolutionDetail(id: string): any
 		table.insert(stats, { label = Upgrades[need].displayName, value = string.format("%d / %d", levelOf(need), max) })
 	end
 	return {
-		icon = glyphIcon("diamond", Color3.fromRGB(176, 113, 255), "Evolution"),
+		icon = glyphIcon("diamond", Color3.fromRGB(176, 113, 255), "Evo_" .. evo.id),
 		name = evo.displayName,
 		description = evo.description .. ".",
 		stats = stats,

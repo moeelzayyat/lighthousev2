@@ -1573,3 +1573,15 @@ Backup: `C:/RobloxProjects/Lighthousev2/backups/LighthouseKeepers_DEV_ICON_2026-
 Now live on DEV: SNV.1 sniper view, VOTE.1 vote panel, SHIP.1 ship walls and gangway, ICON1 item icons.
 Owner live checks (a real phone and PC): walk the pier and gangway onto the ship and try to walk or swim into the hull; climb the sniper tower and look at the island; vote on the forecast with a friend (gold text on the leader); open the shop, BAG, workbench and Trader and look at the pictures.
 Still open: the Sealoot pack's source and licence.
+
+CHECKPOINT: KIT1 Fancy GUI Kit icons (the owner's purchase) — ✅ in DEV, waits for the next DEV publish
+DATE: 2026-10-18
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: ServerStorage.Backups.KIT1_before_2026-10-18 (Bench, ItemIcons) · restore points "KIT1 before", "KIT1 passed"
+UPLOADS (owner's "ok go ahead"): 8 kit icons, resized to 512 px; ids in `Shared/ItemIcons.luau`; sources in `assets/ART_SOURCES.md`.
+CHANGED: `Shared/ItemIcons` (workbench and boost ids; each evolution has its own key `Evo_<id>`); `Bench` looks up `Evo_<id>`.
+NOT USED: the kit's buttons, panels, tabs, bars and badges (our Bold look already draws the same shapes; swapping means rebuilding every menu); its font is Fredoka One, already in Roblox.
+CHECKED: workbench and shop boosts on PC show the kit icons; TestRunner **258 passed, 0 failed**.
+SCREENSHOTS: `assets/screens/item_icons/after_kit_bench_pc.jpg`, `after_kit_boosts_pc.jpg`.
+MIRROR: 167 scripts in DEV, digest identical to `src/` (ad812d5d).
+OWNER: publish DEV again for KIT1 (save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_KIT_2026-10-18.rbxl` first).

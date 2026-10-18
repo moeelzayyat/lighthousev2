@@ -46,16 +46,17 @@ local ItemIcons: { [string]: string } = {
 	Heal = "rbxassetid://113402768992113",
 	OilBundle = "rbxassetid://90694405901185",
 	TowerShield = "rbxassetid://116118202435402",
-	-- workbench upgrades and evolutions (Layer Lab pack)
-	LensPower = "rbxassetid://75273813931997",
-	FuelTank = "rbxassetid://136268247856109",
-	Walls = "rbxassetid://127415312130423",
-	ClockworkSweep = "rbxassetid://79994679192790",
-	Evolution = "rbxassetid://109538298494743",
-	-- shop boosts (Layer Lab pack)
-	ShellPouch = "rbxassetid://94521910719005",
+	-- workbench upgrades and evolutions (Fancy GUI Kit, Polyperfect)
+	LensPower = "rbxassetid://133499829500810",
+	FuelTank = "rbxassetid://85759209785678",
+	Walls = "rbxassetid://80888825885313",
+	ClockworkSweep = "rbxassetid://99189367717481",
+	Evo_OverchargedBeam = "rbxassetid://81067366997095",
+	Evo_ClockworkBastion = "rbxassetid://130684053274835",
+	-- shop boosts (Fancy GUI Kit; Sea Boots: Layer Lab, the kit has no boots)
+	ShellPouch = "rbxassetid://136304543316792",
 	SeaBoots = "rbxassetid://93253580577782",
-	SharpSteel = "rbxassetid://107837145985100",
+	SharpSteel = "rbxassetid://130874696589207",
 	-- menu spots (Sealoot pack)
 	Codes = "rbxassetid://96013858620736",
 	LogSummary = "rbxassetid://95524164604917",
