@@ -9,6 +9,8 @@
 -- KEEPER (your keeper with what the gear adds up to, one tile per equipped slot, and the code box), WEAPONS, ARMOR,
 -- COSMETICS and SUPPLIES (ammo crates and voyage loot). The detail pane compares an item with what is equipped and
 -- has one big EQUIP / UNEQUIP button. Studio only: player attribute HudSimulate is handled by Tiles.
+-- MP.4: a LOGBOOK tab (S7.1's logbook had no page): found creatures as their models, the rest dimmed under
+-- NOT FOUND YET, and each row's Pearl reward (paid by LogbookService; this page only shows it).
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -27,6 +29,10 @@ local UiKit = require(script.Parent:WaitForChild("UiKit")) :: any
 local Tiles = require(script.Parent:WaitForChild("UI"):WaitForChild("Tiles")) :: any
 local ItemPreview = require(script.Parent:WaitForChild("ItemPreview")) :: any
 local CodeBox = require(script.Parent:WaitForChild("CodeBox")) :: any
+local Creatures = require(Shared:WaitForChild("Creatures")) :: any -- MP.4: the logbook page
+local Upgrades = require(Shared:WaitForChild("Upgrades")) :: any
+local Forecasts = require(Shared:WaitForChild("Forecasts")) :: any
+local Logbook = require(Shared:WaitForChild("Definitions"):WaitForChild("Logbook")) :: any
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local ItemModels = ReplicatedStorage:WaitForChild("ItemModels")
@@ -49,6 +55,7 @@ local TABS = {
 	{ id = "Armor", label = "Armor" },
 	{ id = "Cosmetics", label = "Cosmetics" },
 	{ id = "Supplies", label = "Supplies" },
+	{ id = "Logbook", label = "Logbook" },
 }
 local TAB_CATEGORIES: { [string]: { [string]: boolean } } = {
 	Weapons = { Weapons = true },
@@ -275,6 +282,174 @@ local function itemTiles(): { any }
 end
 
 ---------------------------------------------------------------------
+-- LOGBOOK (MP.4): what this keeper has found (the profile's Logbook, S7.1), one tile per entry
+---------------------------------------------------------------------
+
+local LOG_ENTRIES = Logbook.entries(Creatures, Upgrades, Forecasts)
+local LOG_LABELS: { [string]: string } = {
+	Creatures = "Creature",
+	Bosses = "Big monster",
+	Evolutions = "Evolution",
+	Forecasts = "Forecast",
+}
+-- field notes for the creatures (display text only; the numbers live in Shared/Creatures)
+local LOG_NOTES: { [string]: string } = {
+	RockCrab = "Walks up the beach and claws at the tower. The wide beam shoves it back; the focused beam burns it.",
+	SandSkitter = "Small, fast and never alone. One pass of the wide beam sweeps a whole swarm away.",
+	SpitterEel = "Keeps its distance and spits at the spot you stood on. Step out of the green ring.",
+	PufferMine = "Lights a fuse when you get close or when it reaches the tower, then bursts. Back away when it hisses.",
+	GhostLantern = "Weapons and cannons pass right through it. Only the lamp's beam can hurt it, and it drinks the lamp's oil at the tower.",
+	TideWitch = "Calls skitters out of the sea beside her. Stop her before the swarm grows.",
+	CoralShaman = "Mends the small creatures around it. Take it down first.",
+	BarnacleBrute = "So heavy the wide beam cannot shove it. Focus the light and bring the crew.",
+	ShipwreckHermit = "A huge hermit in a wrecked hull. Bring the whole crew and every cannon.",
+}
+
+local function logFound(category: string, id: string): boolean
+	local book = profile and profile.logbook
+	return type(book) == "table" and book[Logbook.key(category, id)] == true
+end
+
+local function logName(category: string, id: string): string
+	if category == "Creatures" or category == "Bosses" then
+		return Creatures[id] and Creatures[id].displayName or id
+	elseif category == "Evolutions" then
+		for _, evo in Upgrades.EVOLUTIONS or {} do
+			if evo.id == id then
+				return evo.displayName
+			end
+		end
+	elseif category == "Forecasts" then
+		return Forecasts[id] and Forecasts[id].displayName or id
+	end
+	return id
+end
+
+local function logProgress(category: string): (number, number)
+	local found = 0
+	for _, id in LOG_ENTRIES[category] or {} do
+		if logFound(category, id) then
+			found += 1
+		end
+	end
+	return found, #(LOG_ENTRIES[category] or {})
+end
+
+-- a found creature's tile shows the creature itself (the client's own template, no glow or health bar)
+local function creatureIcon(id: string): (Instance) -> ()
+	return function(holder: Instance)
+		local templates = ReplicatedStorage:FindFirstChild("CreatureTemplates")
+		local template = templates and templates:FindFirstChild(id)
+		if not template then
+			Tiles.glyph(holder, "alert", Color3.fromRGB(240, 200, 120))
+			return
+		end
+		local view = UiKit.new("ViewportFrame", {
+			Name = "CreatureView",
+			BackgroundTransparency = 1,
+			Size = UDim2.fromScale(1, 1),
+			Ambient = Color3.fromRGB(170, 170, 180),
+			LightColor = Color3.fromRGB(255, 245, 230),
+		}, holder)
+		local model = template:Clone()
+		for _, d in model:GetDescendants() do
+			if d:IsA("BillboardGui") or d:IsA("Light") then
+				d:Destroy()
+			end
+		end
+		model:PivotTo(CFrame.new())
+		model.Parent = view
+		local box, size = model:GetBoundingBox()
+		local reach = math.max(size.X, size.Y, size.Z)
+		local camera = Instance.new("Camera")
+		camera.FieldOfView = 30
+		-- creatures face -Z: look at them from the front, a little to the side and above
+		camera.CFrame = CFrame.lookAt(box.Position + Vector3.new(reach * 0.5, reach * 0.4, -reach * 1.3), box.Position)
+		camera.Parent = view
+		view.CurrentCamera = camera
+	end
+end
+
+local LOG_GLYPHS: { [string]: { kind: string, color: Color3 } } = {
+	Evolutions = { kind = "diamond", color = Color3.fromRGB(255, 200, 80) },
+	Forecasts = { kind = "warning", color = Color3.fromRGB(140, 200, 255) },
+}
+
+local function logIcon(category: string, id: string): (Instance) -> ()
+	if category == "Creatures" or category == "Bosses" then
+		return creatureIcon(id)
+	end
+	local g = LOG_GLYPHS[category]
+	return glyphIcon(g.kind, g.color)
+end
+
+local function logbookTiles(): { any }
+	local list: { any } = { { id = "LogSummary", name = "Your logbook", icon = glyphIcon("check", Color3.fromRGB(255, 200, 80)) } }
+	for _, category in Logbook.ORDER do
+		for _, id in LOG_ENTRIES[category] or {} do
+			if logFound(category, id) then
+				table.insert(list, { id = "Log_" .. category .. "_" .. id, name = logName(category, id), icon = logIcon(category, id) })
+			else
+				table.insert(list, { id = "Log_" .. category .. "_" .. id, name = "???", locked = "NOT FOUND YET", lockedIcon = "lock" })
+			end
+		end
+	end
+	return list
+end
+
+local function logbookSummaryDetail(): any
+	local stats = {}
+	local all, total = 0, 0
+	for _, category in Logbook.ORDER do
+		local def = Logbook[category]
+		local found, count = logProgress(category)
+		all += found
+		total += count
+		table.insert(stats, {
+			label = def.displayName,
+			value = string.format("%d / %d", found, count) .. (if found >= count then "  done" else string.format("  (+%d Pearls)", def.reward)),
+		})
+	end
+	return {
+		icon = glyphIcon("check", Color3.fromRGB(255, 200, 80)),
+		name = string.format("Your logbook  %d / %d", all, total),
+		description = "Everything your crews have found on voyages. Finish a row to earn its Pearls, paid once.",
+		stats = stats,
+	}
+end
+
+local function logEntryDetail(tileId: string): any
+	local category, id = string.match(tileId, "^Log_(%a+)_(.+)$")
+	if not category or not id then
+		return logbookSummaryDetail()
+	end
+	local def = Logbook[category]
+	local note: string
+	if category == "Creatures" or category == "Bosses" then
+		note = LOG_NOTES[id] or ""
+	elseif category == "Evolutions" then
+		note = ""
+		for _, evo in Upgrades.EVOLUTIONS or {} do
+			if evo.id == id then
+				note = evo.description or ""
+			end
+		end
+	else
+		note = Forecasts[id] and Forecasts[id].summary or ""
+	end
+	local found, count = logProgress(category)
+	return {
+		icon = logIcon(category, id),
+		name = logName(category, id),
+		description = LOG_LABELS[category] .. ", " .. def.how .. ". " .. note,
+		stats = {
+			{ label = def.displayName .. " found", value = string.format("%d / %d", found, count) },
+			{ label = "Row reward", value = if found >= count then "Paid" else string.format("%d Pearls", def.reward) },
+		},
+	}
+end
+
+---------------------------------------------------------------------
 -- DETAIL
 ---------------------------------------------------------------------
 
@@ -389,6 +564,8 @@ local function renderDetail()
 		menu:setDetail(keeperDetail())
 	elseif id == "Codes" then
 		menu:setDetail(codesDetail())
+	elseif tab == "Logbook" then
+		menu:setDetail(if id and string.sub(id, 1, 4) == "Log_" then logEntryDetail(id) else logbookSummaryDetail())
 	elseif id and string.sub(id, 1, 5) == "Slot_" then
 		local slotKey = string.sub(id, 6)
 		local itemId = equippedFor(slotKey)
@@ -417,7 +594,7 @@ renderAll = function()
 		renderDetail()
 		return
 	end
-	local list = if tab == "Keeper" then keeperTiles() else itemTiles()
+	local list = if tab == "Keeper" then keeperTiles() elseif tab == "Logbook" then logbookTiles() else itemTiles()
 	local stillThere = false
 	for _, t in list do
 		if t.id == selectedId then

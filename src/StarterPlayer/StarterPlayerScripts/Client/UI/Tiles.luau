@@ -698,8 +698,12 @@ function Tiles.Menu(opts: any): any
 		for _ in tabButtons do
 			count += 1
 		end
+		-- MP.4: six tabs (the BAG) on a small phone: a narrower gap keeps every tab at least 56 px wide
+		local gap = if phone then 6 else 14
+		local tabsLayout = tabsRow:FindFirstChildOfClass("UIListLayout") :: UIListLayout
+		tabsLayout.Padding = UDim.new(0, gap)
 		for _, t in tabButtons do
-			t.button.Size = UDim2.fromOffset(math.floor((leftW - 14 * (count - 1)) / count), unit.tab)
+			t.button.Size = UDim2.fromOffset(math.floor((leftW - gap * (count - 1)) / count), unit.tab)
 			local tabPad = t.text:FindFirstChildOfClass("UIPadding")
 			if tabPad then -- narrow phone tabs: the word gets the room
 				tabPad.PaddingLeft, tabPad.PaddingRight = UDim.new(0, if phone then 6 else 18), UDim.new(0, if phone then 6 else 18)

@@ -51,6 +51,7 @@ local function view(data: any): any
 		equippedFlag = data.Equipped.Flag,
 		stats = { runs = data.Stats.Runs, victories = data.Stats.Victories, bestNight = data.Stats.BestNight },
 		boosts = data.Boosts, -- S6.4: Quartermaster boost ranks
+		logbook = data.Logbook, -- MP.4: found entries ("Creatures:RockCrab" -> true), shown on the BAG's logbook page
 	}
 end
 

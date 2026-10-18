@@ -49,7 +49,7 @@ Server → client only (17): `AdminResult`, `Notify`, `LootCollected`, `OpenUpgr
 | `UpgradeResult`, `ShopResult`, `LoadoutResult`, `TraderResult`, `MerchantResult` | `{requestId, ok, reason?, state?}` (`MerchantResult`: `requestId, ok, message, {itemId, count, shells}`) | replayed for duplicate requestIds |
 | `AdminResult` (R1.8) | `requestId, ok, result` (table for inspect, message otherwise) | owner only in practice |
 | `RunResults` | results payload (S2.2 adds `banked`, S2.5 `crewSize`) | |
-| `GearData` | profile view | **never** includes `Grants`, `RedeemedCodes` |
+| `GearData` | profile view (MP.4: also `logbook`, the found entries "Category:Id" -> true, read-only) | **never** includes `Grants`, `RedeemedCodes` |
 | `CreatureSnapshot` (S4.2, `UnreliableRemoteEvent`) | `buffer`: header `[serverTime f64][n u16]`, then per creature `[id u16][kind u8][x f32][y f32][z f32][yaw u8][state u8][hp u8]` (18 bytes; `kind` added so a client can draw a creature from its first packet); at most 50 creatures per packet (910 bytes) | 12 Hz, `U`, to every client; the client checks `typeof` = buffer and the length (`CreatureSnapshot.decode`). Created by the Platform domain with the other remotes (S5.1) |
 | `CombatResult` (new, S4) | `{Seq, Hits}` | `U`, batched |
 | ~~`DawnPearl` (new, S2.2)~~ | — | S2.2 used the existing `LootCollected` instead: `LootCollected("PearlBanked", amount)`; `RunResults` carries `banked[playerName]` |

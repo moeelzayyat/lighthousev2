@@ -1423,3 +1423,19 @@ PLAY TEST (DEV, Studio memory store; runtime helper spawned a crab and two skitt
 SCREENSHOTS: `assets/screens/creatures_forgegui/` (game_day_rock_crab.jpg, game_day_sand_skitter.jpg; edit_raw_*_side.jpg show them as they arrived).
 MIRROR: 166 scripts in DEV, digest identical to `src/` (8a8fede1).
 NEXT: the logbook page in the BAG (MP.4).
+
+CHECKPOINT: MP.4 Logbook page on the menu pattern — ✅ in DEV (Script Analysis unmeasured; phone sizes are simulated layouts; the owner judges the look)
+DATE: 2026-10-18
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF (probe failed as expected)
+BACKUP: ServerStorage.Backups.MP4_before_2026-10-18 (Inventory, PlayerData, Tiles) · restore points "MP4 before", "MP4 passed"
+SCOPE: of the older screens, only the logbook fits the menu pattern (it had no page); Settings and Results stay as they are (logged in DECISION_LOG).
+BUILT:
+- BAG → LOGBOOK tab (`Inventory.client`): "Your logbook" tile first (found / total for Creatures, Big monsters, Evolutions, Forecasts, with each row's Pearls: 15 / 10 / 10 / 5), then every found entry (creatures drawn as their own models from `CreatureTemplates`; evolutions and forecasts as icons), then the rest dimmed under NOT FOUND YET. The detail pane gives the entry's kind, how it is found, a field note (creatures), the evolution's or forecast's own text, the row's progress and its reward ("Paid" once complete).
+- `PlayerData` adds `logbook` (found entries) to the `GearData` view; API_CONTRACTS row updated. Rewards are still paid only by LogbookService; this page only shows them.
+- `UI/Tiles`: on phones the tab gap is 6 instead of 14 so six tabs stay at least 56 px wide (the first measure gave 55.0 px on a 667×375 layout).
+TESTRUNNER (DEV, Play server): **258 passed, 0 failed**.
+PLAY TEST (DEV, Studio memory store; runtime helper marked 7 entries found): B opened the BAG, LOGBOOK showed 7 / 14 with 4 / 7, 1 / 2, 1 / 2, 1 / 3; Rock Crab's detail showed its model, note, 4 / 7 and 15 Pearls. Smallest tap: real 724×507 window 56.1 px; simulated pc 64.0, laptop 56.2, large phone 56.1, small phone 56.1 px; no text overflowing at any size. 0 errors from game scripts.
+SCREENSHOTS: `assets/screens/logbook_menu/` (the two 724×507 shots were taken before the creature icons were drawn a little larger).
+KNOWN: on a 667×375 phone the six tab labels are small (the longest word, COSMETICS, decides the shared size).
+MIRROR: 166 scripts in DEV, digest identical to `src/` (00f8d658).
+NEXT: nothing left on the coordinator's list (b, c, a done); the DEV publish waits for the owner.
