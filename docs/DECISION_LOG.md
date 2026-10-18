@@ -347,3 +347,5 @@ Decision: two places in the DEV experience, one place file published to both; th
 - Until the owner creates the Isle place (`Config.ISLE_PLACE_ID = 0`), the game runs as today (one place, one ship); a Studio override tests each role.
 Consequences: the S3 public test waits until HX is done and live-checked. Each publish publishes the same file to both places. architecture.md §0 / §4.4 change accordingly.
 ## CP — HX.1–HX.3 harbor/isle split and 4 ships passed in DEV Studio · 2026-10-18 · auto-approved (unattended) · TestRunner 268/268; digest 171 scripts b4da73b9; HX.4 (Isle place) and HX.5 (publish both, live check) wait for the owner
+## Owner report · 2026-10-18 12:31 UTC · thread: the player has to jump to enter the ship. Fixed in SHIP.2 (open pier side, guide rail on the landing).
+## CP — SHIP.2 passed · 2026-10-18 · auto-approved (unattended) · TestRunner 268/268; no script change (art model and pier decor)

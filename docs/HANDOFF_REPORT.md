@@ -1618,3 +1618,12 @@ OWNER (HX.4, then HX.5):
 3. Claude sets `Config.ISLE_PLACE_ID`, then you save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_HX_2026-10-18.rbxl` and publish the same Studio file twice: File → Publish to Roblox (the harbor, as always), then File → Publish to Roblox As… → Lighthouse Keepers DEV → Lighthouse Isle.
 4. Live check: two people on two different ships press SAIL NOW; both crews land on their own island at the same time; after Results, Back to the harbor brings you back with your Pearls.
 The public test (S3) stays on hold until this live check passes.
+
+CHECKPOINT: SHIP.2 Open way onto the ship (the owner's report) — ✅ in DEV, waits for the next DEV publish
+DATE: 2026-10-18
+CAUSE (reproduced): the pier's port rail (0.3 studs thick, 1.3 above the planks) crossed the step from the pier onto the gangway landing, so players had to jump it. Walking diagonally off the landing toward the ship also dropped a player into the gap by the hull.
+FIXED: the rail post at the pier's end removed and the port rail shortened 3.2 studs (`LobbyIslandDecor`); a rail along the landing's ship-side edge (visible rail and posts over an invisible guard) in `ServerStorage.Art.PirateShip.Gangway`, so every harbor ship gets it.
+BACKUP: ServerStorage.Backups.HX1_before_2026-10-18.PierDecor and GW2_before_2026-10-18 · restore points "HX1 pier rail", "GW2 landing rail"
+CHECKED: walking pier → landing → gangway → deck and back: 0 jumps, 0 falls, Ready on deck, off when back on the pier; a diagonal line from the pier toward the gangway now follows the rail instead of falling. TestRunner **268 passed, 0 failed**.
+SCREENSHOTS: `assets/screens/ship_walls/after_open_pier_to_gangway_pc.jpg`, `gangway_route_top.jpg`.
+OWNER: this ships with the next DEV publish. Until the Lighthouse Isle place exists, publishing DEV now is safe (the game stays one place, one ship): save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_SHIP2_2026-10-18.rbxl` and publish DEV.
