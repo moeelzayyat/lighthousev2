@@ -11,7 +11,6 @@ local UiKit, K = Kit.UiKit, Kit.K
 local rgb = K.rgb
 local Color = K.Color
 local Fonts = K.Fonts
-local Type = K.Type
 local new = K.new
 local tween = K.tween
 local formatNumber = K.formatNumber
@@ -129,11 +128,11 @@ function UiKit.Button(parent, text, opts)
 		b:SetAttribute("BaseTextColor", G.text)
 		b:SetAttribute("GhostButton", nil)
 		b:FindFirstChildOfClass("UICorner").CornerRadius = UDim.new(0, 12)
-		local s = b:FindFirstChildOfClass("UIStroke") or UiKit.border(b, G.glow, 1.5, G.glowT)
-		s.Enabled = true
-		s.Color = G.glow
-		s.Transparency = G.glowT
-		s.Thickness = 1.5
+		local glowStroke = b:FindFirstChildOfClass("UIStroke") or UiKit.border(b, G.glow, 1.5, G.glowT)
+		glowStroke.Enabled = true
+		glowStroke.Color = G.glow
+		glowStroke.Transparency = G.glowT
+		glowStroke.Thickness = 1.5
 		if v.stroke then
 			b:SetAttribute("BaseStrokeColor", G.glow)
 		end

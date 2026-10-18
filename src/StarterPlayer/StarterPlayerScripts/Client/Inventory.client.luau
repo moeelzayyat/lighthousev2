@@ -125,7 +125,7 @@ end
 -- the detail pane's stat lines, compared with what is equipped in the same slot (StatPipeline)
 local function statLines(itemId: string): { any }
 	local item = Items[itemId]
-	local lines = {}
+	local lines: { any } = {}
 	local function add(labelText: string, value: number, now: number?, higherIsBetter: boolean, fmt: (number) -> string)
 		if now ~= nil and now ~= value then
 			table.insert(lines, { label = labelText, from = fmt(now), to = fmt(value), better = if higherIsBetter then value > now else value < now })

@@ -93,7 +93,6 @@ function LobbyBuilder.build(islandRefs)
 	end
 	local middle = deckPoint(0, 0)
 	local back = deckPoint(0, Config.LOBBY_WHEEL_OFFSET)
-	local front = deckPoint(0, -Config.LOBBY_SHOP_OFFSET)
 
 	-- Spawn on the deck (the only spawn in the game)
 	local spawn = Instance.new("SpawnLocation")

@@ -7,18 +7,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
 
-local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
-local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SoundFx"))
 local state = ReplicatedStorage:WaitForChild("GameState")
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local beamControl = remotes:WaitForChild("BeamControl")
 local lampAction = remotes:WaitForChild("LampAction")
-local notifyRemote = remotes:WaitForChild("Notify")
 local attackRemote = remotes:WaitForChild("Attack")
-local lootRemote = remotes:WaitForChild("LootCollected")
 local InputController = require(script.Parent:WaitForChild("InputController")) -- S2.6: controller aim rule
 
 -- Tell the server what kind of device this is (for the playtest event log)
@@ -36,10 +31,6 @@ local player = Players.LocalPlayer
 local camera = Workspace.CurrentCamera
 local lampCore = Workspace:WaitForChild("Island"):WaitForChild("LampCore")
 
-local GREEN = Color3.fromRGB(90, 200, 110)
-local YELLOW = Color3.fromRGB(235, 200, 70)
-local RED = Color3.fromRGB(220, 70, 60)
-
 ---------------------------------------------------------------------
 -- HUD
 ---------------------------------------------------------------------
@@ -55,33 +46,6 @@ local function refreshHudVisible()
 end
 player:GetAttributeChangedSignal("Ready"):Connect(refreshHudVisible)
 refreshHudVisible()
-
-local function addCorner(parent, radius)
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, radius)
-	corner.Parent = parent
-end
-
-local function makeLabel(name, size, position, textSize, parent)
-	local label = Instance.new("TextLabel")
-	label.Name = name
-	label.Size = size
-	label.Position = position
-	label.AnchorPoint = Vector2.new(0.5, 0)
-	label.BackgroundTransparency = 1
-	label.TextColor3 = Color3.new(1, 1, 1)
-	label.TextStrokeTransparency = 0.4
-	label.Font = Enum.Font.GothamBold
-	label.TextSize = textSize
-	label.TextWrapped = true
-	label.Text = ""
-	label.Parent = parent or gui
-	return label
-end
-
-local function formatTime(seconds)
-	return string.format("%d:%02d", math.floor(seconds / 60), seconds % 60)
-end
 
 ---------------------------------------------------------------------
 -- Keeper mode: overhead camera + aim the beam at the pointer

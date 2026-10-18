@@ -18,7 +18,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SoundFx"))
 local UiKit = require(script.Parent:WaitForChild("UiKit"))
 local InputController = require(script.Parent:WaitForChild("InputController")) -- S2.6
-local C, F = UiKit.Color, UiKit.Font
+local C = UiKit.Color
 local new, tween = UiKit.new, UiKit.tween
 
 local player = Players.LocalPlayer

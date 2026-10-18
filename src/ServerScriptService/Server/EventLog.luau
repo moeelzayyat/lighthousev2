@@ -25,7 +25,7 @@ function EventLog.busStats()
 end
 
 local runStartedAt = os.clock()
-local stats = {}
+local stats: { [string]: any } = {} -- SA.1: one run's counters, filled in as events arrive
 local devices = {} -- userId -> "Touch" / "Keyboard" / "Gamepad"
 
 -- Onboarding telemetry (launch adaptation, Oct 12 2026)

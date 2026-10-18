@@ -149,6 +149,7 @@ UiKit.CurrencyIcon(goalTile.top, "Pearls", 20).LayoutOrder = 1
 local goalTrack = UiKit.new("Frame", { Name = "Track", BackgroundColor3 = C.SurfaceHover, BorderSizePixel = 0, Position = UDim2.fromOffset(0, 49), Size = UDim2.new(1, 0, 0, 3) }, goalTile.frame)
 local goalFill = UiKit.new("Frame", { Name = "Fill", BackgroundColor3 = C.AccentLighthouse, BorderSizePixel = 0, Size = UDim2.fromScale(0, 1) }, goalTrack)
 local gear -- latest profile from GearData (pearls, owned)
+local renderGoal: () -> () -- SA.1: defined below
 remotes:WaitForChild("GearData").OnClientEvent:Connect(function(profile)
 	gear = profile
 	if isOpen and results then
@@ -180,7 +181,7 @@ local function nextGoal()
 	return best or bestCosmetic
 end
 
-function renderGoal()
+renderGoal = function()
 	local goal = nextGoal()
 	goalTile.frame.Visible = goal ~= nil
 	if not goal then

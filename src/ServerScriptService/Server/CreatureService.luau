@@ -65,15 +65,6 @@ local function directionFor(bearing)
 	return Vector3.new(-math.sin(rad), 0, -math.cos(rad))
 end
 
-local function groundAt(radius)
-	if radius <= Config.ISLAND_RADIUS then
-		return Config.GROUND_Y
-	elseif radius <= Config.ISLAND_RADIUS + 8 then
-		return 3 -- beach
-	end
-	return -0.5 -- half-submerged in the sea
-end
-
 local function makeModelPart(model, name, size, offset, color, material)
 	local part = Instance.new("Part")
 	part.Name = name
@@ -244,7 +235,7 @@ local function targetPosition(target)
 	if target == "tower" then
 		return Vector3.new(center.X, 0, center.Z)
 	elseif typeof(target) == "Instance" then
-		local character = target.Character
+		local character = (target :: any).Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		return root and flat(root.Position)
 	elseif type(target) == "table" and target.position then
@@ -263,7 +254,7 @@ local function targetValid(target)
 		if target:GetAttribute("OnSniperTower") then
 			return false -- D-044: out of reach up the sniper tower
 		end
-		local character = target.Character
+		local character = (target :: any).Character
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 		return humanoid ~= nil and humanoid.Health > 0
 	elseif type(target) == "table" then

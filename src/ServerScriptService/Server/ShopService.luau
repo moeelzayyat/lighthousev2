@@ -116,7 +116,7 @@ local function buy(player, itemId, quantity)
 	return true, string.format("Bought %s for %d Pearls.", item.name, cost)
 end
 
-local function sell(player, itemId, quantity)
+local function _sell(player, itemId, quantity) -- SA.1: unused since selling moved to the Trader; kept for reference
 	local item = Items[itemId]
 	if item.kind ~= "Material" or not item.sell then
 		return false, "The Quartermaster won't buy that."

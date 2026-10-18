@@ -40,7 +40,7 @@ StatPipeline.STATS = {
 
 local function sum(list: { number }?): number
 	local total = 0
-	for _, v in list or {} do
+	for _, v in (list or {}) :: { number } do
 		total += v
 	end
 	return total
@@ -50,12 +50,12 @@ end
 function StatPipeline.compute(statId: string, base: number, mods: Mods?): number
 	local def = StatPipeline.STATS[statId]
 	assert(def, "StatPipeline: unknown stat " .. tostring(statId))
-	local m = mods or {}
+	local m: Mods = mods or ({} :: Mods)
 	assert(m.flat == nil or def.flat, "StatPipeline: " .. statId .. " takes no Flat layer")
 	assert(m.add == nil or def.add, "StatPipeline: " .. statId .. " takes no AdditivePct layer")
 	assert(m.mult == nil or def.mult, "StatPipeline: " .. statId .. " takes no Multiplier layer")
 	local value = (base + sum(m.flat)) * (1 + sum(m.add))
-	for _, x in m.mult or {} do
+	for _, x in (m.mult or {}) :: { number } do
 		value *= x
 	end
 	return math.clamp(value, def.min, def.max)
@@ -67,7 +67,7 @@ export type WeaponStats = { damage: number, cooldown: number, range: number, hit
 function StatPipeline.weapon(weaponId: string, mods: { [string]: Mods }?): WeaponStats
 	local w = Weapons[weaponId]
 	assert(w, "StatPipeline: unknown weapon " .. tostring(weaponId))
-	local m = mods or {}
+	local m: { [string]: Mods } = mods or {}
 	return {
 		damage = StatPipeline.compute("WeaponDamage", w.damage, m.damage),
 		cooldown = StatPipeline.compute("WeaponCooldown", w.cooldown, m.cooldown),
@@ -94,7 +94,7 @@ export type ArmorStats = { maxHealth: number, damageReduction: number }
 function StatPipeline.armor(itemId: string, mods: { [string]: Mods }?): ArmorStats
 	local a = Items[itemId]
 	assert(a and a.kind == "Armor", "StatPipeline: unknown armor " .. tostring(itemId))
-	local m = mods or {}
+	local m: { [string]: Mods } = mods or {}
 	return {
 		maxHealth = StatPipeline.compute("PlayerMaxHealth", a.maxHealth, m.maxHealth),
 		damageReduction = StatPipeline.compute("PlayerArmor", a.damageReduction, m.damageReduction),

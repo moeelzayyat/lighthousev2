@@ -1490,3 +1490,20 @@ TESTRUNNER (DEV, Play server): **258 passed, 0 failed**. 0 errors.
 SCREENSHOTS: `assets/screens/phone_pass/emulator_*.jpg`.
 MIRROR: 166 scripts in DEV, digest identical to `src/` (fcca71bc).
 NEXT: SA.1 Script Analysis clean-up.
+
+CHECKPOINT: SA.1 Script Analysis clean-up — ✅ in DEV (counted with luau-lsp, not Studio's panel)
+DATE: 2026-10-18
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: ServerStorage.Backups.SA1_before_2026-10-18 (the 13 scripts touched) · restore points "SA1 before", "SA1 passed"
+HOW IT WAS COUNTED: Studio's Script Analysis panel cannot be read by a script, but luau-lsp 1.70.1 is already installed at `C:\Users\q_n\tools\luau-lsp\1.70.1` with the Roblox type definitions. Commands (nothing downloaded): `rojo sourcemap src\default.project.json -o sourcemap.json` (Rojo 7.7.1 from Aftman's tool storage), then `luau-lsp analyze --platform roblox --sourcemap sourcemap.json --defs=globalTypes.None.d.luau <every .luau under src except ItemDrafts>`.
+BEFORE: 812 findings: 791 type errors and 21 lint warnings (11 unused locals, 6 unused functions, 2 shadowed locals, 2 unused imports).
+FIXED (no behaviour change):
+- EventLog: its per-run counter table had no type, so every counter it set was a "key not found" (550). Typed as a map.
+- StatPipeline (56): the optional modifier tables are typed where they default to {}.
+- Shop and BAG stat lines, RescueService's carried-castaway parts, CreatureService's player target: types written out.
+- Results: `renderGoal` was a global used before it was defined; now a forward-declared local.
+- Dead code removed: two `groundAt` helpers (CreatureService, LootService; the ground grid replaced them), five unused helpers and seven unused locals in `Main.client`, unused locals in Coach, LobbyBuilder and UI/Controls (a shadowed `s` renamed). ShopService's old `sell` (selling moved to the Trader) is kept and marked unused.
+AFTER: 165 findings (162 type errors, 3 lint): 21 in the vendored ProfileStore (left as shipped), 24 in ProfileSchema and 2 in PlayerData (the save path; left alone on purpose), 26 in test specs, and the rest mostly the analyzer not following `pcall(handler, ...)` returns (EventBus, NetGuard, TestRunner) and `for … in x or {}` loops (UI files), plus Controls' item card (19) and UiSkin's Config key (8).
+TESTRUNNER (DEV, Play server): **258 passed, 0 failed**. PLAY TEST: a voyage to night 1, 12 creatures killed, tower breached, Results drawn with the next goal; 0 errors on server and client.
+MIRROR: 166 scripts in DEV, digest identical to `src/` (25595dce).
+NEXT: the readiness list (PH.1, SND.1, SA.1) is done; the DEV publish waits for the owner.

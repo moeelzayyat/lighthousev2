@@ -107,7 +107,7 @@ end
 -- the detail pane's stat lines: what is equipped now -> this item (StatPipeline, the in-voyage values)
 local function statLines(itemId: string): { any }
 	local item = Items[itemId]
-	local lines = {}
+	local lines: { any } = {}
 	local current = equippedIn(item)
 	local compare = current ~= nil and current ~= itemId
 	local function add(labelText: string, value: number, now: number?, higherIsBetter: boolean, fmt: (number) -> string)

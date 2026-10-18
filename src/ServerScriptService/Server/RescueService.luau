@@ -137,7 +137,7 @@ local function carry(player: Player)
 	end
 	local model = Instance.new("Model")
 	model.Name = "CarriedCastaway"
-	for _, spec in { { "Body", Vector3.new(1.3, 1.8, 0.9), CFrame.new(0, 0.1, 1.2), Color3.fromRGB(170, 140, 100) }, { "Head", Vector3.new(0.9, 0.9, 0.9), CFrame.new(0, 1.35, 1.2), Color3.fromRGB(240, 200, 160) } } do
+	for _, spec: { any } in { { "Body", Vector3.new(1.3, 1.8, 0.9), CFrame.new(0, 0.1, 1.2), Color3.fromRGB(170, 140, 100) }, { "Head", Vector3.new(0.9, 0.9, 0.9), CFrame.new(0, 1.35, 1.2), Color3.fromRGB(240, 200, 160) } } do
 		local p = Instance.new("Part")
 		p.Name = spec[1]
 		p.Size = spec[2]

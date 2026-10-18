@@ -58,17 +58,6 @@ local function makePart(name, size, color, shape)
 	return part
 end
 
-local function groundAt(position)
-	local center = Config.ISLAND_CENTER
-	local radius = Vector3.new(position.X - center.X, 0, position.Z - center.Z).Magnitude
-	if radius <= Config.ISLAND_RADIUS then
-		return Config.GROUND_Y
-	elseif radius <= Config.ISLAND_RADIUS + 8 then
-		return 3
-	end
-	return 0
-end
-
 local function spawnDrop(kind, value, position)
 	local info = KINDS[kind]
 	local orb = makePart("Loot_" .. kind, Vector3.new(info.size, info.size, info.size), info.color, Enum.PartType.Ball)
