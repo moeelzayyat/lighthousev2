@@ -497,9 +497,16 @@ task.spawn(function()
 			marker.Adornee = part
 			marker.Enabled = part ~= nil
 		end
-		-- stay above the bottom HUD row
-		local floorY = hudFloor()
-		chip.Position = UDim2.new(0.5, 0, 0, math.floor(math.min(floorY - 14, root.AbsoluteSize.Y * 0.8)))
+		-- stay above the bottom HUD row; PH.2 (owner, phone): on a phone the hint sits on the left, under the crew
+		-- panel, so it never stacks on the action prompt in the middle of the screen
+		if phone() then
+			chip.AnchorPoint = Vector2.new(0, 0.5)
+			chip.Position = UDim2.new(0, 12, 0.6, 0)
+		else
+			local floorY = hudFloor()
+			chip.AnchorPoint = Vector2.new(0.5, 1)
+			chip.Position = UDim2.new(0.5, 0, 0, math.floor(math.min(floorY - 14, root.AbsoluteSize.Y * 0.8)))
+		end
 		chipText.TextSize = if phone() then 16 else 18
 	end
 end)

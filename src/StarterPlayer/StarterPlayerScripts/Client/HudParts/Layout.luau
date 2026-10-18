@@ -287,8 +287,13 @@ function Layout.init(w, S, cards, after)
 			-- PH.1: stacked, full width (side by side cut "Upgrade Lighthouse" to "Upgrade..." on a small phone)
 			bottomLayout.FillDirection = Enum.FillDirection.Vertical
 			bottomLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+			-- PH.2 (owner, phone: "the E button menu is too wide"): each card is only as wide as its text
+			-- (180 to 260 px, left-aligned next to the joystick zone) instead of 60% of the screen
+			local fitMax = math.max(180, math.min(260, math.floor(hudRoot.AbsoluteSize.X * 0.6) - 20))
 			for _, c in { cards.primary, cards.secondary } do
-				c.button.Size = UDim2.new(1, 0, 0, 50)
+				c.button.Size = UDim2.new(0, c.button.Size.X.Offset, 0, 50)
+				c.button:SetAttribute("FitMax", fitMax)
+				c.fit()
 			end
 		else
 			bottom.AnchorPoint = Vector2.new(0.5, 1)
@@ -296,6 +301,9 @@ function Layout.init(w, S, cards, after)
 			bottom.Position = if touch then UDim2.new(0.6, 0, 1, -220) else UDim2.new(0.5, 0, 1, -126) -- above the weapon slot
 			bottomLayout.FillDirection = Enum.FillDirection.Vertical
 			bottomLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+			for _, c in { cards.primary, cards.secondary } do
+				c.button:SetAttribute("FitMax", nil)
+			end
 			cards.primary.button.Size = UDim2.new(1, 0, 0, 56)
 			cards.secondary.button.Size = UDim2.new(1, 0, 0, 46)
 		end

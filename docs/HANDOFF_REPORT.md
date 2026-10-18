@@ -1716,3 +1716,11 @@ BACKUP: ServerStorage.Backups.ICON3_before_2026-10-18 · restore points "ICON3 c
 CHECKED: Quartermaster Armor and Cosmetics tabs draw every new picture (`assets/screens/icons3/`); TestRunner **280 passed, 0 failed**; API access off.
 MIRROR: 177 scripts, digest identical to `src/` (dba1cbcd).
 STILL DRAWN (owner to find icons): Oilskin Coat, Storm Blue coat, Kelp Green coat, Kraken flag, Founder's flag, Keeper's Glow beam, Shared Lantern beam (and, if wanted, the two housings and the Gull and Rescuer flags).
+
+CHECKPOINT: PH.2 Compact E-button prompts on phones — ✅ in DEV Studio (owner's report, 2026-10-18 20:57 UTC)
+DATE: 2026-10-18
+SEEN (owner, phone): the "Sail now / Ship's Wheel" and "Use the Lamp / Lamp Console" prompt cards ran about 60% across the screen, under the coach hint pill, covering the middle and the vote panel.
+FIXED: `HudParts/Prompts` (each card measures its own text), `HudParts/Layout` (on phones a card is as wide as its text, 180 to 260 px, 50 px tall, left-aligned beside the joystick zone), `Coach.client` (on phones the hint sits on the left under the crew panel instead of above the prompt).
+BACKUP: ServerStorage.Backups.PH2_before_2026-10-18 · restore points "PH2 code", "PH2 passed"
+CHECKED: iPhone 17 Pro in Studio's Device Simulator, landscape: on the ship the wheel prompt now ends before the vote panel and the hint is on the left; at the lamp the prompt and the hint no longer stack and the middle of the screen is clear (`assets/screens/prompts_phone/before_after.jpg`). TestRunner **280 passed, 0 failed**; API access off. Not checked on a real phone.
+MIRROR: 177 scripts, digest identical to `src/` (ce8ba3e1).

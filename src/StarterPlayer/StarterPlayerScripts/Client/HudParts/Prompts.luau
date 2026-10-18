@@ -96,7 +96,35 @@ function Prompts.init(bottom)
 			ZIndex = 3,
 		}, b)
 		UiKit.glassPanel(b)
-		return { button = b, stroke = stroke, keyText = keyText, keyImage = keyImage, action = action, object = object, hold = hold, prompt = nil }
+		-- PH.2 (owner, phone): measuring labels so a phone card can be just as wide as its text (Layout sets FitMax)
+		local function measure(label)
+			return UiKit.new("TextLabel", {
+				Name = "Measure" .. label.Name,
+				BackgroundTransparency = 1,
+				TextTransparency = 1,
+				FontFace = label.FontFace,
+				TextSize = label.TextSize,
+				TextWrapped = false,
+				Text = "",
+				Size = UDim2.fromOffset(0, 0),
+				AutomaticSize = Enum.AutomaticSize.X,
+			}, b)
+		end
+		local cardObj = { button = b, stroke = stroke, keyText = keyText, keyImage = keyImage, action = action, object = object, hold = hold, prompt = nil, measureA = measure(action), measureB = measure(object) }
+		local function fit()
+			local maxW = b:GetAttribute("FitMax")
+			if type(maxW) ~= "number" then
+				return
+			end
+			-- text + left padding 16 + key chip 54 + gaps 22
+			local want = math.max(cardObj.measureA.TextBounds.X, cardObj.measureB.TextBounds.X) + 16 + 54 + 22
+			b.Size = UDim2.new(0, math.clamp(math.ceil(want), math.min(180, maxW), maxW), 0, b.Size.Y.Offset)
+		end
+		cardObj.fit = fit
+		cardObj.measureA:GetPropertyChangedSignal("TextBounds"):Connect(fit)
+		cardObj.measureB:GetPropertyChangedSignal("TextBounds"):Connect(fit)
+		b:GetAttributeChangedSignal("FitMax"):Connect(fit)
+		return cardObj
 	end
 	local primaryCard = promptCard("PrimaryPrompt", 3, false)
 	local secondaryCard = promptCard("SecondaryPrompt", 4, true)
@@ -145,6 +173,9 @@ function Prompts.init(bottom)
 			objectText = (if objectText ~= "" then objectText .. "  ·  " else "") .. "Hold"
 		end
 		cardObj.object.Text = objectText
+		cardObj.measureA.Text = cardObj.action.Text -- PH.2
+		cardObj.measureB.Text = objectText
+		cardObj.fit()
 		local mode = inputMode()
 		cardObj.keyImage.Visible = false
 		cardObj.keyText.Visible = true
