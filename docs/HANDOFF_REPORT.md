@@ -1395,3 +1395,17 @@ PLAY TEST (DEV, Studio memory store; runtime helper kept the lamp and tower up a
 SCREENSHOTS: `assets/screens/creatures_forgegui/` (lineup_front.jpg; front_*.jpg in Edit; game_day_*.jpg and game_night_all.jpg in play).
 MIRROR: 166 scripts in DEV, digest identical to `src/` (893de206). The meshes live in the place (`ServerStorage.Art`), not in `src/`.
 OWNER: judge the five looks; any one can go back to its block shape by deleting it from `ServerStorage.Art`. They ship with the next DEV publish.
+
+CHECKPOINT: F10.2 First 10 minutes, pass 2: the opening on the bigger island — ✅ in DEV (scripted first-timer, not a person; Script Analysis unmeasured)
+DATE: 2026-10-18
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF (probe failed as expected)
+BACKUP: ServerStorage.Backups.F10_before_2026-10-18 (IslandBuilder, OilShed) · restore points "F10 before", "F10 passed"
+MEASURED with `tests/first_beam_hit_bot.luau` (fresh Studio memory profile; it boards, takes the wheel, then follows the coach: oil → tank → lamp → aim; times since the script took control, corrected by the PlayerReady offset; every run at 60 fps):
+- Bigger island as built in ISL.2: first beam hit **41.1 s** (pass 1 on the old island: median 37.7 s). Cause: the oil pile had moved out with its shed, so the opening walk (landing → oil → fuel tank) was 14 studs longer (125 instead of 110).
+- FIXED: the oil pile and the oil shed are back at their old spot (pile at (48, 20), `IslandBuilder`); the bigger island's ground there is still flat at the lighthouse's height.
+- After the fix: **39.0 · 38.2 · 36.8 s, median 38.2 s** (target ≤ 45 s). Landing about 22 s after control as before; oil about 8 s after landing.
+- The creature ring moving out (92 → 117) does not slow the first beam hit: the first crab comes out with the light just ahead of the sweep, and beam damage does not depend on distance.
+TESTRUNNER (DEV, Play server): **258 passed, 0 failed**. 0 errors from game scripts in the runs.
+STILL OPEN from pass 1: on boarding, the camera faces the mast and cargo, so the wheel is behind a first-timer (a camera turn toward the wheel would help).
+MIRROR: 166 scripts in DEV, digest identical to `src/` (9c6f282d).
+NEXT: (c) the ForgeGUI crab and skitter models when the coordinator sends their ids; then (a) the older screens on the menu pattern.

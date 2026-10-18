@@ -254,7 +254,7 @@ function IslandBuilder.build()
 	addLabel(towerDoor, "REPAIR", Color3.fromRGB(150, 210, 255), 5)
 
 	-- Oil barrels out on the island
-	local oilPosition = Vector3.new(c.X + 55, groundY, c.Z + 23) -- ISL.2: beside the oil shed, which moved out with the bigger island (was 48, 20)
+	local oilPosition = Vector3.new(c.X + 48, groundY, c.Z + 20) -- in the oil shed; kept close to the lighthouse on the bigger island so the opening walk stays short (F10.2)
 	local barrelOffsets = {
 		Vector3.new(0, 1.75, 0),
 		Vector3.new(3, 1.75, 0),
