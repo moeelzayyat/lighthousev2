@@ -1731,3 +1731,11 @@ BUILT: `CreatureService` (a big monster's strike mark is red), `Client/CreatureV
 BACKUP: ServerStorage.Backups.KRAKEN2_before_2026-10-18 · restore points "KRAKEN2 code", "KRAKEN2 passed"
 CHECKED (DEV Studio play): tentacle angle sampled every 0.2 s over one strike: 0, rising to 0.52, the whip (0.34, 0.58), back to 0; a test listener on the Attack remote: clicking BAG and its Close fired nothing, one click on the world fired one attack. TestRunner **280 passed, 0 failed**; API access off. Picture: `assets/screens/kraken/kraken_tentacle_rearing_side_pc.jpg`.
 MIRROR: 177 scripts, digest identical to `src/` (94e4604a).
+
+CHECKPOINT: SET.2 Settings saved between visits (D-050) — ✅ in DEV Studio (owner said yes, 2026-10-18 21:15 UTC)
+DATE: 2026-10-18
+BUILT: `PlayerData` (`cleanSettings`, `setSettings`, the settings in the profile sent to the client), `Domains/Data` (`SaveSettings` handler), `Domains/Platform` + `NetGuard` (the remote, 1 / 3 rate), `Client/Menus` (sends a change a second later; applies the saved values when the profile first arrives; footer now "Saved with your keeper."), `Client/Inventory` (the BAG's Settings tile text), `SettingsSaveSpec` (new), NetGuard and Security specs.
+BACKUP: ServerStorage.Backups.SET2_before_2026-10-18 · restore points "SET2 code", "SET2 passed"
+CHECKED (DEV Studio play): in the Settings panel, two taps on Sound effects "–" and Low effects on; a second later the profile held Sfx 0.8, Rain false; the next profile sent to the client carried sfx 0.8 and lowEffects true. TestRunner **282 passed, 0 failed**; API access off.
+NOT CHECKED: the values coming back on a real rejoin (Studio keeps no save between sessions); check it live after the publish: change a setting, leave, rejoin.
+MIRROR: 178 scripts, digest identical to `src/` (232307b2).

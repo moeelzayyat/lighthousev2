@@ -40,6 +40,14 @@ function Data.Init(ctx)
 		return if data then game:GetService("HttpService"):JSONEncode(data) else nil
 	end)
 
+	-- SET.2: Settings saved between visits (sound, storm sound, low effects); PlayerData cleans the values
+	NetGuard.connect(remotes.SaveSettings, function(player, sfx, ambience, lowEffects)
+		if not NetGuard.allow(player, "SaveSettings") then
+			return
+		end
+		PlayerData.setSettings(player, sfx, ambience, lowEffects)
+	end)
+
 	-- Admin channel (R1.8): owner only; everyone else is refused and logged by AdminDataService
 	NetGuard.connect(remotes.AdminRequest, function(player, requestId, action, targetUserId, arg)
 		if not NetGuard.isRequestId(requestId) or not NetGuard.allow(player, "AdminRequest") then

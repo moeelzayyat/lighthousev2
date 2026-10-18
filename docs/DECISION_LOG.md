@@ -386,3 +386,7 @@ Decision:
 ## Owner report · 2026-10-18 20:57 UTC · phone: the E-button prompt is too wide and covers the screen. Fixed in PH.2.
 ## CP — PH.2 passed · 2026-10-18 · TestRunner 280/280; digest 177 scripts ce8ba3e1
 ## CP — KRAKEN.2 passed · 2026-10-18 · TestRunner 280/280; digest 177 scripts 94e4604a
+## D-050 — Settings are saved between visits
+2026-10-18 · SET.2 · **Status: Accepted (owner "yes", 2026-10-18 21:15 UTC)**
+The save already had an unused `Settings` table (Music, Sfx, Shake, Rain). It now holds the player's choices: `Sfx` = sound effects volume, `Music` = the storm and waves volume (the game has no music), `Rain` = false when low effects is on; `Shake` stays unused. No new field and no migration. New remote `SaveSettings(sfx, ambience, lowEffects)`: numbers cleaned to 0..1 in tenths, a boolean; 1 / 3 rate; nothing else is written.
+## CP — SET.2 passed · 2026-10-18 · TestRunner 282/282; digest 178 scripts 232307b2

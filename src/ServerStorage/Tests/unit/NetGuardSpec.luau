@@ -21,6 +21,7 @@ local CONTRACT: { [string]: { number } } = {
 	AdminRequest = { 1, 3 },
 	ChooseVoyage = { 2, 3 },
 	ChooseMap = { 2, 3 }, -- MAP.1
+	SaveSettings = { 1, 3 }, -- SET.2
 	MerchantRequest = { 5, 8 }, -- S6.2
 	CodeRedeem = { 0.1, 1 }, -- L1.4
 	SniperAction = { 3, 5 }, -- D-044

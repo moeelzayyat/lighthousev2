@@ -477,7 +477,7 @@ local function settingsDetail(): any
 	return {
 		icon = glyphIcon("info", Color3.fromRGB(150, 200, 255), "Settings"),
 		name = "Settings",
-		description = "Sound, storm sound and low effects for slower phones. They last until you leave the game.",
+		description = "Sound, storm sound and low effects for slower phones. Saved with your keeper.",
 		action = { text = "Open", enabled = true, onPress = function()
 			setOpen(false)
 			local event = script.Parent:FindFirstChild("OpenSettings")

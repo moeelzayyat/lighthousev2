@@ -111,6 +111,7 @@ return function(T: any)
 				{ "ChooseVoyage", "ModeTest" }, -- test-only voyage
 				{ "ChooseMap", "NoSuchMap" }, -- MAP.1
 				{ "ChooseMap", "FrostIsle" }, -- MAP.1: nobody on the crew holds it
+				{ "SaveSettings", "loud", 0 / 0, "yes" }, -- SET.2: malformed
 				{ "ForecastVote", "NoSuchForecast" },
 				{ "CoachEvent", "shown", "NoSuchPrompt" },
 				{ "LampShift", "NoSuchShift", true },
@@ -210,6 +211,7 @@ return function(T: any)
 				AdminRequest = function() return { rid(), "nope", 1, nil } end,
 				ChooseVoyage = function() return { "NoSuchVoyage" } end,
 				ChooseMap = function() return { "NoSuchMap" } end, -- MAP.1
+				SaveSettings = function() return { 1, 1, false } end, -- SET.2: the defaults, so nothing changes
 				MerchantRequest = function() return { rid(), "buy", "NoSuchItem", 1 } end,
 				CodeRedeem = function() return { "NOSUCHCODE" } end,
 				SniperAction = function() return { "fire", Vector3.new(0, -500, 0) } end, -- D-044: not up the tower

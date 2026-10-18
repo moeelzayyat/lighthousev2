@@ -834,7 +834,7 @@ local settingsFooter = new("Frame", {
 	Position = UDim2.fromScale(0, 1),
 	Size = UDim2.new(1, 0, 0, 48),
 }, settingsContent)
-local sessionNote = UiKit.Label(settingsFooter, "Settings last until you leave the game.", "Micro", {
+local sessionNote = UiKit.Label(settingsFooter, "Saved with your keeper.", "Micro", {
 	Name = "SessionNote",
 	AnchorPoint = Vector2.new(0, 0.5),
 	Position = UDim2.fromScale(0, 0.5),
@@ -853,6 +853,34 @@ local resetButton = UiKit.Button(settingsActions, "Reset", { name = "ResetButton
 local doneButton = UiKit.Button(settingsActions, "Done", { name = "DoneButton", variant = "primary", width = 130, layoutOrder = 2 })
 
 local DEFAULTS = { SFX = 1, Ambience = 1, LowEffects = false }
+-- SET.2 (owner's yes): Settings are saved with the profile. A change is sent a second later (one send for a
+-- slider drag); the saved values are applied when the profile first arrives.
+local saveQueued = false
+local function queueSave()
+	if saveQueued then
+		return
+	end
+	saveQueued = true
+	task.delay(1, function()
+		saveQueued = false
+		remotes:WaitForChild("SaveSettings"):FireServer(SoundFx.getGroup("SFX").Volume, SoundFx.getGroup("Ambience").Volume, player:GetAttribute("LowEffects") == true)
+	end)
+end
+local settingsLoaded = false
+remotes:WaitForChild("GearData").OnClientEvent:Connect(function(data)
+	if settingsLoaded or type(data) ~= "table" or type(data.settings) ~= "table" then
+		return
+	end
+	settingsLoaded = true
+	local s = data.settings
+	if type(s.sfx) == "number" then
+		SoundFx.getGroup("SFX").Volume = s.sfx
+	end
+	if type(s.ambience) == "number" then
+		SoundFx.getGroup("Ambience").Volume = s.ambience
+	end
+	player:SetAttribute("LowEffects", s.lowEffects == true)
+end)
 local CodeBox = require(script.Parent:WaitForChild("CodeBox")) -- L1.4/LO.4: the shared code box
 local dialogOpen = false
 local firstControl
@@ -887,6 +915,7 @@ local function buildSettings()
 			end,
 			onChange = function(v)
 				group.Volume = v / 100
+				queueSave() -- SET.2
 				if preview then
 					SoundFx.play2D("click")
 				end
@@ -910,6 +939,7 @@ local function buildSettings()
 		value = player:GetAttribute("LowEffects") == true,
 		onChange = function(v)
 			player:SetAttribute("LowEffects", v)
+			queueSave() -- SET.2
 		end,
 	})
 	toggle.button.AnchorPoint = Vector2.new(1, 0)
@@ -952,6 +982,7 @@ resetButton.Activated:Connect(function()
 			SoundFx.getGroup("SFX").Volume = DEFAULTS.SFX
 			SoundFx.getGroup("Ambience").Volume = DEFAULTS.Ambience
 			player:SetAttribute("LowEffects", DEFAULTS.LowEffects)
+			queueSave() -- SET.2
 			buildSettings()
 			UiKit.Toast(root, "Settings reset to defaults.", "success")
 			focus(doneButton)

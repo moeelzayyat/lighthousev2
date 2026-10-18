@@ -52,6 +52,8 @@ local function view(data: any): any
 		stats = { runs = data.Stats.Runs, victories = data.Stats.Victories, bestNight = data.Stats.BestNight },
 		boosts = data.Boosts, -- S6.4: Quartermaster boost ranks
 		logbook = data.Logbook, -- MP.4: found entries ("Creatures:RockCrab" -> true), shown on the BAG's logbook page
+		-- SET.2: saved Settings (Sfx = sound effects, Music = storm and waves, Rain false = low effects)
+		settings = { sfx = data.Settings.Sfx, ambience = data.Settings.Music, lowEffects = data.Settings.Rain == false },
 	}
 end
 
@@ -238,6 +240,41 @@ function PlayerData.recordRun(player: Player, won: boolean, nightReached: number
 	data.Stats.NightsSurvived += math.max(0, if won then nightReached else nightReached - 1)
 	player:SetAttribute("RunsCompleted", data.Stats.Runs)
 	changed(player, true)
+end
+
+-- SET.2 (owner's yes, 2026-10-18): Settings are saved between visits in the save's existing Settings fields:
+-- Sfx = the sound effects volume, Music = the storm and waves volume (the game has no music), Rain = false when
+-- low effects is on. Pure: what a client sends, cleaned (volumes 0..1 in steps of 0.1), or nil if malformed.
+function PlayerData.cleanSettings(sfx: any, ambience: any, lowEffects: any): (number?, number?, boolean?)
+	if type(sfx) ~= "number" or type(ambience) ~= "number" or type(lowEffects) ~= "boolean" then
+		return nil, nil, nil
+	end
+	if sfx ~= sfx or ambience ~= ambience then
+		return nil, nil, nil -- NaN
+	end
+	local function step(v: number): number
+		return math.clamp(math.floor(v * 10 + 0.5) / 10, 0, 1)
+	end
+	return step(sfx), step(ambience), lowEffects
+end
+
+-- SET.2: stores a player's Settings (saved with the profile's next save); false when malformed or unchanged
+function PlayerData.setSettings(player: Player, sfx: any, ambience: any, lowEffects: any): boolean
+	local a, b, c = PlayerData.cleanSettings(sfx, ambience, lowEffects)
+	if a == nil then
+		return false
+	end
+	local changedAny = false
+	PlayerData.mutate(player, function(data)
+		local s = data.Settings
+		if s.Sfx == a and s.Music == b and s.Rain == not c then
+			return false
+		end
+		s.Sfx, s.Music, s.Rain = a, b, not c
+		changedAny = true
+		return true
+	end)
+	return changedAny
 end
 
 -- Grants a boolean unlock (S2.1: "LongVoyage" after a Standard win). Saved now; mirrored as Unlock_<key>.
