@@ -46,6 +46,7 @@ growth(n) = min(n-1, GROWTH_FULL_UNTIL-1) + max(0, n-GROWTH_FULL_UNTIL) × GROWT
 crabs(n)  = (CRABS_BASE + CRABS_PER_NIGHT × growth(n)) × (final ? 1.5 : 1) × forecastCrabMult
 skitters(n, crew) = (SWARM_BASE + SWARM_PER_NIGHT × growth(n)) × SWARM_BY_CREW[crew] × forecastMult
 boss(n)   = per VoyageDefinition schedule; count = crew size 1..4 (S6.1, implemented: WaveDirector.bossBearings, evenly spread bearings)
+final(n)  = the voyage's last night: the Kraken takes the first boss slot (D-047, WaveDirector.finalBossNight; none on Endless); health = 1200 × (1 + FINAL_BOSS_HEALTH_PER_EXTRA 0.6 × (crew − 1))
 slots     = small creatures + bosses × BOSS_SLOTS (5) ≤ MAX_CREATURES (45); bosses always arrive, small ones wait (S6.1)
 ```
 Reference table (crew 4, no forecast): night 1 → 14 / 42 · 4 → 34 / 82 · 7 → 46 / 106 · 10 → 58 / 130 · 13 → 70×1.5=105 / 154.

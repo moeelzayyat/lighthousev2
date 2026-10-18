@@ -200,6 +200,14 @@ RULES.Creatures = function(c, Creatures)
 			end
 		end
 		c.bool(w .. ".weaponImmune", d.weaponImmune, true)
+		-- D-047: the final boss
+		if d.minRadius ~= nil then
+			c.num(w .. ".minRadius", d.minRadius, 0, 200)
+		end
+		c.bool(w .. ".finalBoss", d.finalBoss, true)
+		if d.finalBoss and not d.big then
+			c.add(w .. ".finalBoss", "a final boss must be a big monster")
+		end
 		c.bool(w .. ".ignoresPlayers", d.ignoresPlayers, true)
 		if d.shape ~= nil then
 			c.oneOf(w .. ".shape", d.shape, { "eel", "puffer", "lantern", "witch", "shaman" })
@@ -235,6 +243,9 @@ RULES.Creatures = function(c, Creatures)
 	for _, id in Creatures.BIG_POOL or {} do
 		if type(Creatures[id]) == "table" and Creatures[id].big ~= true then
 			c.add("Creatures.BIG_POOL", id .. " is not a big monster")
+		end
+		if type(Creatures[id]) == "table" and Creatures[id].finalBoss then
+			c.add("Creatures.BIG_POOL", id .. " is the final boss: it comes only on the last night")
 		end
 	end
 end

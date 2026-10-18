@@ -546,6 +546,11 @@ function GameState.run(deps)
 					for _, n in WaveDirector.bossNightsFor(def, Config) do
 						bigNights[n] = Creatures.BIG_POOL[math.random(1, #Creatures.BIG_POOL)]
 					end
+					-- D-047: the Kraken leads the last night's big monsters (the others are random kinds as before)
+					local finalNight = WaveDirector.finalBossNight(def, Config)
+					if finalNight and Creatures[Config.FINAL_BOSS] then
+						bigNights[finalNight] = Config.FINAL_BOSS
+					end
 					for night = 1, def.nights do
 						-- DAY: prepare
 						setPhase("Day", night)
@@ -579,7 +584,9 @@ function GameState.run(deps)
 						local bigKind = bigNights[night]
 						if bigKind then
 							task.delay(3, function()
-								notifyAll("The sea is restless... something BIG is coming tonight. Stay close to your crew.")
+								notifyAll(if Creatures[bigKind].finalBoss
+									then "The sea is churning... THE KRAKEN is waking for the last night. Hold the shore!"
+									else "The sea is restless... something BIG is coming tonight. Stay close to your crew.")
 								if state:GetAttribute("Phase") == "Night" and state:GetAttribute("Night") == night then
 									state:SetAttribute("BigWarning", "approaching") -- HUD warning until it arrives
 								end
@@ -592,11 +599,18 @@ function GameState.run(deps)
 								local bearings = WaveDirector.bossBearings(#readyPlayers(), math.random() * 360)
 								for i, bearing in bearings do
 									local kind = if i == 1 then bigKind else Creatures.BIG_POOL[math.random(1, #Creatures.BIG_POOL)]
-									creatures.spawn(kind, bearing)
+									-- D-047: the final boss grows with the crew
+									local healthMult = if Creatures[kind].finalBoss then 1 + (Config.FINAL_BOSS_HEALTH_PER_EXTRA or 0) * (#bearings - 1) else 1
+									creatures.spawn(kind, bearing, healthMult)
 									local rad = math.rad(bearing)
 									SoundFx.playAt("monster", Vector3.new(-math.sin(rad) * 80, 5, -math.cos(rad) * 80))
 									EventLog.log("BigMonsterSpawned", { kind = kind, night = night, bearing = math.floor(bearing), of = #bearings })
 									EventLog.Publish("BossWarning", { VoyageId = EventLog.voyageId(), DefId = kind, Night = night })
+								end
+								if Creatures[bigKind].finalBoss then
+									SoundFx.playAt("krakenRise", Vector3.new(0, 5, 0))
+									notifyAll("THE KRAKEN rises from the deep! Its tentacles mark where they strike: step out of the ring and hit it from the beach.")
+									return
 								end
 								notifyAll(if #bearings == 1
 									then string.format("A %s climbs out of the sea! Big monsters hit hard: bring your best gear.", string.upper(Creatures[bigKind].displayName))

@@ -47,6 +47,9 @@ SoundFx.SOUNDS = {
 	denied = { id = "rbxasset://sounds/button.wav", volume = 0.5, speed = 0.7 },
 	monster = { id = "rbxasset://sounds/HalloweenGhost.wav", volume = 0.9, speed = 0.45 }, -- deep roar when a big monster arrives
 	-- S6.5: each new monster's warning and its move (built-in sounds at their own pitch)
+	-- D-047: the Kraken (built-in sounds, slowed down)
+	krakenRise = { id = "rbxasset://sounds/HalloweenGhost.wav", volume = 1, speed = 0.3 },
+	krakenSlam = { id = "rbxasset://sounds/bass.wav", volume = 1, speed = 0.6 },
 	eelRear = { id = "rbxasset://sounds/swordlunge.wav", volume = 0.7, speed = 0.55 },
 	eelSpit = { id = "rbxasset://sounds/splat.wav", volume = 0.7, speed = 1.5 },
 	pufferFuse = { id = "rbxasset://sounds/electronicpingshort.wav", volume = 0.8, speed = 0.45 },

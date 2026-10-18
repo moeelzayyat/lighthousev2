@@ -21,6 +21,7 @@ export type WaveConfig = {
 	BIG_EVERY_NIGHTS: number?,
 	MAX_BIG_PER_RUN: number?,
 	BOSS_SLOTS: number?,
+	FINAL_BOSS: string?, -- D-047: the big monster of a voyage's last night (nil = none)
 }
 
 -- A forecast definition (Shared/Forecasts entry) or nil; only crabMult affects the plan.
@@ -65,7 +66,7 @@ function WaveDirector.bigNights(config: WaveConfig): { number }
 end
 
 -- A voyage definition (Shared/Definitions/Voyages), S2.1
-export type VoyageDef = { nights: number, bossNights: { number }, bossEveryNightFrom: number? }
+export type VoyageDef = { nights: number, bossNights: { number }, bossEveryNightFrom: number?, endless: boolean? }
 
 -- Big-monster nights of a voyage definition, ascending. BIG_MONSTERS_ENABLED false gives none.
 function WaveDirector.bossNightsFor(def: VoyageDef, config: WaveConfig): { number }
@@ -89,6 +90,15 @@ function WaveDirector.bossNightsFor(def: VoyageDef, config: WaveConfig): { numbe
 	end
 	table.sort(list)
 	return list
+end
+
+-- D-047: the night the final boss comes (the voyage's last night), or nil (none set, big monsters off, or an
+-- Endless voyage, which has no last night). It leads that night's big monsters.
+function WaveDirector.finalBossNight(def: VoyageDef, config: WaveConfig): number?
+	if not config.BIG_MONSTERS_ENABLED or type(config.FINAL_BOSS) ~= "string" or def.endless then
+		return nil
+	end
+	return def.nights
 end
 
 -- The config for one voyage: the definition's length replaces NIGHTS_TO_WIN (the final-night crisis lands on

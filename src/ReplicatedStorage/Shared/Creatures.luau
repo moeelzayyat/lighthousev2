@@ -26,6 +26,8 @@
 --   appears         { from = night, base, every, max }: how many join each night (WaveDirector.specials)
 --   loot            rows { chance, drops = { { kind, min, max } } }: one row is rolled; chances sum to 1
 --   shape, color    the simple model drawn when ServerStorage.Art has no model for it
+-- D-047: minRadius   never comes closer to the tower than this (the Kraken stays in the shallows)
+--         finalBoss   the big monster of a voyage's last night (Config.FINAL_BOSS names it; never in BIG_POOL)
 
 local Creatures = {
 	RockCrab = {
@@ -272,6 +274,39 @@ local Creatures = {
 			{ chance = 0.5, drops = { { "Shells", 5, 8 }, { "CrabClaw", 1, 1 } } },
 			{ chance = 0.5, drops = { { "Shells", 5, 8 }, { "SeaGlass", 1, 1 } } },
 		},
+	},
+
+	-- D-047 (the owner's 12 Oct idea list: "Final boss: the Kraken"): the big monster of a voyage's LAST night. It rises
+	-- in the shallows and stays there (minRadius); every 4 s a tentacle marks a spot (a Keeper near the shore,
+	-- a cannon, or the tower) and slams it 1.2 s later. Beat it from the beach: harpoons, cannons, the sniper tower,
+	-- the beam. Loot: the big-monster pile (no new economy numbers).
+	Kraken = {
+		displayName = "The Kraken",
+		art = "Kraken",
+		health = 1200, -- for a crew of 1; GameState adds Config.FINAL_BOSS_HEALTH_PER_EXTRA per extra Keeper
+		speed = 3,
+		pushable = false,
+		beamDamageMult = 0.6,
+		bodyRadius = 8,
+		attackRange = 40,
+		towerRange = 100,
+		minRadius = 110,
+		hover = -4, -- sits low in the water: head and tentacles above it
+		playerDamage = 30,
+		attackInterval = 4,
+		slamRadius = 0,
+		towerDps = 0,
+		towerHit = 4, -- 1 a second at most: a crew that repairs or kills it keeps the tower
+		cannonDps = 0,
+		cannonHit = 20,
+		scale = 1,
+		big = true,
+		finalBoss = true,
+		behaviour = "spitter",
+		telegraph = 1.2,
+		splashRadius = 7,
+		telegraphSound = "krakenRise",
+		releaseSound = "krakenSlam",
 	},
 }
 

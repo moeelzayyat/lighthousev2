@@ -519,7 +519,8 @@ local function releaseMove(crab, players)
 end
 
 -- Spawns a creature of the given type (see Shared/Creatures) climbing out of the sea
-function CreatureService.spawn(kind, bearing)
+-- healthMult (D-047): scales a big monster's health (the Kraken grows with the crew); small creatures ignore it
+function CreatureService.spawn(kind, bearing, healthMult)
 	local stats = Creatures[kind]
 	if not stats then
 		return false
@@ -542,8 +543,8 @@ function CreatureService.spawn(kind, bearing)
 		target = "tower",
 		targetBits = 0,
 		nextBite = 0,
-		health = stats.health * (if stats.big then 1 else (state:GetAttribute("ForecastCrabHpMult") or 1)),
-		maxHealth = stats.health * (if stats.big then 1 else (state:GetAttribute("ForecastCrabHpMult") or 1)),
+		health = stats.health * (if stats.big then (healthMult or 1) else (state:GetAttribute("ForecastCrabHpMult") or 1)),
+		maxHealth = stats.health * (if stats.big then (healthMult or 1) else (state:GetAttribute("ForecastCrabHpMult") or 1)),
 		moving = true,
 		lit = false,
 		burning = false,
@@ -554,8 +555,8 @@ function CreatureService.spawn(kind, bearing)
 	EventLog.Publish("CreatureSpawned", { VoyageId = EventLog.voyageId(), CreatureId = crab.id, DefId = kind, Big = stats.big == true })
 	if stats.big and state then
 		state:SetAttribute("BossName", stats.displayName)
-		state:SetAttribute("BossMax", stats.health)
-		state:SetAttribute("BossHealth", stats.health)
+		state:SetAttribute("BossMax", crab.maxHealth)
+		state:SetAttribute("BossHealth", crab.maxHealth)
 		-- HUD boss list: GameState.Bosses holds one entry per live big monster
 		local bosses = state:FindFirstChild("Bosses")
 		if not bosses then
@@ -566,8 +567,8 @@ function CreatureService.spawn(kind, bearing)
 		local entry = Instance.new("Configuration")
 		entry.Name = kind .. "_" .. string.format("%d", os.clock() * 1000)
 		entry:SetAttribute("DisplayName", stats.displayName)
-		entry:SetAttribute("Health", stats.health)
-		entry:SetAttribute("Max", stats.health)
+		entry:SetAttribute("Health", crab.maxHealth)
+		entry:SetAttribute("Max", crab.maxHealth)
 		entry.Parent = bosses
 		crab.bossEntry = entry
 	end
@@ -913,6 +914,14 @@ local function step(dt)
 		local offset = crab.pos - towerCenter
 		if offset.Magnitude < Config.TOWER_ATTACK_RADIUS then
 			crab.pos = towerCenter + (if offset.Magnitude > 0.01 then offset.Unit else Vector3.new(0, 0, 1)) * Config.TOWER_ATTACK_RADIUS
+		end
+		-- D-047: the Kraken stays in the shallows (never closer to the tower than its minRadius)
+		local minRadius = stats.minRadius
+		if minRadius then
+			local fromTower = crab.pos - towerCenter
+			if fromTower.Magnitude < minRadius then
+				crab.pos = towerCenter + (if fromTower.Magnitude > 0.01 then fromTower.Unit else Vector3.new(0, 0, 1)) * minRadius
+			end
 		end
 		crab.radius = (crab.pos - towerCenter).Magnitude
 

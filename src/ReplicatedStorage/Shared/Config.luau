@@ -137,6 +137,8 @@ local Config = {
 	CRABS_PER_NIGHT = 8, -- extra crabs each night after
 	SPAWN_WINDOW = 0.7, -- crabs arrive during the first 70% of the night
 	MAX_CREATURES = 45, -- was 60; 45 alive at once keeps phones smooth (new ones arrive as others die)
+	FINAL_BOSS = "Kraken", -- D-047: the big monster of every voyage's last night (nil = none)
+	FINAL_BOSS_HEALTH_PER_EXTRA = 0.6, -- D-047: +60% of its health for each Keeper after the first (1200 solo, 3360 for 4)
 	BOSS_SLOTS = 5, -- S6.1: a big monster counts as 5 toward MAX_CREATURES (fewer small ones while bosses are up)
 	-- Swarm (Oct 12 2026): packs of small Sand Skitters arrive all night on top of the Rock Crabs,
 	-- so there is always something to do. Switch off with SWARM_ENABLED = false.

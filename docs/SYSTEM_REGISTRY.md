@@ -21,6 +21,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Aggro / threat | Released | — | |
 | Rock Crab, Sand Skitter swarm | Released | S4 | render budget |
 | Big monsters (Barnacle Brute, Shipwreck Hermit) | Released; by crew size tested (not yet published) | S6.1 | S6.1: one per crew member on boss nights, evenly spread bearings (`WaveDirector.bossBearings`); a boss counts as 5 toward `MAX_CREATURES` (`Config.BOSS_SLOTS`, `CreatureService.load`); `BossesByCrewSpec` 5 tests |
+| The Kraken (final boss, D-047) | Tested (not yet published) | KRAKEN.1 | leads the last night's big monsters (`Config.FINAL_BOSS`, `WaveDirector.finalBossNight`); never in `BIG_POOL`; health ×(1 + 0.6 per extra Keeper); stays in the shallows (`minRadius`); `KrakenSpec` 3 tests |
 | New monsters ×5 | Tested (not yet published): Spitter Eel, Puffer Mine, Ghost Lantern (S6.5); Tide Witch, Coral Shaman (S6.6) | S6.5–S6.6 | S6.5: `behaviour` in `Shared/Creatures` (telegraph ≥ 0.6 s, own sounds, loot tables, `appears` schedule via `WaveDirector.specials`); TELEGRAPH snapshot state; `MonstersSpec` 6 tests |
 | Wave director (`nightPlan` pure) | Tested (not yet published) | R1.2 | `WaveDirector.nightPlan/bigNights/growth`; 12 tests vs pre-R1.2 reference |
 | Pearl rule (`pearlsFor` pure) | Tested (not yet published) | R1.2 | `Voyage.pearlsFor`; 4 tests (win 7 = 12, win 13 = 18, loss n = n−1) |
