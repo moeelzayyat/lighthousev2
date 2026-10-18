@@ -11,6 +11,9 @@ local ItemIcons: { [string]: string } = {
 	FlareGun = "rbxassetid://120317518318819",
 	WhalerHarpoon = "rbxassetid://102524032311475",
 	CoralLance = "rbxassetid://130837359535096",
+	ChainHook = "rbxassetid://115967038527506", -- WPN.1 (drawn)
+	NetLauncher = "rbxassetid://87999335166597", -- WPN.1 (drawn)
+	LanternBomb = "rbxassetid://116793316938234", -- WPN.1 (drawn)
 	TidecallerBlades = "rbxassetid://139899207751386",
 	-- armor and ammo (Claude-drawn)
 	OilskinCoat = "rbxassetid://114074436530125",
@@ -59,6 +62,7 @@ local ItemIcons: { [string]: string } = {
 	SharpSteel = "rbxassetid://130874696589207",
 	-- menu spots (Fancy GUI Kit)
 	Codes = "rbxassetid://109335607792459",
+	Settings = "rbxassetid://104401437368963", -- SET.1: Fancy GUI Kit gear (dot)
 	LogSummary = "rbxassetid://139867160924968",
 	Salvage = "rbxassetid://103025507172963",
 }

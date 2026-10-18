@@ -1692,3 +1692,9 @@ FIXED (type-only, 29 files): `UI/Controls` (typed tile state), `UiSkin` (optiona
 BACKUP: ServerStorage.Backups.SA2_before_2026-10-18 (29 scripts) · restore points "SA2 before", "SA2 code", "SA2 passed"
 CHECKED: TestRunner **276 passed, 0 failed**; play test in DEV Studio: a voyage from the ship through the opening to night 1, the tower broken by a test script, Results ("The lighthouse fell"), back to the deck, the BAG (Weapons tab) and the Quartermaster; console: no game errors; API access off (probe failed).
 MIRROR: 174 scripts in DEV, digest identical to `src/` (ccecd045).
+
+CHECKPOINT: ICON2 New weapon icons and the Settings gear — ✅ in DEV Studio (owner said yes to the upload, 2026-10-18 14:19 UTC)
+DATE: 2026-10-18
+BUILT: three drawn icons (Chain Hook, Net Launcher, Lantern Bomb; sources and generator in `assets/icons/drawn_wpn1/`) and the Fancy GUI Kit gear for Settings, uploaded from Studio; ids added to `Shared/ItemIcons`.
+BACKUP: ServerStorage.Backups.ICON2_before_2026-10-18 · restore point "ICON2 code"
+CHECKED: the Quartermaster and the BAG's Settings tile show the pictures (`assets/screens/weapons/quartermaster_icons_pc.jpg`, `assets/screens/settings/bag_settings_gear_pc.jpg`); TestRunner **276 passed, 0 failed**; API access off.
