@@ -1473,3 +1473,20 @@ NOTE: the licence status is inferred from the uploader account and the asset des
 FOR THE OWNER: listen to the harbor/island waves and a night's rain after the next DEV publish; say if either is too loud or too quiet.
 MIRROR: 166 scripts in DEV, digest identical to `src/` (501ceba5).
 NEXT: SA.1 Script Analysis clean-up.
+
+CHECKPOINT: PH.1b Phone pass in Studio's Device Simulator — ✅ in DEV (a simulator, not a phone)
+DATE: 2026-10-18
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF · Device Simulator reset to default afterwards
+BACKUP: SniperView is in ServerStorage.Backups.PH1_before_2026-10-18 · restore point "PH1b passed"
+METHOD: StudioDeviceSimulatorService (landscape) → Play → sail → island prologue by the bench; a script measured every visible button against Roblox's own TouchGui jump button and thumbstick (their real positions on that device).
+RESULTS (island HUD):
+- Samsung Galaxy A06, viewport 705×338: 3 buttons, all ≥ 44 px, none over the jump button (70 px at 610,190) or the thumbstick, nothing off screen.
+- iPhone 17 Pro, viewport 750×381: same; jump 70 px at 655,233.
+- iPad 10th generation, viewport 1179×819: same; jump 120 px at 1009,551.
+- Only text cut off: the crew card's player name ("Lighthouse8282 (you)" → "…", by design) on the two phones.
+FOUND AND FIXED: the sniper tower on the iPhone showed the desktop layout (the simulator reports a keyboard as well as touch, so touch is not detected) and CLIMB DOWN, placed 300 px up, sat over the top bar. CLIMB DOWN now goes to the bottom right on any screen under 500 px tall (touch: above FIRE and ZOOM). Checked: CLIMB DOWN 190×56 at the bottom right of the iPhone screen, joystick and jump button hidden while up the tower.
+LIMIT: in the simulator a touch device also reports a keyboard, so the game's touch-only layouts (FIRE/ZOOM buttons, touch prompt sizes) show only on a real phone; those were checked in PH.1's layout simulator.
+TESTRUNNER (DEV, Play server): **258 passed, 0 failed**. 0 errors.
+SCREENSHOTS: `assets/screens/phone_pass/emulator_*.jpg`.
+MIRROR: 166 scripts in DEV, digest identical to `src/` (fcca71bc).
+NEXT: SA.1 Script Analysis clean-up.

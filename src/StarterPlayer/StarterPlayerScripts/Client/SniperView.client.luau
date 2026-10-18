@@ -129,12 +129,12 @@ local function build(): ScreenGui
 
 	-- buttons: CLIMB DOWN for everyone; FIRE and ZOOM on touch screens
 	local touch = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
-	-- PH.1: on a short touch screen (a phone held sideways) the buttons sit lower and smaller, so CLIMB DOWN stays
-	-- clear of the Roblox top bar; the joystick and jump button are hidden while up the tower (see mount)
-	local short = touch and camera().ViewportSize.Y <= 500
+	-- PH.1: on a short screen (a phone held sideways, a small window) the buttons sit lower and smaller, so CLIMB DOWN
+	-- stays clear of the Roblox top bar; the joystick and jump button are hidden while up the tower (see mount)
+	local short = camera().ViewportSize.Y <= 500
 	local down = Tiles.bigButton(root, "ClimbDown")
 	down.button.AnchorPoint = Vector2.new(1, 1) -- right side, clear of the HUD's top bar and the hotbar
-	down.button.Position = if short then UDim2.new(1, -24, 1, -142) else UDim2.new(1, -28, 1, -300)
+	down.button.Position = if short and touch then UDim2.new(1, -24, 1, -142) elseif short then UDim2.new(1, -24, 1, -24) else UDim2.new(1, -28, 1, -300)
 	down.button.Size = if short then UDim2.fromOffset(190, 56) else UDim2.fromOffset(220, 64)
 	down.paint({ face = Color3.fromRGB(220, 40, 40), edge = Color3.fromRGB(140, 20, 20), text = Color3.new(1, 1, 1) }, "Climb down")
 	down.button.Activated:Connect(climbDown)
