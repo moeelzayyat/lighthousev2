@@ -349,3 +349,4 @@ Consequences: the S3 public test waits until HX is done and live-checked. Each p
 ## CP — HX.1–HX.3 harbor/isle split and 4 ships passed in DEV Studio · 2026-10-18 · auto-approved (unattended) · TestRunner 268/268; digest 171 scripts b4da73b9; HX.4 (Isle place) and HX.5 (publish both, live check) wait for the owner
 ## Owner report · 2026-10-18 12:31 UTC · thread: the player has to jump to enter the ship. Fixed in SHIP.2 (open pier side, guide rail on the landing).
 ## CP — SHIP.2 passed · 2026-10-18 · auto-approved (unattended) · TestRunner 268/268; no script change (art model and pier decor)
+## Owner · 2026-10-18 12:56 UTC · thread: added the Lighthouse Isle place to the DEV experience in Studio (PlaceId 134916840337710, read with AssetService:GetGamePlacesAsync) and set it to 4 players. `Config.ISLE_PLACE_ID` set (HX.4). TestRunner 268/268 in the harbor role; digest 171 scripts b51faeb5.

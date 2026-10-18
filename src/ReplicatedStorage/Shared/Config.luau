@@ -49,7 +49,7 @@ local Config = {
 	MAX_CREW = 4, -- party size of ONE departure ship (batch 1 revision); the lobby itself holds the whole server
 	-- D-046 (supersedes D-001): the harbor and Lighthouse Isle are separate places (Shared/PlaceRole)
 	HARBOR_PLACE_ID = 102473202766620, -- Lighthouse Keepers DEV, the start place
-	ISLE_PLACE_ID = 0, -- the Lighthouse Isle place, once the owner creates it (0 = not yet: one place, one ship)
+	ISLE_PLACE_ID = 134916840337710, -- the Lighthouse Isle place in the DEV experience (owner, 2026-10-18; 0 = one place, one ship)
 	PLACE_ROLE_OVERRIDE = nil, -- Studio tests only: "harbor" | "isle"
 	HARBOR_SHIPS = 4, -- ships in the harbor, each with its own crew of MAX_CREW
 	HARBOR_SHIP_ANGLES = { 0, 90, 180, 270 }, -- degrees around the harbor island (0 = north, the first ship)

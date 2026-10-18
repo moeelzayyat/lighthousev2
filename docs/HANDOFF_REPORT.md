@@ -1627,3 +1627,12 @@ BACKUP: ServerStorage.Backups.HX1_before_2026-10-18.PierDecor and GW2_before_202
 CHECKED: walking pier → landing → gangway → deck and back: 0 jumps, 0 falls, Ready on deck, off when back on the pier; a diagonal line from the pier toward the gangway now follows the rail instead of falling. TestRunner **268 passed, 0 failed**.
 SCREENSHOTS: `assets/screens/ship_walls/after_open_pier_to_gangway_pc.jpg`, `gangway_route_top.jpg`.
 OWNER: this ships with the next DEV publish. Until the Lighthouse Isle place exists, publishing DEV now is safe (the game stays one place, one ship): save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_SHIP2_2026-10-18.rbxl` and publish DEV.
+
+HX.5 — READY FOR OWNER TO PUBLISH (DEV, two places)
+DATE: 2026-10-18 · DEV Studio check: role = harbor, 4 ships, TestRunner **268 passed, 0 failed** · digest 171 scripts b51faeb5
+1. In Creator Hub → Lighthouse Keepers DEV (the start place) → set Max Players to 24 (4 ships × 4, plus room).
+2. In the DEV Studio window: File → Save to File As… `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_HX_2026-10-18.rbxl`.
+3. File → Publish to Roblox (the harbor, as always).
+4. File → Publish to Roblox As… → Lighthouse Keepers DEV → Lighthouse Isle → Overwrite. (The same file: the game picks its job from the place.)
+5. Studio's window is now the Lighthouse Isle place. Close it and open Lighthouse Keepers DEV again (File → Open from Roblox), so the next Studio work is on the harbor.
+LIVE CHECK (needs two players, or two accounts): two players board two different ships and press SAIL NOW; both crews land on their own island at the same time; after Results, "Back to the deck" returns each player to the harbor with their Pearls; a full ship of 4 sails by itself.
