@@ -1,9 +1,65 @@
 --!strict
--- ItemIcons (ICON1): the drawn picture for each item, by item id (Shared/Items and Definitions/Merchant ids).
--- Item icons v1: project-drawn vector art in the Bold look, 512x512 PNGs (assets/icons/ in the project files).
--- UI/Tiles shows the picture on shop, workbench, Trader and BAG tiles and in their detail panes; an item with no
--- entry keeps its 3D preview or glyph. Values are rbxassetid:// image ids uploaded from Studio.
+-- ItemIcons (ICON1): the picture for each item, upgrade and menu spot, by id (Shared/Items, Definitions/Merchant,
+-- Upgrades, Definitions/Boosts ids, plus Codes, LogSummary, Salvage and Evolution). Sources: assets/ART_SOURCES.md.
+-- UI/Tiles shows the picture on shop, workbench, Trader and BAG tiles and in their detail panes; an id with no
+-- entry keeps its 3D preview or glyph. Uploaded from DEV Studio on 2026-10-18 (owner's account, owner's OK).
 
-local ItemIcons: { [string]: string } = {}
+local ItemIcons: { [string]: string } = {
+	-- weapons (Claude-drawn)
+	DriftwoodHarpoon = "rbxassetid://129043938053690",
+	StormHarpoon = "rbxassetid://72593835839775",
+	FlareGun = "rbxassetid://120317518318819",
+	WhalerHarpoon = "rbxassetid://102524032311475",
+	CoralLance = "rbxassetid://130837359535096",
+	TidecallerBlades = "rbxassetid://139899207751386",
+	-- armor and ammo (Claude-drawn)
+	OilskinCoat = "rbxassetid://114074436530125",
+	KeepersCoat = "rbxassetid://94339926459043",
+	KelpweaveVest = "rbxassetid://97891374327995",
+	IronclawPlate = "rbxassetid://131837581985487",
+	FireShellCrate = "rbxassetid://76691933271523",
+	-- loot (Sealoot pack)
+	CrabClaw = "rbxassetid://125494313308190",
+	SeaGlass = "rbxassetid://78566778258629",
+	BlackPearl = "rbxassetid://117189862331089",
+	-- cosmetics (Claude-drawn)
+	BeamAmber = "rbxassetid://116090183262825",
+	BeamSeaGlass = "rbxassetid://102490477434070",
+	BeamMoonlight = "rbxassetid://81571281305906",
+	BeamEmber = "rbxassetid://105007451360115",
+	BeamSharedLantern = "rbxassetid://83228195674142",
+	BeamKeepersGlow = "rbxassetid://96464902613251",
+	HousingDriftwood = "rbxassetid://75465142387655",
+	HousingBrass = "rbxassetid://94796303291915",
+	CoatStormBlue = "rbxassetid://110363693204788",
+	CoatKelpGreen = "rbxassetid://132502189617087",
+	LanternMoth = "rbxassetid://102162800434776",
+	LanternTide = "rbxassetid://94479891019422",
+	FlagGull = "rbxassetid://97803221222199",
+	FlagKraken = "rbxassetid://100752905653856",
+	FlagFounder = "rbxassetid://98378099554182",
+	FlagRescuer = "rbxassetid://73939053590853",
+	-- the Trader's island stock (Claude-drawn)
+	OrbitingBlades = "rbxassetid://106009642656255",
+	DamageBoost = "rbxassetid://91291437009736",
+	SpeedBoost = "rbxassetid://73509206717343",
+	Heal = "rbxassetid://113402768992113",
+	OilBundle = "rbxassetid://90694405901185",
+	TowerShield = "rbxassetid://116118202435402",
+	-- workbench upgrades and evolutions (Layer Lab pack)
+	LensPower = "rbxassetid://75273813931997",
+	FuelTank = "rbxassetid://136268247856109",
+	Walls = "rbxassetid://127415312130423",
+	ClockworkSweep = "rbxassetid://79994679192790",
+	Evolution = "rbxassetid://109538298494743",
+	-- shop boosts (Layer Lab pack)
+	ShellPouch = "rbxassetid://94521910719005",
+	SeaBoots = "rbxassetid://93253580577782",
+	SharpSteel = "rbxassetid://107837145985100",
+	-- menu spots (Sealoot pack)
+	Codes = "rbxassetid://96013858620736",
+	LogSummary = "rbxassetid://95524164604917",
+	Salvage = "rbxassetid://137083461181210",
+}
 
 return ItemIcons

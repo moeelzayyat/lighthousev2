@@ -1552,3 +1552,18 @@ CHECKED (DEV, Studio memory store): pier → gangway → deck → stairs → qua
 SCREENSHOTS: `assets/screens/ship_walls/` (before: pier into the stern, the old invisible walls in red; after: gangway and deck on PC, gangway and deck on the phone simulator).
 MIRROR: 166 scripts in DEV, digest identical to `src/` (0afc29b0). The model itself is not mirrored (no .rbxm in the repo); `assets/world/ship_colliders.md` records it.
 OWNER: publish DEV again for SNV.1, VOTE.1 and SHIP.1 to reach the live game. Save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_SHIP_2026-10-18.rbxl` first.
+
+CHECKPOINT: ICON1 Item icons (the owner's report) — ✅ in DEV, waits for the next DEV publish
+DATE: 2026-10-18
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF (probe refused before every Play)
+BACKUP: ServerStorage.Backups.ICON1_before_2026-10-18 (Tiles, Trader, Bench, Shop, Inventory) · restore points "ICON1 before", "ICON1 passed"
+UPLOADS (owner's "Yes upload", 2026-10-18 11:49 UTC): 47 images uploaded from DEV Studio to the owner's account; ids in `Shared/ItemIcons.luau`, sources in `assets/ART_SOURCES.md`.
+CHANGED:
+- `Shared/ItemIcons` (new): picture id per item, upgrade, boost and menu spot.
+- `UI/Tiles`: `Tiles.picture(holder, id)`; tiles and detail panes show the picture when the id has one, otherwise the old 3D preview or glyph.
+- `Bench`, `Shop`, `Inventory`, `Trader`: their glyph tiles look up a picture first (upgrades, evolutions, boosts, Codes, Logbook, the empty sack, island stock).
+CHECKED: PC: shop (weapons, cosmetics, boosts), BAG, workbench and Trader (salvage, island stock) show the pictures, 0 errors. iPhone 17 Pro in the Device Simulator: shop. New uploads took about a minute to appear (Roblox's check). TestRunner **258 passed, 0 failed**.
+SCREENSHOTS: `assets/screens/item_icons/`.
+MIRROR: 167 scripts in DEV, digest identical to `src/` (5a143ee0).
+OPEN (owner): where the Sealoot pack (and the `assets/icons/PNG` materials pack) came from, for ART_SOURCES. The Layer Lab, Sealoot and PNG folders stay out of the repo.
+OWNER: publish DEV again for SNV.1, VOTE.1, SHIP.1 and ICON1. Save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_ICON_2026-10-18.rbxl` first.

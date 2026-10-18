@@ -111,7 +111,7 @@ function Tiles.picture(holder: Instance, itemId: string): any
 		ScaleType = Enum.ScaleType.Fit,
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
-		Size = UDim2.fromScale(0.9, 0.9),
+		Size = UDim2.fromScale(1, 1),
 	}, holder)
 end
 
