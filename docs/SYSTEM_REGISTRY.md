@@ -11,6 +11,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Isle arrival and return to the harbor (`IsleArrival`) | Tested in DEV Studio, teleport stood in | HX.3 | D-046; sails at once when the crew is in (20 s wait) |
 | Standard Voyage (7 nights) | Tested (not yet published) | S2.1 | D-003; `Definitions/Voyages`; bosses 4, 7; win = 12 Pearls, unlocks Long (play-tested in DEV) |
 | Long Voyage (13 nights, unlock) | Tested (not yet published) | S2.1 | now the unlock (`Unlocks.LongVoyage`, `ChooseVoyage`); bosses 4, 7, 10, 13 and every night from 8; win = 18 Pearls |
+| Maps: Frostbite Isle + shared crew unlocks (D-049) | Tested (not yet published) | MAP.1 | `Definitions/Maps`, `MapBuilder` (terrain material swap with exact restore, sea colour, tint, pines and ice crystals, snow), `ChooseMap`; one member's unlock opens the map for the whole crew; `Unlocks.FrostIsle` from a Standard win; `MapsSpec` 4 tests |
 | Lamp beam (wide/focused, fuel, auto-sweep, idle release) | Released | S4 | server pin of the Keeper |
 | Fuel / oil carry / emergency reserve | Released; Night-1 safety Tested (not yet published) | S2.3 | `NightSafety`: first Night-1 blackout of a crew with a 0-run member refills the lamp to full once (D-014); coach oil prompt forced; feed line |
 | Tower integrity / repair | Released | — | |

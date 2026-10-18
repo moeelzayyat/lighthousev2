@@ -152,6 +152,7 @@ local STORM = {
 }
 
 local stormy = nil
+local styleFallRef: (() -> ())? = nil -- MAP.1: set below, once the snow styling exists
 local function setStorm(on)
 	if stormy == on then
 		return
@@ -177,8 +178,41 @@ local function setStorm(on)
 	for _, sheet in sheetEmitters do
 		sheet.Rate = if localPlayer:GetAttribute("LowEffects") or touch or preset.rainRate == 0 then 0 else 70
 	end
+	if styleFallRef then
+		styleFallRef() -- MAP.1: snow on a snowy map
+	end
 end
 
+-- MAP.1 (D-049): on a snowy map (Definitions/Maps .snow) the storm falls as slow snow and the rain sound is off
+local Maps = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Maps")) :: any
+local function snowing(): boolean
+	local def = Maps[state:GetAttribute("Map") or ""]
+	return type(def) == "table" and def.snow == true
+end
+local function styleFall()
+	local snow = snowing()
+	drops.Speed = if snow then NumberRange.new(12, 18) else NumberRange.new(90, 110)
+	drops.Lifetime = if snow then NumberRange.new(3.5, 4.5) else NumberRange.new(0.6, 0.8)
+	drops.Orientation = if snow then Enum.ParticleOrientation.FacingCamera else Enum.ParticleOrientation.VelocityParallel
+	drops.Squash = NumberSequence.new(if snow then 0 else -2.5)
+	drops.Transparency = NumberSequence.new(if snow then 0.15 else 0.4)
+	drops.Color = ColorSequence.new(if snow then Color3.fromRGB(245, 250, 255) else Color3.fromRGB(205, 218, 236))
+	drops.Acceleration = if snow then Vector3.new(4, -2, 2) else Vector3.new(6, 0, 3)
+	if snow then
+		drops.Rate = math.floor(drops.Rate * 0.4)
+		rain.Volume = 0
+		for _, sheet in sheetEmitters do
+			sheet.Rate = 0
+		end
+	end
+end
+state:GetAttributeChangedSignal("Map"):Connect(function()
+	local current = stormy
+	stormy = nil
+	setStorm(current)
+end)
+
+styleFallRef = styleFall
 localPlayer:GetAttributeChangedSignal("LowEffects"):Connect(function()
 	local current = stormy
 	stormy = nil

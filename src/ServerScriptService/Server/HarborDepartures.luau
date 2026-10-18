@@ -18,6 +18,7 @@ type Deps = {
 	shipIds: { string },
 	countdown: number, -- seconds
 	voyageFor: (shipId: string) -> string?, -- the ship's chosen voyage id
+	mapFor: ((shipId: string) -> string?)?, -- MAP.1: the ship's chosen map id
 	forecast: () -> (string?, string?), -- the harbor's current offer (A, B)
 	teleport: (players: { Player }, data: { [string]: any }) -> (boolean, string?),
 	notify: (player: Player, text: string) -> (),
@@ -54,6 +55,7 @@ local function voyageData(id: string, sailing: { Player }): { [string]: any }
 		shipId = id,
 		crew = crew,
 		voyage = deps.voyageFor(id),
+		map = if deps.mapFor then deps.mapFor(id) else nil, -- MAP.1
 		forecastA = a,
 		forecastB = b,
 		votes = votes,

@@ -22,7 +22,7 @@ export type Profile = {
 	Stats: { Runs: number, Victories: number, BestNight: number, BestNightLong: number, NightsSurvived: number, PlayDays: number },
 	Logbook: { [string]: boolean },
 	Objectives: { DayKey: string, Progress: { [string]: number }, Claimed: { [string]: boolean } },
-	Unlocks: { LongVoyage: boolean, Specialties: { [string]: number } },
+	Unlocks: { LongVoyage: boolean, FrostIsle: boolean, Specialties: { [string]: number } }, -- MAP.1: FrostIsle
 	Grants: { [string]: number },
 	RedeemedCodes: { [string]: boolean },
 	Settings: { Music: number, Sfx: number, Shake: boolean, Rain: boolean },
@@ -57,7 +57,7 @@ function ProfileSchema.template(): Profile
 		Stats = { Runs = 0, Victories = 0, BestNight = 0, BestNightLong = 0, NightsSurvived = 0, PlayDays = 0 },
 		Logbook = {},
 		Objectives = { DayKey = "", Progress = {}, Claimed = {} },
-		Unlocks = { LongVoyage = false, Specialties = {} },
+		Unlocks = { LongVoyage = false, FrostIsle = false, Specialties = {} },
 		Grants = {},
 		RedeemedCodes = {},
 		Settings = { Music = 1, Sfx = 1, Shake = true, Rain = true },
@@ -162,6 +162,11 @@ function ProfileSchema.validate(data: any): (Profile, { string })
 		data.Unlocks = fix("Unlocks", "bad shape", t.Unlocks)
 	elseif type(data.Unlocks.LongVoyage) ~= "boolean" then
 		data.Unlocks.LongVoyage = fix("Unlocks.LongVoyage", "not a boolean", false)
+	end
+	-- MAP.1 (D-049): a profile saved before Frostbite Isle existed gets it silently (a new field, not a repair):
+	-- whoever already won a Standard voyage (LongVoyage) has earned it the same way
+	if type(data.Unlocks) == "table" and type(data.Unlocks.FrostIsle) ~= "boolean" then
+		data.Unlocks.FrostIsle = data.Unlocks.LongVoyage == true
 	end
 	if type(data.Settings) ~= "table" then
 		data.Settings = fix("Settings", "not a table", table.clone(t.Settings))

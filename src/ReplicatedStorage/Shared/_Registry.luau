@@ -28,6 +28,7 @@ function Registry.catalogs(): Catalogs
 		Cosmetics = require(Shared:WaitForChild("Definitions"):WaitForChild("Cosmetics")) :: any, -- B1.1
 		Codes = require(Shared:WaitForChild("Definitions"):WaitForChild("Codes")) :: any, -- L1.4
 		LiveEvents = require(Shared:WaitForChild("Definitions"):WaitForChild("LiveEvents")) :: any, -- LO.1
+		Maps = require(Shared:WaitForChild("Definitions"):WaitForChild("Maps")) :: any, -- MAP.1
 		Events = require(Shared:WaitForChild("Events")) :: any,
 	}
 end
@@ -413,6 +414,40 @@ RULES.Upgrades = function(c, Upgrades)
 				end
 			end
 		end
+	end
+end
+
+-- MAP.1 (D-049): islands. Terrain swaps name real materials; an unlock names the voyage whose win grants it.
+RULES.Maps = function(c, Maps, all)
+	c.order("Maps.ORDER", Maps.ORDER, Maps)
+	if type(Maps.DEFAULT) ~= "string" or type(Maps[Maps.DEFAULT]) ~= "table" or Maps[Maps.DEFAULT].unlock ~= nil then
+		c.add("Maps.DEFAULT", "must name a defined map that needs no unlock")
+	end
+	for id, m in c.defs(Maps) do
+		local w = "Maps." .. id
+		if m.id ~= id then
+			c.add(w .. ".id", "must equal its key, got " .. tostring(m.id))
+		end
+		c.str(w .. ".displayName", m.displayName)
+		c.str(w .. ".short", m.short)
+		if m.unlock ~= nil then
+			c.str(w .. ".unlock", m.unlock)
+			local v = type(all.Voyages) == "table" and all.Voyages[m.grantedBy]
+			if type(v) ~= "table" or v.testOnly then
+				c.add(w .. ".grantedBy", "must name a voyage a crew can win")
+			end
+		end
+		for from, to in (if type(m.terrain) == "table" then m.terrain else {}) :: { [any]: any } do
+			local okFrom = pcall(function() return (Enum.Material :: any)[from] end)
+			local okTo = pcall(function() return (Enum.Material :: any)[to] end)
+			if not okFrom or not okTo then
+				c.add(w .. ".terrain", tostring(from) .. " -> " .. tostring(to) .. " is not a material")
+			end
+		end
+		if m.saturation ~= nil then
+			c.num(w .. ".saturation", m.saturation, -1, 1)
+		end
+		c.bool(w .. ".snow", m.snow, true)
 	end
 end
 

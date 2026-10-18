@@ -1698,3 +1698,13 @@ DATE: 2026-10-18
 BUILT: three drawn icons (Chain Hook, Net Launcher, Lantern Bomb; sources and generator in `assets/icons/drawn_wpn1/`) and the Fancy GUI Kit gear for Settings, uploaded from Studio; ids added to `Shared/ItemIcons`.
 BACKUP: ServerStorage.Backups.ICON2_before_2026-10-18 · restore point "ICON2 code"
 CHECKED: the Quartermaster and the BAG's Settings tile show the pictures (`assets/screens/weapons/quartermaster_icons_pc.jpg`, `assets/screens/settings/bag_settings_gear_pc.jpg`); TestRunner **276 passed, 0 failed**; API access off.
+
+CHECKPOINT: MAP.1 Second map: Frostbite Isle, with shared crew unlocks (D-049) — ✅ in DEV Studio, waits for the publish to both places
+DATE: 2026-10-18
+BUILT: `Shared/Definitions/Maps` (new, boot-checked by `_Registry` RULES.Maps), `Server/MapBuilder` (new), `GameState` (applies the crew's map when the ship sails; a Standard win grants the map), `Domains/Encounter` (`ChooseMap`), `Domains/Platform` + `NetGuard` (the remote and its 2 / 3 rate), `HarborDepartures` + `Domains/Crew` + `IsleArrival` (the map travels with the crew to its Lighthouse Isle server), `ProfileSchema` (`Unlocks.FrostIsle`), `Client/Departure` (ISLAND row on the crew card), `Client/Storm` (snow on a snowy map).
+BACKUP: ServerStorage.Backups.MAP1_before_2026-10-18 (11 scripts) · restore points "MAP1 before", "MAP1 code", "MAP1 passed"
+CHECKED (DEV Studio play, one-place game): the unlock given by a test script; the crew card showed the Frostbite Isle button; pressing it through the real `ChooseMap` remote logged MapChosen; the ship sailed and the island turned to snow and ice (16 pines, 12 crystal clusters, cold tint, icy sea) before the crew landed; switching back to the home isle restored the terrain exactly (material counts back to grass, ground and mud), the sea colour and no dressing; each switch took 0.01 s. TestRunner **280 passed, 0 failed**; console: no game errors; API access off.
+NOT CHECKED: snowfall seen on screen (the capture ran in daylight after the storm), a phone, and the harbor to isle teleport carrying the map (Studio cannot teleport; the parse is unit-tested).
+SCREENS: `assets/screens/frost_isle/frostbite_isle_day_pc.jpg`, `frostbite_isle_opening_night_pc.jpg`, `frostbite_isle_ground_pc.jpg`
+MIRROR: 177 scripts in DEV, digest identical to `src/` (1ed1b376).
+OWNER: in the published game a crew needs a Standard win first (or an older save that has one). Publish both places as before.

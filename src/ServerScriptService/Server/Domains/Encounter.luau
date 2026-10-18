@@ -10,6 +10,7 @@ local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Co
 local Weapons = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Weapons"))
 local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SoundFx"))
 local Voyages = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Voyages"))
+local Maps = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Maps")) -- MAP.1 (D-049)
 local LiveEvents = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("LiveEvents")) -- LO.1
 local StatPipeline = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("StatPipeline")) -- S5.7
 local EventLog = require(Server.EventLog)
@@ -444,6 +445,39 @@ local function hookChoices(ctx)
 				stateFolder:SetAttribute("TotalNights", def.nights)
 			end
 			EventLog.log("VoyageChosen", { player = player.Name, voyage = def.id, ship = player:GetAttribute("ShipId") or "" })
+		end
+	end)
+
+	-- MAP.1 (D-049): the island a crew sails to. Shared crew unlock: any member of the sender's crew (same ship in the
+	-- harbor) who holds the map's unlock lets the crew choose it. GameState checks again when the ship leaves.
+	NetGuard.connect(remotes.ChooseMap, function(player, mapId)
+		if type(mapId) ~= "string" or #mapId > 20 or not NetGuard.allow(player, "ChooseMap") then
+			return
+		end
+		local def = (Maps :: any)[mapId]
+		local phase = stateFolder:GetAttribute("Phase")
+		if type(def) ~= "table" or type(def.id) ~= "string" or player:GetAttribute("Ready") ~= true then
+			return
+		end
+		if phase ~= "Waiting" and phase ~= "Intermission" then
+			return
+		end
+		local shipId = player:GetAttribute("ShipId")
+		local function crewHolds(key: string): boolean
+			for _, p in Players:GetPlayers() do
+				if p:GetAttribute("Ready") == true and p:GetAttribute("ShipId") == shipId and p:GetAttribute("Unlock_" .. key) == true then
+					return true
+				end
+			end
+			return false
+		end
+		if Maps.resolve(def.id, crewHolds) ~= def.id then
+			return
+		end
+		local key = if PlaceRole.isHarbor() then "Ship_" .. tostring(shipId) .. "_MapDef" else "MapDef"
+		if stateFolder:GetAttribute(key) ~= def.id then
+			stateFolder:SetAttribute(key, def.id)
+			EventLog.log("MapChosen", { player = player.Name, map = def.id, ship = shipId or "" })
 		end
 	end)
 end

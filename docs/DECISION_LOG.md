@@ -372,3 +372,13 @@ Balance rule kept: every one is below the wide beam's 12 damage a second on one 
 ## CP — WPN.1 passed · 2026-10-18 · auto-approved (unattended) · TestRunner 276/276; digest 174 scripts 4bde78bc
 ## CP — SET.1 passed · 2026-10-18 · auto-approved (unattended) · TestRunner 276/276; digest 174 scripts 7e9b990f · Results and Settings already in the Bold look (not rebuilt, D-041); Settings now open from the BAG anywhere. Settings still last one session: saving them needs a new save field (owner approval, CLAUDE.md rule 5)
 ## CP — SA.2 passed · 2026-10-18 · auto-approved (unattended) · TestRunner 276/276; digest 174 scripts ccecd045 · Script Analysis 103 → 18 distinct warnings, the 18 all inside the vendored ProfileStore (left unchanged on purpose: it is the library as shipped)
+## D-049 — Second map: Frostbite Isle, and shared crew unlocks
+2026-10-18 · MAP.1 · **Status: Accepted (owner "Yes" to building the second map now, 2026-10-18 14:19 UTC); look and unlock rule chosen by Claude, revisable**
+Owner list (12 Oct): "Shared crew unlocks: needs new maps first". The plan had held new maps until playtests asked; the owner said to build it now.
+Decision:
+- A map is a dressing of the same island (`Definitions/Maps`): the shoreline, the lighthouse, every gameplay part and every number stay the same, so creatures, the ground grid, the beam and all tests hold. Frostbite Isle swaps the island's terrain materials (grass and ground to snow, mud to ice, sand to glacier), turns the sea icy, tints the light cold, adds snowy pines and ice crystals, and the storm falls as snow. Only `MapBuilder` changes the world; it saves the home isle's terrain first and restores it exactly.
+- Shared crew unlock: a crew can choose a map if any member on that ship holds its unlock; everyone sails there. GameState checks again when the ship leaves (a crew without a holder sails to the home isle).
+- Unlock: a Standard win gives Frostbite Isle to every crew member who won (same moment as the Long Voyage).
+- Save field (owner approval covered by the "Yes"): `Unlocks.FrostIsle` (boolean, default false). A profile saved before it gets it silently on load, set to its `LongVoyage` (whoever already won a Standard voyage earned it the same way). No other field changes.
+- New remote `ChooseMap` (string up to 20, a known map, Ready, phase Waiting/Intermission, a crew member holds the unlock; 2 / 3 rate). Harbor to isle teleport data gains `map` (known ids only).
+## CP — MAP.1 passed · 2026-10-18 · TestRunner 280/280; digest 177 scripts 1ed1b376

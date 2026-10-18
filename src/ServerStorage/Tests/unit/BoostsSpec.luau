@@ -81,6 +81,8 @@ return function(T: any)
 			T.expect(data.Roles).toEqual({}) -- S7.4: also added with its default
 			data.Boosts = nil
 			data.Roles = nil
+			T.expect(data.Unlocks.FrostIsle).toBe(true) -- MAP.1: a Standard winner (LongVoyage) also has Frostbite Isle
+			data.Unlocks.FrostIsle = nil
 			T.expect(data).toEqual(before)
 		end)
 

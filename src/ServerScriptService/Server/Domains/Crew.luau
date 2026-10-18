@@ -23,6 +23,7 @@ local IsleArrival = require(Server.IsleArrival)
 local PlaceRole = require(ReplicatedStorage.Shared:WaitForChild("PlaceRole"))
 local Forecasts = require(ReplicatedStorage.Shared:WaitForChild("Forecasts"))
 local Voyages = require(ReplicatedStorage.Shared:WaitForChild("Definitions"):WaitForChild("Voyages"))
+local Maps = require(ReplicatedStorage.Shared:WaitForChild("Definitions"):WaitForChild("Maps")) -- MAP.1
 
 local Crew = { Name = "Crew" }
 
@@ -283,6 +284,9 @@ function Crew.Init(ctx)
 			voyageFor = function(id)
 				return stateFolder:GetAttribute("Ship_" .. id .. "_VoyageDef")
 			end,
+			mapFor = function(id) -- MAP.1
+				return stateFolder:GetAttribute("Ship_" .. id .. "_MapDef")
+			end,
 			forecast = function()
 				return stateFolder:GetAttribute("ForecastA"), stateFolder:GetAttribute("ForecastB")
 			end,
@@ -330,7 +334,7 @@ function Crew.Init(ctx)
 			state = stateFolder,
 			shipId = SHIP_ID,
 			wait = Config.ISLE_ARRIVAL_WAIT or 20,
-			known = { voyages = Voyages, forecasts = Forecasts },
+			known = { voyages = Voyages, forecasts = Forecasts, maps = Maps },
 			reserved = function()
 				return RunService:IsStudio() or (game.PrivateServerId ~= "" and game.PrivateServerOwnerId == 0)
 			end,

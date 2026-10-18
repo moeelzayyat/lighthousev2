@@ -31,6 +31,7 @@ NetGuard.RATES = {
 	ForecastVote = { 3, 5 },
 	AdminRequest = { 1, 3 }, -- R1.8, owner-only channel
 	ChooseVoyage = { 2, 3 }, -- S2.1
+	ChooseMap = { 2, 3 }, -- MAP.1
 	MerchantRequest = { 5, 8 }, -- S6.2
 	CodeRedeem = { 0.1, 1 }, -- L1.4: one code every 10 s
 	SniperAction = { 3, 5 }, -- D-044: the rifle fires once a second; leave

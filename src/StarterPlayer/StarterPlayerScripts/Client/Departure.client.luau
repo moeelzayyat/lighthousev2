@@ -272,6 +272,19 @@ end
 local voyageBox = UiKit.new("Frame", { Name = "VoyageChoice", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, LayoutOrder = 3, Visible = false }, crewBody)
 UiKit.list(voyageBox, "y", 6)
 UiKit.Label(voyageBox, "Voyage", "Eyebrow", { LayoutOrder = 0 })
+-- MAP.1 (D-049): the island, under the voyages; shown once any crew member holds a map unlock (shared crew unlock)
+local Maps = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Maps"))
+local mapLabel = UiKit.Label(voyageBox, "Island", "Eyebrow", { LayoutOrder = 20 })
+local mapButtons = {}
+for i, id in Maps.ORDER do
+	local def = (Maps :: any)[id]
+	local b = UiKit.Button(voyageBox, string.upper(def.displayName .. " \u{00B7} " .. def.short), { name = "Map" .. id, variant = "secondary", size = "sm", fill = true, layoutOrder = 20 + i })
+	b.TextSize = 15
+	b.Activated:Connect(function()
+		remotes:WaitForChild("ChooseMap"):FireServer(id)
+	end)
+	mapButtons[id] = b
+end
 local voyageButtons = {}
 for i, id in Voyages.ORDER do
 	local def = Voyages[id]
@@ -284,6 +297,25 @@ for i, id in Voyages.ORDER do
 end
 local function renderVoyageChoice(crew)
 	local offered = false
+	-- MAP.1: maps the crew can choose (any member's unlock counts for everyone)
+	local function crewHolds(key: string): boolean
+		for _, p in crew do
+			if p:GetAttribute("Unlock_" .. key) == true then
+				return true
+			end
+		end
+		return false
+	end
+	local maps = Maps.availableFor(crewHolds)
+	local mapsOffered = #maps > 1
+	mapLabel.Visible = mapsOffered
+	local chosenMap = Maps.resolve(state:GetAttribute("Ship_" .. shownShip() .. "_MapDef") or state:GetAttribute("MapDef"), crewHolds)
+	for id, button in mapButtons do
+		button.Visible = mapsOffered and table.find(maps, id) ~= nil
+		local selected = chosenMap == id
+		button.BackgroundColor3 = if selected then C.AccentLighthouse else C.SurfaceElevated
+		button.TextColor3 = if selected then C.TextOnAccent else C.TextPrimary
+	end
 	for _, id in Voyages.ORDER do
 		local def = Voyages[id]
 		if def.unlock then
@@ -297,7 +329,10 @@ local function renderVoyageChoice(crew)
 			offered = true
 		end
 	end
-	voyageBox.Visible = offered
+	for _, button in voyageButtons do
+		button.Visible = offered
+	end
+	voyageBox.Visible = offered or mapsOffered
 	if not offered then
 		return
 	end

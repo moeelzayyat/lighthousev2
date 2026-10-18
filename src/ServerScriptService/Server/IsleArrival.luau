@@ -10,10 +10,10 @@
 
 local IsleArrival = {}
 
-type Plan = { crew: { number }, voyage: string?, forecastA: string?, forecastB: string?, votes: { [string]: string } }
+type Plan = { crew: { number }, voyage: string?, map: string?, forecastA: string?, forecastB: string?, votes: { [string]: string } }
 
 -- pure: the voyage plan from a player's join data, or nil if it is not a harbor launch
-function IsleArrival.parse(joinData: any, known: { voyages: { [string]: any }, forecasts: { [string]: any } }): Plan?
+function IsleArrival.parse(joinData: any, known: { voyages: { [string]: any }, forecasts: { [string]: any }, maps: { [string]: any }? }): Plan?
 	local data = type(joinData) == "table" and joinData.TeleportData
 	if type(data) ~= "table" or data.v ~= 1 or type(data.crew) ~= "table" then
 		return nil
@@ -28,6 +28,11 @@ function IsleArrival.parse(joinData: any, known: { voyages: { [string]: any }, f
 	if type(voyage) ~= "string" or type(known.voyages[voyage]) ~= "table" or known.voyages[voyage].testOnly then
 		voyage = nil
 	end
+	-- MAP.1: a known map id or nothing (GameState checks the crew's unlock again when the ship sails)
+	local map = data.map
+	if type(map) ~= "string" or not known.maps or type(known.maps[map]) ~= "table" then
+		map = nil
+	end
 	local a, b = data.forecastA, data.forecastB
 	if not (type(a) == "string" and known.forecasts[a] and type(b) == "string" and known.forecasts[b]) then
 		a, b = nil, nil
@@ -40,7 +45,7 @@ function IsleArrival.parse(joinData: any, known: { voyages: { [string]: any }, f
 			end
 		end
 	end
-	return { crew = crew, voyage = voyage, forecastA = a, forecastB = b, votes = votes }
+	return { crew = crew, voyage = voyage, map = map, forecastA = a, forecastB = b, votes = votes }
 end
 
 type Deps = {
@@ -49,7 +54,7 @@ type Deps = {
 	state: Instance,
 	shipId: string,
 	wait: number,
-	known: { voyages: { [string]: any }, forecasts: { [string]: any } },
+	known: { voyages: { [string]: any }, forecasts: { [string]: any }, maps: { [string]: any }? },
 	reserved: () -> boolean, -- is this a reserved (harbor-launched) server?
 	toHarbor: (player: Player, why: string) -> (),
 	log: (kind: string, data: { [string]: any }) -> (),
@@ -88,6 +93,9 @@ local function applyPlan()
 	end
 	if p.voyage then
 		deps.state:SetAttribute("VoyageDef", p.voyage)
+	end
+	if p.map then
+		deps.state:SetAttribute("MapDef", p.map) -- MAP.1
 	end
 	if p.forecastA and p.forecastB then
 		deps.state:SetAttribute("ForecastA", p.forecastA)

@@ -22,6 +22,8 @@ local DawnBanking = require(script.Parent.DawnBanking) -- S2.2: Pearls banked at
 local NightSafety = require(script.Parent.NightSafety) -- S2.3: Night-1 safety reserve (pure)
 local ModeTest = require(script.Parent.ModeTest) -- S3.1b: Standard vs Endless Storm (pure)
 local GrantService = require(script.Parent.GrantService) -- R1.3: the only writer of Pearl income
+local Maps = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Maps")) -- MAP.1 (D-049)
+local MapBuilder = require(script.Parent.MapBuilder) -- MAP.1: dresses the island as the voyage's map
 
 local GameState = {}
 
@@ -514,6 +516,17 @@ function GameState.run(deps)
 						def = Voyages[tested]
 					end
 				end
+				-- MAP.1 (D-049): the crew's map if a sailing member holds its unlock (shared crew unlock), else the home isle
+				local mapId = Maps.resolve(state:GetAttribute("MapDef"), function(key)
+					for _, player in departing do
+						if player:GetAttribute("Unlock_" .. key) == true then
+							return true
+						end
+					end
+					return false
+				end)
+				MapBuilder.apply(mapId)
+				EventLog.log("Map", { id = mapId })
 				local voyageConfig = WaveDirector.configFor(def, Config)
 				state:SetAttribute("VoyageDef", def.id)
 				state:SetAttribute("TotalNights", if def.endless then 0 else def.nights) -- 0 = Endless Storm (S3.1b)
@@ -735,6 +748,13 @@ function GameState.run(deps)
 						deps.playerData.recordRun(player, result == "Victory", results.nightReached, def.id)
 						if won and def.unlocks then
 							deps.playerData.unlock(player, def.unlocks) -- S2.1: a Standard win unlocks the Long Voyage
+						end
+						-- MAP.1: a map granted by this voyage's win goes to every crew member who sailed
+						for _, mapKey in Maps.ORDER do
+							local m = (Maps :: any)[mapKey]
+							if won and m.unlock and m.grantedBy == def.id then
+								deps.playerData.unlock(player, m.unlock)
+							end
 						end
 						results.pearls[player.Name] = banked + earned
 						results.banked[player.Name] = banked
