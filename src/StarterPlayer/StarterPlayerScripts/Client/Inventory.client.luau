@@ -230,8 +230,12 @@ local function avatarIcon(holder: Instance)
 	copy:Destroy()
 end
 
-local function glyphIcon(kind: string, color: Color3): (Instance) -> ()
+-- ICON1: `key` names the tile's picture in Shared/ItemIcons; the glyph shows when there is none
+local function glyphIcon(kind: string, color: Color3, key: string?): (Instance) -> ()
 	return function(holder: Instance)
+		if key and Tiles.picture(holder, key) then
+			return
+		end
 		Tiles.glyph(holder, kind, color)
 	end
 end
@@ -256,7 +260,7 @@ local function keeperTiles(): { any }
 	if crates > 0 then
 		table.insert(list, { id = "FireShellCrate", name = Items.FireShellCrate.name, icon = "FireShellCrate", qty = crates })
 	end
-	table.insert(list, { id = "Codes", name = "Codes", icon = glyphIcon("check", Color3.fromRGB(255, 200, 80)) })
+	table.insert(list, { id = "Codes", name = "Codes", icon = glyphIcon("check", Color3.fromRGB(255, 200, 80), "Codes") })
 	return list
 end
 
@@ -384,7 +388,7 @@ local function logIcon(category: string, id: string): (Instance) -> ()
 end
 
 local function logbookTiles(): { any }
-	local list: { any } = { { id = "LogSummary", name = "Your logbook", icon = glyphIcon("check", Color3.fromRGB(255, 200, 80)) } }
+	local list: { any } = { { id = "LogSummary", name = "Your logbook", icon = glyphIcon("check", Color3.fromRGB(255, 200, 80), "LogSummary") } }
 	for _, category in Logbook.ORDER do
 		for _, id in LOG_ENTRIES[category] or {} do
 			if logFound(category, id) then
@@ -411,7 +415,7 @@ local function logbookSummaryDetail(): any
 		})
 	end
 	return {
-		icon = glyphIcon("check", Color3.fromRGB(255, 200, 80)),
+		icon = glyphIcon("check", Color3.fromRGB(255, 200, 80), "LogSummary"),
 		name = string.format("Your logbook  %d / %d", all, total),
 		description = "Everything your crews have found on voyages. Finish a row to earn its Pearls, paid once.",
 		stats = stats,
@@ -469,7 +473,7 @@ end
 
 local function codesDetail(): any
 	return {
-		icon = glyphIcon("check", Color3.fromRGB(255, 200, 80)),
+		icon = glyphIcon("check", Color3.fromRGB(255, 200, 80), "Codes"),
 		name = "Codes",
 		description = "Type a code from the game's page or a creator, then press Redeem. Each code works once.",
 		extra = function(container: Instance, unit: any)

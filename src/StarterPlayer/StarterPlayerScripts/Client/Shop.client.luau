@@ -256,8 +256,14 @@ end
 -- TILES AND DETAIL
 ---------------------------------------------------------------------
 
-local function boostIcon(holder: Instance)
-	Tiles.glyph(holder, "plus", UiKit.Color.AccentLighthouse)
+-- ICON1: the boost's picture from Shared/ItemIcons when it has one, else the plus glyph
+local function boostIcon(id: string): (Instance) -> ()
+	return function(holder: Instance)
+		if Tiles.picture(holder, id) then
+			return
+		end
+		Tiles.glyph(holder, "plus", UiKit.Color.AccentLighthouse)
+	end
 end
 
 local function itemTiles(): { any }
@@ -295,7 +301,7 @@ local function boostTiles(): { any }
 		table.insert(list, {
 			id = id,
 			name = def.displayName,
-			icon = boostIcon,
+			icon = boostIcon(id),
 			cost = if ok and price then { kind = "Pearls", amount = price } else nil,
 			affordable = ok and price ~= nil and pearls() >= price,
 			owned = top,
@@ -449,7 +455,7 @@ local function boostDetail(id: string): any
 	local balance = pearls()
 	local why = if not ok then reason elseif price and balance < price then string.format("Need %d more Pearls.", price - balance) elseif pendingId then "Finishing the last order..." else nil
 	return {
-		icon = boostIcon,
+		icon = boostIcon(id),
 		name = def.displayName,
 		description = def.description,
 		stats = stats,

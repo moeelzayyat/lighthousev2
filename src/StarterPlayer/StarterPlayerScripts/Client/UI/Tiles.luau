@@ -29,6 +29,7 @@ local Client = script.Parent.Parent
 local UiKit = require(Client:WaitForChild("UiKit"))
 local ItemPreview = require(Client:WaitForChild("ItemPreview"))
 local SoundFx = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SoundFx"))
+local ItemIcons = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("ItemIcons"))
 
 local C, F = UiKit.Color, UiKit.Font
 local Skin = UiKit.Skin
@@ -97,9 +98,28 @@ local function label(parent: Instance, props: { [string]: any }): any
 	end
 	return new("TextLabel", base, parent)
 end
+-- ICON1: the item's drawn picture (Shared/ItemIcons), fitted in the icon holder; nil when the item has none
+function Tiles.picture(holder: Instance, itemId: string): any
+	local image = ItemIcons[itemId]
+	if not image then
+		return nil
+	end
+	return new("ImageLabel", {
+		Name = "Picture",
+		BackgroundTransparency = 1,
+		Image = image,
+		ScaleType = Enum.ScaleType.Fit,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(0.9, 0.9),
+	}, holder)
+end
+
 local function icon(holder: Instance, spec: any): any
 	if typeof(spec) == "function" then
 		spec(holder)
+	elseif type(spec) == "string" and ItemIcons[spec] then
+		Tiles.picture(holder, spec)
 	elseif type(spec) == "string" then
 		local preview = ItemPreview.new(holder, { backdrop = false })
 		preview:setItem(spec)

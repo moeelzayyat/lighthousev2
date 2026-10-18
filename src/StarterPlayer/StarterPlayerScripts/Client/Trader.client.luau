@@ -92,6 +92,9 @@ local menu = Tiles.Menu({
 local function glyphIcon(id: string): (Instance) -> ()
 	local spec = STOCK_GLYPH[id] or { "plus", UiKit.Color.AccentLighthouse }
 	return function(holder: Instance)
+		if Tiles.picture(holder, id) then -- ICON1: the drawn picture when the item has one
+			return
+		end
 		Tiles.glyph(holder, spec[1] :: string, spec[2] :: Color3)
 	end
 end

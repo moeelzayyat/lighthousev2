@@ -69,8 +69,12 @@ local menu = Tiles.Menu({
 	end,
 })
 
-local function glyphIcon(kind: string, color: Color3?): (Instance) -> ()
+-- ICON1: `key` names the tile's picture in Shared/ItemIcons; the glyph shows when there is none
+local function glyphIcon(kind: string, color: Color3?, key: string?): (Instance) -> ()
 	return function(holder: Instance)
+		if key and Tiles.picture(holder, key) then
+			return
+		end
 		Tiles.glyph(holder, kind, color or UiKit.Color.AccentLighthouse)
 	end
 end
@@ -101,7 +105,7 @@ local function tiles(): { any }
 		table.insert(list, {
 			id = id,
 			name = upgrade.displayName,
-			icon = glyphIcon(BENEFIT[id] and BENEFIT[id].glyph or "plus"),
+			icon = glyphIcon(BENEFIT[id] and BENEFIT[id].glyph or "plus", nil, id),
 			cost = if maxed then nil else { kind = "Shells", amount = price },
 			affordable = balance >= price,
 			owned = maxed,
@@ -115,7 +119,7 @@ local function tiles(): { any }
 			table.insert(list, {
 				id = "Evo_" .. evo.id,
 				name = evo.displayName,
-				icon = glyphIcon("diamond", Color3.fromRGB(176, 113, 255)),
+				icon = glyphIcon("diamond", Color3.fromRGB(176, 113, 255), "Evolution"),
 				owned = forged,
 				ownedText = "Forged",
 				locked = if forged then nil else "Max both upgrades to forge",
@@ -159,7 +163,7 @@ local function upgradeDetail(id: string): any
 		elseif pendingId then "Fitting the last upgrade..."
 		else nil
 	return {
-		icon = glyphIcon(b and b.glyph or "plus"),
+		icon = glyphIcon(b and b.glyph or "plus", nil, id),
 		name = upgrade.displayName,
 		description = upgrade.description .. (if b and b.extra and not maxed then ". " .. b.extra else ""),
 		stats = stats,
@@ -187,7 +191,7 @@ local function evolutionDetail(id: string): any
 		table.insert(stats, { label = Upgrades[need].displayName, value = string.format("%d / %d", levelOf(need), max) })
 	end
 	return {
-		icon = glyphIcon("diamond", Color3.fromRGB(176, 113, 255)),
+		icon = glyphIcon("diamond", Color3.fromRGB(176, 113, 255), "Evolution"),
 		name = evo.displayName,
 		description = evo.description .. ".",
 		stats = stats,
