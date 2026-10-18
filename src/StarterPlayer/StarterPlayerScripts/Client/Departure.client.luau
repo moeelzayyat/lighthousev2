@@ -126,7 +126,20 @@ local crewCard = UiKit.Panel(root, { name = "CrewCard", kind = "plain", variant 
 UiKit.border(crewCard, C.AccentLighthouse, 1, 0.5)
 crewCard.Visible = false
 crewCard:FindFirstChild("Content"):Destroy() -- sized by its own content instead
-local crewBody = UiKit.new("Frame", { Name = "Body", BackgroundTransparency = 1 }, crewCard)
+-- VOTE.1: the card stops above the BAG / CODES / jump buttons and scrolls inside when its content is taller
+local crewScroll = UiKit.new("ScrollingFrame", {
+	Name = "Scroll",
+	BackgroundTransparency = 1,
+	BorderSizePixel = 0,
+	Size = UDim2.fromScale(1, 1),
+	CanvasSize = UDim2.new(),
+	AutomaticCanvasSize = Enum.AutomaticSize.Y,
+	ScrollingDirection = Enum.ScrollingDirection.Y,
+	ScrollBarThickness = 6,
+	ScrollBarImageColor3 = C.TextSecondary,
+	Selectable = false,
+}, crewCard)
+local crewBody = UiKit.new("Frame", { Name = "Body", BackgroundTransparency = 1 }, crewScroll)
 UiKit.pad(crewBody, 12, 14, 12, 14)
 UiKit.list(crewBody, "y", 6)
 local crewEyebrow = UiKit.Label(crewBody, "Your crew", "Eyebrow", { LayoutOrder = 1, Size = UDim2.new(1, 0, 0, 18), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false })
@@ -194,16 +207,22 @@ local function renderForecastVote(crew)
 	end
 	local mine = player:GetAttribute("ForecastVote")
 	-- phones: compact card (name + votes only, no note) so the crew card fits a 375 px tall screen
-	local rootFrame = crewBody.Parent and crewBody.Parent.Parent
-	local phone = rootFrame ~= nil and rootFrame:IsA("GuiObject") and UiKit.Breakpoint(rootFrame.AbsoluteSize) == "phone"
+	local phone = UiKit.Breakpoint(root.AbsoluteSize) == "phone"
 	forecastNote.Visible = not phone
+	-- VOTE.1 (owner): the option with the most votes has gold text; your own vote has a gold ring; a tie has no leader
+	local counts = {}
 	for i, id in { a, b } do
-		local votes = 0
+		counts[i] = 0
 		for _, p in crew do
 			if p:GetAttribute("ForecastVote") == id then
-				votes += 1
+				counts[i] += 1
 			end
 		end
+	end
+	local leader = if counts[1] > counts[2] then 1 elseif counts[2] > counts[1] then 2 else nil
+	local tied = leader == nil and counts[1] > 0
+	for i, id in { a, b } do
+		local votes = counts[i]
 		local button = forecastButtons[i]
 		local text = if phone
 			then string.upper(string.format("%s  (%d)", Forecasts[id].displayName, votes))
@@ -213,10 +232,29 @@ local function renderForecastVote(crew)
 			button:SetAttribute("BaseText", text)
 		end
 		local chosen = mine == id
-		button.BackgroundColor3 = if chosen then C.AccentLighthouse else C.SurfaceElevated
-		button.TextColor3 = if chosen then C.TextOnAccent else C.TextPrimary
+		button.BackgroundColor3 = C.SurfaceElevated
+		button.TextColor3 = if leader == i then C.AccentLighthouse else C.TextPrimary
+		button:SetAttribute("BaseTextColor", button.TextColor3)
+		-- the Bold look draws the button with its own face and text (BoldFace, BoldText); paint those when present
+		local boldText = button:FindFirstChild("BoldText")
+		if boldText and boldText:IsA("TextLabel") then
+			boldText.TextColor3 = if leader == i then C.AccentLighthouse else Color3.new(1, 1, 1)
+		end
+		local face = button:FindFirstChild("BoldFace")
+		local ring = (face and face:FindFirstChildOfClass("UIStroke")) or button:FindFirstChildOfClass("UIStroke")
+		if ring then
+			if ring:GetAttribute("VoteBaseColor") == nil then
+				ring:SetAttribute("VoteBaseColor", ring.Color)
+				ring:SetAttribute("VoteBaseThickness", ring.Thickness)
+			end
+			ring.Enabled = true
+			ring.Color = if chosen then C.AccentLighthouse else ring:GetAttribute("VoteBaseColor")
+			ring.Thickness = if chosen then 4 else ring:GetAttribute("VoteBaseThickness")
+		end
 	end
-	forecastNote.Text = if mine then "Majority wins when the ship sails; a tie is a coin toss." else "Pick one. No vote = the crew's choice."
+	forecastNote.Text = if tied then "Tied: a coin toss when the ship sails."
+		elseif mine then "Gold text leads. Majority wins when the ship sails."
+		else "Pick one. No vote = the crew's choice."
 end
 -- S2.1: once any crew member holds the Long Voyage unlock (a Standard win) the card offers the voyage choice;
 -- only holders can switch to the Long Voyage, everyone sees which one is picked. The server checks again.
@@ -520,7 +558,7 @@ local function render()
 				row.frame.Visible = false
 			end
 		end
-		local compact = crewBody.Parent and crewBody.Parent.Parent and crewBody.Parent.Parent:IsA("GuiObject") and UiKit.Breakpoint(crewBody.Parent.Parent.AbsoluteSize) == "phone"
+		local compact = UiKit.Breakpoint(root.AbsoluteSize) == "phone"
 		crewInvite.Visible = canInvite and not invitedFromCrew and crewCount < 4 and not compact -- phones: invite lives on Results
 		renderForecastVote(crew)
 		renderVoyageChoice(crew)
@@ -544,6 +582,44 @@ end
 -- LAYOUT
 ---------------------------------------------------------------------
 
+-- VOTE.1: the crew card's height: its content, but never below the top of the BAG / CODES / jump buttons under it
+local function obstacles(): { GuiObject }
+	local list = {}
+	local pg = player:FindFirstChild("PlayerGui")
+	local inv = pg and pg:FindFirstChild("InventoryButton")
+	for _, name in { "BagButton", "CodesButton" } do
+		local b = inv and inv:FindFirstChild(name, true)
+		if b and b:IsA("GuiObject") and b.Visible and (inv :: ScreenGui).Enabled then
+			table.insert(list, b)
+		end
+	end
+	local touch = pg and pg:FindFirstChild("TouchGui")
+	local jump = touch and touch:FindFirstChild("JumpButton", true)
+	if jump and jump:IsA("GuiObject") and jump.Visible and (touch :: ScreenGui).Enabled then
+		table.insert(list, jump)
+	end
+	return list
+end
+local function fitCrewCard()
+	if not crewCard.Visible then
+		return
+	end
+	local top = crewCard.AbsolutePosition.Y
+	local x0, x1 = crewCard.AbsolutePosition.X, crewCard.AbsolutePosition.X + crewCard.AbsoluteSize.X
+	local limit = root.AbsolutePosition.Y + root.AbsoluteSize.Y - 12
+	for _, o in obstacles() do
+		local ox0, ox1 = o.AbsolutePosition.X, o.AbsolutePosition.X + o.AbsoluteSize.X
+		if ox1 > x0 and ox0 < x1 and o.AbsolutePosition.Y > top then
+			limit = math.min(limit, o.AbsolutePosition.Y - 10)
+		end
+	end
+	local height = math.max(120, math.min(crewBody.AbsoluteSize.Y, limit - top))
+	if crewCard.Size.Y.Offset ~= height then
+		crewCard.Size = UDim2.fromOffset(crewCard.Size.X.Offset, height)
+	end
+end
+crewBody:GetPropertyChangedSignal("AbsoluteSize"):Connect(fitCrewCard)
+
 local function layout()
 	local size = root.AbsoluteSize
 	if size.X <= 0 then
@@ -563,13 +639,14 @@ local function layout()
 	harborEyebrow.TextSize = if phone then 14 else 16
 	-- crew card: top right, under the BAG button, clear of the HUD's centre cluster
 	local cw = if phone then 230 else 300
-	crewCard.Size = UDim2.fromOffset(cw, 0)
-	crewCard.AutomaticSize = Enum.AutomaticSize.Y
+	crewCard.Size = UDim2.fromOffset(cw, crewCard.Size.Y.Offset)
+	crewCard.AutomaticSize = Enum.AutomaticSize.None -- VOTE.1: fitCrewCard sets the height
 	crewCard.Position = UDim2.new(1, -12, 0, if phone then 52 else 120)
 	crewBody.Size = UDim2.new(1, 0, 0, 0)
 	crewBody.AutomaticSize = Enum.AutomaticSize.Y
 	crewHeadline.TextSize = if phone then 18 else 22
 	roster.Visible = not phone or #crewList() <= 2
+	task.defer(fitCrewCard)
 	travelColumn.Size = UDim2.fromOffset(math.min(520, size.X - 32), 120)
 	-- voyage crew: left edge, above the phone thumbstick area
 	voyageCard.Size = UDim2.fromOffset(if phone then 150 else 190, 0)
@@ -581,6 +658,7 @@ layout()
 task.spawn(function()
 	while true do
 		render()
+		fitCrewCard()
 		task.wait(0.25)
 	end
 end)

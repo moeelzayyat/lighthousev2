@@ -1523,3 +1523,15 @@ CHECKED (DEV, Studio memory store): PC: the view opens on the lighthouse (0° of
 SCREENSHOTS: `assets/screens/sniper_view/` (before_pc, after_pc, after_iphone17pro_simulator).
 MIRROR: 166 scripts in DEV, digest identical to `src/` (3e958918).
 OWNER: publish DEV again for this fix to reach the live game (save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_SNV_2026-10-18.rbxl` first).
+
+CHECKPOINT: VOTE.1 Harbor crew and vote panel (the owner's report) — ✅ in DEV, waits for the next DEV publish
+DATE: 2026-10-18
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF
+BACKUP: ServerStorage.Backups.VOTE1_before_2026-10-18 (Departure) · restore points "VOTE1 before", "VOTE1 passed"
+REPRODUCED: Studio Device Simulator, a custom 1150×550 phone (the owner's screen), on the ship with the forecast vote and three voyages (Standard, Long, Shipwreck Rescue): the crew card reached 423 px and ran under the BAG button and the jump button; the event voyage was cut off.
+FIXED (`Departure.client`):
+- The crew card's content sits in a scrolling frame; the card's height is its content, but it stops 10 px above any BAG, CODES or jump button below it (read from their real positions) and above the screen's bottom edge.
+- Vote look (Bold look, D-042): the option with the most votes has gold text; the one you voted for has a thick gold ring (the same gold as a selected tile); a tie shows no gold text and the note reads "Tied: a coin toss when the ship sails." (phones hide the note, as before).
+CHECKED: 1150×550 phone: card 52→304 px, BAG button top 314 px; scrolling shows all three voyages; your vote (Spring Tide) in a gold ring with gold text "(1)". PC 2004×985: the whole card shows (120→639 px), BAG button at 797 px. TestRunner **258 passed, 0 failed**; 0 errors.
+SCREENSHOTS: `assets/screens/vote_panel/` (before and after on the phone, scrolled, PC).
+MIRROR: 166 scripts in DEV, digest identical to `src/` (0afc29b0).
