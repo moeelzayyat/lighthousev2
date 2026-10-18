@@ -261,6 +261,7 @@ local function keeperTiles(): { any }
 		table.insert(list, { id = "FireShellCrate", name = Items.FireShellCrate.name, icon = "FireShellCrate", qty = crates })
 	end
 	table.insert(list, { id = "Codes", name = "Codes", icon = glyphIcon("check", Color3.fromRGB(255, 200, 80), "Codes") })
+	table.insert(list, { id = "Settings", name = "Settings", icon = glyphIcon("info", Color3.fromRGB(150, 200, 255), "Settings") }) -- SET.1
 	return list
 end
 
@@ -471,6 +472,22 @@ local function keeperDetail(): any
 	}
 end
 
+-- SET.1: Settings from the BAG (sound, storm sound, low effects); the panel itself lives in Menus
+local function settingsDetail(): any
+	return {
+		icon = glyphIcon("info", Color3.fromRGB(150, 200, 255), "Settings"),
+		name = "Settings",
+		description = "Sound, storm sound and low effects for slower phones. They last until you leave the game.",
+		action = { text = "Open", enabled = true, onPress = function()
+			setOpen(false)
+			local event = script.Parent:FindFirstChild("OpenSettings")
+			if event and event:IsA("BindableEvent") then
+				event:Fire()
+			end
+		end },
+	}
+end
+
 local function codesDetail(): any
 	return {
 		icon = glyphIcon("check", Color3.fromRGB(255, 200, 80), "Codes"),
@@ -568,6 +585,8 @@ local function renderDetail()
 		menu:setDetail(keeperDetail())
 	elseif id == "Codes" then
 		menu:setDetail(codesDetail())
+	elseif id == "Settings" then
+		menu:setDetail(settingsDetail())
 	elseif tab == "Logbook" then
 		menu:setDetail(if id and string.sub(id, 1, 4) == "Log_" then logEntryDetail(id) else logbookSummaryDetail())
 	elseif id and string.sub(id, 1, 5) == "Slot_" then

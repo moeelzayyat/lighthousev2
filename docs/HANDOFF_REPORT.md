@@ -1672,3 +1672,15 @@ MIRROR: 174 scripts in DEV, digest identical to `src/` (4bde78bc).
 SCREENS: `assets/screens/weapons/quartermaster_new_weapons_pc.jpg`, `net_launcher_in_hand_pc.jpg`, `models_hook_net_bomb.jpg`
 NOT DONE: drawn shop icons for the three (the tiles show the 3D model for now; drawing them needs an upload to the owner's account); a phone check; a picture of the effects in action (Studio's camera resets after each scripted step).
 OWNER: save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_WPN_2026-10-18.rbxl`, File → Publish to Roblox (harbor), then File → Publish to Roblox As… → Lighthouse Keepers DEV → Lighthouse Isle → Overwrite; reopen Lighthouse Keepers DEV in Studio. This one publish also carries KRAKEN.1.
+
+CHECKPOINT: SET.1 Settings from anywhere (and a look at Results and Settings) — ✅ in DEV Studio, waits for the next publish
+DATE: 2026-10-18
+FOUND: Results and the Settings panel already draw in the Bold look, so they were left alone (D-041: rebuild or leave alone, never layer). Settings could only be opened from the title screen; the server skips the title for a player on their first voyage, and the Lighthouse Isle place never shows it, so most players could not reach the sound or low-effects settings.
+BUILT: `Inventory.client`: a Settings tile in the BAG's KEEPER tab with an OPEN button; `Menus.client`: an `OpenSettings` client event opens the same Settings panel when the title is gone, and DONE / close returns to the game (no frozen controls). Glyph icon for now (the Fancy GUI Kit's gear would need an upload).
+BACKUP: ServerStorage.Backups.SET1_before_2026-10-18 · restore points "SET1 before", "SET1 passed"
+CHECKED (DEV Studio play, clicks through the real buttons): harbor: BAG → Settings tile → OPEN → the Settings panel with both sound sliders and Low effects; DONE hid it. At sea (the opening): opened, walk speed 16 and not anchored, DONE hid it. TestRunner **276 passed, 0 failed**; console: no game errors; API access off (probe failed). A type-only cast was added to `Menus` after the play check (no runtime change).
+ANALYZER: no new warnings (Menus 1 and Inventory 1, the same as before).
+MIRROR: 174 scripts in DEV, digest identical to `src/` (7e9b990f).
+SCREENS: `assets/screens/settings/bag_settings_tile_pc.jpg`, `settings_open_in_game_pc.jpg`, `results_bold_rewards_pc.jpg`
+NOT DONE: saving settings between sessions (needs a new save field: owner approval); a phone check.
+SEEN, NOT CHANGED: one mouse click in the harbor counted as the first "harpoon attack" in the log while the BAG closed; it looks like a click passing through a menu to the world. Worth a look later.

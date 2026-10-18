@@ -1094,6 +1094,10 @@ root:GetPropertyChangedSignal("AbsoluteSize"):Connect(relayout)
 -- Screen switching
 ---------------------------------------------------------------------
 
+-- SET.1: Settings also open from the BAG during a game (a new player skips the title screen and the
+-- Lighthouse Isle never shows it). Nothing is frozen at sea: the character keeps its controls.
+local settingsInGame = false
+
 local function openPanel(which)
 	if current ~= "title" then
 		return
@@ -1124,6 +1128,19 @@ closePanel = function()
 	end
 	local panel = if current == "how" then howPanel else settingsPanel
 	local opener = if current == "how" then howButton else settingsButton
+	if settingsInGame then -- SET.1: back to the game, not to the title
+		settingsInGame = false
+		current = "gone"
+		tween(scrim, UiKit.Motion.fast, { BackgroundTransparency = 1 })
+		UiKit.Close(panel, function()
+			if (current :: string) == "gone" then -- still gone (not reopened meanwhile)
+				scrim.Visible = false
+				panels.Visible = false
+			end
+		end)
+		GuiService.SelectedObject = nil
+		return
+	end
 	current = "title"
 	tween(scrim, UiKit.Motion.fast, { BackgroundTransparency = 1 })
 	UiKit.Close(panel, function()
@@ -1139,6 +1156,20 @@ howButton.Activated:Connect(function()
 	openPanel("how")
 end)
 settingsButton.Activated:Connect(function()
+	openPanel("settings")
+end)
+
+-- SET.1: the BAG's Settings tile fires this (client only)
+local openSettingsEvent = Instance.new("BindableEvent")
+openSettingsEvent.Name = "OpenSettings"
+openSettingsEvent.Parent = script.Parent
+openSettingsEvent.Event:Connect(function()
+	if current ~= "gone" then
+		return
+	end
+	settingsInGame = true
+	current = "title"
+	panels.Visible = true
 	openPanel("settings")
 end)
 

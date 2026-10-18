@@ -370,3 +370,4 @@ Numbers (chosen by Claude; the owner may change any of them):
 - Lantern Bomb: 120 Pearls; 30 damage (one Rock Crab), 4.5 s reload, range 45, radius 10, up to 8 creatures, after a 0.35 s flight and a 0.9 s fuse.
 Balance rule kept: every one is below the wide beam's 12 damage a second on one creature (7.1, 1.0 and 6.7).
 ## CP — WPN.1 passed · 2026-10-18 · auto-approved (unattended) · TestRunner 276/276; digest 174 scripts 4bde78bc
+## CP — SET.1 passed · 2026-10-18 · auto-approved (unattended) · TestRunner 276/276; digest 174 scripts 7e9b990f · Results and Settings already in the Bold look (not rebuilt, D-041); Settings now open from the BAG anywhere. Settings still last one session: saving them needs a new save field (owner approval, CLAUDE.md rule 5)
