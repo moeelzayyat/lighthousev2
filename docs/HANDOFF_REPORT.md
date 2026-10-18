@@ -1567,3 +1567,9 @@ SCREENSHOTS: `assets/screens/item_icons/`.
 MIRROR: 167 scripts in DEV, digest identical to `src/` (5a143ee0).
 OPEN (owner): where the Sealoot pack (and the `assets/icons/PNG` materials pack) came from, for ART_SOURCES. The Layer Lab, Sealoot and PNG folders stay out of the repo.
 OWNER: publish DEV again for SNV.1, VOTE.1, SHIP.1 and ICON1. Save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_ICON_2026-10-18.rbxl` first.
+
+DEV PUBLISHED BY THE OWNER — 2026-10-18 12:00 UTC
+Backup: `C:/RobloxProjects/Lighthousev2/backups/LighthouseKeepers_DEV_ICON_2026-10-18.rbxl` (1,326,203 bytes, on disk).
+Now live on DEV: SNV.1 sniper view, VOTE.1 vote panel, SHIP.1 ship walls and gangway, ICON1 item icons.
+Owner live checks (a real phone and PC): walk the pier and gangway onto the ship and try to walk or swim into the hull; climb the sniper tower and look at the island; vote on the forecast with a friend (gold text on the leader); open the shop, BAG, workbench and Trader and look at the pictures.
+Still open: the Sealoot pack's source and licence.
