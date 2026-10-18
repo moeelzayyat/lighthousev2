@@ -56,6 +56,7 @@ export type Deps = {
 	island: Instance, -- the voyage island folder (the tower is built into it)
 	remote: RemoteEvent, -- SniperAction
 	at: Vector3, -- the tower's flat position
+	deckY: number?, -- ISL.1: when the tower stands in the sea, the height of the wooden deck under it (a bridge runs to the shore)
 	height: number, -- studs from the ground to the platform
 	aimPad: number, -- studs added to a creature's body radius when tracing a shot
 	groundY: (x: number, z: number) -> number,
@@ -95,11 +96,66 @@ local function part(parent: Instance, name: string, size: Vector3, cf: CFrame, c
 	return p
 end
 
+-- ISL.1: the deck the tower stands on out in the sea (on pilings), and a small bridge from its lighthouse edge to
+-- the first dry ground toward the lighthouse
+local PILING = 24 -- studs the pilings reach down into the sea
+
+local function buildDeck(model: Model, deps: Deps, frame: CFrame, half: number, ladderZ: number)
+	local front, back = ladderZ - 5.5, half + 2.4 -- -Z is the lighthouse side; the front holds the ladder's foot
+	local width = half * 2 + 5
+	local middle = (front + back) / 2
+	part(model, "Deck", Vector3.new(width, 1, back - front), frame * CFrame.new(0, -0.5, middle), WOOD, Enum.Material.WoodPlanks)
+	for _, sx in { -1, 1 } do
+		for _, z in { front + 0.6, middle, back - 0.6 } do
+			part(model, "Piling", Vector3.new(1, PILING, 1), frame * CFrame.new(sx * (width / 2 - 0.6), -PILING / 2, z), DARK_WOOD, Enum.Material.Wood)
+		end
+		part(model, "DeckRail", Vector3.new(0.3, 0.3, back - front), frame * CFrame.new(sx * (width / 2 - 0.2), 2.6, middle), DARK_WOOD, Enum.Material.Wood)
+		for _, z in { front + 0.2, back - 0.2 } do
+			part(model, "DeckPost", Vector3.new(0.4, 2.8, 0.4), frame * CFrame.new(sx * (width / 2 - 0.2), 1.4, z), DARK_WOOD, Enum.Material.Wood)
+		end
+	end
+	part(model, "DeckRail", Vector3.new(width, 0.3, 0.3), frame * CFrame.new(0, 2.6, back - 0.2), DARK_WOOD, Enum.Material.Wood)
+
+	-- the bridge: from the deck's front edge toward the lighthouse until the ground is dry
+	local edge = (frame * CFrame.new(0, 0, front)).Position
+	local toCenter = frame.LookVector
+	local landing: Vector3? = nil
+	for step = 1, 40 do
+		local p = edge + toCenter * step
+		local y = deps.groundY(p.X, p.Z)
+		if y >= edge.Y - 1 then
+			landing = Vector3.new(p.X, y, p.Z) + toCenter * 1.5 -- a little onto the sand
+			break
+		end
+	end
+	if not landing then
+		warn("[SniperService] no shore within 40 studs of the tower's deck; no bridge built")
+		return
+	end
+	local length = (landing - edge).Magnitude
+	local along = CFrame.lookAt(edge:Lerp(landing, 0.5), landing)
+	part(model, "Bridge", Vector3.new(4, 0.6, length + 0.6), along * CFrame.new(0, -0.3, 0), WOOD, Enum.Material.WoodPlanks)
+	local spans = math.max(1, math.ceil(length / 5))
+	for _, sx in { -1, 1 } do
+		part(model, "BridgeRail", Vector3.new(0.3, 0.3, length), along * CFrame.new(sx * 1.9, 2.6, 0), DARK_WOOD, Enum.Material.Wood)
+		for i = 0, spans do
+			part(model, "BridgePost", Vector3.new(0.4, 2.8, 0.4), along * CFrame.new(sx * 1.9, 1.3, length / 2 - length * i / spans), DARK_WOOD, Enum.Material.Wood)
+		end
+	end
+	for i = 1, spans - 1 do
+		local p = edge:Lerp(landing, i / spans)
+		part(model, "Piling", Vector3.new(0.9, PILING, 0.9), CFrame.new(p.X, p.Y - 0.6 - PILING / 2, p.Z), DARK_WOOD, Enum.Material.Wood)
+	end
+end
+
 -- Builds the tower; returns the model, the prompt at its foot, where a climber stands, where they come down and
 -- the rifle's muzzle
 local function build(deps: Deps): (Model, ProximityPrompt, CFrame, CFrame, Vector3)
 	local x, z = deps.at.X, deps.at.Z
-	local g = deps.groundY(x, z)
+	local ground = deps.groundY(x, z)
+	local deckY = deps.deckY
+	local inSea = deckY ~= nil and ground < deckY
+	local g = if deckY and inSea then deckY else ground
 	local h = deps.height
 	local base = Vector3.new(x, g, z)
 	local toCenter = Vector3.new(deps.center.X - x, 0, deps.center.Z - z).Unit
@@ -157,6 +213,10 @@ local function build(deps: Deps): (Model, ProximityPrompt, CFrame, CFrame, Vecto
 		if d:IsA("BasePart") then
 			d.CanQuery = d == platform -- shots and aims pass through the frame
 		end
+	end
+
+	if inSea then
+		buildDeck(model, deps, frame, half, ladderZ)
 	end
 
 	-- the climb prompt at the foot of the ladder

@@ -56,7 +56,7 @@ return function(T: any)
 			T.expect(math.ceil(Creatures.RockCrab.health / s.damage)).toBe(3)
 			T.expect(math.ceil(Creatures.RockCrab.health * 0.8 / s.damage)).toBe(2)
 			T.expect(s.cooldown).toBe(1)
-			T.expect(s.range).toBe(220)
+			T.expect(s.range).toBe(250)
 		end)
 
 		T.it("its remote has a rate (contract row)", function()

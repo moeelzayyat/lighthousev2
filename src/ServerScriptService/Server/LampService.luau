@@ -55,7 +55,7 @@ local function getHumanoid(player)
 	return character and character:FindFirstChildOfClass("Humanoid")
 end
 
-local GLOW_DISTANCES = { 28, 52, 76 } -- where the pools of light sit along the beam
+local GLOW_DISTANCES = { 28, 58, 98 } -- where the pools of light sit along the beam (ISL.2: was 28, 52, 76)
 
 local function applyBeam()
 	refs.emitter.CFrame = CFrame.new(refs.lampPosition)

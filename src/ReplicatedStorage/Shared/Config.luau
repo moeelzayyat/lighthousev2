@@ -55,12 +55,12 @@ local Config = {
 
 	-- Beam
 	BEAM_TURN_SPEED = 120, -- degrees per second (manual control)
-	BEAM_LENGTH = 105,
-	BEAM_TILT = 31, -- degrees pointing down; the beam lands on the rocks at the island's edge
+	BEAM_LENGTH = 127, -- ISL.2: reaches the bigger island's shore (was 105)
+	BEAM_TILT = 25, -- degrees pointing down; the beam lands at the island's edge (ISL.2: was 31)
 	WIDE_HALF_ANGLE = 18, -- how wide the beam's effect is, either side of center
 	FOCUSED_HALF_ANGLE = 9,
-	WIDE_VISUAL_WIDTH = 78, -- matches WIDE_HALF_ANGLE at the end of the beam
-	FOCUSED_VISUAL_WIDTH = 38, -- matches FOCUSED_HALF_ANGLE
+	WIDE_VISUAL_WIDTH = 94, -- matches WIDE_HALF_ANGLE at the end of the beam (ISL.2: was 78 for the shorter beam)
+	FOCUSED_VISUAL_WIDTH = 46, -- matches FOCUSED_HALF_ANGLE (ISL.2: was 38)
 	FOCUSED_FUEL_MULTIPLIER = 2.5, -- focused beam burns fuel much faster
 	FOCUSED_DPS = 35, -- damage per second in the focused beam (also stops creatures)
 	WIDE_DPS = 12, -- damage per second in the wide beam (also pushes creatures back)
@@ -100,11 +100,12 @@ local Config = {
 	WAVE_BONUS_PER_NIGHT = 13, -- surviving night N gives N x this many shells (was 10; +30% Shells, Oct 12)
 
 	-- Sniper tower (owner's idea 2026-10-17, D-044): one crew member at a time shoots a scoped rifle from it
-	SNIPER_TOWER_AT = Vector3.new(-44, 0, 0), -- flat position on the island's west side, between two cannon pads
+	SNIPER_TOWER_AT = Vector3.new(107, 0, -84), -- ISL.1 (owner): out in the sea off the island's east beach, reached by a bridge (was -44, 0, 0 on the island)
 	SNIPER_TOWER_HEIGHT = 22, -- studs from the ground to the platform
+	SNIPER_DECK_Y = 2.5, -- ISL.1: in the sea the tower stands on a wooden deck this high, with a bridge to the shore
 	SNIPER_DAMAGE = 12, -- per shot: a Sand Skitter (6 HP) in one, a Rock Crab (30 HP) in three (two in a Spring Tide)
 	SNIPER_COOLDOWN = 1.0, -- seconds between shots
-	SNIPER_RANGE = 220, -- studs from the rifle
+	SNIPER_RANGE = 250, -- studs from the rifle (ISL.1: was 220; out in the sea it still reaches the far side of the creature ring)
 	SNIPER_AIM_PAD = 2.5, -- studs added to a creature's body radius when a shot is traced (aim forgiveness)
 
 	-- Cannons (built on fixed pads with crew shells; reset every run)
@@ -177,12 +178,12 @@ local Config = {
 
 	-- Island layout
 	ISLAND_CENTER = Vector3.new(0, 0, 0),
-	ISLAND_RADIUS = 70,
-	GROUND_GRID_RADIUS = 128, -- S4.1: the height grid covers this far from the island centre (creatures spawn at 92)
+	ISLAND_RADIUS = 88, -- ISL.2 (owner): the island is about 50% bigger (was 70)
+	GROUND_GRID_RADIUS = 140, -- S4.1: the height grid covers this far from the island centre (creatures spawn at 117; was 128)
 	GROUND_Y = 10, -- height of the island surface where the lighthouse stands (sea surface is y = 0)
 	TOWER_HEIGHT = 60,
 	TOWER_ATTACK_RADIUS = 10, -- creatures stop here to attack the tower
-	CREATURE_SPAWN_RADIUS = 92, -- creatures climb out of the sea here
+	CREATURE_SPAWN_RADIUS = 117, -- creatures climb out of the sea here (ISL.2: the new shoreline; was 92)
 }
 
 -- Short timings: 13 nights x (30 s + 90 s) = about 27 minutes plus the opening

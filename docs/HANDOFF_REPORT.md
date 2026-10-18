@@ -1366,3 +1366,18 @@ KNOWN: the code field is redrawn when new profile data arrives, so a half-typed 
 SCREENSHOTS: `assets/screens/bag_menu/`.
 MIRROR: 166 scripts in DEV, digest identical to `src/` (8a3c7939).
 NEXT: the owner's two island changes, ISL.1 (sniper tower into the water with a bridge) and ISL.2 (lighthouse island about 50% bigger).
+
+CHECKPOINT: ISL.2 lighthouse island about 50% bigger + ISL.1 sniper tower in the sea with a small bridge (the owner's asks, 2026-10-17 23:42) — ✅ in DEV (Script Analysis unmeasured; the owner judges the look)
+DATE: 2026-10-17
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF (probe: error 7)
+BACKUP: ServerStorage.Backups.ISL_before_2026-10-17 (the terrain region, IslandProps, Decor, Config, SniperService, Encounter, LampService, IslandBuilder) · restore points "ISL before", "ISL passed"
+BUILT (numbers in D-045, all revisable):
+- Terrain stretched outward from 44 studs: land above the sea 32,076 → 47,672 square studs (x1.49 measured), flat ground x1.43; the middle (lighthouse, shop, bench, Trader) unchanged. Outer sea rocks, the dock, the path lanterns, the keeper's hut, the oil shed (and the oil pile with it), crates and wrecks moved out to match.
+- Creatures climb out of the sea at 117 studs (was 92); ground grid 140 (635,136 samples, built in 3.1-4.0 s at boot in Studio, in the background); the beam's visual reaches the new shore (measured end 115 studs out at sea level).
+- Sniper tower: in the sea off the east beach on a wooden deck with pilings and rails; an 11-stud bridge to the sand, built automatically toward the lighthouse; rifle range 250.
+- `GroundSpec` tolerance changed as recorded in D-045 (99% within 0.2 studs, none over 1 stud).
+TESTRUNNER (DEV, Play server): **258 passed, 0 failed**.
+PLAY TEST (DEV, Studio memory store; runtime helper kept the lamp fuelled and, in the second run, the tower repaired): the tower and bridge were built (Deck, Bridge, 8 pilings); walked from the beach over the bridge to the climb spot (MoveTo reached); climbed (OnSniperTower set); 14 shots at creatures 127-139 studs away: 8 kills (3 Rock Crabs, 5 Sand Skitters). Night 1 with nobody defending: creatures walked in from the new ring and reached the tower (the tower fell, as expected with no defence). 0 errors from game scripts.
+SCREENSHOTS: `assets/screens/island/` (before and after from above; the tower in the sea; the deck and bridge).
+MIRROR: 166 scripts in DEV, digest identical to `src/` (ef2b0250).
+OWNER: the next DEV publish carries the Trader and BAG menus, the bigger island and the tower in the sea. Before it: File → Save to File As → `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_ISL_2026-10-17.rbxl`; Studio API access stays OFF; then File → Publish to Roblox (DEV only).

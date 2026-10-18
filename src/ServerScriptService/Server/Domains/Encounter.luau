@@ -453,6 +453,7 @@ function Encounter.Start(ctx)
 		island = refs.folder,
 		remote = ctx.remotes.SniperAction,
 		at = Config.SNIPER_TOWER_AT,
+		deckY = Config.SNIPER_DECK_Y,
 		height = Config.SNIPER_TOWER_HEIGHT,
 		aimPad = Config.SNIPER_AIM_PAD,
 		groundY = function(x, z)
