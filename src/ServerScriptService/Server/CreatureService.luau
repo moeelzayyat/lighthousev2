@@ -171,6 +171,21 @@ local function buildTemplate(kind)
 		corner.CornerRadius = UDim.new(1, 0)
 		corner.Parent = eye
 	end
+	-- Textured art can say where its own eyes are (art attributes EyeAt, in studs in the art's own frame, and
+	-- EyeSize), so the glow sits on the face instead of above the head
+	local eyeAt = art and art:GetAttribute("EyeAt")
+	if typeof(eyeAt) == "Vector3" then
+		local spot = Instance.new("Attachment")
+		spot.Name = "EyeSpot"
+		spot.Position = eyeAt * stats.scale
+		spot.Parent = body
+		eyes.Adornee = spot
+		eyes.StudsOffset = Vector3.zero
+		local eyeSize = art:GetAttribute("EyeSize")
+		if type(eyeSize) == "number" then
+			eyes.Size = UDim2.new(2.4 * bigScale * eyeSize, 0, 0.9 * bigScale * eyeSize, 0)
+		end
+	end
 
 	-- Health bar, shown once the creature has taken damage
 	local bar = Instance.new("BillboardGui")

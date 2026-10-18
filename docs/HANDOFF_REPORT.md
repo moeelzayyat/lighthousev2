@@ -1381,3 +1381,17 @@ PLAY TEST (DEV, Studio memory store; runtime helper kept the lamp fuelled and, i
 SCREENSHOTS: `assets/screens/island/` (before and after from above; the tower in the sea; the deck and bridge).
 MIRROR: 166 scripts in DEV, digest identical to `src/` (ef2b0250).
 OWNER: the next DEV publish carries the Trader and BAG menus, the bigger island and the tower in the sea. Before it: File → Save to File As → `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_ISL_2026-10-17.rbxl`; Studio API access stays OFF; then File → Publish to Roblox (DEV only).
+
+CHECKPOINT: ART.1 ForgeGUI models for the five block-built monsters — ✅ in DEV (Script Analysis unmeasured; the owner judges the look)
+DATE: 2026-10-18
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF (probe failed as expected)
+BACKUP: ServerStorage.Backups.ART5_before_2026-10-18 (Art listing, CreatureService) · restore points "ART5 before", "ART5 passed"
+BUILT:
+- Inserted the owner's five ForgeGUI models (asset ids in `assets/ART_SOURCES.md`). Each is one MeshPart with one SurfaceAppearance (about 1 stud as uploaded), so each creature still draws one part (rule 9). Placed in `ServerStorage.Art` under the art names, without the package link: Spitter Eel 4.0 studs tall, Puffer Mine 3.4, Ghost Lantern 2.6 (it hovers 3 up), Tide Witch 3.8, Coral Shaman 3.4.
+- Facing: the eel already faced forward; the puffer, ghost, witch and shaman faced sideways and got `YawOffset` -90 (checked front-on in Edit and in play).
+- Glow eyes: the night-time glow eyes floated above the new heads, so `CreatureService` now reads two optional art attributes, `EyeAt` (where the art's eyes are) and `EyeSize`, and puts the eyes on the face; creatures without them are unchanged.
+TESTRUNNER (DEV, Play server): **258 passed, 0 failed**.
+PLAY TEST (DEV, Studio memory store; runtime helper kept the lamp and tower up and spawned each new monster in Day 1 and Night 1): all five drew from the new models, one part each, faced the way they walked, eyes on their faces; the ghost floated as before. 0 errors from game scripts.
+SCREENSHOTS: `assets/screens/creatures_forgegui/` (lineup_front.jpg; front_*.jpg in Edit; game_day_*.jpg and game_night_all.jpg in play).
+MIRROR: 166 scripts in DEV, digest identical to `src/` (893de206). The meshes live in the place (`ServerStorage.Art`), not in `src/`.
+OWNER: judge the five looks; any one can go back to its block shape by deleting it from `ServerStorage.Art`. They ship with the next DEV publish.
