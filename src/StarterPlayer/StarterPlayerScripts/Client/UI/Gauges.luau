@@ -12,6 +12,14 @@ local new = K.new
 local tween = K.tween
 local restyleTag = K.restyleTag
 
+-- PH.1: on a narrow gauge (phones) a state note keeps only the state, e.g. "TOWER · BREACHING" -> "BREACHING"
+local function noteText(label, text)
+	if label.AbsoluteSize.X > 0 and label.AbsoluteSize.X < 120 then
+		return string.match(text, " · (.+)$") or text
+	end
+	return text
+end
+
 ---------------------------------------------------------------------
 -- GAUGES: one family, four silhouettes. Shared: icon cap (Inset), Label text, numeric readout.
 ---------------------------------------------------------------------
@@ -172,7 +180,7 @@ function UiKit.HealthGauge(parent, opts)
 		local critical = alpha <= 0.25
 		cap.BackgroundColor3 = if critical then Color.StateDanger else P.SurfaceInset
 		UiKit.SetGlyphColor(heart, if critical then Color.TextOnAccent else Color.StateDanger)
-		label.Text = self.note or (if critical then "HEALTH · CRITICAL" else "HEALTH")
+		label.Text = noteText(label, self.note or (if critical then "HEALTH · CRITICAL" else "HEALTH"))
 		label.TextColor3 = if critical or self.note then Color.StateDanger else Color.TextSecondary
 	end
 	-- the maximum can change (armor); the current value is kept
@@ -361,7 +369,7 @@ function UiKit.TowerGauge(parent, opts)
 		initialized = true
 		readout.Text = string.format("%d%%", math.floor(v * 100 + 0.5))
 		local breaching = v < 0.3
-		label.Text = if breaching then "TOWER · BREACHING" else "TOWER"
+		label.Text = noteText(label, if breaching then "TOWER · BREACHING" else "TOWER")
 		label.TextColor3 = if breaching then Color.StateDanger else Color.TextSecondary
 	end
 	self.set(opts.value or 1)

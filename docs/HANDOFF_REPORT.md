@@ -1439,3 +1439,22 @@ SCREENSHOTS: `assets/screens/logbook_menu/` (the two 724×507 shots were taken b
 KNOWN: on a 667×375 phone the six tab labels are small (the longest word, COSMETICS, decides the shared size).
 MIRROR: 166 scripts in DEV, digest identical to `src/` (00f8d658).
 NEXT: nothing left on the coordinator's list (b, c, a done); the DEV publish waits for the owner.
+
+CHECKPOINT: PH.1 Phone pass — ✅ in DEV as a SIMULATED LAYOUT test (not an emulator, not a phone; Script Analysis unmeasured)
+DATE: 2026-10-18
+STUDIO INSTANCE: Lighthouse Keepers DEV, placeId 102473202766620 verified · API access: OFF (probe failed as expected)
+BACKUP: ServerStorage.Backups.PH1_before_2026-10-18 (Layout, SniperView, Gauges, Results) · restore points "PH1 before", "PH1 passed"
+METHOD: Studio's Device Emulator cannot be switched from a script, so every screen was drawn with the game's Studio-only layout simulator (HudSimulate: 667×375 small phone, 932×430 large phone, 1180×820 tablet; touch layout on; the joystick start area (left 40 % × bottom 45 %) and the jump button (70 px or 120 px, Roblox's own placement) drawn). A script measured every visible button and text box (size, inside the screen, over the joystick area, over the jump button) and every text that did not fit. States: harbor, island prologue near the bench, night with the tower breaching, the lamp keeper's controls, Results; the Tiles menus (shop, bench, Trader, BAG) were measured in S2.5c/MP.2–MP.4 (≥ 56 px).
+FOUND AND FIXED:
+- HEALTH (read "HEAL…") and BEAM · AUTO-SWEEP (ran past its pill) on phones: the phone plates are 172 px wide (were 150/146).
+- Prompt cards side by side cut "Upgrade Lighthouse" to "Upgrade…" on a small phone: on phones they stack, full width, 50 px tall.
+- "TOWER · BREACHING" / "HEALTH · CRITICAL" cut off on phones: a gauge narrower than 120 px shows the state alone ("BREACHING").
+- Sniper tower on a short touch screen: CLIMB DOWN sat 11 px from the top (under the Roblox top bar); now FIRE 104 px at the bottom right, ZOOM 84 px beside it, CLIMB DOWN 190×56 above them (top edge 177 px down on a 375 px screen); the joystick and jump button are hidden while up the tower (nobody walks there), and come back on climbing down unless a menu is open.
+- Results: the share line was a 20 px text box (now 44 px); the crew card "Everyone pitched in / No single job stood out" was cut off on phones (now "All hands / Everyone pitched in"); the tablet's Pearls note now reads "Survive nights for Pearls".
+AFTER (measured): small phone, large phone and tablet: every button and text box ≥ 44 px; none over the joystick area or the jump button; no fixed text cut off. Only player names cut off with "…" (e.g. "Lighthouse8282 (you)" on the crew card), by design.
+CHECKED BY GEOMETRY (these screens do not take the simulator): the BAG button on a phone is 52 px, 11 px left of the jump button; CODES 52 px further left; on a tablet the BAG is 62 px, 12 px left of the 120 px jump button. Results and every menu hide the joystick and jump button while open (UiKit.pushModal), as does the lamp keeper's view.
+FOR THE OWNER ON A REAL PHONE (cannot be checked in Studio): (1) the LAMP FUEL bar and the voyage title sit in the Roblox top bar (HudTopBar): check they do not cover the Roblox menu, chat or leaderboard buttons on your phone; (2) climb the sniper tower and check FIRE, ZOOM and CLIMB DOWN reach your thumb and the joystick is gone; (3) the six BAG tabs are small on a 667-wide phone: check you can read them; (4) the frame rate during a night-7 swarm.
+TESTRUNNER (DEV, Play server): **258 passed, 0 failed**. 0 errors from game scripts.
+SCREENSHOTS: `assets/screens/phone_pass/` (before/after small phone island and results, night breach, lamp keeper, tablet).
+MIRROR: 166 scripts in DEV, digest identical to `src/` (acaa324e).
+NEXT: SND.1 sound licence audit.

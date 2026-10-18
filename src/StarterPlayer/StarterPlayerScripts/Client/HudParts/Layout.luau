@@ -126,8 +126,9 @@ function Layout.init(w, S, cards, after)
 			slimGauge(w.health.frame, 38, 38, 46, "Track", 14, 1)
 			slimGauge(w.tower.frame, 42, 42, 50, "Blocks", 20, 1)
 		end
-		local sideW = if compact then 146 else topRight.Size.X.Offset
-		w.topLeft.Size = UDim2.fromOffset(if compact then 150 else w.topLeft.Size.X.Offset, 0)
+		-- PH.1: 172 on phones (was 146/150) so HEALTH and BEAM · AUTO-SWEEP fit on a 667 x 375 screen
+		local sideW = if compact then 172 else topRight.Size.X.Offset
+		w.topLeft.Size = UDim2.fromOffset(if compact then 172 else w.topLeft.Size.X.Offset, 0)
 		topRight.Size = UDim2.fromOffset(sideW, 0)
 		sideStack.Size = UDim2.fromOffset(sideW, 0)
 		setPad(w.leftPlate, if compact then 6 else 10, if compact then 9 else 12)
@@ -283,10 +284,11 @@ function Layout.init(w, S, cards, after)
 			bottom.AnchorPoint = Vector2.new(0, 1)
 			bottom.Position = UDim2.new(0.4, 8, 1, -92)
 			bottom.Size = UDim2.new(0.6, -20, 0, 0)
-			bottomLayout.FillDirection = Enum.FillDirection.Horizontal
+			-- PH.1: stacked, full width (side by side cut "Upgrade Lighthouse" to "Upgrade..." on a small phone)
+			bottomLayout.FillDirection = Enum.FillDirection.Vertical
 			bottomLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
 			for _, c in { cards.primary, cards.secondary } do
-				c.button.Size = UDim2.new(0.5, -4, 0, 52)
+				c.button.Size = UDim2.new(1, 0, 0, 50)
 			end
 		else
 			bottom.AnchorPoint = Vector2.new(0.5, 1)

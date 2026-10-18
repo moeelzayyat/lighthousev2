@@ -85,7 +85,7 @@ local shareBox = UiKit.new("TextBox", {
 	Name = "RunCard",
 	LayoutOrder = 6,
 	BackgroundTransparency = 1,
-	Size = UDim2.new(1, 0, 0, 20),
+	Size = UDim2.new(1, 0, 0, 44), -- PH.1: a 44 px touch target (was 20) so a phone can select it
 	FontFace = shareStyle.FontFace,
 	TextSize = shareStyle.TextSize,
 	TextColor3 = shareStyle.TextColor3,
@@ -337,7 +337,7 @@ local function render()
 		medal(i, award.title, award.player, string.format("%s %s", fmt(award.value), award.unit))
 	end
 	if #(r.awards or {}) == 0 then
-		medal(1, "Crew", "Everyone pitched in", "No single job stood out")
+		medal(1, "Crew", "All hands", "Everyone pitched in") -- PH.1: fits a phone's 150 px card (was cut off)
 	end
 	yourPart.Text = yourContribution(r)
 	-- 4 rewards (less prominent; economy-only tiles hide when the economy is off)
@@ -348,7 +348,7 @@ local function render()
 	pearlTile.note.Text = if banked > 0
 		then string.format("%s banked at dawn \u{00B7} yours to keep", fmt(banked))
 		elseif pearls > 0 then "Yours to keep \u{00B7} Quartermaster"
-		else "Survive a night to earn Pearls"
+		else "Survive nights for Pearls" -- PH.1: fits the tile on a tablet
 	local economy = r.economy ~= false
 	shellTile.frame.Visible = economy
 	lootTile.frame.Visible = economy

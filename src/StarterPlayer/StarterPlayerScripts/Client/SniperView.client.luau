@@ -9,6 +9,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
 local ContextActionService = game:GetService("ContextActionService")
 local TweenService = game:GetService("TweenService")
 
@@ -128,23 +129,26 @@ local function build(): ScreenGui
 
 	-- buttons: CLIMB DOWN for everyone; FIRE and ZOOM on touch screens
 	local touch = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+	-- PH.1: on a short touch screen (a phone held sideways) the buttons sit lower and smaller, so CLIMB DOWN stays
+	-- clear of the Roblox top bar; the joystick and jump button are hidden while up the tower (see mount)
+	local short = touch and camera().ViewportSize.Y <= 500
 	local down = Tiles.bigButton(root, "ClimbDown")
 	down.button.AnchorPoint = Vector2.new(1, 1) -- right side, clear of the HUD's top bar and the hotbar
-	down.button.Position = UDim2.new(1, -28, 1, -300)
-	down.button.Size = UDim2.fromOffset(220, 64)
+	down.button.Position = if short then UDim2.new(1, -24, 1, -142) else UDim2.new(1, -28, 1, -300)
+	down.button.Size = if short then UDim2.fromOffset(190, 56) else UDim2.fromOffset(220, 64)
 	down.paint({ face = Color3.fromRGB(220, 40, 40), edge = Color3.fromRGB(140, 20, 20), text = Color3.new(1, 1, 1) }, "Climb down")
 	down.button.Activated:Connect(climbDown)
 	if touch then
 		local fireButton = Tiles.bigButton(root, "Fire")
 		fireButton.button.AnchorPoint = Vector2.new(1, 1)
-		fireButton.button.Position = UDim2.new(1, -28, 1, -150)
-		fireButton.button.Size = UDim2.fromOffset(120, 120)
+		fireButton.button.Position = if short then UDim2.new(1, -24, 1, -24) else UDim2.new(1, -28, 1, -150)
+		fireButton.button.Size = if short then UDim2.fromOffset(104, 104) else UDim2.fromOffset(120, 120)
 		fireButton.paint({ face = Color3.fromRGB(120, 220, 60), edge = Color3.fromRGB(70, 150, 30), text = Color3.new(1, 1, 1) }, "Fire")
 		fireButton.button.Activated:Connect(fire)
 		local zoom = Tiles.bigButton(root, "Zoom")
 		zoom.button.AnchorPoint = Vector2.new(1, 1)
-		zoom.button.Position = UDim2.new(1, -164, 1, -150)
-		zoom.button.Size = UDim2.fromOffset(96, 96)
+		zoom.button.Position = if short then UDim2.new(1, -140, 1, -34) else UDim2.new(1, -164, 1, -150)
+		zoom.button.Size = if short then UDim2.fromOffset(84, 84) else UDim2.fromOffset(96, 96)
 		zoom.button.Activated:Connect(function()
 			setScope(not scoped)
 		end)
@@ -167,6 +171,9 @@ local function mount()
 		return
 	end
 	mounted = true
+	pcall(function() -- PH.1: no joystick or jump button up the tower (nobody walks there); FIRE and ZOOM take that corner
+		GuiService.TouchControlsEnabled = false
+	end)
 	local cam = camera()
 	saved.cameraMode = player.CameraMode
 	saved.fov = cam.FieldOfView
@@ -205,6 +212,9 @@ local function unmount()
 	end
 	setScope(false)
 	mounted = false
+	pcall(function()
+		GuiService.TouchControlsEnabled = player:GetAttribute("MenuOpen") ~= true
+	end)
 	ContextActionService:UnbindAction("SniperFire")
 	ContextActionService:UnbindAction("SniperZoom")
 	ContextActionService:UnbindAction("SniperDown")
