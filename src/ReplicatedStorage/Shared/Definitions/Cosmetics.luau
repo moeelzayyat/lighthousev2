@@ -19,6 +19,7 @@ local Cosmetics = {
 		"HousingDriftwood", "HousingBrass", "CoatStormBlue", "CoatKelpGreen",
 		"LanternMoth", "LanternTide", "FlagGull", "FlagKraken", "FlagFounder",
 		"PetPuffin",
+		"KrakenChest",
 	},
 
 	BeamSeaGlass = { robux = 29, productId = 3719247063 } :: Product,
@@ -35,6 +36,11 @@ local Cosmetics = {
 	FlagFounder = { robux = 149, productId = 3719247016 } :: Product, -- the supporter item: Robux only (a cosmetic, so allowed)
 	-- PET.1 (D-051): convenience, so it is also sold for Pearls (Items.PetPuffin); product created by the owner 2026-10-19
 	PetPuffin = { robux = 99, productId = 3720011582 } :: Product,
+	-- CHEST.2 (D-055, owner's choice on the decision card 2026-10-19 22:20 UTC, "Also sell crates"): a Kraken Chest for
+	-- Robux, the same chest as the free daily one (cosmetics and Pearls only, odds shown in the BAG). A paid random
+	-- item, so the BAG hides it where PolicyService says ArePaidRandomItemsRestricted. productId 0 until the owner
+	-- creates the product.
+	KrakenChest = { robux = 49, productId = 0 } :: Product,
 }
 
 -- The item a developer product buys, or nil

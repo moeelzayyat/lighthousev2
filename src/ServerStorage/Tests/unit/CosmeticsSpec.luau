@@ -40,8 +40,9 @@ return function(T: any)
 			local robuxOnly = {}
 			for _, id in Cosmetics.ORDER do
 				local item = Items[id]
-				T.expect(item.kind == "Cosmetic" or (item.kind == "Pet" and type(item.price) == "number")).toBe(true) -- PET.1
-				if item.price == nil then
+				local chest = item.kind == "Chest" and item.reward == "chest" -- D-055: also earned free, one a day for the Kraken
+				T.expect(item.kind == "Cosmetic" or chest or (item.kind == "Pet" and type(item.price) == "number")).toBe(true) -- PET.1
+				if item.price == nil and not chest then
 					table.insert(robuxOnly, id)
 				end
 			end
@@ -95,7 +96,11 @@ return function(T: any)
 				end
 			end
 			T.expect(receipts).toEqual({ "Economy" }) -- the Economy domain hands receipts to PurchaseService
-			T.expect(prompts).toEqual({ "Shop" })
+			table.sort(prompts)
+			T.expect(prompts).toEqual({ "Inventory", "Shop" }) -- D-055: the BAG prompts the Robux Kraken Chest
+			local bag = (game.StarterPlayer.StarterPlayerScripts.Client.Inventory :: any).Source :: string
+			T.expect(bag).toContain("ArePaidRandomItemsRestricted") -- hidden where paid random items are restricted
+			T.expect(bag).toContain("PromptProductPurchase(player, product.productId)")
 			local shop = (game.StarterPlayer.StarterPlayerScripts.Client.Shop :: any).Source :: string
 			-- S2.5c: the one prompt is for the product the Cosmetics catalogue lists for that item (nil when Robux is off)
 			T.expect(shop).toContain("Cosmetics.productFor(itemId)")

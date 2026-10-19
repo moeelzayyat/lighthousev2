@@ -34,6 +34,20 @@ local Upgrades = require(Shared:WaitForChild("Upgrades")) :: any
 local Forecasts = require(Shared:WaitForChild("Forecasts")) :: any
 local Logbook = require(Shared:WaitForChild("Definitions"):WaitForChild("Logbook")) :: any
 local Chests = require(Shared:WaitForChild("Definitions"):WaitForChild("Chests")) :: any -- CHEST.1
+local Cosmetics = require(Shared:WaitForChild("Definitions"):WaitForChild("Cosmetics")) :: any -- CHEST.2: the Robux chest
+local MarketplaceService = game:GetService("MarketplaceService")
+-- CHEST.2 (D-055): a chest bought with Robux is a paid random item, which Roblox restricts in some places; hidden
+-- until PolicyService says this player may see it
+local paidRandomAllowed = false
+task.spawn(function()
+	local ok, info = pcall(function()
+		return game:GetService("PolicyService"):GetPolicyInfoForPlayerAsync(Players.LocalPlayer)
+	end)
+	paidRandomAllowed = ok and type(info) == "table" and info.ArePaidRandomItemsRestricted == false
+end)
+local function chestProduct(chestId: string): any
+	return if paidRandomAllowed then Cosmetics.productFor(chestId) else nil
+end
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local ItemModels = ReplicatedStorage:WaitForChild("ItemModels")
@@ -280,8 +294,8 @@ local function keeperTiles(): { any }
 	end
 	for _, chestId in Chests.ORDER do -- CHEST.1: unopened chests sit on the first page
 		local n = count(chestId)
-		if n > 0 then
-			table.insert(list, { id = chestId, name = Items[chestId].name, icon = chestId, qty = n })
+		if n > 0 or chestProduct(chestId) then -- CHEST.2: shown to buy one even when the bag holds none
+			table.insert(list, { id = chestId, name = Items[chestId].name, icon = chestId, qty = if n > 0 then n else nil })
 		end
 	end
 	table.insert(list, { id = "Codes", name = "Codes", icon = glyphIcon("check", Color3.fromRGB(255, 200, 80), "Codes") })
@@ -588,6 +602,12 @@ local function itemDetail(itemId: string): any
 				openChest(itemId)
 			end }
 			else { text = "Open", enabled = false, reason = "Beat the Kraken to earn the next one." }
+		local product = chestProduct(itemId)
+		if product then -- CHEST.2 (D-055): one more chest for Robux, same contents and odds as the free one
+			detail.action2 = { text = "Buy one R$ " .. product.robux, enabled = true, variant = "robux", onPress = function()
+				MarketplaceService:PromptProductPurchase(player, product.productId)
+			end }
+		end
 		return detail
 	end
 	if not item.slot then

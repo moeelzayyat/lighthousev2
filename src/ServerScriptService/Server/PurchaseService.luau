@@ -39,7 +39,7 @@ function PurchaseService.process(receipt: any, deps: Deps): string
 	local status = deps.grant(player, "receipt:" .. receipt.PurchaseId, { Items = { [itemId] = 1 } }, "robux")
 	if status == "granted" then
 		deps.log("PurchaseGranted", { player = player.Name, item = itemId, product = receipt.ProductId, robux = receipt.CurrencySpent })
-		deps.notify(player, string.format("Thank you! %s is yours. Equip it from your BAG.", deps.nameOf(itemId)))
+		deps.notify(player, string.format("Thank you! %s is in your BAG.", deps.nameOf(itemId)))
 		return "granted"
 	elseif status == "duplicate" then
 		return "granted" -- already given for this receipt

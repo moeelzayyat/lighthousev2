@@ -1784,3 +1784,11 @@ CHECKED (DEV Studio play, API access off): the Lantern Turtle stands on the grou
 NOT CHECKED: an in-game picture of each pet (Studio's 3D view drew white during play); a real phone.
 OWNER STEPS: save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_PETS_2026-10-19.rbxl` (the pet models live only in the place), then publish to both places. For Robux sales of a pet, create a developer product per pet and send the ids.
 MIRROR: 184 scripts, digest identical to `src/` (7d81ee8b).
+
+CHECKPOINT: CHEST.2 Kraken Chest for Robux (D-055) — 🟦 waiting for the owner's developer product
+BUILT: `Definitions/Cosmetics` KrakenChest (49 R$, productId 0), `_Registry` (a chest may be in the Robux catalogue, D-055), `PurchaseService` (thank-you note "is in your BAG"), `Client/Inventory` (BUY ONE R$ 49 beside OPEN on the chest; the chest tile shows even with none in the bag when it can be bought; hidden unless PolicyService says paid random items are allowed), `ChestSpec` (+1), `CosmeticsSpec` (the BAG may prompt the chest; it checks the policy).
+BACKUP: ServerStorage.Backups.CHEST2_before_2026-10-19 · restore points "CHEST2 before", "CHEST2 passed"
+CHECKED (DEV Studio play, API access off): PolicyService answered ArePaidRandomItemsRestricted = false for the owner's account; with a temporary product id (runtime only, reverted) the BAG showed BUY ONE R$ 49 above OPEN with the odds listed; a test receipt through PurchaseService gave one chest, the same receipt again gave nothing more. TestRunner **294 passed, 0 failed**; no script errors.
+NOT CHECKED: a real Robux purchase (needs the product and a published game); a player in a restricted country (the button should not show).
+OWNER STEPS: Creator Hub → Lighthouse Keepers DEV → Monetization → Developer Products → Create: name "Kraken Chest", price 49 Robux, description "One Kraken Chest. Open it in your BAG for Pearls or a rare look: 25 Pearls 60%, Abyss Beam 22%, Kraken Ink Coat 12%, Leviathan Housing 5%, Golden Puffin 1%. Looks only, no power." Send Claude the product id.
+MIRROR: 184 scripts, digest identical to `src/` (1a14524d).

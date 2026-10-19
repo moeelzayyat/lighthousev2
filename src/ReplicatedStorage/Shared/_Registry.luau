@@ -781,9 +781,10 @@ RULES.Cosmetics = function(c, Cosmetics, all)
 	for id, def in c.defs(Cosmetics) do
 		local w = "Cosmetics." .. id
 		local item = if type(items) == "table" then items[id] else nil
-		if type(item) ~= "table" or (item.kind ~= "Cosmetic" and not (item.kind == "Pet" and type(item.price) == "number")) then
-			c.add(w, "is not a cosmetic in Items: only cosmetics (and pets also sold for Pearls) are sold for Robux")
-		elseif item.reward ~= nil and item.reward ~= "supporter" then
+		local chest = type(item) == "table" and item.kind == "Chest" and type(all.Chests) == "table" and type(all.Chests[id]) == "table" -- D-055
+		if type(item) ~= "table" or (item.kind ~= "Cosmetic" and not chest and not (item.kind == "Pet" and type(item.price) == "number")) then
+			c.add(w, "is not a cosmetic in Items: only cosmetics, pets also sold for Pearls and (D-055) cosmetic-only chests are sold for Robux")
+		elseif item.reward ~= nil and item.reward ~= "supporter" and not chest then
 			c.add(w, "is earned (" .. tostring(item.reward) .. "), so it is never sold")
 		end
 		for field in def do

@@ -96,6 +96,17 @@ return function(T: any)
 			T.expect(string.find(text, "Chests.KrakenChest.loot[2].item", 1, true) ~= nil).toBe(true)
 		end)
 
+		T.it("the Robux chest (D-055) is the same chest, listed in the Robux catalogue, and its finds are never sold alone", function()
+			local Cosmetics = T.require(game.ReplicatedStorage.Shared.Definitions.Cosmetics)
+			T.expect(type(Cosmetics.KrakenChest)).toBe("table")
+			T.expect(table.find(Cosmetics.ORDER, "KrakenChest") ~= nil).toBe(true)
+			for _, row in Chests.KrakenChest.loot do
+				if row.item then
+					T.expect(Cosmetics[row.item]).toBe(nil)
+				end
+			end
+		end)
+
 		T.it("rolls land on the right rows", function()
 			T.expect(Chests.roll(Chests.KrakenChest, 0).pearls).toBe(25)
 			T.expect(Chests.roll(Chests.KrakenChest, 0.65).item).toBe("BeamAbyss")
