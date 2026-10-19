@@ -49,6 +49,7 @@ local function view(data: any): any
 		equippedCoat = data.Equipped.Coat,
 		equippedLantern = data.Equipped.Lantern,
 		equippedFlag = data.Equipped.Flag,
+		equippedPet = data.Equipped.Pet, -- PET.1
 		stats = { runs = data.Stats.Runs, victories = data.Stats.Victories, bestNight = data.Stats.BestNight },
 		boosts = data.Boosts, -- S6.4: Quartermaster boost ranks
 		logbook = data.Logbook, -- MP.4: found entries ("Creatures:RockCrab" -> true), shown on the BAG's logbook page
@@ -199,7 +200,7 @@ function PlayerData.addItem(player: Player, itemId: string, amount: number?)
 	if not data or type(item) ~= "table" then
 		return
 	end
-	if item.kind == "Weapon" or item.kind == "Armor" or item.kind == "Cosmetic" then
+	if item.kind == "Weapon" or item.kind == "Armor" or item.kind == "Cosmetic" or item.kind == "Pet" then -- PET.1: Pet
 		data.Owned[itemId] = true
 	else
 		data.Counts[itemId] = (data.Counts[itemId] or 0) + (amount or 1)
@@ -316,7 +317,7 @@ function PlayerData.setEquipped(player: Player, slot: string, itemId: string?)
 		data.Equipped.Armor = itemId
 	elseif slot == "Beam" then
 		data.Equipped.Beam = itemId
-	elseif slot == "Housing" or slot == "Coat" or slot == "Lantern" or slot == "Flag" then
+	elseif slot == "Housing" or slot == "Coat" or slot == "Lantern" or slot == "Flag" or slot == "Pet" then -- PET.1: Pet
 		data.Equipped[slot] = itemId -- L1.3
 	end
 	changed(player)

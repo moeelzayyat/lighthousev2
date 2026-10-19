@@ -82,7 +82,7 @@ local function buy(player, itemId, quantity)
 	if item.kind == "Cosmetic" and not Config.COSMETICS_ENABLED then
 		return false, "The Quartermaster doesn't sell that."
 	end
-	if item.kind == "Weapon" or item.kind == "Armor" or item.kind == "Cosmetic" then
+	if item.kind == "Weapon" or item.kind == "Armor" or item.kind == "Cosmetic" or item.kind == "Pet" then -- PET.1: Pet
 		if playerData.owns(player, itemId) then
 			return false, "You already own " .. item.name .. "."
 		end

@@ -16,7 +16,7 @@ export type Status = "granted" | "duplicate" | "invalid"
 
 GrantService.CLAIM_ID_MAX = 100
 
-local OWNED_KINDS = { Weapon = true, Armor = true, Cosmetic = true }
+local OWNED_KINDS = { Weapon = true, Armor = true, Cosmetic = true, Pet = true } -- PET.1: Pet
 
 local function wholeNonNegative(x: any): boolean
 	return type(x) == "number" and x == x and x >= 0 and x < 1e6 and x % 1 == 0

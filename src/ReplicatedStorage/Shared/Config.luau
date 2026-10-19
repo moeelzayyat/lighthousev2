@@ -102,6 +102,10 @@ local Config = {
 	LOOT_MAGNET_RADIUS = 10, -- loot flies to players within this distance
 	LOOT_PICKUP_RADIUS = 2.5,
 	LOOT_LIFETIME = 60, -- uncollected loot washes away after this long (and at dawn)
+	PET_RANGE = 24, -- PET.1 (D-051): a pet fetches Shells within this many studs of its owner
+	PET_PICK_INTERVAL = 0.5, -- PET.1: seconds a pet rests between the orbs it brings back
+	PET_SPEED = 30, -- PET.1: studs per second a pet flies to an orb (the orb counts when it gets there)
+	PET_LOAN_VOYAGES = 3, -- PET.1: new players borrow a pet for their first 3 voyages (no timer shown)
 	WAVE_BONUS_PER_NIGHT = 13, -- surviving night N gives N x this many shells (was 10; +30% Shells, Oct 12)
 
 	-- Sniper tower (owner's idea 2026-10-17, D-044): one crew member at a time shoots a scoped rifle from it

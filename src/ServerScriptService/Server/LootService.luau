@@ -22,6 +22,7 @@ local GrantService = require(script.Parent.GrantService) -- R1.3: Pearl drops ar
 local VoyageCast = require(script.Parent.VoyageCast)
 local Ground = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Ground"))
 local Creatures = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Creatures"))
+local PetRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("PetRules")) -- PET.1 (D-051)
 
 local LootService = {}
 
@@ -35,6 +36,8 @@ local KINDS = {
 	Pearls = { color = Color3.fromRGB(245, 240, 255), size = 1.4, pillar = Color3.fromRGB(255, 245, 210), name = "Pearls", pearls = true },
 }
 local MAGNET_SPEED = 35
+local nextPetPick: { [Player]: number } = {} -- PET.1: when each player's pet fetches its next orb
+local petTrip: { [Player]: { drop: any, at: number } } = {} -- PET.1: the orb each pet is flying to, and when it gets there
 
 local folder
 local upgrades
@@ -262,6 +265,31 @@ local function onHeartbeat(dt)
 	end
 
 	local now = os.clock()
+	-- PET.1 (D-051): a pet brings back one Shells orb at a time from around its owner (it goes to the crew, as if
+	-- the owner picked it up)
+	for _, entry in players do
+		local player = entry.player
+		local trip = petTrip[player]
+		if trip then
+			-- the pet is on its way: the orb counts when it gets there (unless someone picked it up first)
+			local index = table.find(drops, trip.drop)
+			if not index then
+				petTrip[player] = nil
+			elseif now >= trip.at then
+				petTrip[player] = nil
+				nextPetPick[player] = now + Config.PET_PICK_INTERVAL
+				collect(index, player)
+			end
+		elseif player:GetAttribute("Pet") and now >= (nextPetPick[player] or 0) then
+			local index = PetRules.pick(entry.position, drops :: any, Config.PET_RANGE)
+			if index then
+				local drop = drops[index]
+				drop.claimed = true
+				drop.orb:SetAttribute("PetClaim", player.UserId) -- Client/PetView flies this player's pet to it
+				petTrip[player] = { drop = drop, at = now + (drop.position - entry.position).Magnitude / Config.PET_SPEED }
+			end
+		end
+	end
 	for index = #drops, 1, -1 do
 		local drop = drops[index]
 		if now - drop.bornAt > Config.LOOT_LIFETIME then
@@ -295,6 +323,10 @@ function LootService.init(islandFolder, upgradeService, remoteFolder, playerData
 	folder.Name = "Loot"
 	folder.Parent = islandFolder
 	RunService.Heartbeat:Connect(onHeartbeat)
+	Players.PlayerRemoving:Connect(function(player)
+		nextPetPick[player] = nil -- PET.1
+		petTrip[player] = nil
+	end)
 	-- S5.3: a killed creature drops its loot (was CreatureService.onKilled)
 	EventLog.Subscribe("CreatureKilled", function(e)
 		LootService.dropFrom(Vector3.new(e.X, e.Y, e.Z), e.DefId)

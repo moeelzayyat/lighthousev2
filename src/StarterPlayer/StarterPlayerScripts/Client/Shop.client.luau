@@ -25,6 +25,7 @@ local SoundFx = require(Shared:WaitForChild("SoundFx")) :: any
 local StatPipeline = require(Shared:WaitForChild("StatPipeline")) :: any -- S5.7: the values previews and voyages share
 local Boosts = require(Shared:WaitForChild("Definitions"):WaitForChild("Boosts")) :: any -- S6.4
 local Cosmetics = require(Shared:WaitForChild("Definitions"):WaitForChild("Cosmetics")) :: any -- L1.3
+local Config = require(Shared:WaitForChild("Config")) :: any -- PET.1: the pet's reach
 local UiKit = require(script.Parent:WaitForChild("UiKit")) :: any
 local Tiles = require(script.Parent:WaitForChild("UI"):WaitForChild("Tiles")) :: any
 
@@ -54,7 +55,7 @@ end
 local function owns(itemId: string): boolean
 	return profile ~= nil and profile.owned[itemId] == true
 end
-local EQUIPPED_FIELDS = { "equippedWeapon", "equippedArmor", "equippedBeam", "equippedHousing", "equippedCoat", "equippedLantern", "equippedFlag" }
+local EQUIPPED_FIELDS = { "equippedWeapon", "equippedArmor", "equippedBeam", "equippedHousing", "equippedCoat", "equippedLantern", "equippedFlag", "equippedPet" }
 local function isEquipped(itemId: string): boolean
 	if not profile then
 		return false
@@ -98,7 +99,7 @@ local function equippedIn(item: any): string?
 		return profile.equippedArmor
 	elseif item.kind == "Cosmetic" and item.slot == "Beam" then
 		return profile.equippedBeam or "BeamAmber"
-	elseif item.kind == "Cosmetic" then
+	elseif item.kind == "Cosmetic" or item.kind == "Pet" then -- PET.1
 		return profile["equipped" .. item.slot]
 	end
 	return nil
@@ -139,6 +140,9 @@ local function statLines(itemId: string): { any }
 		table.insert(lines, { label = "You carry", value = string.format("%d / %d", count(itemId), item.maxStack) })
 	elseif item.kind == "Cosmetic" then
 		table.insert(lines, { label = "Power", value = "none: looks only" })
+	elseif item.kind == "Pet" then -- PET.1
+		table.insert(lines, { label = "Fetches", value = "Shells" })
+		table.insert(lines, { label = "Reach", value = Config.PET_RANGE .. " studs" })
 	end
 	return lines
 end
@@ -273,7 +277,7 @@ local function itemTiles(): { any }
 		local item = Items[itemId]
 		local price = item.price or 0
 		local owned = owns(itemId) and item.kind ~= "Ammo"
-		local product = if item.kind == "Cosmetic" then Cosmetics.productFor(itemId) else nil
+		local product = if item.kind == "Cosmetic" or item.kind == "Pet" then Cosmetics.productFor(itemId) else nil
 		local qty = if item.kind == "Ammo" then count(itemId) else nil
 		table.insert(list, {
 			id = itemId,
@@ -351,7 +355,7 @@ local function itemDetail(itemId: string): any
 	local item = Items[itemId]
 	local balance = pearls()
 	local price = item.price or 0
-	local product = if item.kind == "Cosmetic" and not owns(itemId) then Cosmetics.productFor(itemId) else nil
+	local product = if (item.kind == "Cosmetic" or item.kind == "Pet") and not owns(itemId) then Cosmetics.productFor(itemId) else nil
 	local detail: any = {
 		icon = itemId,
 		name = item.name,

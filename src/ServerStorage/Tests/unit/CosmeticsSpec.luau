@@ -36,11 +36,11 @@ return function(T: any)
 			end
 		end)
 
-		T.it("everything sold for Robux is a cosmetic, and all but the supporter flag can be earned with Pearls", function()
+		T.it("everything sold for Robux is a cosmetic (or a pet also sold for Pearls), and all but the supporter flag can be earned with Pearls", function()
 			local robuxOnly = {}
 			for _, id in Cosmetics.ORDER do
 				local item = Items[id]
-				T.expect(item.kind).toBe("Cosmetic")
+				T.expect(item.kind == "Cosmetic" or (item.kind == "Pet" and type(item.price) == "number")).toBe(true) -- PET.1
 				if item.price == nil then
 					table.insert(robuxOnly, id)
 				end

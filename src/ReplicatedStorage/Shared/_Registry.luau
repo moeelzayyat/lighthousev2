@@ -276,7 +276,7 @@ RULES.Items = function(c, Items, all)
 		local w = "Items." .. id
 		c.str(w .. ".name", item.name)
 		c.str(w .. ".description", item.description)
-		c.oneOf(w .. ".kind", item.kind, { "Weapon", "Armor", "Ammo", "Material", "Cosmetic" })
+		c.oneOf(w .. ".kind", item.kind, { "Weapon", "Armor", "Ammo", "Material", "Cosmetic", "Pet" }) -- PET.1
 		if item.price ~= nil then
 			c.pos(w .. ".price", item.price)
 		end
@@ -319,6 +319,12 @@ RULES.Items = function(c, Items, all)
 		elseif item.kind == "Material" then
 			c.pos(w .. ".shellValue", item.shellValue)
 			c.num(w .. ".maxStack", item.maxStack, 1, nil, true)
+		elseif item.kind == "Pet" then
+			-- PET.1: a pet is convenience: it must be earnable for Pearls (never Robux only)
+			c.oneOf(w .. ".slot", item.slot, { "Pet" })
+			if type(item.price) ~= "number" or item.price <= 0 then
+				c.add(w .. ".price", "a pet must also be sold for Pearls")
+			end
 		elseif item.kind == "Cosmetic" then
 			c.oneOf(w .. ".slot", item.slot, { "Beam", "Housing", "Coat", "Lantern", "Flag" })
 			local field = if item.slot == "Beam" then "beamColor" else "color" -- L1.3
@@ -725,8 +731,8 @@ RULES.Cosmetics = function(c, Cosmetics, all)
 	for id, def in c.defs(Cosmetics) do
 		local w = "Cosmetics." .. id
 		local item = if type(items) == "table" then items[id] else nil
-		if type(item) ~= "table" or item.kind ~= "Cosmetic" then
-			c.add(w, "is not a cosmetic in Items: only cosmetics are sold for Robux")
+		if type(item) ~= "table" or (item.kind ~= "Cosmetic" and not (item.kind == "Pet" and type(item.price) == "number")) then
+			c.add(w, "is not a cosmetic in Items: only cosmetics (and pets also sold for Pearls) are sold for Robux")
 		elseif item.reward ~= nil and item.reward ~= "supporter" then
 			c.add(w, "is earned (" .. tostring(item.reward) .. "), so it is never sold")
 		end

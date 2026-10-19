@@ -143,6 +143,9 @@ end
 
 -- L1.3: cosmetics the character wears ---------------------------------------
 local COSMETIC_SLOTS = { "Housing", "Coat", "Lantern", "Flag" }
+local PetRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("PetRules")) -- PET.1 (D-051)
+local petNoteSent = {} -- PET.1: the "your puffin went home" note, once per session
+local petOwned = {} -- PET.1: whether the player owned a pet at the last gear sync (a new one comes out at once)
 
 -- A small lantern at the hip: glass in the lantern's colour between a cap and a base (no light: S4.4 budget)
 local function buildLantern(character)
@@ -339,6 +342,34 @@ local function syncGear(player)
 		player:SetAttribute(slot .. "Color", if cosmetic and cosmetic.color then Color3.fromRGB(cosmetic.color[1], cosmetic.color[2], cosmetic.color[3]) else nil)
 	end
 	refreshShipFlag()
+	-- PET.1 (D-051): the pet out with this player (its equipped pet, else a new player's loaner); LootService fetches
+	-- Shells for it and Client/PetView draws it
+	if profile then
+		local ownsPet, firstPet = false, nil
+		for itemId in profile.owned or {} do
+			if Items[itemId] and Items[itemId].kind == "Pet" then
+				ownsPet = true
+				firstPet = firstPet or itemId
+			end
+		end
+		-- a pet just bought (Pearls or Robux) comes out at once when no pet is out, so a borrowed one is not lost
+		local equipped = profile.equippedPet
+		if ownsPet and petOwned[player] == false and equipped == nil and firstPet then
+			equipped = firstPet
+			task.defer(PlayerData.setEquipped, player, "Pet", firstPet)
+		end
+		petOwned[player] = ownsPet
+		local runs = profile.stats and profile.stats.runs or 0
+		local pet, loan = PetRules.active(equipped, ownsPet, runs, Config.PET_LOAN_VOYAGES, function(id)
+			return Items[id] ~= nil and Items[id].kind == "Pet"
+		end)
+		player:SetAttribute("Pet", pet)
+		player:SetAttribute("PetLoan", if loan then true else nil)
+		if PetRules.loanJustEnded(ownsPet, runs, Config.PET_LOAN_VOYAGES) and not petNoteSent[player] then
+			petNoteSent[player] = true
+			LampService.notify(player, "Your borrowed puffin flew home. Puffin Pal is at the Quartermaster.")
+		end
+	end
 
 	local character = player.Character
 	local backpack = player:FindFirstChildOfClass("Backpack")
@@ -665,6 +696,8 @@ function Economy.Start(ctx)
 	Players.PlayerRemoving:Connect(function(player)
 		traderHandled[player] = nil
 		lastTrade[player] = nil
+		petNoteSent[player] = nil -- PET.1
+		petOwned[player] = nil
 		MerchantService.forget(player)
 	end)
 end

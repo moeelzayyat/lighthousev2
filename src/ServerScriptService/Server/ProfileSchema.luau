@@ -128,7 +128,7 @@ function ProfileSchema.validate(data: any): (Profile, { string })
 		end
 	end
 	-- L1.3: cosmetic slots are optional (nil = none); the item must be owned and fit the slot
-	for _, slot in { "Housing", "Coat", "Lantern", "Flag" } do
+	for _, slot in { "Housing", "Coat", "Lantern", "Flag", "Pet" } do -- PET.1: Pet
 		local id = data.Equipped[slot]
 		if id ~= nil then
 			local item = type(id) == "string" and data.Owned[id] and Items[id]

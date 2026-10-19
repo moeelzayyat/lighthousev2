@@ -62,6 +62,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Quartermaster permanent boosts + gear | Tested (not yet published) | S6.4 | `Definitions/Boosts` (Shell Pouch, Sea Boots, Sharpened Steel; +15% total cap), `ShopService` action `boost`, Boosts tab; profile field `Boosts` (default {}); gear: Coral Lance, Tidecaller Blades (permanent Orbit), Kelpweave Vest; `BoostsSpec` 9 tests |
 | Logbook | Tested (not yet published) | S7.1 | `Definitions/Logbook` + `LogbookService` (LiveOps domain, bus only): creatures, big monsters, evolutions, forecasts; Pearls once per finished category; profile field `Logbook`; notices only, no logbook page yet; `LogbookSpec` 5 tests |
 | Daily objective | Tested (not yet published) | S7.2 | `Definitions/Objectives` (5 objectives) + `ObjectiveService` (LiveOps, bus only): one a day per account (UTC), paid once automatically, no streak; player attributes `ObjectiveText/Progress/Target/Done` (no HUD line yet); `ObjectivesSpec` 6 tests |
+| Puffin Pal, Shell-fetching pet (D-051) | Tested (not yet published) | PET.1 | `Shared/PetRules`, `LootService` (fetch on arrival, `PetClaim`), `Domains/Economy` (Pet / PetLoan attributes, loan for the first 3 voyages, note), `Client/PetView`; 120 Pearls, 99 R$ once the product exists; `PetSpec` 4 tests |
 
 ## Platform and data
 | System | Status | Target | Notes |

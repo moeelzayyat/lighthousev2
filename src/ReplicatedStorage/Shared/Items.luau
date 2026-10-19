@@ -21,11 +21,24 @@ local Items = {
 		"CrabClaw", "SeaGlass", "BlackPearl",
 		"BeamAmber", "BeamSeaGlass", "BeamMoonlight", "BeamEmber", "BeamSharedLantern", "BeamKeepersGlow",
 		"HousingDriftwood", "HousingBrass", "CoatStormBlue", "CoatKelpGreen", "LanternMoth", "LanternTide", "FlagGull", "FlagKraken", "FlagFounder", "FlagRescuer",
+		"PetPuffin",
 	},
 	SHOP_CATEGORIES = { "Weapons", "Armor", "Ammunition", "Cosmetics" }, -- loot is sold to the Trader during a voyage, for shells
 	TIERS = { "Common", "Uncommon", "Rare", "Epic", "Legendary" }, -- display-only rarity (harbor UI); never changes a price or a stat
 	INVENTORY_FILTERS = { "All", "Weapons", "Armor", "Ammunition", "Materials" },
 	EXPENSIVE_PRICE = 60, -- owner-approved re-price Oct 12 2026 (was 500 with the old prices) -- purchases at or above this ask for confirmation
+
+	-- PET.1 (D-051, owner's idea 2026-10-19): a pet that flies out and brings back Shells (Shared/PetRules). Earnable
+	-- for Pearls; also for Robux once its product exists (Definitions/Cosmetics). New players borrow one at first.
+	PetPuffin = {
+		kind = "Pet", category = "Cosmetics", slot = "Pet", model = "PetPuffin",
+		name = "Puffin Pal",
+		tier = "Epic", -- display only (harbor UI rarity)
+		description = "A little puffin that flies out and brings back the Shells from fallen creatures.",
+		strengths = "Picks up Shells near you, so you can keep fighting",
+		tradeoffs = "Shells only: no Sea Glass, claws or Pearls",
+		price = 120,
+	},
 
 	-- WEAPONS (stats live in Shared/Weapons under the same id) -------------
 	DriftwoodHarpoon = {

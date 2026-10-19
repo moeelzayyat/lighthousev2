@@ -58,3 +58,5 @@ Reference table (crew 4, no forecast): night 1 → 14 / 42 · 4 → 34 / 82 · 7
 Permanent Quartermaster boosts total ≤ +15% across Shells/speed/damage (D-pending S6.4). Specialties ≤ +10% each, one active. Voyage-only merchant boosts ≤ +25%, wiped at Results.
 
 **WPN.1 (D-048):** weapon effects are definition values, not pipeline stats (no boost touches them yet): `pullDistance` 14 / `pullStopAt` 6 (Chain Hook), `slowFactor` 0.35 / `slowSeconds` 3 (Net Launcher; big monsters `1 − (1 − f)/2`), `fuse` 0.9 (Lantern Bomb). Rules in `Shared/WeaponFx`.
+
+**PET.1 (D-051):** pet values are Config values, not pipeline stats (no boost touches them): `PET_RANGE` 24 studs from its Keeper, `PET_SPEED` 30 studs/s, `PET_PICK_INTERVAL` 0.5 s, `PET_LOAN_VOYAGES` 3. Rules in `Shared/PetRules`.

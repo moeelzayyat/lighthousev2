@@ -48,6 +48,7 @@ local SLOTS = {
 	{ key = "Coat", label = "Keeper coat" },
 	{ key = "Lantern", label = "Lantern" },
 	{ key = "Flag", label = "Ship flag" },
+	{ key = "Pet", label = "Pet" }, -- PET.1
 }
 local TABS = {
 	{ id = "Keeper", label = "Keeper" },
@@ -80,7 +81,7 @@ end
 local function owns(itemId: string): boolean
 	return profile ~= nil and (profile.owned[itemId] == true or count(itemId) > 0)
 end
-local EQUIPPED_FIELDS = { "equippedWeapon", "equippedArmor", "equippedBeam", "equippedHousing", "equippedCoat", "equippedLantern", "equippedFlag" }
+local EQUIPPED_FIELDS = { "equippedWeapon", "equippedArmor", "equippedBeam", "equippedHousing", "equippedCoat", "equippedLantern", "equippedFlag", "equippedPet" }
 local function isEquipped(itemId: string): boolean
 	if not profile then
 		return false
@@ -103,7 +104,7 @@ local function equippedFor(slot: string): string?
 	return if slot == "Primary" then profile.equippedWeapon
 		elseif slot == "Armor" then profile.equippedArmor
 		elseif slot == "Beam" then (profile.equippedBeam or "BeamAmber")
-		elseif slot == "Housing" or slot == "Coat" or slot == "Lantern" or slot == "Flag" then profile["equipped" .. slot] -- L1.3
+		elseif slot == "Housing" or slot == "Coat" or slot == "Lantern" or slot == "Flag" or slot == "Pet" then profile["equipped" .. slot] -- L1.3; PET.1
 		else nil
 end
 local function typeLabel(item: any): string
@@ -118,6 +119,8 @@ local function typeLabel(item: any): string
 	elseif item.kind == "Cosmetic" then
 		local labels: { [string]: string } = { Beam = "Lamp beam colour", Housing = "Lamp housing", Coat = "Keeper coat", Lantern = "Lantern", Flag = "Ship flag" }
 		return (labels[item.slot] or "Cosmetic") .. " \u{00B7} looks only"
+	elseif item.kind == "Pet" then -- PET.1
+		return "Pet \u{00B7} fetches Shells"
 	end
 	return item.category
 end
@@ -163,6 +166,8 @@ local function statLines(itemId: string): { any }
 		table.insert(lines, { label = "Worth now", value = (n * (item.shellValue or 0)) .. " Shells" })
 	elseif item.kind == "Cosmetic" then
 		table.insert(lines, { label = "Power", value = "none: looks only" })
+	elseif item.kind == "Pet" then -- PET.1
+		table.insert(lines, { label = "Fetches", value = "Shells" })
 	end
 	return lines
 end
