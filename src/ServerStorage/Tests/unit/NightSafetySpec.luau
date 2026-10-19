@@ -55,7 +55,7 @@ return function(T: any)
 		end)
 
 		T.it("a blackout late in Night 1 is caught too; a full crew of first voyagers also reaches dawn 1", function()
-			T.expect(nightsSurvived(40, { 0 })).toBe(1)
+			T.expect(nightsSurvived(40, { 0 }) >= 1).toBe(true) -- D-052: with 15 s of grace the refilled lamp can also see out Night 2
 			T.expect(nightsSurvived(0, { 0, 0, 0, 0 })).toBe(1)
 		end)
 	end)

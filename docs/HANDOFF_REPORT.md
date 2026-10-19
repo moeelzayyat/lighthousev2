@@ -1754,3 +1754,10 @@ BUILT: `Definitions/Cosmetics` PetPuffin productId 3720011582 (also moved the Fo
 CHECKED: MarketplaceService reports "Puffin Pal", 99 Robux, for sale, with the owner's description. DEV Studio play (API access off): the shop shows the puffin with both prices (120 Pearls and R$ 99); TestRunner **286 passed, 0 failed**; no script errors.
 BACKUP: ServerStorage.Backups.PET1b_before_2026-10-19 · restore point "PET1b before"
 NOT CHECKED: a real Robux purchase (only possible in the published game). After publishing: buy it once, check it is owned, out at once, and not charged twice.
+
+CHECKPOINT: GRACE.1 Lamp blackout grace 15 seconds (D-052) — ✅ in DEV Studio (owner asked 2026-10-19 17:13 UTC)
+BUILT: `Config.DARK_GRACE_SECONDS` 10 → 15; `NightSafetySpec` (the late-blackout case now checks "survives Night 1 at least").
+BACKUP: ServerStorage.Backups.GRACE1_before_2026-10-19 · restore points "GRACE1 before", "GRACE1 code", "GRACE1 passed"
+CHECKED: DEV Studio play (API access off): server and client both read 15; TestRunner **286 passed, 0 failed**; no script errors.
+NOT CHECKED: a real blackout timed in a played voyage (the countdown and loss read the same value). Check it live: let the lamp run dry and count 15 on the HUD.
+MIRROR: 181 scripts, digest identical to `src/` (5bb556db).

@@ -56,7 +56,7 @@ local Config = {
 	ISLE_ARRIVAL_WAIT = 20, -- isle: seconds to wait for the whole crew before the voyage starts anyway
 	DAWN_LOOT_SECONDS = 25, -- leftover loot stays this long into the day at full value (was 10; owner, Oct 12)
 	DAWN_LOOT_FRACTION = 0.5, -- at dawn the tide brings leftover loot to the crew at this fraction of its value
-	DARK_GRACE_SECONDS = 10, -- how long the lamp can be out before the run is lost
+	DARK_GRACE_SECONDS = 15, -- how long the lamp can be out before the run is lost (owner 2026-10-19: was 10, D-052)
 
 	-- Beam
 	BEAM_TURN_SPEED = 120, -- degrees per second (manual control)
