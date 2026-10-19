@@ -64,7 +64,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Daily objective | Tested (not yet published) | S7.2 | `Definitions/Objectives` (5 objectives) + `ObjectiveService` (LiveOps, bus only): one a day per account (UTC), paid once automatically, no streak; player attributes `ObjectiveText/Progress/Target/Done` (no HUD line yet); `ObjectivesSpec` 6 tests |
 | Puffin Pal, Shell-fetching pet (D-051) | Tested (not yet published) | PET.1 | `Shared/PetRules`, `LootService` (fetch on arrival, `PetClaim`), `Domains/Economy` (Pet / PetLoan attributes, loan for the first 3 voyages, note), `Client/PetView`; 120 Pearls, 99 R$ once the product exists; `PetSpec` 4 tests |
 | Kraken Chests (D-053) | Tested (not yet published) | CHEST.1 | `Definitions/Chests`, `ChestService` (earn on the Kraken kill, one a day; open via `ChestRequest`), `Client/Inventory` (odds, OPEN, reveal card); chest-only looks Abyss Beam, Kraken Ink Coat, Leviathan Housing, Golden Puffin; earned only; `ChestSpec` 6 tests |
-| More pets: Glow Jelly, Lantern Turtle, Baby Kraken (D-054) | Tested with stand-in models | PET.2 | `Items` (petMotion, petGlow), `Client/PetView` (fly / float / walk); same fetching as Puffin Pal; Pearls 150 / 180 / 250 |
+| More pets: Storm Petrel, Glow Jelly, Lantern Turtle, Baby Kraken (D-054) | Tested (not yet published) | PET.2 | `Items` (petMotion, petGlow), `Client/PetView` (fly / float / walk); same fetching as Puffin Pal; Pearls 140 / 150 / 180 / 250 |
 
 ## Platform and data
 | System | Status | Target | Notes |

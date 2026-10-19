@@ -1777,3 +1777,10 @@ CHECKED (DEV Studio play, API access off): the Lantern Turtle stood on the groun
 NOT CHECKED: the real ForgeGUI models (not made yet); the Glow Jelly at night.
 NEXT: swap the stand-ins for the ForgeGUI models when the coordinator relays the asset ids; add the fourth pet with its model.
 MIRROR: 184 scripts, digest identical to `src/` (6e6d7d20).
+
+CHECKPOINT: PET.2 More pets — ✅ in DEV Studio with the real models
+BUILT: the four ForgeGUI models in `ItemModels` (Storm Petrel 111056173661175, Glow Jellyfish 139090460114842, Lantern Turtle 96074918735401, Baby Kraken 137363367136851), each about 2 studs, facing forward, with a small PointLight; `Items.PetStormPetrel` (140 Pearls, flies).
+CHECKED (DEV Studio play, API access off): the Lantern Turtle stands on the ground at the keeper's feet and lights orange; TestRunner **293 passed, 0 failed**; no script errors. A lineup picture of all five pets is in the project files (`pets_lineup.jpg`).
+NOT CHECKED: an in-game picture of each pet (Studio's 3D view drew white during play); a real phone.
+OWNER STEPS: save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_PETS_2026-10-19.rbxl` (the pet models live only in the place), then publish to both places. For Robux sales of a pet, create a developer product per pet and send the ids.
+MIRROR: 184 scripts, digest identical to `src/` (7d81ee8b).

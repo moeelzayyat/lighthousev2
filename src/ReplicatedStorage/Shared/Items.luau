@@ -21,7 +21,7 @@ local Items = {
 		"CrabClaw", "SeaGlass", "BlackPearl",
 		"BeamAmber", "BeamSeaGlass", "BeamMoonlight", "BeamEmber", "BeamSharedLantern", "BeamKeepersGlow",
 		"HousingDriftwood", "HousingBrass", "CoatStormBlue", "CoatKelpGreen", "LanternMoth", "LanternTide", "FlagGull", "FlagKraken", "FlagFounder", "FlagRescuer",
-		"PetPuffin", "PetGlowJelly", "PetLanternTurtle", "PetBabyKraken", -- PET.2
+		"PetPuffin", "PetStormPetrel", "PetGlowJelly", "PetLanternTurtle", "PetBabyKraken", -- PET.2
 		"BeamAbyss", "CoatKrakenInk", "HousingLeviathan", "PetGoldenPuffin", "KrakenChest", -- CHEST.1
 	},
 	SHOP_CATEGORIES = { "Weapons", "Armor", "Ammunition", "Cosmetics" }, -- loot is sold to the Trader during a voyage, for shells
@@ -73,6 +73,16 @@ local Items = {
 		strengths = "Fetches Shells near you, and everyone can see you tamed a Kraken",
 		tradeoffs = "Shells only. Fetches exactly like Puffin Pal",
 		price = 250,
+	},
+	PetStormPetrel = {
+		kind = "Pet", category = "Cosmetics", slot = "Pet", model = "PetStormPetrel",
+		petMotion = "fly",
+		name = "Storm Petrel",
+		tier = "Rare", -- display only (harbor UI rarity)
+		description = "A tough little seabird with lightning on its wings. It loves a storm.",
+		strengths = "Fetches Shells near you, lightning stripes glowing",
+		tradeoffs = "Shells only. Fetches exactly like Puffin Pal",
+		price = 140,
 	},
 
 	-- CHEST.1 (D-053, owner's idea 2026-10-19): the Kraken Chest and the looks found only inside it
