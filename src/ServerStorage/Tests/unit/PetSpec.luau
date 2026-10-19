@@ -52,6 +52,21 @@ return function(T: any)
 			T.expect(data.Counts.PetPuffin).toBe(nil)
 		end)
 
+		T.it("every pet is earnable, has its model and a known way to move, and fetches like Puffin Pal (PET.2)", function()
+			local n = 0
+			for id, item in Items do
+				if type(item) == "table" and item.kind == "Pet" then
+					n += 1
+					T.expect((type(item.price) == "number" and item.price > 0) or item.reward == "chest").toBe(true)
+					T.expect(game.ReplicatedStorage.ItemModels:FindFirstChild(item.model or id) ~= nil).toBe(true)
+					T.expect(item.petMotion == nil or item.petMotion == "fly" or item.petMotion == "float" or item.petMotion == "walk").toBe(true)
+					-- no pet has its own reach, speed or loot: PetRules and Config are the same for all
+					T.expect(item.range == nil and item.speed == nil and item.fetches == nil).toBe(true)
+				end
+			end
+			T.expect(n >= 5).toBe(true)
+		end)
+
 		T.it("fetches only landed Shells, the nearest one within reach that no other pet is fetching", function()
 			local owner = Vector3.new(0, 0, 0)
 			local drops = {

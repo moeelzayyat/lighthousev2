@@ -21,7 +21,7 @@ local Items = {
 		"CrabClaw", "SeaGlass", "BlackPearl",
 		"BeamAmber", "BeamSeaGlass", "BeamMoonlight", "BeamEmber", "BeamSharedLantern", "BeamKeepersGlow",
 		"HousingDriftwood", "HousingBrass", "CoatStormBlue", "CoatKelpGreen", "LanternMoth", "LanternTide", "FlagGull", "FlagKraken", "FlagFounder", "FlagRescuer",
-		"PetPuffin",
+		"PetPuffin", "PetGlowJelly", "PetLanternTurtle", "PetBabyKraken", -- PET.2
 		"BeamAbyss", "CoatKrakenInk", "HousingLeviathan", "PetGoldenPuffin", "KrakenChest", -- CHEST.1
 	},
 	SHOP_CATEGORIES = { "Weapons", "Armor", "Ammunition", "Cosmetics" }, -- loot is sold to the Trader during a voyage, for shells
@@ -39,6 +39,40 @@ local Items = {
 		strengths = "Picks up Shells near you, so you can keep fighting",
 		tradeoffs = "Shells only: no Sea Glass, claws or Pearls",
 		price = 120,
+	},
+
+	-- PET.2 (D-054, owner 2026-10-19 "add more pets that looks cool"): they fetch Shells exactly like Puffin Pal
+	-- (same reach and speed); only the looks and the way they move differ (`petMotion`: fly / float / walk, read by
+	-- Client/PetView; `petGlow` adds a light). Sold for Pearls, so they may also be sold for Robux once a product exists.
+	PetGlowJelly = {
+		kind = "Pet", category = "Cosmetics", slot = "Pet", model = "PetGlowJelly",
+		petMotion = "float", petGlow = { 120, 220, 255 },
+		name = "Glow Jelly",
+		tier = "Rare", -- display only (harbor UI rarity)
+		description = "A little jellyfish that glows in the dark and drifts beside you.",
+		strengths = "Fetches Shells near you and lights up the night around you",
+		tradeoffs = "Shells only. Fetches exactly like Puffin Pal",
+		price = 150,
+	},
+	PetLanternTurtle = {
+		kind = "Pet", category = "Cosmetics", slot = "Pet", model = "PetLanternTurtle",
+		petMotion = "walk", petGlow = { 255, 190, 90 },
+		name = "Lantern Turtle",
+		tier = "Epic", -- display only (harbor UI rarity)
+		description = "A sea turtle with a tiny lantern on its shell. It trots along at your feet.",
+		strengths = "Fetches Shells near you, lantern lit",
+		tradeoffs = "Shells only. Fetches exactly like Puffin Pal",
+		price = 180,
+	},
+	PetBabyKraken = {
+		kind = "Pet", category = "Cosmetics", slot = "Pet", model = "PetBabyKraken",
+		petMotion = "float",
+		name = "Baby Kraken",
+		tier = "Legendary", -- display only (harbor UI rarity)
+		description = "A pocket-sized Kraken that floats beside you, tentacles swaying.",
+		strengths = "Fetches Shells near you, and everyone can see you tamed a Kraken",
+		tradeoffs = "Shells only. Fetches exactly like Puffin Pal",
+		price = 250,
 	},
 
 	-- CHEST.1 (D-053, owner's idea 2026-10-19): the Kraken Chest and the looks found only inside it

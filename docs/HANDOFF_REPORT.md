@@ -1769,3 +1769,11 @@ CHECKED (DEV Studio play, API access off): BossDefeated for a Barnacle Brute gav
 NOT CHECKED: a real Kraken kill in a played voyage (the kill event was published by a test script); a real phone; the reveal card on a small screen (it scales to the screen, not measured).
 OWNER STEPS: none needed to use it. Save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_CHEST_2026-10-19.rbxl` (the chest and Golden Puffin models live only in the place), then publish to both places. Icons for the chest and the three looks would help (they show as 3D previews or colour swatches today).
 MIRROR: 184 scripts, digest identical to `src/` (6564739c).
+
+CHECKPOINT: PET.2 More pets (D-054) — 🟦 in DEV Studio with stand-in models (owner asked 2026-10-19 22:12 UTC)
+BUILT: `Items` PetGlowJelly / PetLanternTurtle / PetBabyKraken (Pearls 150 / 180 / 250; `petMotion`, `petGlow`), `_Registry` (petMotion is fly/float/walk; petGlow is { r, g, b }), `Client/PetView` (fly over the right shoulder, float higher over the left with a sway, walk on the ground at your feet with a hop; glow light), `PetSpec` (+1 test). Stand-in models from parts in `ItemModels` (marked Source = stand-in).
+BACKUP: ServerStorage.Backups.PET2_before_2026-10-19 · restore points "PET2 before", "PET2 stand-ins", "PET2 passed"
+CHECKED (DEV Studio play, API access off): the Lantern Turtle stood on the ground at the keeper's feet; three Shells drops were fetched and the claws and Sea Glass left; the Baby Kraken floated over the left shoulder. TestRunner **293 passed, 0 failed**; no script errors.
+NOT CHECKED: the real ForgeGUI models (not made yet); the Glow Jelly at night.
+NEXT: swap the stand-ins for the ForgeGUI models when the coordinator relays the asset ids; add the fourth pet with its model.
+MIRROR: 184 scripts, digest identical to `src/` (6e6d7d20).

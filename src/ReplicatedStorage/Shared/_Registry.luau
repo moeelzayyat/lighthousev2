@@ -326,6 +326,18 @@ RULES.Items = function(c, Items, all)
 			if (type(item.price) ~= "number" or item.price <= 0) and item.reward ~= "chest" then
 				c.add(w .. ".price", "a pet must also be sold for Pearls (or found in a chest)")
 			end
+			if item.petMotion ~= nil then -- PET.2: how Client/PetView moves it
+				c.oneOf(w .. ".petMotion", item.petMotion, { "fly", "float", "walk" })
+			end
+			if item.petGlow ~= nil then
+				if type(item.petGlow) ~= "table" or #item.petGlow ~= 3 then
+					c.add(w .. ".petGlow", "must be { r, g, b }")
+				else
+					for i = 1, 3 do
+						c.num(w .. ".petGlow[" .. i .. "]", item.petGlow[i], 0, 255, true)
+					end
+				end
+			end
 		elseif item.kind == "Chest" then
 			c.num(w .. ".maxStack", item.maxStack, 1, nil, true)
 			if item.price ~= nil then
