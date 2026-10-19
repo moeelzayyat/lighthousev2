@@ -32,10 +32,9 @@ local Cosmetics = {
 	LanternTide = { robux = 75, productId = 3719246864 } :: Product,
 	FlagGull = { robux = 39, productId = 3719246928 } :: Product,
 	FlagKraken = { robux = 99, productId = 3719246972 } :: Product,
-	FlagFounder = { robux = 149, productId = 3719247016 } :: Product,
-	-- PET.1 (D-051): convenience, so it is also sold for Pearls (Items.PetPuffin); productId 0 until the owner creates
-	-- the developer product, so it is not offered for Robux yet
-	PetPuffin = { robux = 99, productId = 0 } :: Product, -- the supporter item: Robux only (a cosmetic, so allowed)
+	FlagFounder = { robux = 149, productId = 3719247016 } :: Product, -- the supporter item: Robux only (a cosmetic, so allowed)
+	-- PET.1 (D-051): convenience, so it is also sold for Pearls (Items.PetPuffin); product created by the owner 2026-10-19
+	PetPuffin = { robux = 99, productId = 3720011582 } :: Product,
 }
 
 -- The item a developer product buys, or nil

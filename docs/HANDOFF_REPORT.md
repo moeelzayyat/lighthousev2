@@ -1748,3 +1748,9 @@ CHECKED (DEV Studio play, API access off): a new player had Pet = PetPuffin on l
 NOT CHECKED: a real phone; a full voyage with creature kills (the drops were spawned by a test script); several pets in one crew (each pet takes a different orb by rule, tested in PetSpec only).
 OWNER STEPS: (1) For Robux: Creator Hub → Lighthouse Keepers DEV → Monetization → Developer Products → Create: name "Puffin Pal", price 99 Robux; send Claude the product id. (2) Save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_PET_2026-10-19.rbxl` (the puffin model lives only in the place), then publish the DEV window to both places as before.
 MIRROR: 181 scripts, digest identical to `src/` (23ed1b66).
+
+CHECKPOINT: PET.1b Puffin Pal for Robux — ✅ in DEV Studio (owner sent product id 3720011582, 2026-10-19 14:02 UTC)
+BUILT: `Definitions/Cosmetics` PetPuffin productId 3720011582 (also moved the Founder's Flag comment back to its own line), `PetSpec` checks the product both ways.
+CHECKED: MarketplaceService reports "Puffin Pal", 99 Robux, for sale, with the owner's description. DEV Studio play (API access off): the shop shows the puffin with both prices (120 Pearls and R$ 99); TestRunner **286 passed, 0 failed**; no script errors.
+BACKUP: ServerStorage.Backups.PET1b_before_2026-10-19 · restore point "PET1b before"
+NOT CHECKED: a real Robux purchase (only possible in the published game). After publishing: buy it once, check it is owned, out at once, and not charged twice.

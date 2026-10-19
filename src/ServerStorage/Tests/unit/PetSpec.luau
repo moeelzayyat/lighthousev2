@@ -14,7 +14,7 @@ return function(T: any)
 	end
 
 	T.describe("the pet", function()
-		T.it("is earnable for Pearls, passes the registry, and is not sold for Robux before its product exists", function()
+		T.it("is earnable for Pearls, passes the registry, and is sold for Robux through its product", function()
 			local problems = {}
 			for _, p in Registry.check(Registry.catalogs()) do
 				if string.find(p, "PetPuffin", 1, true) then
@@ -24,7 +24,8 @@ return function(T: any)
 			T.expect(problems).toEqual({})
 			T.expect(Items.PetPuffin.kind).toBe("Pet")
 			T.expect(Items.PetPuffin.price > 0).toBe(true)
-			T.expect(Cosmetics.productFor("PetPuffin")).toBe(nil)
+			T.expect(Cosmetics.productFor("PetPuffin").productId).toBe(3720011582)
+			T.expect(Cosmetics.itemFor(3720011582)).toBe("PetPuffin")
 			T.expect(game.ReplicatedStorage.ItemModels:FindFirstChild(Items.PetPuffin.model) ~= nil).toBe(true)
 		end)
 
