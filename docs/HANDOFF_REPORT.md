@@ -1792,3 +1792,7 @@ CHECKED (DEV Studio play, API access off): PolicyService answered ArePaidRandomI
 NOT CHECKED: a real Robux purchase (needs the product and a published game); a player in a restricted country (the button should not show).
 OWNER STEPS: Creator Hub → Lighthouse Keepers DEV → Monetization → Developer Products → Create: name "Kraken Chest", price 49 Robux, description "One Kraken Chest. Open it in your BAG for Pearls or a rare look: 25 Pearls 60%, Abyss Beam 22%, Kraken Ink Coat 12%, Leviathan Housing 5%, Golden Puffin 1%. Looks only, no power." Send Claude the product id.
 MIRROR: 184 scripts, digest identical to `src/` (1a14524d).
+
+CHECKPOINT: CHEST.2 product wired — ✅ in DEV Studio
+The owner created the developer product (2026-10-19 22:33 UTC): MarketplaceService reports "Kraken Chest", 49 Robux, for sale. `Definitions/Cosmetics` KrakenChest productId 3720133661. DEV Studio play: the chest tile shows in the BAG with none held, with BUY ONE R$ 49 above OPEN; TestRunner **294 passed, 0 failed**; no script errors.
+NOT CHECKED: a real Robux purchase (after the publish: buy one, check the chest is in the bag and only one was given).

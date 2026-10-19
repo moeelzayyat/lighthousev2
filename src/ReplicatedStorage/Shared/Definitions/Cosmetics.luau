@@ -38,9 +38,9 @@ local Cosmetics = {
 	PetPuffin = { robux = 99, productId = 3720011582 } :: Product,
 	-- CHEST.2 (D-055, owner's choice on the decision card 2026-10-19 22:20 UTC, "Also sell crates"): a Kraken Chest for
 	-- Robux, the same chest as the free daily one (cosmetics and Pearls only, odds shown in the BAG). A paid random
-	-- item, so the BAG hides it where PolicyService says ArePaidRandomItemsRestricted. productId 0 until the owner
-	-- creates the product.
-	KrakenChest = { robux = 49, productId = 0 } :: Product,
+	-- item, so the BAG hides it where PolicyService says ArePaidRandomItemsRestricted. Product created by the owner
+	-- 2026-10-19 22:33 UTC.
+	KrakenChest = { robux = 49, productId = 3720133661 } :: Product,
 }
 
 -- The item a developer product buys, or nil
