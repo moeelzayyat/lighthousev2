@@ -1796,3 +1796,10 @@ MIRROR: 184 scripts, digest identical to `src/` (1a14524d).
 CHECKPOINT: CHEST.2 product wired — ✅ in DEV Studio
 The owner created the developer product (2026-10-19 22:33 UTC): MarketplaceService reports "Kraken Chest", 49 Robux, for sale. `Definitions/Cosmetics` KrakenChest productId 3720133661. DEV Studio play: the chest tile shows in the BAG with none held, with BUY ONE R$ 49 above OPEN; TestRunner **294 passed, 0 failed**; no script errors.
 NOT CHECKED: a real Robux purchase (after the publish: buy one, check the chest is in the bag and only one was given).
+
+CHECKPOINT: CHEST.3 Leviathan Hatchling, the chest-only 1% pet (D-056) — ✅ in DEV Studio
+BUILT: `Definitions/Chests` (new odds), `Items.PetLeviathanHatchling` (chest only, Legendary, floats), `PetGoldenPuffin` now Epic, `ChestSpec`; model `ItemModels.PetLeviathanHatchling` (ForgeGUI 91772206923752, about 2.4 studs, blue PointLight, gold sparkles).
+BACKUP: ServerStorage.Backups.CHEST3_before_2026-10-19 · restore points "CHEST3 before", "CHEST3 code", "CHEST3 passed"
+CHECKED (DEV Studio play, API access off): the Hatchling granted, equipped and drawn beside the keeper; TestRunner **294 passed, 0 failed**; no script errors. Picture: `leviathan_hatchling.jpg` in the project files.
+OWNER STEPS: save `C:\RobloxProjects\Lighthousev2ackups\LighthouseKeepers_DEV_HATCH_2026-10-19.rbxl` (the new models live only in the place), then publish to both places. After publishing, buy one Kraken Chest with Robux to check a real purchase.
+MIRROR: 184 scripts, digest identical to `src/` (6557c049).

@@ -22,7 +22,7 @@ local Items = {
 		"BeamAmber", "BeamSeaGlass", "BeamMoonlight", "BeamEmber", "BeamSharedLantern", "BeamKeepersGlow",
 		"HousingDriftwood", "HousingBrass", "CoatStormBlue", "CoatKelpGreen", "LanternMoth", "LanternTide", "FlagGull", "FlagKraken", "FlagFounder", "FlagRescuer",
 		"PetPuffin", "PetStormPetrel", "PetGlowJelly", "PetLanternTurtle", "PetBabyKraken", -- PET.2
-		"BeamAbyss", "CoatKrakenInk", "HousingLeviathan", "PetGoldenPuffin", "KrakenChest", -- CHEST.1
+		"BeamAbyss", "CoatKrakenInk", "HousingLeviathan", "PetGoldenPuffin", "PetLeviathanHatchling", "KrakenChest", -- CHEST.1; CHEST.3
 	},
 	SHOP_CATEGORIES = { "Weapons", "Armor", "Ammunition", "Cosmetics" }, -- loot is sold to the Trader during a voyage, for shells
 	TIERS = { "Common", "Uncommon", "Rare", "Epic", "Legendary" }, -- display-only rarity (harbor UI); never changes a price or a stat
@@ -128,10 +128,22 @@ local Items = {
 	PetGoldenPuffin = {
 		kind = "Pet", category = "Cosmetics", slot = "Pet", model = "PetGoldenPuffin",
 		name = "Golden Puffin",
-		tier = "Legendary", -- display only (harbor UI rarity)
-		description = "A shining golden puffin. About one Kraken Chest in a hundred holds one.",
+		tier = "Epic", -- display only (harbor UI rarity); CHEST.3: was the 1% prize
+		description = "A shining golden puffin, found only in Kraken Chests.",
 		strengths = "Fetches Shells near you like Puffin Pal, and everyone can see it shine",
 		tradeoffs = "Shells only: no Sea Glass, claws or Pearls. Fetches exactly like Puffin Pal",
+		reward = "chest",
+	},
+	-- CHEST.3 (owner 2026-10-19 22:30 UTC: "the 1% item has to be a unique item to the box like a pet"): the
+	-- Kraken Chest's legendary prize, never sold on its own
+	PetLeviathanHatchling = {
+		kind = "Pet", category = "Cosmetics", slot = "Pet", model = "PetLeviathanHatchling",
+		petMotion = "float",
+		name = "Leviathan Hatchling",
+		tier = "Legendary", -- display only (harbor UI rarity)
+		description = "A deep-sea serpent hatchling with glowing runes and gold fins. Only one Kraken Chest in a hundred holds one.",
+		strengths = "Fetches Shells near you, and nobody can buy one",
+		tradeoffs = "Shells only. Fetches exactly like Puffin Pal",
 		reward = "chest",
 	},
 

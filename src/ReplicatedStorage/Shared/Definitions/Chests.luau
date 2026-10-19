@@ -22,10 +22,12 @@ Chests.KrakenChest = {
 	maxHeld = 5,
 	loot = {
 		{ pearls = 25, chance = 0.60, tier = "Common" },
-		{ item = "BeamAbyss", dupPearls = 40, chance = 0.22, tier = "Rare" },
+		{ item = "BeamAbyss", dupPearls = 40, chance = 0.20, tier = "Rare" },
 		{ item = "CoatKrakenInk", dupPearls = 60, chance = 0.12, tier = "Epic" },
 		{ item = "HousingLeviathan", dupPearls = 80, chance = 0.05, tier = "Epic" },
-		{ item = "PetGoldenPuffin", dupPearls = 150, chance = 0.01, tier = "Legendary" },
+		{ item = "PetGoldenPuffin", dupPearls = 120, chance = 0.02, tier = "Epic" },
+		-- CHEST.3 (owner 2026-10-19 22:30 UTC): the 1% prize is a pet found only in the chest
+		{ item = "PetLeviathanHatchling", dupPearls = 200, chance = 0.01, tier = "Legendary" },
 	},
 } :: Chest
 
