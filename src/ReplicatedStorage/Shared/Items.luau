@@ -22,6 +22,7 @@ local Items = {
 		"BeamAmber", "BeamSeaGlass", "BeamMoonlight", "BeamEmber", "BeamSharedLantern", "BeamKeepersGlow",
 		"HousingDriftwood", "HousingBrass", "CoatStormBlue", "CoatKelpGreen", "LanternMoth", "LanternTide", "FlagGull", "FlagKraken", "FlagFounder", "FlagRescuer",
 		"PetPuffin",
+		"BeamAbyss", "CoatKrakenInk", "HousingLeviathan", "PetGoldenPuffin", "KrakenChest", -- CHEST.1
 	},
 	SHOP_CATEGORIES = { "Weapons", "Armor", "Ammunition", "Cosmetics" }, -- loot is sold to the Trader during a voyage, for shells
 	TIERS = { "Common", "Uncommon", "Rare", "Epic", "Legendary" }, -- display-only rarity (harbor UI); never changes a price or a stat
@@ -38,6 +39,56 @@ local Items = {
 		strengths = "Picks up Shells near you, so you can keep fighting",
 		tradeoffs = "Shells only: no Sea Glass, claws or Pearls",
 		price = 120,
+	},
+
+	-- CHEST.1 (D-053, owner's idea 2026-10-19): the Kraken Chest and the looks found only inside it
+	-- (Definitions/Chests). Earned by beating the Kraken, never sold; the finds are looks only.
+	KrakenChest = {
+		kind = "Chest", category = "Chests", model = "KrakenChest",
+		name = "Kraken Chest",
+		tier = "Epic", -- display only (harbor UI rarity)
+		description = "Earned by beating the Kraken, one a day. Open it for Pearls or a rare look found nowhere else.",
+		reward = "chest",
+		maxStack = 5,
+	},
+	BeamAbyss = {
+		kind = "Cosmetic", category = "Cosmetics", slot = "Beam",
+		name = "Abyss Beam",
+		tier = "Rare", -- display only (harbor UI rarity)
+		description = "Sea-green light from the Kraken's lair. Found only in Kraken Chests.",
+		strengths = "Shown to the crew while you hold the lamp",
+		tradeoffs = "Looks only: no power",
+		reward = "chest",
+		beamColor = { 40, 230, 190 },
+	},
+	CoatKrakenInk = {
+		kind = "Cosmetic", category = "Cosmetics", slot = "Coat",
+		name = "Kraken Ink Coat",
+		tier = "Epic", -- display only (harbor UI rarity)
+		description = "Dyed deep purple in Kraken ink. Found only in Kraken Chests.",
+		strengths = "Worn over your armor",
+		tradeoffs = "Looks only: no power. Your armor's protection is unchanged",
+		reward = "chest",
+		color = { 92, 38, 140 },
+	},
+	HousingLeviathan = {
+		kind = "Cosmetic", category = "Cosmetics", slot = "Housing",
+		name = "Leviathan Housing",
+		tier = "Epic", -- display only (harbor UI rarity)
+		description = "Dark green scale-metal from the deep. Found only in Kraken Chests.",
+		strengths = "Shown round the lamp while you hold it",
+		tradeoffs = "Looks only: no power",
+		reward = "chest",
+		color = { 34, 96, 78 },
+	},
+	PetGoldenPuffin = {
+		kind = "Pet", category = "Cosmetics", slot = "Pet", model = "PetGoldenPuffin",
+		name = "Golden Puffin",
+		tier = "Legendary", -- display only (harbor UI rarity)
+		description = "A shining golden puffin. About one Kraken Chest in a hundred holds one.",
+		strengths = "Fetches Shells near you like Puffin Pal, and everyone can see it shine",
+		tradeoffs = "Shells only: no Sea Glass, claws or Pearls. Fetches exactly like Puffin Pal",
+		reward = "chest",
 	},
 
 	-- WEAPONS (stats live in Shared/Weapons under the same id) -------------

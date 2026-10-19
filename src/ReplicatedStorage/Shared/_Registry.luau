@@ -29,6 +29,7 @@ function Registry.catalogs(): Catalogs
 		Codes = require(Shared:WaitForChild("Definitions"):WaitForChild("Codes")) :: any, -- L1.4
 		LiveEvents = require(Shared:WaitForChild("Definitions"):WaitForChild("LiveEvents")) :: any, -- LO.1
 		Maps = require(Shared:WaitForChild("Definitions"):WaitForChild("Maps")) :: any, -- MAP.1
+		Chests = require(Shared:WaitForChild("Definitions"):WaitForChild("Chests")) :: any, -- CHEST.1
 		Events = require(Shared:WaitForChild("Events")) :: any,
 	}
 end
@@ -276,7 +277,7 @@ RULES.Items = function(c, Items, all)
 		local w = "Items." .. id
 		c.str(w .. ".name", item.name)
 		c.str(w .. ".description", item.description)
-		c.oneOf(w .. ".kind", item.kind, { "Weapon", "Armor", "Ammo", "Material", "Cosmetic", "Pet" }) -- PET.1
+		c.oneOf(w .. ".kind", item.kind, { "Weapon", "Armor", "Ammo", "Material", "Cosmetic", "Pet", "Chest" }) -- PET.1; CHEST.1
 		if item.price ~= nil then
 			c.pos(w .. ".price", item.price)
 		end
@@ -288,7 +289,7 @@ RULES.Items = function(c, Items, all)
 			c.add(w, "needs a price (or starter = true, or reward = how it is earned)")
 		end
 		if item.reward ~= nil then -- S7.5: earned, never sold
-			c.oneOf(w .. ".reward", item.reward, { "invite", "code", "supporter", "event" })
+			c.oneOf(w .. ".reward", item.reward, { "invite", "code", "supporter", "event", "chest" }) -- CHEST.1: chest
 			if item.price ~= nil then
 				c.add(w, "is a reward, so it has no price")
 			end
@@ -320,10 +321,15 @@ RULES.Items = function(c, Items, all)
 			c.pos(w .. ".shellValue", item.shellValue)
 			c.num(w .. ".maxStack", item.maxStack, 1, nil, true)
 		elseif item.kind == "Pet" then
-			-- PET.1: a pet is convenience: it must be earnable for Pearls (never Robux only)
+			-- PET.1: a pet is convenience: it must be earnable, for Pearls or (CHEST.1) from a chest; never Robux only
 			c.oneOf(w .. ".slot", item.slot, { "Pet" })
-			if type(item.price) ~= "number" or item.price <= 0 then
-				c.add(w .. ".price", "a pet must also be sold for Pearls")
+			if (type(item.price) ~= "number" or item.price <= 0) and item.reward ~= "chest" then
+				c.add(w .. ".price", "a pet must also be sold for Pearls (or found in a chest)")
+			end
+		elseif item.kind == "Chest" then
+			c.num(w .. ".maxStack", item.maxStack, 1, nil, true)
+			if item.price ~= nil then
+				c.add(w .. ".price", "a chest is earned, never sold (HARD RULE 8: no paid random crates)")
 			end
 		elseif item.kind == "Cosmetic" then
 			c.oneOf(w .. ".slot", item.slot, { "Beam", "Housing", "Coat", "Lantern", "Flag" })
@@ -454,6 +460,38 @@ RULES.Maps = function(c, Maps, all)
 			c.num(w .. ".saturation", m.saturation, -1, 1)
 		end
 		c.bool(w .. ".snow", m.snow, true)
+	end
+end
+
+-- CHEST.1 (D-053): chests are earned, never sold; they hold Pearls or chest-only looks, never power
+RULES.Chests = function(c, Chests, all)
+	c.order("Chests.ORDER", Chests.ORDER, Chests)
+	local Items = all.Items
+	for id, chest in c.defs(Chests) do
+		local w = "Chests." .. id
+		c.str(w .. ".name", chest.name)
+		c.num(w .. ".maxHeld", chest.maxHeld, 1, nil, true)
+		local item = type(Items) == "table" and Items[id]
+		if type(item) ~= "table" or item.kind ~= "Chest" then
+			c.add(w, "has no Items." .. id .. " entry of kind Chest")
+		elseif item.maxStack ~= chest.maxHeld then
+			c.add(w .. ".maxHeld", "must equal Items." .. id .. ".maxStack")
+		end
+		for i, row in (if type(chest.loot) == "table" then chest.loot else {}) :: { any } do
+			local rw = w .. ".loot[" .. i .. "]"
+			c.oneOf(rw .. ".tier", row.tier, if type(Items) == "table" then Items.TIERS or {} else {})
+			if row.item == nil then
+				c.pos(rw .. ".pearls", row.pearls)
+			else
+				local find = type(Items) == "table" and Items[row.item]
+				if type(find) ~= "table" or (find.kind ~= "Cosmetic" and find.kind ~= "Pet") then
+					c.add(rw .. ".item", "must be a cosmetic or a pet in Items, got " .. tostring(row.item))
+				elseif find.reward ~= "chest" or find.price ~= nil then
+					c.add(rw .. ".item", "must be found only in chests (reward = \"chest\", no price)")
+				end
+				c.pos(rw .. ".dupPearls", row.dupPearls)
+			end
+		end
 	end
 end
 

@@ -112,6 +112,8 @@ return function(T: any)
 				{ "ChooseMap", "NoSuchMap" }, -- MAP.1
 				{ "ChooseMap", "FrostIsle" }, -- MAP.1: nobody on the crew holds it
 				{ "SaveSettings", "loud", 0 / 0, "yes" }, -- SET.2: malformed
+				{ "ChestRequest", rid(), "NoSuchChest" }, -- CHEST.1
+				{ "ChestRequest", rid(), "KrakenChest" }, -- CHEST.1: none in the bag
 				{ "ForecastVote", "NoSuchForecast" },
 				{ "CoachEvent", "shown", "NoSuchPrompt" },
 				{ "LampShift", "NoSuchShift", true },
@@ -215,6 +217,7 @@ return function(T: any)
 				MerchantRequest = function() return { rid(), "buy", "NoSuchItem", 1 } end,
 				CodeRedeem = function() return { "NOSUCHCODE" } end,
 				SniperAction = function() return { "fire", Vector3.new(0, -500, 0) } end, -- D-044: not up the tower
+				ChestRequest = function() return { rid(), "KrakenChest" } end, -- CHEST.1: none in the bag
 			}
 			local over = {}
 			for remote, rate in NetGuard.RATES do

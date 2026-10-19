@@ -19,6 +19,7 @@ EconomySim.SOURCES = {
 	invite = "an item (the Shared Lantern), no Pearls",
 	code = "a promo code's Pearls, once per profile (Definitions/Codes; finite)",
 	robux = "a Robux receipt: a cosmetic item, no Pearls (L1.3)",
+	chest = "a Kraken Chest find (CHEST.1): 25 Pearls, or 40 to 150 for a look already owned; at most one chest a day per keeper, earned by beating the Kraken",
 	rescue = "Shipwreck Rescue event voyage: 1 Pearl per 2 castaways saved (at most 4 a voyage) and the event flag once (LO.2)",
 }
 

@@ -17,6 +17,7 @@ local StatPipeline = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChi
 local EventLog = require(Server.EventLog)
 local PlayerData = require(Server.PlayerData)
 local GrantService = require(Server.GrantService)
+local ChestService = require(Server.ChestService) -- CHEST.1
 local DawnBanking = require(Server.DawnBanking) -- S2.2: Pearls banked at each dawn (bus consumer)
 local ShopService = require(Server.ShopService)
 local LoadoutService = require(Server.LoadoutService)
@@ -565,6 +566,18 @@ end
 function Economy.Start(ctx)
 	local remotes, refs, state = ctx.remotes, ctx.refs, ctx.state
 	ShopService.init(remotes, PlayerData, refs.shopCounter, refs.shopPrompt)
+	-- CHEST.1 (D-053): a Kraken Chest for beating the Kraken, opened from the BAG
+	ChestService.init(remotes, {
+		grant = function(player, claimId, rewards, source)
+			return (GrantService.Grant(player, claimId, rewards, source))
+		end,
+		owns = PlayerData.owns,
+		count = PlayerData.count,
+		removeItem = PlayerData.removeItem,
+		addItem = PlayerData.addItem,
+		now = os.time,
+		random = math.random,
+	}, LampService.notify, EventLog.log)
 
 	Players.PlayerAdded:Connect(hookWeapons)
 	for _, player in Players:GetPlayers() do

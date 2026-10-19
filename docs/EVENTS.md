@@ -25,7 +25,7 @@ Module: `EventLog` (Telemetry domain) exposes `Publish(name, payload)` / `Subscr
 | `CannonBuilt` / `CannonReloaded` / `CannonDestroyed` | `{VoyageId, UserId?, Pad, Level}` (no `UserId` on Destroyed) | Encounter (Defense) | Feed, Objectives, Analytics | S5.3 ✅ |
 | `CreatureSpawned` | `{VoyageId, CreatureId, DefId, Big: boolean}` | Encounter (CreatureService) | Analytics (sampled) | S5.3 ✅ |
 | `CreatureKilled` | `{VoyageId, CreatureId, DefId, Source, KillerId?, X, Y, Z, Big: boolean}` (`Source` is the damage tag as recorded: `WideBeam`, `FocusedBeam`, `Cannon`, `Weapon:<id>`, `Sniper` (D-044); X/Y/Z where it fell) | Encounter (CreatureService) | **Loot (drops, S5.3 ✅)**, Results, Logbook, Objectives, Analytics (S3: beam modes per player, sent as `BeamModes` at the voyage's end) | S5.3 ✅ |
-| `BossWarning` / `BossDefeated` | `{VoyageId, DefId, Night}` / `{VoyageId, DefId, FinalBlow?}` | Encounter (GameState / CreatureService) | HUD, Results, Logbook | S5.3 ✅ |
+| `BossWarning` / `BossDefeated` | `{VoyageId, DefId, Night}` / `{VoyageId, DefId, FinalBlow?}` | Encounter (GameState / CreatureService) | HUD, Results, Logbook, Economy (ChestService: the Kraken Chest, CHEST.1) | S5.3 ✅ |
 | `LootCollected` | `{VoyageId, UserId, ItemId, Qty}` | Encounter (Loot) | Objectives, Analytics | S5.3 ✅ |
 | `ShellsChanged` | `{VoyageId, Delta, Reason}` (`loot`, `tide`, `waveBonus`, `trader`, `upgrade`, `merchant`) | Encounter (UpgradeService holds the crew pool today) | Analytics | S5.3 ✅ |
 | `UpgradeBought` / `EvolutionUnlocked` | `{VoyageId, UserId, Id, Rank}` / `{VoyageId, Id}` | Encounter (bench / UpgradeService) | Results, Logbook, Objectives | S5.3 ✅ |

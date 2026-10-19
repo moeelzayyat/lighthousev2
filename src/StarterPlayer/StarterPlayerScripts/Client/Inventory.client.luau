@@ -33,6 +33,7 @@ local Creatures = require(Shared:WaitForChild("Creatures")) :: any -- MP.4: the 
 local Upgrades = require(Shared:WaitForChild("Upgrades")) :: any
 local Forecasts = require(Shared:WaitForChild("Forecasts")) :: any
 local Logbook = require(Shared:WaitForChild("Definitions"):WaitForChild("Logbook")) :: any
+local Chests = require(Shared:WaitForChild("Definitions"):WaitForChild("Chests")) :: any -- CHEST.1
 
 local remotes = ReplicatedStorage:WaitForChild("Remotes")
 local ItemModels = ReplicatedStorage:WaitForChild("ItemModels")
@@ -62,7 +63,7 @@ local TAB_CATEGORIES: { [string]: { [string]: boolean } } = {
 	Weapons = { Weapons = true },
 	Armor = { Armor = true },
 	Cosmetics = { Cosmetics = true },
-	Supplies = { Ammunition = true, Materials = true },
+	Supplies = { Ammunition = true, Materials = true, Chests = true }, -- CHEST.1: Chests
 }
 
 local profile: any = nil
@@ -70,6 +71,8 @@ local isOpen = false
 local tab = "Keeper"
 local selectedId: string? = nil
 local pendingId: string? = nil
+local chestPending: string? = nil -- CHEST.1: the chest being opened
+local lastFind: any = nil -- CHEST.1: what the last chest held, shown on the chest
 
 ---------------------------------------------------------------------
 -- FACTS
@@ -121,6 +124,8 @@ local function typeLabel(item: any): string
 		return (labels[item.slot] or "Cosmetic") .. " \u{00B7} looks only"
 	elseif item.kind == "Pet" then -- PET.1
 		return "Pet \u{00B7} fetches Shells"
+	elseif item.kind == "Chest" then -- CHEST.1
+		return "Treasure chest \u{00B7} earned"
 	end
 	return item.category
 end
@@ -168,6 +173,13 @@ local function statLines(itemId: string): { any }
 		table.insert(lines, { label = "Power", value = "none: looks only" })
 	elseif item.kind == "Pet" then -- PET.1
 		table.insert(lines, { label = "Fetches", value = "Shells" })
+	elseif item.kind == "Chest" and Chests[itemId] then -- CHEST.1: the odds, shown before you open it
+		table.insert(lines, { label = "In your bag", value = tostring(count(itemId)) })
+		for _, row in Chests[itemId].loot do
+			local name = if row.item and Items[row.item] then Items[row.item].name else (row.pearls or 0) .. " Pearls"
+			local pct = row.chance * 100
+			table.insert(lines, { label = name, value = (if pct < 1 or pct % 1 ~= 0 then string.format("%.1f%%", pct) else string.format("%d%%", pct)) .. " \u{00B7} " .. row.tier })
+		end
 	end
 	return lines
 end
@@ -179,6 +191,7 @@ end
 local setOpen: (boolean, string?) -> () -- forward
 local renderAll: () -> () -- forward
 local equip: (string, string) -> () -- forward
+local openChest: (string) -> () -- forward (CHEST.1)
 local menu = Tiles.Menu({
 	name = "Inventory",
 	displayOrder = 18,
@@ -264,6 +277,12 @@ local function keeperTiles(): { any }
 	local crates = count("FireShellCrate")
 	if crates > 0 then
 		table.insert(list, { id = "FireShellCrate", name = Items.FireShellCrate.name, icon = "FireShellCrate", qty = crates })
+	end
+	for _, chestId in Chests.ORDER do -- CHEST.1: unopened chests sit on the first page
+		local n = count(chestId)
+		if n > 0 then
+			table.insert(list, { id = chestId, name = Items[chestId].name, icon = chestId, qty = n })
+		end
 	end
 	table.insert(list, { id = "Codes", name = "Codes", icon = glyphIcon("check", Color3.fromRGB(255, 200, 80), "Codes") })
 	table.insert(list, { id = "Settings", name = "Settings", icon = glyphIcon("info", Color3.fromRGB(150, 200, 255), "Settings") }) -- SET.1
@@ -559,6 +578,18 @@ local function itemDetail(itemId: string): any
 		description = typeLabel(item) .. ". " .. description,
 		stats = statLines(itemId),
 	}
+	if item.kind == "Chest" then -- CHEST.1
+		local n = count(itemId)
+		if lastFind and lastFind.chest == itemId then
+			detail.description ..= "\nLast opened: " .. lastFind.name .. " (" .. lastFind.tier .. ")" .. (if lastFind.duplicate then ", already yours, so " .. lastFind.pearls .. " Pearls instead." elseif lastFind.item then ". Equip it from Cosmetics." else ".")
+		end
+		detail.action = if chestPending then { text = "Opening...", enabled = false, reason = "Opening the chest..." }
+			elseif n > 0 then { text = "Open", enabled = true, onPress = function()
+				openChest(itemId)
+			end }
+			else { text = "Open", enabled = false, reason = "Beat the Kraken to earn the next one." }
+		return detail
+	end
 	if not item.slot then
 		detail.action = if item.kind == "Ammo"
 			then { text = "Used by cannons", enabled = false, reason = "Used automatically when you reload a cannon. Nothing to equip." }
@@ -605,7 +636,7 @@ local function renderDetail()
 			Weapons = "Weapons you own show up here. The Quartermaster in the harbor sells more.",
 			Armor = "Armor you own shows up here. The Quartermaster in the harbor sells more.",
 			Cosmetics = "Looks-only items you own show up here: beam colours, housings, coats, lanterns and flags.",
-			Supplies = "Fire Shell crates and voyage loot show up here. Loot lasts one voyage.",
+			Supplies = "Fire Shell crates, Kraken Chests and voyage loot show up here. Loot lasts one voyage.",
 		}
 		menu:setDetail({ name = "Nothing here yet", description = empty[tab] or "" })
 	end
@@ -662,6 +693,101 @@ equip = function(itemId: string, action: string)
 	end)
 end
 
+-- CHEST.1: open a chest (the server rolls and grants; this only asks and shows the find)
+openChest = function(chestId: string)
+	if chestPending then
+		return
+	end
+	local id = string.sub(HttpService:GenerateGUID(false), 1, 36)
+	chestPending = id
+	remotes.ChestRequest:FireServer(id, chestId)
+	renderDetail()
+	task.delay(REQUEST_TIMEOUT, function()
+		if chestPending == id then
+			chestPending = nil
+			UiKit.Toast(menu.root, "No reply from the server. Your chest is still in your bag. Try again.", "danger")
+			renderAll()
+		end
+	end)
+end
+
+-- CHEST.1: the find, shown big over the bag (the moment to show off); tap NICE or wait to close it
+local TIER_COLORS: { [string]: Color3 } = {
+	Common = Color3.fromRGB(200, 210, 220),
+	Uncommon = Color3.fromRGB(110, 220, 120),
+	Rare = Color3.fromRGB(90, 170, 255),
+	Epic = Color3.fromRGB(190, 110, 255),
+	Legendary = Color3.fromRGB(255, 200, 60),
+}
+local function showFind(find: any)
+	local old = player.PlayerGui:FindFirstChild("ChestReveal")
+	if old then
+		old:Destroy()
+	end
+	local gui = UiKit.new("ScreenGui", { Name = "ChestReveal", DisplayOrder = 30, IgnoreGuiInset = true, ResetOnSpawn = false }, player.PlayerGui)
+	local dim = UiKit.new("TextButton", { Name = "Dim", Text = "", AutoButtonColor = false, BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 0.45, Size = UDim2.fromScale(1, 1) }, gui)
+	local tierColor = TIER_COLORS[find.tier] or TIER_COLORS.Common
+	local panel = UiKit.new("Frame", { Name = "Panel", AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(460, 430), BackgroundColor3 = Color3.fromRGB(22, 38, 58), BorderSizePixel = 0 }, gui)
+	UiKit.new("UICorner", { CornerRadius = UDim.new(0, 24) }, panel)
+	UiKit.new("UIStroke", { Thickness = 5, Color = tierColor }, panel)
+	UiKit.new("UISizeConstraint", { MaxSize = Vector2.new(460, 430) }, panel)
+	local fit = UiKit.new("UIScale", {}, panel)
+	local function scaleToScreen()
+		local view = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
+		fit.Scale = math.min(1, (view.X - 32) / 460, (view.Y - 32) / 430)
+	end
+	scaleToScreen()
+	local function text(name: string, value: string, y: number, h: number, size: number, color: Color3, font: any)
+		return UiKit.new("TextLabel", { Name = name, Text = value, BackgroundTransparency = 1, Position = UDim2.new(0, 20, 0, y), Size = UDim2.new(1, -40, 0, h), FontFace = font, TextSize = size, TextColor3 = color, TextWrapped = true }, panel)
+	end
+	text("Title", string.upper(Items[find.chest] and Items[find.chest].name or "Chest"), 14, 34, 26, Color3.fromRGB(255, 220, 140), UiKit.Font.Display)
+	local holder = UiKit.new("Frame", { Name = "Icon", BackgroundTransparency = 1, AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 52), Size = UDim2.fromOffset(170, 170) }, panel)
+	if find.item and Items[find.item] then
+		local preview = ItemPreview.new(holder, { backdrop = false })
+		preview:setItem(find.item)
+	elseif not Tiles.picture(holder, "BlackPearl") then
+		Tiles.glyph(holder, "check", tierColor)
+	end
+	text("Name", tostring(find.name), 228, 44, 34, Color3.new(1, 1, 1), UiKit.Font.Display)
+	text("Tier", string.upper(tostring(find.tier)), 272, 28, 24, tierColor, UiKit.Font.BodyBold)
+	local note = if find.duplicate then string.format("Already yours, so you get %d Pearls instead.", find.pearls or 0)
+		elseif find.item then "Yours to keep. Equip it from Cosmetics in your bag."
+		else "Added to your Pearls."
+	text("Note", note, 302, 40, 20, Color3.fromRGB(200, 215, 230), UiKit.Font.Body)
+	local close = Tiles.bigButton(panel, "Nice")
+	close.button.AnchorPoint = Vector2.new(0.5, 1)
+	close.button.Position = UDim2.new(0.5, 0, 1, -22)
+	close.button.Size = UDim2.fromOffset(220, 64)
+	close.paint({ face = Color3.fromRGB(255, 194, 61), edge = Color3.fromRGB(179, 123, 12), text = Color3.fromRGB(42, 21, 0) }, "Nice!")
+	local function done()
+		if gui.Parent then
+			gui:Destroy()
+		end
+	end
+	close.button.Activated:Connect(done)
+	dim.Activated:Connect(done)
+	fit.Scale *= 0.6
+	game:GetService("TweenService"):Create(fit, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = fit.Scale / 0.6 }):Play()
+	task.delay(if find.tier == "Legendary" or find.tier == "Epic" then 8 else 5, done)
+end
+
+remotes.ChestResult.OnClientEvent:Connect(function(requestId, ok, result)
+	if requestId ~= chestPending then
+		return
+	end
+	chestPending = nil
+	if not ok then
+		SoundFx.play2D("denied")
+		UiKit.Toast(menu.root, tostring(result), "danger")
+	elseif type(result) == "table" then
+		lastFind = result
+		local rare = result.tier == "Epic" or result.tier == "Legendary"
+		SoundFx.play2D(if rare and not result.duplicate then "lantern" else "click")
+		showFind(result)
+	end
+	renderAll()
+end)
+
 remotes.LoadoutResult.OnClientEvent:Connect(function(requestId, ok, message)
 	if requestId ~= pendingId then
 		return -- the Quartermaster's own requests are answered there
@@ -716,6 +842,7 @@ setOpen = function(open: boolean, focus: string?)
 		tab = "Keeper"
 		selectedId = focus or "Keeper"
 		pendingId = nil
+		chestPending = nil
 		UiKit.pushModal("Inventory")
 		menu:open()
 		menu:setTabs(TABS, tab, onTab)

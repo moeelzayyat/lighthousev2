@@ -36,6 +36,7 @@ NetGuard.RATES = {
 	MerchantRequest = { 5, 8 }, -- S6.2
 	CodeRedeem = { 0.1, 1 }, -- L1.4: one code every 10 s
 	SniperAction = { 3, 5 }, -- D-044: the rifle fires once a second; leave
+	ChestRequest = { 1, 3 }, -- CHEST.1: open a chest
 } :: { [string]: { number } }
 
 NetGuard.REPLAY_CAP = 40
