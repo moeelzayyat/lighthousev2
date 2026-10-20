@@ -277,8 +277,8 @@ local card = UiKit.new("Frame", {
 }, gui)
 UiKit.round(card, 18)
 UiKit.border(card, C.AccentLighthouse, 2, 0.1)
-UiKit.pad(card, 14, 18, 14, 18)
-UiKit.list(card, "y", 10)
+local cardPad = UiKit.pad(card, 14, 18, 14, 18) :: UIPadding
+local cardList = UiKit.list(card, "y", 10) :: UIListLayout
 local sizeLimit = UiKit.new("UISizeConstraint", { MaxSize = Vector2.new(560, math.huge) }, card)
 local stepLabel = UiKit.Label(card, "", "Eyebrow", { Name = "Step", LayoutOrder = 1, TextColor3 = C.AccentLighthouse })
 local textLabel = UiKit.Label(card, "", "H3", { Name = "Text", LayoutOrder = 2, TextWrapped = true, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y })
@@ -510,19 +510,19 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
--- the card sits on the left (the middle of the screen stays clear for the arrow and the target). On a phone it sits
--- half way down on the left, where the coach hints go, clear of the top HUD and the Roblox buttons.
+-- the card sits on the left (the middle of the screen stays clear for the arrow and the target). On a phone it is
+-- wider and shorter and sits just under the top banner, so it stays clear of the thumbstick in the bottom left
+-- (iPhone 7 simulator: card 330x136 at y 72, thumbstick from y 223).
 local function fit()
 	local view = Workspace.CurrentCamera and Workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
-	if UiKit.Breakpoint(view) == "phone" then
-		card.AnchorPoint = Vector2.new(0, 0.5)
-		card.Position = UDim2.new(0, 16, 0.42, 0)
-		sizeLimit.MaxSize = Vector2.new(math.clamp(view.X - 32, 300, 340), math.huge)
-	else
-		card.AnchorPoint = Vector2.new(0, 0)
-		card.Position = UDim2.new(0, 16, 0, 152)
-		sizeLimit.MaxSize = Vector2.new(460, math.huge)
-	end
+	local phone = UiKit.Breakpoint(view) == "phone"
+	card.AnchorPoint = Vector2.new(0, 0)
+	card.Position = UDim2.new(0, 16, 0, if phone then 72 else 152)
+	sizeLimit.MaxSize = Vector2.new(if phone then math.clamp(view.X - 32, 300, 330) else 460, math.huge)
+	textLabel.TextSize = if phone then 16 else 18
+	cardPad.PaddingTop = UDim.new(0, if phone then 10 else 14)
+	cardPad.PaddingBottom = UDim.new(0, if phone then 10 else 14)
+	cardList.Padding = UDim.new(0, if phone then 6 else 10)
 end
 fit()
 if Workspace.CurrentCamera then
