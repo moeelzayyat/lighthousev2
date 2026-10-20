@@ -426,3 +426,4 @@ Flintlock Pistol (6 damage, 0.55 s, range 60, 1 target; 90 Pearls), Blunderbuss 
 2026-10-20 · WSKIN.1 · **Status: Accepted (owner's choice 2026-10-20 00:40 UTC: "Robux looks, same power", of three options; rule 8 unchanged)**
 The owner asked for two weapons sold for Robux. They hit exactly like a Pearl weapon (Golden Dragon Pistol = Flintlock Pistol, Kraken Blaster = Blunderbuss); only the model, name and shot colour differ. Prices 149 and 199 Robux (Claude's pick, revisable). Not for sale until the owner creates the developer products.
 ## CP — WSKIN.1 built · 2026-10-20 · TestRunner 298/298; digest 186 scripts 08d47f9a · auto-approved (unattended); 🟦 until the product ids arrive
+## CP — WSKIN.1 passed · 2026-10-20 · the owner's products wired: Golden Dragon Pistol 3720163184 (149 R$), Kraken Blaster 3720163243 (199 R$), both checked through MarketplaceService; TestRunner 298/298 · auto-approved (unattended)

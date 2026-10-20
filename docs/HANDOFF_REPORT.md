@@ -1818,3 +1818,6 @@ BACKUP: ServerStorage.Backups.WSKIN1_before_2026-10-20 · restore points "WSKIN1
 CHECKED (DEV Studio play, API access off): both weapons held with the barrel forward; the Kraken Blaster fired its teal pellet spray; TestRunner **298 passed, 0 failed**; no script errors. Pictures `golden_dragon_pistol_hand.jpg`, `kraken_blaster_hand.jpg`.
 OWNER STEPS: create the two developer products (name, description, price in the thread) and send the ids; save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_RBXWEAPONS_2026-10-20.rbxl` before the next publish (the models live only in the place).
 MIRROR: 186 scripts, digest identical to `src/` (08d47f9a).
+
+CHECKPOINT: WSKIN.1 products wired — ✅ in DEV Studio
+The owner created both products (2026-10-20 00:49 UTC); MarketplaceService reports Golden Dragon Pistol 149 R$ and Kraken Blaster 199 R$, both for sale. `Definitions/Cosmetics` productIds set. DEV Studio play: the Quartermaster's Weapons tab shows both with their Robux prices and an R$ button; TestRunner **298 passed, 0 failed**. NOT CHECKED: a real Robux purchase (after the publish).
