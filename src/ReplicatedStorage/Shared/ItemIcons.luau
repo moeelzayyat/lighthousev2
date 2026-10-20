@@ -14,7 +14,7 @@ local ItemIcons: { [string]: string } = {
 	ChainHook = "rbxassetid://115967038527506", -- WPN.1 (drawn)
 	NetLauncher = "rbxassetid://87999335166597", -- WPN.1 (drawn)
 	LanternBomb = "rbxassetid://116793316938234", -- WPN.1 (drawn)
-	TidecallerBlades = "rbxassetid://139899207751386",
+	TidecallerBlades = "rbxassetid://76994631120741", -- BLADE1: Claude-built cutlass render, tide glow
 	-- armor and ammo (Claude-drawn)
 	OilskinCoat = "rbxassetid://114074436530125",
 	KeepersCoat = "rbxassetid://131656108776329", -- ICON3: Fancy GUI Kit chestplate (purple) (owner's pick)
@@ -43,7 +43,7 @@ local ItemIcons: { [string]: string } = {
 	FlagFounder = "rbxassetid://98378099554182",
 	FlagRescuer = "rbxassetid://73939053590853",
 	-- the Trader's island stock (Claude-drawn)
-	OrbitingBlades = "rbxassetid://106009642656255",
+	OrbitingBlades = "rbxassetid://84779757358778", -- BLADE1: Claude-built cutlass render, sea glow
 	DamageBoost = "rbxassetid://91291437009736",
 	SpeedBoost = "rbxassetid://73509206717343",
 	Heal = "rbxassetid://113402768992113",

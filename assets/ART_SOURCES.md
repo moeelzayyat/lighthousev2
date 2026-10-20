@@ -70,3 +70,5 @@ L1.5: the two new thumbnails and the trailer's new shots are DEV Studio captures
 ## Rules
 - Nothing purchased without owner approval. Free Creator Store models only with the licence checked and recorded.
 - Never silently update a package; insert, test, add a row, mark the old row Superseded.
+| Pirate cutlass (`ItemModels.OrbitCutlass`, `ItemModels.TidecallerBlades`) | Unions | in place | Claude-built in Studio from parts (BLADE1, 2026-10-20) | owner | owner | 2026-10-20 | `Client.OrbitView`, BAG preview | Active (DEV) |
+| Cutlass shop icons (Orbiting Blades, Tidecaller Blades) | Image | 84779757358778, 76994631120741 | rendered from the cutlass model in Studio, swoosh added by Claude | owner | owner upload (via Studio) | 2026-10-20 | `Shared.ItemIcons` | Active (DEV) |

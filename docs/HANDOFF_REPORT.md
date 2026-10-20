@@ -1857,3 +1857,10 @@ CHECKED (DEV Studio play, API access off): Orbiting Blades and Tidecaller Blades
 NOT DONE: the shop tile pictures are uploaded images (`Shared/ItemIcons`); new ones need an image upload to Roblox, waiting for the owner's yes.
 OWNER STEPS: in the open Studio window, save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_BLADES_2026-10-20.rbxl` (it includes QM.2 and QM.3), then publish to both places.
 MIRROR: 188 scripts, digest identical to `src/` (e3346f18). The models live only in the place.
+
+CHECKPOINT: BLADE1 point and shop icons — ✅ in DEV Studio
+FIXED: the cutlass's point was on backwards (a WedgePart is full height at +Z); the model was rebuilt with the point forward and the glowing edge running into it (`ItemModels.OrbitCutlass`, `ItemModels.TidecallerBlades`).
+ICONS: rendered the cutlass in Studio on a key colour, cut out, added a whirl swoosh in each weapon's glow (sea-blue / tide-green), uploaded from Studio: OrbitingBlades `rbxassetid://84779757358778`, TidecallerBlades `rbxassetid://76994631120741` (`Shared/ItemIcons`). The old images stay in ServerStorage.Backups.BLADE1_before_2026-10-20 (ItemIcons copy).
+CHECKED (DEV Studio play, API access off): the Quartermaster's Weapons tab shows the new Tidecaller Blades icon; both blade weapons spin with the fixed point, tip leading (1.00); TestRunner **301 passed, 0 failed**; no script errors.
+OWNER STEPS: in the open Studio window, save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_BLADES_2026-10-20.rbxl`, then publish to both places.
+MIRROR: 188 scripts, digest identical to `src/` (1b3a97bb).
