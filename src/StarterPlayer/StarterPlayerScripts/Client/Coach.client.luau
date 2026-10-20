@@ -341,6 +341,9 @@ local function eligible()
 		return false
 	end
 	local runs = player:GetAttribute("RunsCompleted")
+	if player:GetAttribute("TutorialActive") == true then
+		return false -- TUT.1: the tutorial is teaching; the hints wait
+	end
 	return runs == nil or runs <= 0 -- unknown (failed load) or a first voyage
 end
 

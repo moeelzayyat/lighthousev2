@@ -218,6 +218,7 @@ return function(T: any)
 				CodeRedeem = function() return { "NOSUCHCODE" } end,
 				SniperAction = function() return { "fire", Vector3.new(0, -500, 0) } end, -- D-044: not up the tower
 				ChestRequest = function() return { rid(), "KrakenChest" } end, -- CHEST.1: none in the bag
+				TutorialDone = function() return { false } end, -- TUT.1: only true is taken, so nothing changes
 			}
 			local over = {}
 			for remote, rate in NetGuard.RATES do

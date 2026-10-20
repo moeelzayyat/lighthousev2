@@ -48,6 +48,14 @@ function Data.Init(ctx)
 		PlayerData.setSettings(player, sfx, ambience, lowEffects)
 	end)
 
+	-- TUT.1 (D-059): the client says the first-time tutorial is finished or skipped (only `true` is accepted)
+	NetGuard.connect(remotes.TutorialDone, function(player, done)
+		if done ~= true or not NetGuard.allow(player, "TutorialDone") then
+			return
+		end
+		PlayerData.setTutorialDone(player)
+	end)
+
 	-- Admin channel (R1.8): owner only; everyone else is refused and logged by AdminDataService
 	NetGuard.connect(remotes.AdminRequest, function(player, requestId, action, targetUserId, arg)
 		if not NetGuard.isRequestId(requestId) or not NetGuard.allow(player, "AdminRequest") then

@@ -29,6 +29,7 @@ B1.3: every handler is connected with `NetGuard.connect(remote, handler)`; no ot
 | `ForecastVote` | `choice` | Ready, phase Waiting/Intermission, one of the two offered | 3 / 5 |
 | `ChestRequest` → `ChestResult` (CHEST.1, D-053) | `requestId, chestId` → `requestId, ok, find or message` | request id ≤ 40 characters and a chest id ≤ 40; the chest must be in `Chests.ORDER` and in the bag; the server rolls; a repeated request id replays its answer (capped map); the find goes through GrantService with claim `chestopen:<UserId>:<requestId>` | 1 / 3 |
 | `SaveSettings` (SET.2, D-050) | `sfx, ambience, lowEffects` | two numbers (NaN refused; clamped to 0..1 and rounded to tenths) and a boolean; written to the profile's Settings (Sfx, Music, Rain) only when they change | 1 / 3 |
+| `TutorialDone` (TUT.1, D-059) | `done` | must be exactly `true`; sets the profile's `TutorialDone` once (a second call changes nothing); there is no way to unset it from the client | 1 / 3 |
 | `ChooseMap` (MAP.1, D-049) | `mapId` | string up to 20, a known map (`Definitions/Maps`); Ready; phase Waiting/Intermission; a Ready member on the sender's ship holds the map's unlock (`Unlock_<key>`, shared crew unlock); GameState re-checks at departure that a sailing member holds it | 2 / 3 |
 | `ChooseVoyage` (S2.1) | `defId` | string ≤ 20, a known voyage definition that is not test-only (S3.1b: Endless Storm is refused); Ready; phase Waiting/Intermission; the sender holds the definition's unlock (`Unlock_<key>`); GameState re-checks at departure that a sailing member holds it | 2 / 3 |
 | `AdminRequest` (R1.8) | `requestId, action, targetUserId, arg?` | requestId ≤ 40; action string ≤ 20; finite targetUserId; arg number or string ≤ 20; **owner UserId only** (`AdminDataService.OWNER_IDS`), anyone else refused and logged `AdminRejected`; actions inspect / grant (1–1000 Pearls, target online) / rollback (YYYY-MM-DD snapshot) | 1 / 3 |
@@ -40,8 +41,8 @@ B1.3: every handler is connected with `NetGuard.connect(remote, handler)`; no ot
 
 Deferred from this table: `Attack.Seq` + `CombatResult` (architecture §7.1 feel work) — not in the R1.4 roadmap row; lands with client prediction in S4.
 
-## All 34 current remotes
-Client → server (18): `AdminRequest`, `Attack`, `ChooseMap` (MAP.1), `SaveSettings` (SET.2), `ChestRequest` (CHEST.1), `ChooseVoyage`, `BeamControl`, `LampAction`, `LampShift` (both directions), `BuyUpgrade`, `ShopRequest`, `TraderRequest`, `MerchantRequest` (S6.2), `LoadoutRequest`, `GearAction`, `SetReady`, `VoteRematch`, `EnterLobby`, `ReportDevice`, `CoachEvent` (both directions), `ForecastVote`.
+## All 35 current remotes
+Client → server (19): `AdminRequest`, `Attack`, `TutorialDone` (TUT.1), `ChooseMap` (MAP.1), `SaveSettings` (SET.2), `ChestRequest` (CHEST.1), `ChooseVoyage`, `BeamControl`, `LampAction`, `LampShift` (both directions), `BuyUpgrade`, `ShopRequest`, `TraderRequest`, `MerchantRequest` (S6.2), `LoadoutRequest`, `GearAction`, `SetReady`, `VoteRematch`, `EnterLobby`, `ReportDevice`, `CoachEvent` (both directions), `ForecastVote`.
 Server → client only (17): `AdminResult`, `Notify`, `LootCollected`, `OpenUpgrades`, `PlaySound`, `RunResults`, `GearData`, `ShopOpen`, `ShopResult`, `LoadoutResult`, `Travel`, `UpgradeResult`, `TraderOpen`, `TraderResult`, `MerchantResult` (S6.2), `CrewFeed`, `CodeResult` (L1.4), `ChestResult` (CHEST.1). They have no server handler, so client input on them is ignored.
 
 ## Server → Client

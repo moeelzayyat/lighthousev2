@@ -83,6 +83,8 @@ return function(T: any)
 			data.Roles = nil
 			T.expect(data.Unlocks.FrostIsle).toBe(true) -- MAP.1: a Standard winner (LongVoyage) also has Frostbite Isle
 			data.Unlocks.FrostIsle = nil
+			T.expect(data.TutorialDone).toBe(data.Stats.Runs > 0) -- TUT.1: added from the voyages already played
+			data.TutorialDone = nil
 			T.expect(data).toEqual(before)
 		end)
 

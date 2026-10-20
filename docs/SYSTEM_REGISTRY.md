@@ -65,6 +65,7 @@ Status: `Planned` · `In Development` · `Implemented` · `Tested` (has TestRunn
 | Puffin Pal, Shell-fetching pet (D-051) | Tested (not yet published) | PET.1 | `Shared/PetRules`, `LootService` (fetch on arrival, `PetClaim`), `Domains/Economy` (Pet / PetLoan attributes, loan for the first 3 voyages, note), `Client/PetView`; 120 Pearls, 99 R$ once the product exists; `PetSpec` 4 tests |
 | Kraken Chests (D-053) | Tested (not yet published) | CHEST.1 | `Definitions/Chests`, `ChestService` (earn on the Kraken kill, one a day; open via `ChestRequest`), `Client/Inventory` (odds, OPEN, reveal card); chest-only looks Abyss Beam, Kraken Ink Coat, Leviathan Housing, Golden Puffin; earned only; `ChestSpec` 6 tests |
 | More pets: Storm Petrel, Glow Jelly, Lantern Turtle, Baby Kraken (D-054) | Tested (not yet published) | PET.2 | `Items` (petMotion, petGlow), `Client/PetView` (fly / float / walk); same fetching as Puffin Pal; Pearls 140 / 150 / 180 / 250 |
+| First-time tutorial (D-059) | Tested (not yet published) | TUT.1 | `Client/Tutorial` (steps, card, arrow, outline, button glow, edge arrow; `ReplayTutorial`), `ProfileSchema.TutorialDone`, `PlayerData.setTutorialDone`, remote `TutorialDone` in `Domains/Data`, BAG Tutorial tile in `Client/Inventory`, `Coach` waits while it runs |
 
 ## Platform and data
 | System | Status | Target | Notes |

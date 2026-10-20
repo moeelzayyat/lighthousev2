@@ -28,6 +28,7 @@ export type Profile = {
 	Settings: { Music: number, Sfx: number, Shake: boolean, Rain: boolean },
 	Boosts: { [string]: number }, -- S6.4 (D-021): Quartermaster boost id -> rank bought; added with default {}
 	Roles: { [string]: number }, -- S7.4 (D-028): role counters that earn specialties; added with default {}
+	TutorialDone: boolean, -- TUT.1 (D-059): the first-time tutorial was finished or skipped
 }
 
 ProfileSchema.DEFAULT_WEAPON = "DriftwoodHarpoon"
@@ -63,6 +64,7 @@ function ProfileSchema.template(): Profile
 		Settings = { Music = 1, Sfx = 1, Shake = true, Rain = true },
 		Boosts = {},
 		Roles = {},
+		TutorialDone = false,
 	}
 end
 
@@ -211,6 +213,11 @@ function ProfileSchema.validate(data: any): (Profile, { string })
 			data.Roles[role] = nil
 			fix("Roles." .. tostring(role), "not a whole number", nil)
 		end
+	end
+	-- TUT.1 (D-059): a profile saved before the tutorial existed gets it silently (a new field, not a repair): whoever
+	-- already finished a voyage does not need it
+	if type(data.TutorialDone) ~= "boolean" then
+		data.TutorialDone = type(data.Stats) == "table" and type(data.Stats.Runs) == "number" and data.Stats.Runs > 0
 	end
 	if data.SchemaVersion ~= ProfileSchema.VERSION then
 		data.SchemaVersion = fix("SchemaVersion", "was " .. tostring(data.SchemaVersion), ProfileSchema.VERSION)

@@ -6,7 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Config"))
 local Voyages = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Definitions"):WaitForChild("Voyages"))
 
-local REMOTES = { "BeamControl", "LampAction", "Notify", "Attack", "LootCollected", "OpenUpgrades", "BuyUpgrade", "ReportDevice", "PlaySound", "SetReady", "VoteRematch", "RunResults", "GearData", "GearAction", "ShopOpen", "ShopRequest", "ShopResult", "LoadoutRequest", "LoadoutResult", "EnterLobby", "Travel", "UpgradeResult", "TraderOpen", "TraderRequest", "TraderResult", "CrewFeed", "LampShift", "CoachEvent", "ForecastVote", "AdminRequest", "AdminResult", "ChooseVoyage", "ChooseMap", "SaveSettings", "MerchantRequest", "MerchantResult", "CodeRedeem", "CodeResult", "SniperAction", "ChestRequest", "ChestResult" }
+local REMOTES = { "BeamControl", "LampAction", "Notify", "Attack", "LootCollected", "OpenUpgrades", "BuyUpgrade", "ReportDevice", "PlaySound", "SetReady", "VoteRematch", "RunResults", "GearData", "GearAction", "ShopOpen", "ShopRequest", "ShopResult", "LoadoutRequest", "LoadoutResult", "EnterLobby", "Travel", "UpgradeResult", "TraderOpen", "TraderRequest", "TraderResult", "CrewFeed", "LampShift", "CoachEvent", "ForecastVote", "AdminRequest", "AdminResult", "ChooseVoyage", "ChooseMap", "SaveSettings", "MerchantRequest", "MerchantResult", "CodeRedeem", "CodeResult", "SniperAction", "ChestRequest", "ChestResult", "TutorialDone" }
 
 local Platform = { Name = "Platform" }
 

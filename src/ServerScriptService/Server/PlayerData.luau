@@ -55,6 +55,7 @@ local function view(data: any): any
 		logbook = data.Logbook, -- MP.4: found entries ("Creatures:RockCrab" -> true), shown on the BAG's logbook page
 		-- SET.2: saved Settings (Sfx = sound effects, Music = storm and waves, Rain false = low effects)
 		settings = { sfx = data.Settings.Sfx, ambience = data.Settings.Music, lowEffects = data.Settings.Rain == false },
+		tutorialDone = data.TutorialDone == true, -- TUT.1
 	}
 end
 
@@ -272,6 +273,20 @@ function PlayerData.setSettings(player: Player, sfx: any, ambience: any, lowEffe
 			return false
 		end
 		s.Sfx, s.Music, s.Rain = a, b, not c
+		changedAny = true
+		return true
+	end)
+	return changedAny
+end
+
+-- TUT.1 (D-059): the first-time tutorial was finished or skipped; it is never shown again on its own
+function PlayerData.setTutorialDone(player: Player): boolean
+	local changedAny = false
+	PlayerData.mutate(player, function(data)
+		if data.TutorialDone == true then
+			return false
+		end
+		data.TutorialDone = true
 		changedAny = true
 		return true
 	end)

@@ -300,6 +300,7 @@ local function keeperTiles(): { any }
 	end
 	table.insert(list, { id = "Codes", name = "Codes", icon = glyphIcon("check", Color3.fromRGB(255, 200, 80), "Codes") })
 	table.insert(list, { id = "Settings", name = "Settings", icon = glyphIcon("info", Color3.fromRGB(150, 200, 255), "Settings") }) -- SET.1
+	table.insert(list, { id = "Tutorial", name = "Tutorial", icon = glyphIcon("next", Color3.fromRGB(255, 205, 90)) }) -- TUT.1
 	return list
 end
 
@@ -643,6 +644,19 @@ local function renderDetail()
 		menu:setDetail(codesDetail())
 	elseif id == "Settings" then
 		menu:setDetail(settingsDetail())
+	elseif id == "Tutorial" then -- TUT.1: play the first-time tutorial again
+		menu:setDetail({
+			icon = glyphIcon("next", Color3.fromRGB(255, 205, 90)),
+			name = "Tutorial",
+			description = "A quick guided tour: the Quartermaster, your BAG, boarding a ship, and how to keep the light on a voyage.",
+			action = { text = "Play again", enabled = true, onPress = function()
+				setOpen(false)
+				local event = script.Parent:FindFirstChild("ReplayTutorial")
+				if event and event:IsA("BindableEvent") then
+					event:Fire()
+				end
+			end },
+		})
 	elseif tab == "Logbook" then
 		menu:setDetail(if id and string.sub(id, 1, 4) == "Log_" then logEntryDetail(id) else logbookSummaryDetail())
 	elseif id and string.sub(id, 1, 5) == "Slot_" then
@@ -858,6 +872,7 @@ setOpen = function(open: boolean, focus: string?)
 		return
 	end
 	isOpen = open
+	player:SetAttribute("BagOpen", if open then true else nil) -- TUT.1: the tutorial's BAG step
 	if open then
 		tab = "Keeper"
 		selectedId = focus or "Keeper"
