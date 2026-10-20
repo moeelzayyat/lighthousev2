@@ -6,7 +6,8 @@
 -- Mostly world-integrated, no big menu:
 --   * the SHIP'S WHEEL sign (a billboard on the wheel) shows the departure state to everyone nearby
 --   * the wheel prompt says Join / Leave for YOU (set locally; the server still decides)
---   * a small harbor status card (top centre) while you're ashore and not in the crew
+--   * a small harbor notice (top centre) only when the ship you walked onto is full or at sea (QM.3: the standing
+--     "waiting for crew" banner is gone; each ship's wheel sign shows its own crew)
 --   * a crew card (top right) once you've joined: who's sailing, countdown, how to leave
 --   * a travel card during the fade between the harbor and the island
 -- Reads only replicated state: GameState Phase / TimeLeft / CrewCount / AboardCount and each
@@ -111,20 +112,6 @@ local harborText = UiKit.new("Frame", { Name = "Text", BackgroundTransparency = 
 UiKit.list(harborText, "y", 2, { VerticalAlignment = Enum.VerticalAlignment.Center })
 local harborEyebrow = UiKit.Label(harborText, "", "Eyebrow", { Name = "State", LayoutOrder = 1, Size = UDim2.new(1, 0, 0, 20), AutomaticSize = Enum.AutomaticSize.None, TextWrapped = false, TextTruncate = Enum.TextTruncate.AtEnd })
 local harborBody = UiKit.Label(harborText, "", "BodySmall", { Name = "Body", LayoutOrder = 2, TextColor3 = C.TextPrimary })
-local harborKey = UiKit.new("Frame", { Name = "Key", BackgroundTransparency = 1, AnchorPoint = Vector2.new(1, 0.5), Size = UDim2.fromOffset(96, 52) }, harbor)
-local keycap = UiKit.new("TextLabel", {
-	Name = "Keycap",
-	BackgroundColor3 = C.SurfaceElevated,
-	FontFace = F.LabelBold,
-	TextSize = 16,
-	TextColor3 = C.TextPrimary,
-	AnchorPoint = Vector2.new(0.5, 0),
-	Position = UDim2.fromScale(0.5, 0),
-	Size = UDim2.fromOffset(40, 30),
-}, harborKey)
-UiKit.round(keycap, UiKit.Radius.control)
-UiKit.border(keycap, C.BorderBrassBright, 1, 0.25)
-UiKit.Label(harborKey, "at the wheel", "Micro", { AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.fromScale(0.5, 1), Size = UDim2.new(1, 0, 0, 16), AutomaticSize = Enum.AutomaticSize.None, TextXAlignment = Enum.TextXAlignment.Center, TextWrapped = false })
 
 -- crew card (you're in the crew, before the ship sails) ----------------
 local crewCard = UiKit.Panel(root, { name = "CrewCard", kind = "plain", variant = "primary", padding = 0, anchor = Vector2.new(1, 0) })
@@ -516,7 +503,6 @@ local function render()
 		sailing, left, underway = mine.sailing, mine.left, mine.underway
 	end
 	local seats = string.format("%d/%d", crewCount, capacity)
-	local full = crewCount >= capacity
 	local departure = mine.departure -- "auto" | "manual" | "rematch" | nil
 	local leaving = sailing and departure ~= nil
 	for _, w in wheels do
@@ -549,28 +535,20 @@ local function render()
 	local hidden = player:GetAttribute("MenuOpen") == true
 	local atHarbor = ashore and nearShip()
 
-	-- harbor status card: ashore and not in the crew
-	local showHarbor = ashore and not ready and not hidden
+	-- harbor notice: only while you stand on a ship that can't take you (QM.3, owner 2026-10-20: "I don't think we
+	-- need this text bubble at all"; the standing waiting banner is gone, each ship's wheel sign shows its own crew)
 	local refused = player:GetAttribute("BoardRefused")
+	local showHarbor = ashore and not ready and not hidden and (refused == "full" or refused == "sailed")
 	harbor.Visible = showHarbor
 	if showHarbor then
-		keycap.Text = key
 		if refused == "full" then
 			harborEyebrow.Text = "CREW FULL · " .. seats
 			harborEyebrow.TextColor3 = C.StateWarning
 			harborBody.Text = "Crew full. Find another ship and sail, or wait here for the next voyage."
-		elseif underway or refused == "sailed" then
+		else
 			harborEyebrow.Text = "VOYAGE AT SEA · " .. seats .. " CREW"
 			harborEyebrow.TextColor3 = C.AccentSea
 			harborBody.Text = "The ship's crew is at sea. Wait here: the next voyage takes a new crew."
-		elseif leaving then
-			harborEyebrow.Text = string.upper(string.format("The ship leaves in %s · %s crew", clock(left), seats))
-			harborEyebrow.TextColor3 = if left <= 5 then C.StateWarning else C.AccentLighthouse
-			harborBody.Text = if full then "This crew is full. Wait here for the next voyage." else "Walk onto the ship to sail with them."
-		else
-			harborEyebrow.Text = (if crewCount == 0 then "HARBOR ISLAND · WAITING FOR CREW " else "HARBOR ISLAND · SHIP ") .. seats
-			harborEyebrow.TextColor3 = C.AccentLighthouse
-			harborBody.Text = "Walk the pier onto the ship to join its crew (up to " .. capacity .. "). The Quartermaster sells gear by the path."
 		end
 	end
 
@@ -704,11 +682,8 @@ local function layout()
 	local phone = UiKit.Breakpoint(size) == "phone"
 	-- harbor card: top centre, where the HUD's voyage chip sits during a run
 	placeHarborCard()
-	local keyW = 0 -- boarding batch: no key to press, you walk aboard
-	harborKey.Visible = false
-	harborKey.Position = UDim2.new(1, -10, 0.5, 0)
 	harborText.Position = UDim2.fromOffset(24, 4)
-	harborText.Size = UDim2.new(1, -24 - keyW - 16, 1, -8)
+	harborText.Size = UDim2.new(1, -40, 1, -8)
 	harborBody.TextSize = if phone then 13 else 15
 	harborEyebrow.TextSize = if phone then 14 else 16
 	-- crew card: top right, under the BAG button, clear of the HUD's centre cluster

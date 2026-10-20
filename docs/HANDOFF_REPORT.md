@@ -1840,3 +1840,10 @@ CHECKED (DEV Studio play, API access off): the stall from the path, the side and
 NOTE: DEV Studio was closed when this came in; Claude opened the DEV harbor place (PlaceId 102473202766620, now named "Lighthouse Keepers: Storm Survival") from Roblox. These changes are only in that open Studio window until it is saved.
 OWNER STEPS: in that Studio window, save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_QM2_2026-10-20.rbxl`, then publish to both places.
 MIRROR: 188 scripts, digest identical to `src/` (bb4c7128).
+
+CHECKPOINT: QM.3 Harbor banner removed — ✅ in DEV Studio (owner 2026-10-20 17:46 UTC)
+BUILT: `Client/Departure`: the harbor card no longer shows while you wait ashore; it appears only as a short CREW FULL / VOYAGE AT SEA notice while the ship you stand on refuses you (`BoardRefused`), so players still learn why they can't board. The unused key hint inside the card is removed. It never showed on the isle.
+BACKUP: ServerStorage.Backups.QM3_before_2026-10-20 (Departure) · restore points "QM3 before", "QM3 code", "QM3 passed"
+CHECKED (DEV Studio play, API access off, after the owner stopped his own Play test): PC 2004×909 and phone simulator harbor without the banner; aboard a free ship nothing shows; a refusal set on the server showed "CREW FULL · 0/4" and it cleared when the player stepped off; TestRunner **301 passed, 0 failed**; no script errors.
+OWNER STEPS: in the open Studio window, save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_QM3_2026-10-20.rbxl` (it includes QM.2), then publish to both places.
+MIRROR: 188 scripts, digest identical to `src/` (a481263f).

@@ -434,3 +434,4 @@ A guided tour starts by itself on a keeper's first join: welcome, the Quartermas
 - New remote `TutorialDone` (client → server, only `true` is accepted, rate 1 / 3); it can only mark the tutorial finished, never undo it.
 ## CP — TUT.1 passed · 2026-10-20 · TestRunner 301/301; analyzer 0 outside ProfileStore; digest 188 scripts 6f633175; iPhone 7 simulator checked · auto-approved (unattended)
 ## CP — QM.2 passed · 2026-10-20 · owner report fixed (Quartermaster floating; Pearls counter merged with the harbor banner on phones); TestRunner 301/301; digest 188 scripts bb4c7128 · auto-approved (unattended)
+## CP — QM.3 passed · 2026-10-20 · owner: remove the harbor banner ("I don't think we need this text bubble at all"); a crew-full / at-sea notice stays only while a ship refuses you; TestRunner 301/301; digest 188 scripts a481263f · auto-approved (unattended)
