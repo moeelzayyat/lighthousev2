@@ -1803,3 +1803,11 @@ BACKUP: ServerStorage.Backups.CHEST3_before_2026-10-19 · restore points "CHEST3
 CHECKED (DEV Studio play, API access off): the Hatchling granted, equipped and drawn beside the keeper; TestRunner **294 passed, 0 failed**; no script errors. Picture: `leviathan_hatchling.jpg` in the project files.
 OWNER STEPS: save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_HATCH_2026-10-19.rbxl` (the new models live only in the place), then publish to both places. After publishing, buy one Kraken Chest with Robux to check a real purchase.
 MIRROR: 184 scripts, digest identical to `src/` (6557c049).
+
+CHECKPOINT: GUN.1 Guns (D-057) — ✅ in DEV Studio (owner asked 2026-10-20 00:16 UTC)
+BUILT: `Shared/Weapons` + `Items` (FlintlockPistol, Blunderbuss, HarpoonGun, StormMusket), `_Registry` (projectiles bullet, shot), `SoundFx` (gunshot, blunderbuss), `Domains/Encounter` (showGunfire: muzzle flash, tracer, impact flash, pellet spray), `Domains/Economy` (a model's `GripYaw` attribute turns it in the hand), `GunsSpec` (new). Models in `ItemModels` from ForgeGUI (owner's account), sized 2.5 / 3.5 / 4 / 4.5 studs, `Muzzle` attachment, a blue light on the musket's tip.
+BACKUP: ServerStorage.Backups.GUN1_before_2026-10-20 · restore points "GUN1 before", "GUN1 models", "GUN1 code", "GUN1 passed"
+CHECKED (DEV Studio play, API access off): all four guns held with the barrel forward; the Storm Musket and the Blunderbuss fired with their flash, tracer and pellets; TestRunner **296 passed, 0 failed**; no script errors. Why the owner saw one weapon: the isle trader sells only the Orbiting Blades (by design); the Quartermaster sells 13 weapons now.
+NOT CHECKED: a gun killing creatures in a played voyage (the hits use the same server path as the other aimed weapons); a real phone.
+OWNER STEPS: save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_GUNS_2026-10-20.rbxl` (the gun models live only in the place), then publish to both places.
+MIRROR: 185 scripts, digest identical to `src/` (89c9f53a).

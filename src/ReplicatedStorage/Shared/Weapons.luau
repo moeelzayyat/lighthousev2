@@ -7,7 +7,8 @@
 --   maxTargets  how many creatures one shot can hit (1 = single target)
 --   archetype   "Thrown" (aimed: a click or tap throws a spear or fires a flare) or "Orbit" (S6.3: blades
 --               circle the player and cut what they pass; nothing to aim)
---   projectile  "spear" or "flare" (the visual of a Thrown weapon); "hook", "net", "bomb" for WPN.1
+--   projectile  "spear" or "flare" (the visual of a Thrown weapon); "hook", "net", "bomb" for WPN.1; GUN.1: "bullet"
+--               (a fast tracer with a muzzle flash) and "shot" (a spray of pellets over the area it hits)
 --   WPN.1 (D-048), aimed like Thrown, each with one effect (Shared/WeaponFx):
 --     "Chain" pullDistance, pullStopAt   drags the hooked creature toward the thrower (not big monsters)
 --     "Net"   slowFactor, slowSeconds    slows every creature hit (big monsters feel half)
@@ -129,6 +130,52 @@ local Weapons = {
 		slowFactor = 0.35, -- netted creatures move at 35% speed (big monsters feel half: 67.5%)
 		slowSeconds = 3,
 		color = Color3.fromRGB(205, 180, 120),
+	},
+	-- GUN.1 (owner 2026-10-20 "let's add guns and stuff that are attractive"): aimed like a harpoon (Thrown), fired
+	-- as bullets. Numbers chosen unattended (D-057), revisable; every one stays under the lamp's damage per second.
+	FlintlockPistol = {
+		displayName = "Flintlock Pistol",
+		damage = 6,
+		cooldown = 0.55, -- about 11 damage per second: quick light shots at one target
+		range = 60,
+		hitRadius = 4,
+		maxTargets = 1,
+		archetype = "Thrown",
+		projectile = "bullet",
+		color = Color3.fromRGB(255, 220, 140),
+	},
+	Blunderbuss = {
+		displayName = "Blunderbuss",
+		damage = 8,
+		cooldown = 1.5, -- a short-range spray: up to 5 creatures in a wide circle
+		range = 28,
+		hitRadius = 8,
+		maxTargets = 5,
+		archetype = "Thrown",
+		projectile = "shot",
+		color = Color3.fromRGB(255, 190, 90),
+	},
+	HarpoonGun = {
+		displayName = "Harpoon Gun",
+		damage = 14,
+		cooldown = 1.2, -- about 12 damage per second, through up to 3 creatures, from far away
+		range = 80,
+		hitRadius = 5,
+		maxTargets = 3,
+		archetype = "Thrown",
+		projectile = "spear",
+		color = Color3.fromRGB(95, 105, 115),
+	},
+	StormMusket = {
+		displayName = "Storm Musket",
+		damage = 32,
+		cooldown = 2.2, -- about 15 damage per second to one target, at the longest range
+		range = 95,
+		hitRadius = 4,
+		maxTargets = 1,
+		archetype = "Thrown",
+		projectile = "bullet",
+		color = Color3.fromRGB(110, 170, 255),
 	},
 	LanternBomb = {
 		displayName = "Lantern Bomb",

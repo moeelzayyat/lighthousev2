@@ -16,6 +16,7 @@
 local Items = {
 	SHOP_ORDER = {
 		"DriftwoodHarpoon", "StormHarpoon", "FlareGun", "CoralLance", "ChainHook", "NetLauncher", "TidecallerBlades", "LanternBomb", "WhalerHarpoon",
+		"FlintlockPistol", "Blunderbuss", "HarpoonGun", "StormMusket", -- GUN.1
 		"OilskinCoat", "KeepersCoat", "KelpweaveVest", "IronclawPlate",
 		"FireShellCrate",
 		"CrabClaw", "SeaGlass", "BlackPearl",
@@ -219,6 +220,43 @@ local Items = {
 		strengths = "Slows up to 6 creatures to a crawl for 3 seconds",
 		tradeoffs = "Barely hurts them; slow reload",
 		price = 80,
+	},
+	-- GUN.1 (D-057): guns, bought with Pearls (weapon power is never sold for Robux)
+	FlintlockPistol = {
+		kind = "Weapon", category = "Weapons", slot = "Primary", model = "FlintlockPistol",
+		name = "Flintlock Pistol",
+		tier = "Uncommon", -- display only (harbor UI rarity)
+		description = "A brass pirate pistol. Point, click, bang.",
+		strengths = "Fastest shots in the harbor",
+		tradeoffs = "One target at a time, light hits",
+		price = 90,
+	},
+	Blunderbuss = {
+		kind = "Weapon", category = "Weapons", slot = "Primary", model = "Blunderbuss",
+		name = "Blunderbuss",
+		tier = "Rare", -- display only (harbor UI rarity)
+		description = "A wide brass bell full of shot. Wait for them to come close.",
+		strengths = "Sprays a whole group: hits up to 5 creatures",
+		tradeoffs = "Short range and a slow reload",
+		price = 130,
+	},
+	HarpoonGun = {
+		kind = "Weapon", category = "Weapons", slot = "Primary", model = "HarpoonGun",
+		name = "Harpoon Gun",
+		tier = "Rare", -- display only (harbor UI rarity)
+		description = "A deck launcher you can carry. The harpoon flies far and keeps going.",
+		strengths = "Long range, through up to 3 creatures",
+		tradeoffs = "Heavier and slower than the pistol",
+		price = 160,
+	},
+	StormMusket = {
+		kind = "Weapon", category = "Weapons", slot = "Primary", model = "StormMusket",
+		name = "Storm Musket",
+		tier = "Epic", -- display only (harbor UI rarity)
+		description = "A long rifle charged by the storm. Each shot leaves a streak of blue lightning.",
+		strengths = "Huge hits at the longest range",
+		tradeoffs = "Slow reload, one target at a time",
+		price = 180,
 	},
 	LanternBomb = { -- WPN.1 (D-048)
 		kind = "Weapon", category = "Weapons", slot = "Primary", model = "LanternBomb",

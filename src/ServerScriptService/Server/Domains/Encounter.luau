@@ -266,7 +266,69 @@ local function showWeaponFx(folder, weapon, from, to)
 	end
 end
 
+-- GUN.1: a gun's shot: a muzzle flash, then bright tracers (one bullet, or a spray of pellets over the area it hit)
+local function showGunfire(folder, weapon, from, to)
+	local function flash(at, size, life)
+		local p = Instance.new("Part")
+		p.Anchored = true
+		p.CanCollide = false
+		p.CanQuery = false
+		p.CanTouch = false
+		p.Shape = Enum.PartType.Ball
+		p.Material = Enum.Material.Neon
+		p.Color = Color3.fromRGB(255, 210, 120)
+		p.Size = Vector3.new(size, size, size)
+		p.CFrame = CFrame.new(at)
+		p.Parent = folder
+		local fade = TweenService:Create(p, TweenInfo.new(life), { Transparency = 1, Size = Vector3.new(size * 1.6, size * 1.6, size * 1.6) })
+		fade.Completed:Connect(function()
+			p:Destroy()
+		end)
+		fade:Play()
+	end
+	local function tracer(a, b, width)
+		local length = (b - a).Magnitude
+		if length < 0.1 then
+			return
+		end
+		local p = Instance.new("Part")
+		p.Anchored = true
+		p.CanCollide = false
+		p.CanQuery = false
+		p.CanTouch = false
+		p.Material = Enum.Material.Neon
+		p.Color = weapon.color
+		p.Size = Vector3.new(width, width, length)
+		p.CFrame = CFrame.lookAt(a, b) * CFrame.new(0, 0, -length / 2)
+		p.Parent = folder
+		local fade = TweenService:Create(p, TweenInfo.new(0.14), { Transparency = 1, Size = Vector3.new(width * 0.3, width * 0.3, length) })
+		fade.Completed:Connect(function()
+			p:Destroy()
+		end)
+		fade:Play()
+	end
+	local muzzle = from + (to - from).Unit * 1.5
+	flash(muzzle, 0.9, 0.12)
+	if weapon.projectile == "shot" then
+		SoundFx.playAt("blunderbuss", muzzle)
+		local rng = Random.new()
+		for _ = 1, 7 do
+			local angle = rng:NextNumber(0, math.pi * 2)
+			local spread = rng:NextNumber(0, weapon.hitRadius)
+			tracer(muzzle, to + Vector3.new(math.cos(angle) * spread, rng:NextNumber(0, 1.5), math.sin(angle) * spread), 0.12)
+		end
+	else
+		SoundFx.playAt("gunshot", muzzle)
+		tracer(muzzle, to, if weapon.damage >= 20 then 0.3 else 0.16)
+		flash(to, 0.6, 0.15)
+	end
+end
+
 local function showProjectile(folder, weapon, from, to)
+	if weapon.projectile == "bullet" or weapon.projectile == "shot" then
+		showGunfire(folder, weapon, from, to)
+		return
+	end
 	local shot = Instance.new("Part")
 	shot.Anchored = true
 	shot.CanCollide = false

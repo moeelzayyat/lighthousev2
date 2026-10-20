@@ -377,7 +377,7 @@ RULES.Weapons = function(c, Weapons, all)
 			c.num(w .. ".blades", wpn.blades, 1, 6, true)
 			c.pos(w .. ".spin", wpn.spin)
 		else
-			c.oneOf(w .. ".projectile", wpn.projectile, { "spear", "flare", "hook", "net", "bomb" })
+			c.oneOf(w .. ".projectile", wpn.projectile, { "spear", "flare", "hook", "net", "bomb", "bullet", "shot" }) -- GUN.1: bullet, shot
 		end
 		-- WPN.1: each aimed archetype's own effect
 		if wpn.archetype == "Chain" then

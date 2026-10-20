@@ -72,6 +72,11 @@ local function buildWeaponTool(weaponId)
 		end
 		copy:Destroy()
 		handle.Name = "Handle"
+		-- GUN.1: a model whose barrel points the other way along its handle says how far to turn it in the hand
+		local yaw = model:GetAttribute("GripYaw")
+		if type(yaw) == "number" then
+			tool.Grip = CFrame.Angles(0, math.rad(yaw), 0)
+		end
 	else
 		-- Fallback if the model is missing: a plain stick
 		local handle = Instance.new("Part")

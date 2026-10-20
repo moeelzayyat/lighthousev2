@@ -418,3 +418,7 @@ HARD RULE 8 says no random paid crates; the owner lifted it for the Kraken Chest
 2026-10-19 · CHEST.3 · **Status: Accepted (owner 2026-10-19 22:30 UTC: "the 1% item has to be a unique item to the box like a pet can only obtainer thru the box"; also: a product description must not say "looks only, no power")**
 Leviathan Hatchling, Legendary, 1%, chest only (it fetches exactly like Puffin Pal). Golden Puffin becomes a 2% Epic find. Abyss Beam 22% → 20%. Duplicate Pearls: Golden Puffin 150 → 120, Hatchling 200. Product descriptions sell the item; the rule is kept in the game, not in the text.
 ## CP — CHEST.3 passed · 2026-10-19 · TestRunner 294/294; digest 184 scripts 6557c049 · auto-approved (unattended)
+## D-057 — Guns: four Pearl weapons
+2026-10-20 · GUN.1 · **Status: Accepted (owner 2026-10-20 00:16 UTC "let's add guns and stuff that are attractive"; numbers by Claude, revisable)**
+Flintlock Pistol (6 damage, 0.55 s, range 60, 1 target; 90 Pearls), Blunderbuss (8, 1.5 s, range 28, up to 5 in radius 8; 130), Harpoon Gun (14, 1.2 s, range 80, up to 3; 160), Storm Musket (32, 2.2 s, range 95, 1 target; 180). All under the focused beam's 35 damage per second. Pearls only (HARD RULE 8: weapon power is never sold for Robux).
+## CP — GUN.1 passed · 2026-10-20 · TestRunner 296/296; digest 185 scripts 89c9f53a · auto-approved (unattended)
