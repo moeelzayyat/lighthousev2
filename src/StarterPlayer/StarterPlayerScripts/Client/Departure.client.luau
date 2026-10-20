@@ -552,7 +552,8 @@ local function render()
 		end
 	end
 
-	renderVoyageCrew(ready and RUN_PHASES[phase] == true, crew, seats)
+	-- TUT.2: the first-time tutorial's card sits where this panel goes; the crew panel waits until it is done
+	renderVoyageCrew(ready and RUN_PHASES[phase] == true and player:GetAttribute("TutorialActive") ~= true, crew, seats)
 
 	-- crew card: you're in the crew and the ship hasn't sailed yet
 	local showCrew = ready and not underway and (sailing or phase == "Waiting") and not hidden

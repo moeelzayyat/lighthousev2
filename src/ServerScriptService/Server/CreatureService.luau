@@ -645,6 +645,11 @@ function CreatureService.damageArea(position, radius, amount, maxTargets, source
 	for _, index in killed do
 		removeAt(index, "killed")
 	end
+	-- TUT.2: a player's first hit on a creature, from any of their weapons (thrown, gun, Orbiting Blades, sniper),
+	-- shows on the player for the first-time tutorial's "strike" step (cannons fire on their own and do not count)
+	if #hits > 0 and typeof(attacker) == "Instance" and attacker:IsA("Player") and attacker:GetAttribute("StruckCreature") ~= true then
+		attacker:SetAttribute("StruckCreature", true)
+	end
 	return hits
 end
 

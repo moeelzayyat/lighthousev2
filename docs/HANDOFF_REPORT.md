@@ -1864,3 +1864,12 @@ ICONS: rendered the cutlass in Studio on a key colour, cut out, added a whirl sw
 CHECKED (DEV Studio play, API access off): the Quartermaster's Weapons tab shows the new Tidecaller Blades icon; both blade weapons spin with the fixed point, tip leading (1.00); TestRunner **301 passed, 0 failed**; no script errors.
 OWNER STEPS: in the open Studio window, save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_BLADES_2026-10-20.rbxl`, then publish to both places.
 MIRROR: 188 scripts, digest identical to `src/` (1b3a97bb).
+
+CHECKPOINT: TUT.2 Tutorial strike step counts every weapon — ✅ in DEV Studio (owner report 2026-10-20 22:45 UTC)
+CAUSE: the "strike" step waited for `Tool.Activated`. The Orbiting Blades are not a tool (OrbitService cuts on the server), so blade kills never counted.
+BUILT: `CreatureService.damageArea` sets the player attribute `StruckCreature` on a player's first credited hit (the attacker passed by thrown weapons, guns, Orbiting Blades, sniper; cannons pass a pad and do not count); `Client/Tutorial` accepts it; `Client/Departure` hides the voyage crew panel while `TutorialActive` (the owner's screenshot showed the card on top of it); `TutorialSpec` +1.
+NOT A BUG: the green "UPGR…" at the bottom-right edge is the upgrade bench's world sign (a 3D label above the bench), cut off only because the bench was at the edge of the view.
+BACKUP: ServerStorage.Backups.TUT2_before_2026-10-20 (CreatureService, Tutorial, Departure, TutorialSpec) · restore points "TUT2 before", "TUT2 code", "TUT2 passed"
+CHECKED (DEV Studio play, API access off, Galaxy S22 Ultra simulator): a voyage with only the Orbiting Blades: the strike step advanced 1 s after the blades reached a crab, then on to the finish card; the crew panel stayed hidden under the card; TestRunner **302 passed, 0 failed**; no script errors.
+OWNER STEPS: in the open Studio window, save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_TUT2_2026-10-20.rbxl` (it includes QM.2, QM.3 and BLADE1), then publish to both places.
+MIRROR: 188 scripts, digest identical to `src/` (0daf3c4f).

@@ -33,5 +33,12 @@ return function(T: any)
 			T.expect(src).toContain('"Skip"')
 			T.expect(string.find(src, "task.delay", 1, true) == nil).toBe(true) -- nothing moves on by itself: no timer
 		end)
+
+		T.it("counts a strike from any weapon the server credits (TUT.2: Orbiting Blades kills did not count)", function()
+			local creatures = (game.ServerScriptService.Server.CreatureService :: any).Source :: string
+			T.expect(creatures).toContain('attacker:SetAttribute("StruckCreature", true)')
+			local src = (game.StarterPlayer.StarterPlayerScripts.Client.Tutorial :: any).Source :: string
+			T.expect(src).toContain('player:GetAttribute("StruckCreature") == true')
+		end)
 	end)
 end

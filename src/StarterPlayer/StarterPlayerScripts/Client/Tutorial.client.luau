@@ -234,7 +234,9 @@ local VOYAGE: { Step } = {
 		text = "When creatures come, strike them with your weapon.",
 		keys = { keyboard = "Click", touch = "Tap", gamepad = Enum.KeyCode.ButtonR2 },
 		done = function()
-			return did.attacked
+			-- a swing, or any hit the server credits to this player (TUT.2: the Orbiting Blades and guns never
+			-- "activate" a tool, so the owner's blade kills did not count)
+			return did.attacked or player:GetAttribute("StruckCreature") == true
 		end,
 	},
 	{
