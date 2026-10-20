@@ -191,4 +191,18 @@ local Weapons = {
 	},
 }
 
+-- WSKIN.1 (D-058, owner 2026-10-20 "Robux looks, same power"): Robux weapons that hit exactly like a Pearl weapon
+-- (`skinOf`); only the name, the colour of the shot and the model differ. _Registry checks that the numbers match.
+local function skin(baseId: string, look: { [string]: any }): any
+	local w = table.clone((Weapons :: any)[baseId])
+	for k, v in look do
+		w[k] = v
+	end
+	w.skinOf = baseId
+	return w
+end
+local W = Weapons :: any
+W.GoldenDragonPistol = skin("FlintlockPistol", { displayName = "Golden Dragon Pistol", color = Color3.fromRGB(255, 200, 60) })
+W.KrakenBlaster = skin("Blunderbuss", { displayName = "Kraken Blaster", color = Color3.fromRGB(80, 230, 210) })
+
 return Weapons

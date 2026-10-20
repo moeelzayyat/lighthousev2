@@ -17,6 +17,7 @@ local Items = {
 	SHOP_ORDER = {
 		"DriftwoodHarpoon", "StormHarpoon", "FlareGun", "CoralLance", "ChainHook", "NetLauncher", "TidecallerBlades", "LanternBomb", "WhalerHarpoon",
 		"FlintlockPistol", "Blunderbuss", "HarpoonGun", "StormMusket", -- GUN.1
+		"GoldenDragonPistol", "KrakenBlaster", -- WSKIN.1
 		"OilskinCoat", "KeepersCoat", "KelpweaveVest", "IronclawPlate",
 		"FireShellCrate",
 		"CrabClaw", "SeaGlass", "BlackPearl",
@@ -257,6 +258,25 @@ local Items = {
 		strengths = "Huge hits at the longest range",
 		tradeoffs = "Slow reload, one target at a time",
 		price = 180,
+	},
+	-- WSKIN.1 (D-058): Robux weapons with the same power as a Pearl weapon (Shared/Weapons `skinOf`)
+	GoldenDragonPistol = {
+		kind = "Weapon", category = "Weapons", slot = "Primary", model = "GoldenDragonPistol",
+		name = "Golden Dragon Pistol",
+		tier = "Legendary", -- display only (harbor UI rarity)
+		description = "A gold sea-dragon pistol that breathes golden fire with every shot.",
+		strengths = "Fires like the Flintlock Pistol, in gold",
+		tradeoffs = "Same hits as the Flintlock Pistol",
+		reward = "supporter",
+	},
+	KrakenBlaster = {
+		kind = "Weapon", category = "Weapons", slot = "Primary", model = "KrakenBlaster",
+		name = "Kraken Blaster",
+		tier = "Legendary", -- display only (harbor UI rarity)
+		description = "A hand cannon wrapped in Kraken tentacles around a glowing teal core.",
+		strengths = "Sprays shot like the Blunderbuss, in Kraken style",
+		tradeoffs = "Same hits as the Blunderbuss",
+		reward = "supporter",
 	},
 	LanternBomb = { -- WPN.1 (D-048)
 		kind = "Weapon", category = "Weapons", slot = "Primary", model = "LanternBomb",

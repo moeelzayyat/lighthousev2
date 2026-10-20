@@ -277,7 +277,7 @@ local function itemTiles(): { any }
 		local item = Items[itemId]
 		local price = item.price or 0
 		local owned = owns(itemId) and item.kind ~= "Ammo"
-		local product = if item.kind == "Cosmetic" or item.kind == "Pet" then Cosmetics.productFor(itemId) else nil
+		local product = if item.kind == "Cosmetic" or item.kind == "Pet" or Weapons[itemId] and Weapons[itemId].skinOf then Cosmetics.productFor(itemId) else nil -- WSKIN.1
 		local qty = if item.kind == "Ammo" then count(itemId) else nil
 		table.insert(list, {
 			id = itemId,
@@ -355,7 +355,7 @@ local function itemDetail(itemId: string): any
 	local item = Items[itemId]
 	local balance = pearls()
 	local price = item.price or 0
-	local product = if (item.kind == "Cosmetic" or item.kind == "Pet") and not owns(itemId) then Cosmetics.productFor(itemId) else nil
+	local product = if (item.kind == "Cosmetic" or item.kind == "Pet" or (Weapons[itemId] and Weapons[itemId].skinOf)) and not owns(itemId) then Cosmetics.productFor(itemId) else nil -- WSKIN.1
 	local detail: any = {
 		icon = itemId,
 		name = item.name,

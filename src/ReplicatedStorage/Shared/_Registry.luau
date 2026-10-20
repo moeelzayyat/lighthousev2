@@ -391,6 +391,19 @@ RULES.Weapons = function(c, Weapons, all)
 		end
 		c.color(w .. ".color", wpn.color)
 		c.bool(w .. ".voyageOnly", wpn.voyageOnly, true)
+		if wpn.skinOf ~= nil then -- WSKIN.1 (D-058): a Robux weapon must hit exactly like the Pearl weapon it is a skin of
+			local base = Weapons[wpn.skinOf]
+			local baseItem = type(all.Items) == "table" and all.Items[wpn.skinOf]
+			if type(base) ~= "table" or base.skinOf ~= nil or type(baseItem) ~= "table" or type(baseItem.price) ~= "number" then
+				c.add(w .. ".skinOf", "must name a weapon sold for Pearls, got " .. tostring(wpn.skinOf))
+			else
+				for _, field in { "damage", "cooldown", "range", "hitRadius", "maxTargets", "archetype", "projectile" } do
+					if wpn[field] ~= base[field] then
+						c.add(w .. "." .. field, "a Robux skin hits exactly like " .. tostring(wpn.skinOf) .. " (" .. tostring(base[field]) .. "), got " .. tostring(wpn[field]))
+					end
+				end
+			end
+		end
 		local item = type(all.Items) == "table" and all.Items[id]
 		if not wpn.voyageOnly and type(all.Items) == "table" and (type(item) ~= "table" or item.kind ~= "Weapon") then
 			c.add(w, "has no Items." .. id .. " entry of kind Weapon")
@@ -782,7 +795,8 @@ RULES.Cosmetics = function(c, Cosmetics, all)
 		local w = "Cosmetics." .. id
 		local item = if type(items) == "table" then items[id] else nil
 		local chest = type(item) == "table" and item.kind == "Chest" and type(all.Chests) == "table" and type(all.Chests[id]) == "table" -- D-055
-		if type(item) ~= "table" or (item.kind ~= "Cosmetic" and not chest and not (item.kind == "Pet" and type(item.price) == "number")) then
+		local weaponSkin = type(item) == "table" and item.kind == "Weapon" and type(all.Weapons) == "table" and type(all.Weapons[id]) == "table" and all.Weapons[id].skinOf ~= nil -- D-058
+		if type(item) ~= "table" or (item.kind ~= "Cosmetic" and not chest and not weaponSkin and not (item.kind == "Pet" and type(item.price) == "number")) then
 			c.add(w, "is not a cosmetic in Items: only cosmetics, pets also sold for Pearls and (D-055) cosmetic-only chests are sold for Robux")
 		elseif item.reward ~= nil and item.reward ~= "supporter" and not chest then
 			c.add(w, "is earned (" .. tostring(item.reward) .. "), so it is never sold")

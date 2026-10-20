@@ -422,3 +422,7 @@ Leviathan Hatchling, Legendary, 1%, chest only (it fetches exactly like Puffin P
 2026-10-20 · GUN.1 · **Status: Accepted (owner 2026-10-20 00:16 UTC "let's add guns and stuff that are attractive"; numbers by Claude, revisable)**
 Flintlock Pistol (6 damage, 0.55 s, range 60, 1 target; 90 Pearls), Blunderbuss (8, 1.5 s, range 28, up to 5 in radius 8; 130), Harpoon Gun (14, 1.2 s, range 80, up to 3; 160), Storm Musket (32, 2.2 s, range 95, 1 target; 180). All under the focused beam's 35 damage per second. Pearls only (HARD RULE 8: weapon power is never sold for Robux).
 ## CP — GUN.1 passed · 2026-10-20 · TestRunner 296/296; digest 185 scripts 89c9f53a · auto-approved (unattended)
+## D-058 — Robux weapons with the same power as a Pearl weapon
+2026-10-20 · WSKIN.1 · **Status: Accepted (owner's choice 2026-10-20 00:40 UTC: "Robux looks, same power", of three options; rule 8 unchanged)**
+The owner asked for two weapons sold for Robux. They hit exactly like a Pearl weapon (Golden Dragon Pistol = Flintlock Pistol, Kraken Blaster = Blunderbuss); only the model, name and shot colour differ. Prices 149 and 199 Robux (Claude's pick, revisable). Not for sale until the owner creates the developer products.
+## CP — WSKIN.1 built · 2026-10-20 · TestRunner 298/298; digest 186 scripts 08d47f9a · auto-approved (unattended); 🟦 until the product ids arrive

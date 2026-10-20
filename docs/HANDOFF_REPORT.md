@@ -1811,3 +1811,10 @@ CHECKED (DEV Studio play, API access off): all four guns held with the barrel fo
 NOT CHECKED: a gun killing creatures in a played voyage (the hits use the same server path as the other aimed weapons); a real phone.
 OWNER STEPS: save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_GUNS_2026-10-20.rbxl` (the gun models live only in the place), then publish to both places.
 MIRROR: 185 scripts, digest identical to `src/` (89c9f53a).
+
+CHECKPOINT: WSKIN.1 Robux weapons, same power (D-058) — 🟦 waiting for the owner's two developer products
+BUILT: `Shared/Weapons` (`skinOf`: GoldenDragonPistol from FlintlockPistol, KrakenBlaster from Blunderbuss), `Items` (both, reward supporter, no Pearl price), `_Registry` (a skin hits exactly like a Pearl weapon; may sit in the Robux catalogue), `Definitions/Cosmetics` (149 / 199 R$, productId 0), `Client/Shop` (Robux button for weapon skins), `WeaponSkinsSpec` (new), `CosmeticsSpec`. Models from ForgeGUI (owner's account): Golden Dragon Pistol 76878965218034 (2.6 studs, jaws forward), Kraken Blaster 101767664388944 (3.6 studs, `GripYaw` 180), each with a small light.
+BACKUP: ServerStorage.Backups.WSKIN1_before_2026-10-20 · restore points "WSKIN1 before", "WSKIN1 models", "WSKIN1 code", "WSKIN1 passed"
+CHECKED (DEV Studio play, API access off): both weapons held with the barrel forward; the Kraken Blaster fired its teal pellet spray; TestRunner **298 passed, 0 failed**; no script errors. Pictures `golden_dragon_pistol_hand.jpg`, `kraken_blaster_hand.jpg`.
+OWNER STEPS: create the two developer products (name, description, price in the thread) and send the ids; save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_RBXWEAPONS_2026-10-20.rbxl` before the next publish (the models live only in the place).
+MIRROR: 186 scripts, digest identical to `src/` (08d47f9a).

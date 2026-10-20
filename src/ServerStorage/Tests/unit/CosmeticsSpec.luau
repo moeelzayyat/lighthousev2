@@ -41,8 +41,10 @@ return function(T: any)
 			for _, id in Cosmetics.ORDER do
 				local item = Items[id]
 				local chest = item.kind == "Chest" and item.reward == "chest" -- D-055: also earned free, one a day for the Kraken
-				T.expect(item.kind == "Cosmetic" or chest or (item.kind == "Pet" and type(item.price) == "number")).toBe(true) -- PET.1
-				if item.price == nil and not chest then
+				local Weapons = T.require(game.ReplicatedStorage.Shared.Weapons)
+				local skin = item.kind == "Weapon" and Weapons[id] and Weapons[id].skinOf ~= nil -- D-058: same power as a Pearl weapon
+				T.expect(item.kind == "Cosmetic" or chest or skin or (item.kind == "Pet" and type(item.price) == "number")).toBe(true) -- PET.1
+				if item.price == nil and not chest and not skin then
 					table.insert(robuxOnly, id)
 				end
 			end

@@ -20,6 +20,7 @@ local Cosmetics = {
 		"LanternMoth", "LanternTide", "FlagGull", "FlagKraken", "FlagFounder",
 		"PetPuffin",
 		"KrakenChest",
+		"GoldenDragonPistol", "KrakenBlaster",
 	},
 
 	BeamSeaGlass = { robux = 29, productId = 3719247063 } :: Product,
@@ -41,6 +42,10 @@ local Cosmetics = {
 	-- item, so the BAG hides it where PolicyService says ArePaidRandomItemsRestricted. Product created by the owner
 	-- 2026-10-19 22:33 UTC.
 	KrakenChest = { robux = 49, productId = 3720133661 } :: Product,
+	-- WSKIN.1 (D-058, owner 2026-10-20 "Robux looks, same power"): weapons that hit exactly like a Pearl weapon
+	-- (Shared/Weapons `skinOf`, checked by _Registry). productId 0 until the owner creates the products.
+	GoldenDragonPistol = { robux = 149, productId = 0 } :: Product,
+	KrakenBlaster = { robux = 199, productId = 0 } :: Product,
 }
 
 -- The item a developer product buys, or nil
