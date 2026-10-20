@@ -51,6 +51,8 @@ Every asset, package and audio ID used in the place, recorded before it ships.
 | Fancy GUI Kit (Polyperfect), 11 icons (target, barrel, shield, gear_gold, gem_purple, rune, inventory, sword, key_gold, book, chest-empty), resized to 512 px | Image × 11 | `LensPower`, `FuelTank`, `Walls`, `ClockworkSweep`, `Evo_OverchargedBeam`, `Evo_ClockworkBastion`, `ShellPouch`, `SharpSteel`, `Codes`, `LogSummary`, `Salvage` in `Shared/ItemIcons.luau` | Unity Asset Store, bought by the owner 2026-10-18 (`assets/GUI/Fancy_GUI_Kit/`, not in the repo) | Unity Asset Store EULA (standard); kit files are not in the repo | owner upload (Studio, owner's OK 2026-10-18) | 2026-10-18 | workbench, shop boosts, BAG Codes and Logbook, Trader empty sack | Active (DEV) |
 | Sealoot icons, 6 (CraftPix "RPG Sea Loot Icons", https://craftpix.net/product/rpg-sea-loot-icons/) | Image × 6 | removed from `Shared/ItemIcons.luau` (SEA1) | CraftPix, paid product ($5.50 or membership), owner named the source 2026-10-18 | CraftPix File License §1 (paid): commercial games allowed, no raw-file redistribution; valid only if the owner bought it | owner upload (Studio) | 2026-10-18 | none: replaced by the drawn loot icons and Fancy GUI Kit pictures | Superseded (not bought, owner 2026-10-18 12:27 UTC; do not use) |
 | Production place | Experience | place 132065051336560 / universe 10769064643 | owner | — | owner | — | — | Live |
+| Pirate cutlass (`ItemModels.OrbitCutlass`, `ItemModels.TidecallerBlades`) | Unions | in place | Claude-built in Studio from parts (BLADE1, 2026-10-20) | owner | owner | 2026-10-20 | `Client.OrbitView`, BAG preview | Active (DEV) |
+| Cutlass shop icons (Orbiting Blades, Tidecaller Blades) | Image | 84779757358778, 76994631120741 | rendered from the cutlass model in Studio, swoosh added by Claude | owner | owner upload (via Studio) | 2026-10-20 | `Shared.ItemIcons` | Active (DEV) |
 
 ## Store assets
 | Asset | Variant | File | Uploaded ID | Status |
@@ -70,5 +72,3 @@ L1.5: the two new thumbnails and the trailer's new shots are DEV Studio captures
 ## Rules
 - Nothing purchased without owner approval. Free Creator Store models only with the licence checked and recorded.
 - Never silently update a package; insert, test, add a row, mark the old row Superseded.
-| Pirate cutlass (`ItemModels.OrbitCutlass`, `ItemModels.TidecallerBlades`) | Unions | in place | Claude-built in Studio from parts (BLADE1, 2026-10-20) | owner | owner | 2026-10-20 | `Client.OrbitView`, BAG preview | Active (DEV) |
-| Cutlass shop icons (Orbiting Blades, Tidecaller Blades) | Image | 84779757358778, 76994631120741 | rendered from the cutlass model in Studio, swoosh added by Claude | owner | owner upload (via Studio) | 2026-10-20 | `Shared.ItemIcons` | Active (DEV) |
