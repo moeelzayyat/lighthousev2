@@ -1831,3 +1831,12 @@ PHONE: Device Simulator iPhone 7 (666×374): the card is 330×136 at the top lef
 NOT CHECKED: a real new account in the live game; the voyage half in the separate isle place (same code; the harbor place runs the harbor steps, the isle place the voyage steps).
 OWNER STEPS: save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_TUTORIAL_2026-10-20.rbxl`, then publish to both places. To see it yourself: BAG → Keeper → Tutorial → PLAY AGAIN.
 MIRROR: 188 scripts, digest identical to `src/` (6f633175).
+
+CHECKPOINT: QM.2 Quartermaster on the ground, Pearls counter apart from the banner — ✅ in DEV Studio (owner report 2026-10-20 17:23 UTC)
+CAUSE: `LobbyBuilder` turned the harbor stall 180° too far, so the shelves faced the path and the Quartermaster stood outside the stall's back on a 1.5-stud box; from the path he seemed to hover behind it. The harbor banner (`Client/Departure`) was always centred and 460 px wide on phones, so on a ~670 px wide phone it ran under the Pearls counter (`Client/Inventory` PearlsPill, top right).
+BUILT: `LobbyBuilder` (stall faces the path; a plank `StallFloor` 0.6 high between counter and shelves; Quartermaster 1.2× and standing on it), `Client/Departure` (`placeHarborCard`: centred if it fits, else slides left to keep 12 px from the Pearls counter; rechecked 4× a second as the counter changes), `Client/Tutorial` (phone card at y 82, under the banner).
+BACKUP: ServerStorage.Backups.QM2_before_2026-10-20 (LobbyBuilder, Departure, Inventory, Tutorial) · restore points "QM2 before", "QM2 code", "QM2 passed"
+CHECKED (DEV Studio play, API access off): the stall from the path, the side and the back (he stands on the plank floor, shelves behind him); Device Simulator Galaxy S22 Ultra (677×338) banner x 72–532 and Pearls 544–665, iPhone 7 (666×374) banner 61–521 and Pearls 533–654; PC 2004×909 banner still centred (702–1302); TestRunner **301 passed, 0 failed**; no script errors. The pearl icon itself is unchanged; it only looked odd while the banner ran into it. Not a real phone.
+NOTE: DEV Studio was closed when this came in; Claude opened the DEV harbor place (PlaceId 102473202766620, now named "Lighthouse Keepers: Storm Survival") from Roblox. These changes are only in that open Studio window until it is saved.
+OWNER STEPS: in that Studio window, save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_QM2_2026-10-20.rbxl`, then publish to both places.
+MIRROR: 188 scripts, digest identical to `src/` (bb4c7128).

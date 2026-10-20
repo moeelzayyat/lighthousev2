@@ -181,26 +181,27 @@ function LobbyBuilder.build(islandRefs)
 	local shopFacing = CFrame.lookAt(shopSpot, Vector3.new(0, shopSpot.Y, shopXZ.Z))
 	if stall then
 		local _, stallSize = stall:GetBoundingBox()
-		-- the stall model's counter faces +Z; turn it so the counter faces the players
-		stall:PivotTo(shopFacing * CFrame.new(0, stallSize.Y / 2, 0) * CFrame.Angles(0, math.rad(180), 0))
+		-- QM.2 (owner 2026-10-20, "Quartermaster still floating"): the stall model's planked counter front and
+		-- awning already face -Z, the path. The old extra 180-degree turn put the shelves on the path side and the
+		-- Quartermaster out at the back on a box, so from the path he seemed to hover behind the stall.
+		stall:PivotTo(shopFacing * CFrame.new(0, stallSize.Y / 2, 0))
 		stall.Parent = lobby
 	end
 	if keeper then
-		-- Behind the counter, looking at the players (the model faces -Z). The stall's counter sits about
-		-- 2 studs back from shopSpot, so 1.2 put him INSIDE it (fixed Oct 12). He now stands 4.95 back
-		-- (clear of the counter top and the shelves, checked by overlap test), on a small step so his
-		-- upper body shows over the 3.7-stud counter.
-		local STEP = 1.5
-		local BACK = 4.95
-		local step = Instance.new("Part")
-		step.Name = "KeeperStep"
-		step.Anchored = true
-		step.Size = Vector3.new(2.6, STEP, 2.6)
-		step.Material = Enum.Material.WoodPlanks
-		step.Color = Color3.fromRGB(110, 78, 50)
-		step.CFrame = shopFacing * CFrame.new(0, STEP / 2, BACK)
-		step.Parent = lobby
-		keeper.CFrame = shopFacing * CFrame.new(0, STEP + keeper.Size.Y / 2, BACK)
+		-- Between the counter (centre 2 studs toward the path) and the back shelves (1.15 behind shopSpot), looking
+		-- at the players (the model faces -Z), standing on the stall's plank floor. 20% larger than the art so his
+		-- head and shoulders clear the tall counter, like the shopkeeper he is.
+		local FLOOR = 0.6
+		local floor = Instance.new("Part")
+		floor.Name = "StallFloor"
+		floor.Anchored = true
+		floor.Size = Vector3.new(8.6, FLOOR, 2.7)
+		floor.Material = Enum.Material.WoodPlanks
+		floor.Color = Color3.fromRGB(110, 78, 50)
+		floor.CFrame = shopFacing * CFrame.new(0, FLOOR / 2, 0.4)
+		floor.Parent = lobby
+		keeper.Size *= 1.2
+		keeper.CFrame = shopFacing * CFrame.new(0, FLOOR + keeper.Size.Y / 2, -0.4)
 		keeper.Parent = lobby
 	end
 	counter.CFrame = shopFacing * CFrame.new(0, 2.5, -3)

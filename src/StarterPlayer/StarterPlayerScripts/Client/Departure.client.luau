@@ -667,6 +667,35 @@ local function fitCrewCard()
 end
 crewBody:GetPropertyChangedSignal("AbsoluteSize"):Connect(fitCrewCard)
 
+-- QM.2 (owner 2026-10-20: the Pearls counter and the banner "combine" on a phone): the harbor card sits top centre,
+-- but never reaches the Pearls counter in the top right (Client/Inventory's PearlsPill): when centring would touch
+-- it, the card slides left and, if it must, gets narrower, always leaving a 12 px gap.
+local pearlsPill: GuiObject? = nil
+local function placeHarborCard()
+	local size = root.AbsoluteSize
+	if size.X <= 0 then
+		return
+	end
+	local phone = UiKit.Breakpoint(size) == "phone"
+	local hw = math.min(if phone then 460 else 600, size.X - 24)
+	if not (pearlsPill and pearlsPill.Parent) then
+		pearlsPill = player:WaitForChild("PlayerGui"):FindFirstChild("PearlsPill", true) :: GuiObject?
+	end
+	local right = size.X - 12
+	local pill = pearlsPill
+	if pill and pill.Visible and pill.AbsoluteSize.X > 0 then
+		right = pill.AbsolutePosition.X - root.AbsolutePosition.X - 12
+	end
+	local left = (size.X - hw) / 2
+	if left + hw > right then
+		left = math.max(12, right - hw)
+		hw = math.max(220, right - left)
+	end
+	harbor.AnchorPoint = Vector2.zero
+	harbor.Size = UDim2.fromOffset(hw, if phone then 64 else 78)
+	harbor.Position = UDim2.fromOffset(math.floor(left), if phone then 6 else 12)
+end
+
 local function layout()
 	local size = root.AbsoluteSize
 	if size.X <= 0 then
@@ -674,9 +703,7 @@ local function layout()
 	end
 	local phone = UiKit.Breakpoint(size) == "phone"
 	-- harbor card: top centre, where the HUD's voyage chip sits during a run
-	local hw = math.min(if phone then 460 else 600, size.X - 24)
-	harbor.Size = UDim2.fromOffset(hw, if phone then 64 else 78)
-	harbor.Position = UDim2.new(0.5, 0, 0, if phone then 6 else 12)
+	placeHarborCard()
 	local keyW = 0 -- boarding batch: no key to press, you walk aboard
 	harborKey.Visible = false
 	harborKey.Position = UDim2.new(1, -10, 0.5, 0)
@@ -706,6 +733,7 @@ task.spawn(function()
 	while true do
 		render()
 		fitCrewCard()
+		placeHarborCard() -- the Pearls counter appears, hides and grows with its number
 		task.wait(0.25)
 	end
 end)

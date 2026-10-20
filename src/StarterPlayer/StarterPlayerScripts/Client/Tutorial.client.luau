@@ -512,12 +512,12 @@ end)
 
 -- the card sits on the left (the middle of the screen stays clear for the arrow and the target). On a phone it is
 -- wider and shorter and sits just under the top banner, so it stays clear of the thumbstick in the bottom left
--- (iPhone 7 simulator: card 330x136 at y 72, thumbstick from y 223).
+-- (iPhone 7 simulator: card 330x136 at y 82, 12 px under the 64 px harbor banner; thumbstick from y 223).
 local function fit()
 	local view = Workspace.CurrentCamera and Workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
 	local phone = UiKit.Breakpoint(view) == "phone"
 	card.AnchorPoint = Vector2.new(0, 0)
-	card.Position = UDim2.new(0, 16, 0, if phone then 72 else 152)
+	card.Position = UDim2.new(0, 16, 0, if phone then 82 else 152)
 	sizeLimit.MaxSize = Vector2.new(if phone then math.clamp(view.X - 32, 300, 330) else 460, math.huge)
 	textLabel.TextSize = if phone then 16 else 18
 	cardPad.PaddingTop = UDim.new(0, if phone then 10 else 14)
