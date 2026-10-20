@@ -1847,3 +1847,13 @@ BACKUP: ServerStorage.Backups.QM3_before_2026-10-20 (Departure) · restore point
 CHECKED (DEV Studio play, API access off, after the owner stopped his own Play test): PC 2004×909 and phone simulator harbor without the banner; aboard a free ship nothing shows; a refusal set on the server showed "CREW FULL · 0/4" and it cleared when the player stepped off; TestRunner **301 passed, 0 failed**; no script errors.
 OWNER STEPS: in the open Studio window, save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_QM3_2026-10-20.rbxl` (it includes QM.2), then publish to both places.
 MIRROR: 188 scripts, digest identical to `src/` (a481263f).
+
+CHECKPOINT: BLADE1 Cutlass for the whirling blades — ✅ in DEV Studio (owner 2026-10-20 18:12 / 18:32 UTC)
+CAUSE: `Client/OrbitView` drew each blade as a 0.2 × 0.5 × 2.2 grey Part; `ItemModels.TidecallerBlades` was three plain parts.
+BUILT: `ReplicatedStorage.ItemModels.OrbitCutlass` (Claude-built, no outside art): curved three-section steel blade with fullers and a wedge point, Neon edge, gold crossguard, cup and knuckle bow, wrapped grip, gold pommel; unioned into `Body` (keeps each piece's colour) and `Glow` (Neon, tinted per weapon) with a short `Whirl` trail from the tip; 4.26 studs long. `Client/OrbitView` clones it per blade (2 parts each, 6 per carrier, still one BulkMoveTo), lies it flat along the circle with the edge out and the tip leading. `ItemModels.TidecallerBlades` replaced by three cutlasses in a whirl.
+UNCHANGED: damage, cooldown, range, blade count and spin of both weapons; the server's cutting.
+BACKUP: ServerStorage.Backups.BLADE1_before_2026-10-20 (OrbitView, ItemIcons, the old TidecallerBlades model) · restore points "BLADE1 before", "BLADE1 code", "BLADE1 models", "BLADE1 passed"
+CHECKED (DEV Studio play, API access off): Orbiting Blades and Tidecaller Blades around the keeper, 6 parts, tip leading the spin; TestRunner **301 passed, 0 failed**; no script errors.
+NOT DONE: the shop tile pictures are uploaded images (`Shared/ItemIcons`); new ones need an image upload to Roblox, waiting for the owner's yes.
+OWNER STEPS: in the open Studio window, save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_BLADES_2026-10-20.rbxl` (it includes QM.2 and QM.3), then publish to both places.
+MIRROR: 188 scripts, digest identical to `src/` (e3346f18). The models live only in the place.

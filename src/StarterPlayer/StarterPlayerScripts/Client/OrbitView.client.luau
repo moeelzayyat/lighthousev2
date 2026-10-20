@@ -1,8 +1,10 @@
 --!strict
 -- OrbitView (S6.3): draws the Orbiting Blades around every player who carries them (the server-set player
 -- attribute "OrbitWeapon"). Cosmetic only: the server does the cutting (OrbitService) and there is nothing to
--- aim. `blades` small parts per carrier (3), moved together each frame with one BulkMoveTo; no lights, no
--- sounds, nothing replicated.
+-- aim. Each blade is the pirate cutlass in ReplicatedStorage.ItemModels.OrbitCutlass (BLADE1, owner 2026-10-20:
+-- "looks bad, like no 3D model"): two parts, the steel-and-gold body and the glowing edge (tinted per weapon, with a
+-- short trail), so 6 parts per carrier, all moved together each frame with one BulkMoveTo; no lights, no sounds,
+-- nothing replicated.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -18,7 +20,14 @@ local folder = Instance.new("Folder")
 folder.Name = "OrbitViews"
 folder.Parent = Workspace
 
-type View = { weaponId: string, weapon: any, parts: { BasePart } }
+local template = ReplicatedStorage:WaitForChild("ItemModels"):WaitForChild("OrbitCutlass") :: Model
+-- the edge's glow per weapon (the weapon's own colour is the steel-grey it always had)
+local GLOW: { [string]: Color3 } = {
+	OrbitingBlades = Color3.fromRGB(90, 230, 255), -- sea glow
+	TidecallerBlades = Color3.fromRGB(70, 255, 190), -- tide green
+}
+
+type View = { weaponId: string, weapon: any, parts: { BasePart }, offsets: { CFrame } }
 local views: { [Player]: View } = {}
 
 local function clear(player: Player)
@@ -37,22 +46,35 @@ local function build(player: Player, weaponId: string)
 		return
 	end
 	local parts: { BasePart } = {}
+	local offsets: { CFrame } = {}
+	local body = template.PrimaryPart :: BasePart
+	local glow = GLOW[weaponId] or weapon.color
 	for i = 1, weapon.blades do
-		local blade = Instance.new("Part")
-		blade.Name = "Blade" .. i
-		blade.Anchored = true
-		blade.CanCollide = false
-		blade.CanQuery = false
-		blade.CanTouch = false
-		blade.CastShadow = false
-		blade.Size = Vector3.new(0.2, 0.5, 2.2)
-		blade.Material = Enum.Material.Metal
-		blade.Color = weapon.color
-		blade.CFrame = PARKED
-		blade.Parent = folder
-		table.insert(parts, blade)
+		for _, source in template:GetChildren() do
+			if source:IsA("BasePart") then
+				local piece = source:Clone()
+				piece.Name = "Blade" .. i .. source.Name
+				piece.Anchored = true
+				piece.CanCollide = false
+				piece.CanQuery = false
+				piece.CanTouch = false
+				piece.CastShadow = false
+				if source.Name == "Glow" then
+					piece.Color = glow
+					local trail = piece:FindFirstChildOfClass("Trail")
+					if trail then
+						trail.Color = ColorSequence.new(glow)
+					end
+				end
+				piece.CFrame = PARKED
+				piece.Parent = folder
+				table.insert(parts, piece)
+				-- where this piece sits on the blade (the body is the blade's own frame)
+				table.insert(offsets, body.CFrame:ToObjectSpace(source.CFrame))
+			end
+		end
 	end
-	views[player] = { weaponId = weaponId, weapon = weapon, parts = parts }
+	views[player] = { weaponId = weaponId, weapon = weapon, parts = parts, offsets = offsets }
 end
 
 local function sync(player: Player)
@@ -88,17 +110,19 @@ RunService.RenderStepped:Connect(function()
 	for player, view in views do
 		local character = player.Character
 		local root = character and character:FindFirstChild("HumanoidRootPart")
-		local count = #view.parts
-		for i, blade in view.parts do
+		local count = view.weapon.blades
+		local perBlade = #view.parts // count
+		for k, piece in view.parts do
+			local i = (k - 1) // perBlade + 1
 			local frame = PARKED
 			if root and root:IsA("BasePart") then
 				local center = root.Position + Vector3.new(0, HEIGHT, 0)
 				local angle = math.rad(t * view.weapon.spin) + (i - 1) * 2 * math.pi / count
 				local at = center + Vector3.new(math.cos(angle), 0, math.sin(angle)) * view.weapon.range
-				-- the long side runs along the circle
-				frame = CFrame.lookAt(at, center) * CFrame.Angles(0, math.rad(90), 0)
+				-- the blade lies flat along the circle, its glowing edge facing out and its tip leading the spin
+				frame = CFrame.lookAt(at, center) * CFrame.Angles(0, math.rad(90), 0) * CFrame.Angles(math.pi, 0, 0) * view.offsets[k]
 			end
-			table.insert(parts, blade)
+			table.insert(parts, piece)
 			table.insert(frames, frame)
 		end
 	end
