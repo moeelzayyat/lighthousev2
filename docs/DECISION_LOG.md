@@ -443,3 +443,7 @@ A guided tour starts by itself on a keeper's first join: welcome, the Quartermas
 - Ghost Lantern: weapons and cannons deal 50% of their damage to it (`Config.GHOST_WEAPON_MULT`; was 0). The beam still deals double. Cause: weapons passed through it by design (D-023) and the automatic sweep does no damage unless the Clockwork Sweep upgrade is bought, so without someone aiming the beam it could not be hurt.
 - Tower: during the opening squall the tower takes no damage at all. Before, the squall could dent it (it could not fall) and Day 1 then restored it to full, which looked like the lighthouse healing itself. No other regeneration exists: repairs at the tower, the Walls upgrade (+50 when bought) and the merchant's Tower Shield are the only ways it goes up.
 ## CP — BUGS5 passed · 2026-10-24 · GHOST.1, TOWER.1, FLAG.1, PHONE.3; TestRunner 302/302; digest 188 scripts 1f39ec0f · auto-approved (unattended)
+## D-061 — Shorter harbor departure
+2026-10-24 · SAIL.1 · **Status: Accepted (owner 2026-10-24 20:55 UTC: "Before leaving the harbor isle there is a long delay"; number by Claude, revisable)**
+The harbor ship's countdown after SAIL NOW (or a full crew) is 4 s (`Config.HARBOR_SAIL_SECONDS`; was `INTERMISSION_SECONDS`, 10). The Lighthouse Isle server is now reserved while the countdown runs instead of after it. The one-place game keeps its 10 s.
+## CP — SAIL.1 passed · 2026-10-24 · TestRunner 302/302; digest 188 scripts 82f72ad0 · auto-approved (unattended)

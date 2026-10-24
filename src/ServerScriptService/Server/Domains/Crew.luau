@@ -275,12 +275,13 @@ function Crew.Init(ctx)
 
 	-- D-046: the harbor sends each crew to its own Lighthouse Isle server
 	if ROLE == "harbor" then
+		local reservedFor: { [string]: string } = {} -- SAIL.1: ship id -> reserved isle server code (or "pending")
 		HarborDepartures.init({
 			roster = ShipRoster,
 			departure = ShipDeparture,
 			state = stateFolder,
 			shipIds = SHIP_IDS,
-			countdown = Config.INTERMISSION_SECONDS,
+			countdown = Config.HARBOR_SAIL_SECONDS, -- SAIL.1: 4 s (was 10)
 			voyageFor = function(id)
 				return stateFolder:GetAttribute("Ship_" .. id .. "_VoyageDef")
 			end,
@@ -290,6 +291,18 @@ function Crew.Init(ctx)
 			forecast = function()
 				return stateFolder:GetAttribute("ForecastA"), stateFolder:GetAttribute("ForecastB")
 			end,
+			prepare = function(id) -- SAIL.1: reserve the crew's isle server while the countdown runs
+				if RunService:IsStudio() or reservedFor[id] then
+					return
+				end
+				reservedFor[id] = "pending"
+				task.spawn(function()
+					local ok, code = pcall(function()
+						return TeleportService:ReserveServer(Config.ISLE_PLACE_ID)
+					end)
+					reservedFor[id] = if ok then code else nil
+				end)
+			end,
 			teleport = function(players, data)
 				if RunService:IsStudio() then
 					for _, p in players do
@@ -298,9 +311,21 @@ function Crew.Init(ctx)
 					end
 					return false, "studio"
 				end
-				local ok, code = pcall(function()
-					return TeleportService:ReserveServer(Config.ISLE_PLACE_ID)
-				end)
+				-- SAIL.1: use the server reserved during the countdown (wait a moment if it is still coming), else reserve now
+				local ready = reservedFor[data.shipId]
+				local waited = 0
+				while ready == "pending" and waited < 5 do
+					task.wait(0.1)
+					waited += 0.1
+					ready = reservedFor[data.shipId]
+				end
+				reservedFor[data.shipId] = nil
+				local ok, code = true, ready
+				if type(ready) ~= "string" or ready == "pending" then
+					ok, code = pcall(function()
+						return TeleportService:ReserveServer(Config.ISLE_PLACE_ID)
+					end)
+				end
 				if not ok then
 					return false, "reserve: " .. tostring(code)
 				end

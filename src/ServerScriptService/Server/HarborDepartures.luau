@@ -21,6 +21,7 @@ type Deps = {
 	mapFor: ((shipId: string) -> string?)?, -- MAP.1: the ship's chosen map id
 	forecast: () -> (string?, string?), -- the harbor's current offer (A, B)
 	teleport: (players: { Player }, data: { [string]: any }) -> (boolean, string?),
+	prepare: ((shipId: string) -> ())?, -- SAIL.1: start reserving the isle server while the countdown runs
 	notify: (player: Player, text: string) -> (),
 	log: (kind: string, data: { [string]: any }) -> (),
 	now: (() -> number)?, -- tests: a fake clock
@@ -105,6 +106,9 @@ function HarborDepartures.step(id: string)
 			s.phase = "Countdown"
 			s.endsAt = now() + sailIn
 			publish(id)
+			if deps.prepare then
+				deps.prepare(id) -- SAIL.1: the isle server is reserved during the countdown, not after it
+			end
 		end
 	elseif s.phase == "Countdown" then
 		if not wanted then

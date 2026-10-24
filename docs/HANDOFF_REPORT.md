@@ -1883,3 +1883,11 @@ BACKUP: ServerStorage.Backups.BUGS5_before_2026-10-24 · restore points "BUGS5 b
 CHECKED (DEV Studio play, API access off): as above; TestRunner **302 passed, 0 failed**; luau-lsp 0 outside ProfileStore; no script errors. Not a real phone.
 OWNER STEPS: in the open Studio window, save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_BUGS5_2026-10-24.rbxl`, then publish to both places.
 MIRROR: 188 scripts, digest identical to `src/` (1f39ec0f).
+
+CHECKPOINT: SAIL.1 Shorter harbor departure (D-061) — ✅ in DEV Studio (owner report 2026-10-24 20:55 UTC)
+CAUSE: after SAIL NOW (or a full crew) the harbor ship counted down 10 s (`INTERMISSION_SECONDS`), and only then reserved the crew's Lighthouse Isle server (`TeleportService:ReserveServer`, about 1–3 s) before the teleport itself (Roblox's loading screen).
+BUILT: `Config.HARBOR_SAIL_SECONDS = 4`; `HarborDepartures` calls `deps.prepare(shipId)` when a countdown starts; `Domains/Crew` reserves the isle server there and the teleport uses it (waits up to 5 s if it is still coming, else reserves as before).
+BACKUP: ServerStorage.Backups.SAIL1_before_2026-10-24 (Config, HarborDepartures, Crew) · restore points "SAIL1 before", "SAIL1 code", "SAIL1 passed"
+CHECKED (DEV Studio play, API access off, harbor role by a temporary `PLACE_ROLE_OVERRIDE` that was reverted): SAIL NOW → Countdown at 0.3 s → launched at 4.5 s; TestRunner **302 passed, 0 failed**; no script errors. NOT CHECKED: the real teleport time (Studio can't teleport); please time it live.
+OWNER STEPS: in the open Studio window, save `C:\RobloxProjects\Lighthousev2\backups\LighthouseKeepers_DEV_SAIL1_2026-10-24.rbxl` (it includes BUGS5), then publish to both places.
+MIRROR: 188 scripts, digest identical to `src/` (82f72ad0).
