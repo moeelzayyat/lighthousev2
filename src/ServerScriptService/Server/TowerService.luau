@@ -13,7 +13,7 @@ local TowerService = {}
 local state
 local maxIntegrity = Config.MAX_INTEGRITY
 local integrity = Config.MAX_INTEGRITY
-local protected = false -- during the opening incident the tower can't fall
+local protected = false -- during the opening incident the tower takes no damage (TOWER.1)
 
 local function push()
 	state:SetAttribute("Integrity", math.ceil(integrity))
@@ -46,7 +46,11 @@ function TowerService.damage(amount)
 	if state:GetAttribute("TowerShield") then
 		amount *= Merchant.TowerShield.mult -- S6.2: the merchant's shield, until dawn
 	end
-	local floor = if protected then 1 else 0
+	if protected then
+		return -- TOWER.1 (D-060, owner 2026-10-24: "the lighthouse heals itself"): the opening squall can't hurt the
+		-- tower at all (it used to dent it and then restore it to full at Day 1, which looked like healing)
+	end
+	local floor = 0
 	local before = integrity / maxIntegrity
 	integrity = math.max(floor, integrity - amount)
 	local after = integrity / maxIntegrity

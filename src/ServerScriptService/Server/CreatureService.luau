@@ -603,9 +603,6 @@ end
 function CreatureService.damageArea(position, radius, amount, maxTargets, source, attacker, effect)
 	local candidates = {}
 	for index, crab in creatures do
-		if crab.stats.weaponImmune then
-			continue -- S6.5: a Ghost Lantern only feels the lamp's beam
-		end
 		local offset = crab.worldPos - position
 		local distance = Vector3.new(offset.X, 0, offset.Z).Magnitude
 		if distance <= radius + crab.stats.bodyRadius then
@@ -621,7 +618,13 @@ function CreatureService.damageArea(position, radius, amount, maxTargets, source
 	for n = 1, math.min(maxTargets, #candidates) do
 		local crab = creatures[candidates[n].index]
 		table.insert(hits, crab.worldPos)
-		crab.health -= amount
+		local dealt = amount
+		if crab.stats.weaponImmune then
+			-- GHOST.1 (D-060, owner 2026-10-24: "a ghost that is invincible"): weapons and cannons now hurt a Ghost
+			-- Lantern, at a reduced share; the beam (double damage) is still the best counter
+			dealt *= Config.GHOST_WEAPON_MULT
+		end
+		crab.health -= dealt
 		crab.lastSource = source or "Unknown"
 		crab.lastAttacker = attacker
 		-- Aggro: whoever hurt it becomes more interesting to it
@@ -658,12 +661,10 @@ end
 function CreatureService.damageRay(origin, direction, range, pad, amount, source, attacker)
 	local best, bestT = nil, math.huge
 	for _, crab in creatures do
-		if not crab.stats.weaponImmune then
-			local centre = crab.worldPos + Vector3.new(0, crab.stats.bodyRadius, 0)
-			local t = SniperService.rayHit(origin, direction, range, centre, crab.stats.bodyRadius + pad)
-			if t and t < bestT then
-				best, bestT = crab, t
-			end
+		local centre = crab.worldPos + Vector3.new(0, crab.stats.bodyRadius, 0)
+		local t = SniperService.rayHit(origin, direction, range, centre, crab.stats.bodyRadius + pad)
+		if t and t < bestT then
+			best, bestT = crab, t
 		end
 	end
 	if not best then

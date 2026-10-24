@@ -21,7 +21,7 @@
 --   ignoresPlayers  always goes for the lighthouse
 --   telegraph       seconds of warning (the TELEGRAPH snapshot state and telegraphSound), then releaseSound
 --   towerRange / towerHit / cannonHit / splashRadius / triggerRadius / blastRadius / fuelDrain   the move's numbers
---   weaponImmune    weapons and cannons pass through it (the beam is the counter)
+--   weaponImmune    weapons and cannons deal only Config.GHOST_WEAPON_MULT of their damage (GHOST.1; the beam is the counter)
 --   hover           studs above the ground
 --   appears         { from = night, base, every, max }: how many join each night (WaveDirector.specials)
 --   loot            rows { chance, drops = { { kind, min, max } } }: one row is rolled; chances sum to 1
@@ -174,7 +174,7 @@ local Creatures = {
 		},
 	},
 
-	-- S6.5: floats to the lighthouse and drinks the lamp's oil; harpoons and cannons pass through it: burn it
+	-- S6.5: floats to the lighthouse and drinks the lamp's oil; harpoons and cannons only half-hurt it (GHOST.1): burn it
 	GhostLantern = {
 		displayName = "Ghost Lantern",
 		art = "GhostLantern",

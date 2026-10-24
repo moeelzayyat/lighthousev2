@@ -70,6 +70,7 @@ local Config = {
 	FOCUSED_DPS = 35, -- damage per second in the focused beam (also stops creatures)
 	WIDE_DPS = 12, -- damage per second in the wide beam (also pushes creatures back)
 	WIDE_PUSH_SPEED = 7, -- studs per second creatures are pushed back by a manual wide beam
+	GHOST_WEAPON_MULT = 0.5, -- GHOST.1 (D-060): weapons and cannons deal this share to a Ghost Lantern (was 0: invincible without the beam)
 
 	-- Automatic sweep (nobody at the lamp)
 	AUTO_SWEEP_SPEED = 25, -- degrees per second

@@ -249,49 +249,118 @@ local function mastTop(ship)
 	return best, visual
 end
 
--- The ship flies the flag of the first player in the server who has one equipped (none: no flag)
-local function refreshShipFlag()
-	local lobby = Workspace:FindFirstChild("Lobby")
-	local ship = lobby and lobby:FindFirstChild("PirateShip")
-	if not ship then
+-- FLAG.1 (owner 2026-10-24: "why it didn't show after purchase and using it"): every harbor ship flies a flag: the
+-- flag of a crew member aboard it who has one equipped, else of the first keeper in the server who has one (none:
+-- no flag). The cloth shows the flag's own picture (Shared/ItemIcons, cropped to the cloth) on both sides, so a dark
+-- flag like the Kraken Flag still reads at night; before, it was a plain block in the flag's colour on Ship1 only,
+-- and the near-black Kraken Flag vanished against the night sky.
+local ItemIcons = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("ItemIcons"))
+local FLAG_SIZE = Vector3.new(0.15, 4.4, 7)
+local CLOTH = { x = 0.23, y = 0.08, w = 0.61, h = 0.5 } -- where the cloth sits inside a flag icon (fractions)
+
+local function shipIdOf(ship: Instance): string
+	return if ship.Name == "PirateShip" then "Ship1" else string.gsub(ship.Name, "^PirateShip_", "")
+end
+
+local function flagOf(player: Player): string?
+	local profile = PlayerData.get(player)
+	local id = profile and profile.equippedFlag
+	return if type(id) == "string" and Items[id] and Items[id].slot == "Flag" then id else nil
+end
+
+local function dressFlag(flag: BasePart, flagId: string)
+	if flag:GetAttribute("FlagId") == flagId then
 		return
 	end
-	local color = nil
+	flag:SetAttribute("FlagId", flagId)
+	local item = Items[flagId]
+	flag.Color = if item.color then Color3.fromRGB(item.color[1], item.color[2], item.color[3]) else Color3.new(1, 1, 1)
+	for _, old in flag:GetChildren() do
+		old:Destroy()
+	end
+	local image = ItemIcons[flagId]
+	if not image then
+		return
+	end
+	for _, face in { Enum.NormalId.Left, Enum.NormalId.Right } do
+		local gui = Instance.new("SurfaceGui")
+		gui.Name = "Cloth" .. face.Name
+		gui.Face = face
+		gui.LightInfluence = 0.4 -- still readable under the night sky
+		gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+		gui.PixelsPerStud = 40
+		local clip = Instance.new("Frame")
+		clip.BackgroundTransparency = 1
+		clip.ClipsDescendants = true
+		clip.Size = UDim2.fromScale(1, 1)
+		clip.Parent = gui
+		local picture = Instance.new("ImageLabel")
+		picture.BackgroundTransparency = 1
+		picture.Image = image
+		picture.Size = UDim2.fromScale(1 / CLOTH.w, 1 / CLOTH.h)
+		picture.Position = UDim2.fromScale(-CLOTH.x / CLOTH.w, -CLOTH.y / CLOTH.h)
+		picture.Parent = clip
+		gui.Parent = flag
+	end
+end
+
+local function refreshShipFlag()
+	local lobby = Workspace:FindFirstChild("Lobby")
+	if not lobby then
+		return
+	end
+	local anyone: string? = nil
 	for _, player in Players:GetPlayers() do
-		local c = player:GetAttribute("FlagColor")
-		if typeof(c) == "Color3" then
-			color = c
+		anyone = flagOf(player)
+		if anyone then
 			break
 		end
 	end
-	local flag = ship:FindFirstChild("CosmeticFlag")
-	if not color then
-		if flag then
-			flag:Destroy()
+	for _, ship in lobby:GetChildren() do
+		if ship:IsA("Model") and string.sub(ship.Name, 1, 10) == "PirateShip" then
+			local shipId = shipIdOf(ship)
+			local chosen: string? = nil
+			for _, player in Players:GetPlayers() do
+				if player:GetAttribute("ShipId") == shipId and player:GetAttribute("Ready") == true then
+					chosen = flagOf(player)
+					if chosen then
+						break
+					end
+				end
+			end
+			chosen = chosen or anyone
+			local flag = ship:FindFirstChild("CosmeticFlag")
+			if not chosen then
+				if flag then
+					flag:Destroy()
+				end
+			else
+				if not (flag and flag:IsA("BasePart")) then
+					local top, visual = mastTop(ship)
+					if not top then
+						continue
+					end
+					-- hang it along the ship's length, just under the mast top
+					local along = if visual.Size.Z >= visual.Size.X then visual.CFrame.LookVector else visual.CFrame.RightVector
+					along = Vector3.new(along.X, 0, along.Z).Unit
+					local center = top + Vector3.new(0, -FLAG_SIZE.Y / 2 - 0.4, 0) + along * (FLAG_SIZE.Z / 2 + 0.1)
+					local part = Instance.new("Part")
+					part.Name = "CosmeticFlag"
+					part.Size = FLAG_SIZE
+					part.CFrame = CFrame.lookAt(center, center + along)
+					part.Anchored = true
+					part.CanCollide = false
+					part.CanQuery = false
+					part.CanTouch = false
+					part.CastShadow = false
+					part.Material = Enum.Material.Fabric
+					part.Parent = ship
+					flag = part
+				end
+				dressFlag(flag :: BasePart, chosen)
+			end
 		end
-		return
 	end
-	if not flag then
-		local top, visual = mastTop(ship)
-		if not top then
-			return
-		end
-		-- hang it along the ship's length, just under the mast top
-		local along = if visual.Size.Z >= visual.Size.X then visual.CFrame.LookVector else visual.CFrame.RightVector
-		along = Vector3.new(along.X, 0, along.Z).Unit
-		local center = top + Vector3.new(0, -2.2, 0) + along * 3.1
-		flag = Instance.new("Part")
-		flag.Name = "CosmeticFlag"
-		flag.Size = Vector3.new(0.15, 3.6, 6)
-		flag.CFrame = CFrame.lookAt(center, center + along)
-		flag.Anchored = true
-		flag.CanCollide = false
-		flag.CanQuery = false
-		flag.CanTouch = false
-		flag.Material = Enum.Material.Fabric
-		flag.Parent = ship
-	end
-	flag.Color = color
 end
 
 local function humanoidOf(player)
@@ -692,6 +761,9 @@ function Economy.Start(ctx)
 		player.CharacterAdded:Connect(function()
 			task.defer(applyBoosts, player) -- a new character walks at the boosted speed
 		end)
+		-- FLAG.1: a ship's flag follows the crew aboard it
+		player:GetAttributeChangedSignal("ShipId"):Connect(refreshShipFlag)
+		player:GetAttributeChangedSignal("Ready"):Connect(refreshShipFlag)
 	end
 	Players.PlayerAdded:Connect(hookBoosts)
 	for _, player in Players:GetPlayers() do

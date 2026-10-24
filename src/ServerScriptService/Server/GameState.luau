@@ -341,7 +341,7 @@ function GameState.run(deps)
 
 		lamp.setDraining(false)
 		tower.setProtected(false)
-		tower.repair(math.huge) -- start the real run with a full-strength tower
+		-- TOWER.1: no free repair here any more; the squall cannot damage the tower (TowerService.damage)
 		EventLog.log("Tutorial", { step = "crabs", result = if creatures.count() == 0 then "cleared" else "timed out", seconds = elapsed() })
 		EventLog.first("opening completed")
 		creatures.clearAll()

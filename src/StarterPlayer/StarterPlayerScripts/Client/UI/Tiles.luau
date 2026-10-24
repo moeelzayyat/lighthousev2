@@ -665,7 +665,9 @@ function Tiles.Menu(opts: any): any
 
 	function menu:layout()
 		local vp, simulated = viewport()
-		local scale = math.clamp(vp.Y / REF_H, 0.55, 1)
+		-- PHONE.3 (owner 2026-10-24: "icons and menus are too big for phone"): a phone may shrink further (0.44, was
+		-- 0.55); every tap target still stays at least MIN_TAP device pixels (minRef below)
+		local scale = math.clamp(vp.Y / REF_H, if vp.X < 1000 then 0.44 else 0.55, 1)
 		local W, H = vp.X / scale, vp.Y / scale
 		uiScale.Scale = scale
 		root.Size = UDim2.fromOffset(W, H)
@@ -683,7 +685,7 @@ function Tiles.Menu(opts: any): any
 		local minRef = math.ceil(MIN_TAP / scale) -- 56 device pixels in reference units
 		local phone = vp.X < 1000
 		unit.phone = phone
-		unit.cols = if phone then 3 else 5
+		unit.cols = if phone then 4 else 5 -- PHONE.3: four columns on a phone (was 3)
 		unit.button = math.max(if phone then 96 else 112, minRef)
 		unit.close = math.max(if phone then 80 else 96, minRef)
 		unit.tab = math.max(64, minRef)

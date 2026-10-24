@@ -282,6 +282,7 @@ UiKit.border(card, C.AccentLighthouse, 2, 0.1)
 local cardPad = UiKit.pad(card, 14, 18, 14, 18) :: UIPadding
 local cardList = UiKit.list(card, "y", 10) :: UIListLayout
 local sizeLimit = UiKit.new("UISizeConstraint", { MaxSize = Vector2.new(560, math.huge) }, card)
+local cardScale = UiKit.new("UIScale", { Name = "PhoneScale" }, card) -- PHONE.3: smaller on phones
 local stepLabel = UiKit.Label(card, "", "Eyebrow", { Name = "Step", LayoutOrder = 1, TextColor3 = C.AccentLighthouse })
 local textLabel = UiKit.Label(card, "", "H3", { Name = "Text", LayoutOrder = 2, TextWrapped = true, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y })
 local row = UiKit.new("Frame", { Name = "Row", BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 56), LayoutOrder = 3 }, card)
@@ -522,6 +523,9 @@ local function fit()
 	card.Position = UDim2.new(0, 16, 0, if phone then 82 else 152)
 	sizeLimit.MaxSize = Vector2.new(if phone then math.clamp(view.X - 32, 300, 330) else 460, math.huge)
 	textLabel.TextSize = if phone then 16 else 18
+	-- PHONE.3 (owner 2026-10-24: "the tutorial UI is too big for phone"): the whole card at 78% on a phone
+	-- (about 257 x 106 px on an iPhone 14, was 330 x 136); its buttons are then about 44 px tall
+	cardScale.Scale = if phone then 0.78 else 1
 	cardPad.PaddingTop = UDim.new(0, if phone then 10 else 14)
 	cardPad.PaddingBottom = UDim.new(0, if phone then 10 else 14)
 	cardList.Padding = UDim.new(0, if phone then 6 else 10)

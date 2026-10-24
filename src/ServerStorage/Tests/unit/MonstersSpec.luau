@@ -73,6 +73,11 @@ return function(T: any)
 			local Server = game.ServerScriptService.Server
 			local creatures = source(Server.CreatureService)
 			T.expect(creatures).toContain("if crab.stats.weaponImmune then")
+			-- GHOST.1 (D-060): weapons hurt a Ghost Lantern at a reduced share, never zero; TOWER.1: the squall can't dent the tower
+			T.expect(creatures).toContain("dealt *= Config.GHOST_WEAPON_MULT")
+			local mult = require(game.ReplicatedStorage.Shared.Config).GHOST_WEAPON_MULT
+			T.expect(mult > 0 and mult < 1).toBe(true)
+			T.expect(source(Server.TowerService)).toContain("if protected then\n\t\treturn")
 			T.expect(creatures).toContain("if releaseMove(crab, players) then")
 			T.expect(creatures).toContain("CreatureSnapshot.TELEGRAPH")
 			T.expect(creatures).toContain("markSpot(spot, stats.splashRadius, stats.telegraph") -- KRAKEN.2: plus the mark colour
